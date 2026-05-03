@@ -429,3 +429,12 @@
   background: var(--amber);
   color: var(--bg);
 }
+.genesisBtn {
+  color: #C9A84C;
+  border-color: #C9A84C;
+  font-weight: 700;
+}
+.genesisBtn:hover:not(:disabled) {
+  background: #C9A84C;
+  color: var(--bg);
+}

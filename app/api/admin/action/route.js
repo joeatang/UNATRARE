@@ -20,7 +20,7 @@ export async function POST(request) {
   }
 
   const name = tokenName.toUpperCase().trim();
-  const actions = ['approve', 'reject', 'judge'];
+  const actions = ['approve', 'reject', 'judge', 'genesis'];
   if (!actions.includes(action)) {
     return NextResponse.json({ error: 'invalid action' }, { status: 400 });
   }
@@ -36,6 +36,34 @@ export async function POST(request) {
       // Trigger AI judge pipeline
       const result = await judgeToken(name);
       return NextResponse.json({ ok: true, result });
+    }
+
+    if (action === 'genesis') {
+      // Series 0 — founding collection, admin-certified, no AI judge required
+      const last = db.prepare(
+        'SELECT MAX(card_number) as mx FROM tokens WHERE series=0'
+      ).get();
+      const card_number = (last?.mx ?? 0) + 1;
+
+      let supply = token.supply || 0;
+      if (supply <= 0) {
+        try {
+          const res = await fetch(
+            `https://tokenscan.io/api/asset/${encodeURIComponent(name)}`,
+            { headers: { 'User-Agent': 'UNATRARE/1.0' } }
+          );
+          if (res.ok) { const d = await res.json(); supply = Number(d.supply) || 0; }
+        } catch { /* non-critical */ }
+      }
+
+      db.prepare(
+        `UPDATE tokens
+         SET status='approved', judged_at=unixepoch(), series=0, card_number=?,
+             rejection_reason=?, supply=?
+         WHERE token_name=?`
+      ).run(card_number, note ? `Genesis: ${note}` : 'Genesis Series 0 — founding collection', supply, name);
+
+      return NextResponse.json({ ok: true, action: 'genesis', series: 0, card_number, supply });
     }
 
     if (action === 'approve') {

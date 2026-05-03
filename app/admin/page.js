@@ -53,7 +53,7 @@ function LoginGate({ onAuth }) {
 
 // ── Single token row in review queue ──────────────────────────
 function TokenRow({ token, authToken, onAction }) {
-  const [loading, setLoading] = useState(null); // 'approve' | 'reject' | null
+  const [loading, setLoading] = useState(null); // 'approve' | 'reject' | 'judge' | 'genesis' | null
   const [note, setNote] = useState('');
   const [expanded, setExpanded] = useState(false);
 
@@ -190,6 +190,14 @@ function TokenRow({ token, authToken, onAction }) {
                 disabled={!!loading}
               >
                 {loading === 'judge' ? 'judging...' : '⚡ re-judge'}
+              </button>
+              <button
+                className={`${styles.actionBtn} ${styles.genesisBtn}`}
+                onClick={() => act('genesis')}
+                disabled={!!loading}
+                title="Certify as SERIES 0 — founding collection, no AI judge"
+              >
+                {loading === 'genesis' ? 'certifying...' : '★ genesis'}
               </button>
             </div>
           </div>
