@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server';
 import { validateTokenName } from '../../../lib/tokenValidator';
+import { writeFile, mkdir } from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Phase 0: accepts upload, validates type/size, stores to /tmp (local dev).
-// Phase 1: swap storage target to Cloudflare R2.
+// Uploads are stored in /public/uploads/ — served by Next.js as /uploads/FILENAME
+// This directory persists on the server across restarts.
 // Max size: 10 MB. Allowed: PNG, JPG, GIF, WebP.
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Resolve to [project root]/public/uploads/
+const UPLOAD_DIR = path.resolve(__dirname, '..', '..', '..', '..', 'public', 'uploads');
 
 const ALLOWED_MIME = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -47,21 +54,15 @@ export async function POST(request) {
     }, { status: 422 });
   }
 
-  // Phase 0: write to local /tmp for dev. Phase 1: stream to R2.
   const ext      = file.type.split('/')[1].replace('jpeg', 'jpg');
   const filename = `${normalized}.${ext}`;
 
   try {
-    const { writeFile } = await import('fs/promises');
-    const path = `/tmp/unatrare_uploads/${filename}`;
-    const { mkdir } = await import('fs/promises');
-    await mkdir('/tmp/unatrare_uploads', { recursive: true });
-    await writeFile(path, Buffer.from(bytes));
+    await mkdir(UPLOAD_DIR, { recursive: true });
+    await writeFile(path.join(UPLOAD_DIR, filename), Buffer.from(bytes));
 
-    // In production this would be the R2 CDN URL.
-    // For dev, return a placeholder URL that the judge pipeline will replace.
+    // Public URL — served by Next.js static file serving
     const url = `/uploads/${filename}`;
-
     return NextResponse.json({ ok: true, url, filename });
   } catch (err) {
     console.error('Upload error:', err);

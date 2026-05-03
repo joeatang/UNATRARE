@@ -15,8 +15,9 @@ out/
 *.db-shm
 *.db-wal
 
-# Uploads (local dev only — production uses R2)
-/tmp/unatrare_uploads/
+# Uploads (actual files never in git — directory tracked via .gitkeep)
+/public/uploads/*
+!/public/uploads/.gitkeep
 
 # OS
 .DS_Store

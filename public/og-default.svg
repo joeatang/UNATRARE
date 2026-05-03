@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
+  <rect width="1200" height="630" fill="#080808"/>
+  <rect x="0" y="0" width="1200" height="2" fill="#2a2a2a"/>
+  <rect x="0" y="628" width="1200" height="2" fill="#2a2a2a"/>
+  <text x="600" y="260" font-family="monospace" font-size="96" font-weight="bold" fill="#C9A84C" text-anchor="middle" letter-spacing="12">UNATRARE</text>
+  <text x="600" y="340" font-family="monospace" font-size="22" fill="#666666" text-anchor="middle" letter-spacing="6">CURATED ART DIRECTORY ON BITCOIN</text>
+  <text x="600" y="420" font-family="monospace" font-size="16" fill="#3d9e3d" text-anchor="middle" letter-spacing="4">· judged by scientists · certified on-chain ·</text>
+  <rect x="80" y="560" width="1040" height="1" fill="#1a1a1a"/>
+  <text x="600" y="600" font-family="monospace" font-size="14" fill="#2a2a2a" text-anchor="middle" letter-spacing="3">unatrare.wtf</text>
+</svg>
