@@ -107,7 +107,7 @@ export async function POST(request) {
          WHERE token_name=?`
       ).run(series, card_number, note ? `Admin note: ${note}` : '', supply, name);
 
-      return NextResponse.json({ ok: true, action: 'approved', series, card_number, supply });
+      return NextResponse.json({ ok: true, action: 'approved', series, card_number, supply, payUrl: `https://unatrare.wtf/pay/${name}` });
     }
 
     if (action === 'reject') {

@@ -56,6 +56,8 @@ function TokenRow({ token, authToken, onAction }) {
   const [loading, setLoading] = useState(null); // 'approve' | 'reject' | 'judge' | 'genesis' | 'purge' | null
   const [note, setNote] = useState('');
   const [expanded, setExpanded] = useState(false);
+  const [approvalResult, setApprovalResult] = useState(null); // set after approve/genesis
+  const [msgCopied, setMsgCopied] = useState(false);
 
   async function act(action) {
     setLoading(action);
@@ -69,8 +71,15 @@ function TokenRow({ token, authToken, onAction }) {
     });
     const json = await res.json();
     setLoading(null);
-    if (json.ok) onAction(token.token_name, action);
-    else alert(json.error || 'Action failed');
+    if (json.ok) {
+      if (action === 'approve' || action === 'genesis') {
+        setApprovalResult(json); // show branded message before dismissing
+      } else {
+        onAction(token.token_name, action);
+      }
+    } else {
+      alert(json.error || 'Action failed');
+    }
   }
 
   const submittedAt = token.submitted_at
@@ -98,11 +107,17 @@ function TokenRow({ token, authToken, onAction }) {
               judge score: <strong>{token.judge_score?.toFixed(1)}</strong>/37.5
             </div>
           )}
+          {approvalResult && (
+            <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px',
+              color:'var(--green)', marginTop:4}}>
+              ✓ CERTIFIED — send payment link to artist
+            </div>
+          )}
         </div>
-        <div className={styles.rowToggle}>{expanded ? '▲' : '▼'}</div>
+        <div className={styles.rowToggle}>{approvalResult ? '✉' : expanded ? '▲' : '▼'}</div>
       </div>
 
-      {expanded && (
+      {expanded && !approvalResult && (
         <div className={styles.rowDetail}>
           {token.art_url && (
             <div className={styles.detailArt}>
@@ -161,6 +176,42 @@ function TokenRow({ token, authToken, onAction }) {
             )}
           </div>
 
+          {/* Per-judge breakdown */}
+          {token.judge_notes && (() => {
+            try {
+              const notes = JSON.parse(token.judge_notes);
+              return (
+                <div style={{margin:'12px 0', padding:'10px 12px', border:'1px solid var(--border-dim)', background:'var(--bg)'}}>
+                  <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'3px', color:'var(--text-dim)', marginBottom:8}}>
+                    JUDGE PANEL VERDICT
+                  </div>
+                  {notes.map(j => (
+                    <div key={j.judge_id} style={{display:'flex', gap:8, marginBottom:6, alignItems:'flex-start'}}>
+                      <div style={{
+                        fontFamily:'var(--font-card)', fontSize:'8px', letterSpacing:'1px',
+                        color: j.verdict === 'CERTIFIED' ? 'var(--green)' : 'var(--red)',
+                        minWidth:12, marginTop:1,
+                      }}>
+                        {j.verdict === 'CERTIFIED' ? '✓' : '✗'}
+                      </div>
+                      <div style={{flex:1}}>
+                        <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px', color:'var(--amber)', marginBottom:2}}>
+                          {j.display_name}
+                          <span style={{color:'var(--text-dim)', marginLeft:8}}>
+                            {Object.values(j.scores || {}).reduce((a,b) => a+b, 0)}/40
+                          </span>
+                        </div>
+                        <div style={{fontFamily:'var(--font-body)', fontSize:'11px', color:'var(--text-dim)', lineHeight:1.5}}>
+                          {j.reasoning}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            } catch { return null; }
+          })()}
+
           <div className={styles.actions}>
             <textarea
               className={styles.noteInput}
@@ -213,6 +264,75 @@ function TokenRow({ token, authToken, onAction }) {
           </div>
         </div>
       )}
+
+      {/* Branded approval message — shown after certify */}
+      {approvalResult && (() => {
+        const payUrl = approvalResult.payUrl || `https://unatrare.wtf/pay/${token.token_name}`;
+        const series = approvalResult.series ?? '—';
+        const cardNum = approvalResult.card_number ?? '—';
+        const msg = [
+          '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+          '✦  UNATRARE — CERTIFIED DANK  ✦',
+          '',
+          `${token.token_name} has been evaluated by the`,
+          'UNATRARE scientist panel and certified DANK.',
+          '',
+          'Your art has earned a place in the directory.',
+          '',
+          'Complete your enrollment:',
+          `→ ${payUrl}`,
+          '',
+          'Submit the fee to take your official position',
+          'in the collection.',
+          '',
+          `Series ${series} · Card #${cardNum}`,
+          '— The UNATRARE Scientist Panel',
+          '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        ].join('\n');
+
+        async function copyMsg() {
+          try { await navigator.clipboard.writeText(msg); } catch { /* fallback */ }
+          setMsgCopied(true);
+          setTimeout(() => setMsgCopied(false), 2000);
+        }
+
+        return (
+          <div style={{
+            margin:'0', padding:'16px', background:'rgba(0,255,100,0.04)',
+            borderTop:'1px solid var(--green)', borderBottom:'1px solid var(--green)',
+          }}>
+            <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'3px',
+              color:'var(--green)', marginBottom:10}}>
+              ✓ CERTIFIED — COPY THIS MESSAGE AND SEND TO ARTIST
+            </div>
+            <pre style={{
+              fontFamily:'var(--font-card)', fontSize:'10px', letterSpacing:'1px',
+              color:'var(--text-dim)', whiteSpace:'pre-wrap', wordBreak:'break-word',
+              lineHeight:1.8, marginBottom:12, background:'var(--bg)',
+              padding:'12px', border:'1px solid var(--border)',
+            }}>
+              {msg}
+            </pre>
+            <div style={{display:'flex', gap:8}}>
+              <button
+                onClick={copyMsg}
+                style={{fontFamily:'var(--font-card)', fontSize:'10px', letterSpacing:'2px',
+                  padding:'8px 16px', border:'1px solid var(--green)',
+                  background: msgCopied ? 'var(--green)' : 'transparent',
+                  color: msgCopied ? 'var(--bg)' : 'var(--green)', cursor:'pointer'}}>
+                {msgCopied ? 'copied!' : '⎘ copy message'}
+              </button>
+              <button
+                onClick={() => onAction(token.token_name, 'approve')}
+                style={{fontFamily:'var(--font-card)', fontSize:'10px', letterSpacing:'2px',
+                  padding:'8px 16px', border:'1px solid var(--border)',
+                  background:'transparent', color:'var(--text-dim)', cursor:'pointer'}}>
+                dismiss →
+              </button>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

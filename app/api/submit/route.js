@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import { validateTokenName } from '../../../lib/tokenValidator';
 import { getDb } from '../../../lib/db';
+import { judgeToken } from '../../../lib/judge.js';
 
-const ALLOWED_CURRENCIES = new Set(['NAT', 'PEPECASH', 'BTC']);
-const TXID_RE   = /^[0-9a-fA-F]{64}$/;
 const ADDR_RE   = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
 const BASE64_RE = /^[A-Za-z0-9+/=]{87,88}$/; // 65 bytes base64, may end with =
 
@@ -28,7 +27,7 @@ export async function POST(request) {
   } = body || {};
 
   // ── Required field checks ───────────────────────────────────
-  const missing = ['tokenName','owner','artUrl','signature','txid','currency']
+  const missing = ['tokenName','owner','artUrl','signature']
     .filter(k => !body?.[k]);
   if (missing.length) {
     return NextResponse.json({ ok: false, error: `Missing: ${missing.join(', ')}` }, { status: 400 });
@@ -50,15 +49,6 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, error: 'Invalid signature format' }, { status: 422 });
   }
 
-  // ── Validate txid ───────────────────────────────────────────
-  if (!TXID_RE.test(txid)) {
-    return NextResponse.json({ ok: false, error: 'Invalid transaction ID' }, { status: 422 });
-  }
-
-  // ── Validate currency ───────────────────────────────────────
-  if (!ALLOWED_CURRENCIES.has(currency)) {
-    return NextResponse.json({ ok: false, error: 'Invalid currency' }, { status: 422 });
-  }
 
   // ── Validate art URL (must be a relative or absolute URL) ───
   if (!artUrl || artUrl.length < 4) {
@@ -89,14 +79,6 @@ export async function POST(request) {
       }, { status: 429 });
     }
 
-    const txUsed = db.prepare('SELECT token_name FROM tokens WHERE payment_txid = ?').get(txid);
-    if (txUsed) {
-      return NextResponse.json({
-        ok: false,
-        error: `Transaction ID already used for ${txUsed.token_name}`,
-      }, { status: 409 });
-    }
-
     // Validate ordinals inscription ID if provided
     const safeInscription = /^[0-9a-fA-F]{64}$/.test(ordInscription.trim())
       ? ordInscription.trim()
@@ -105,23 +87,24 @@ export async function POST(request) {
     db.prepare(`
       INSERT INTO tokens
         (token_name, display_title, artist_address, artist_handle,
-         description, status, art_url, art_mime, payment_txid, payment_currency,
+         description, status, art_url, art_mime,
          supply, cp_version, ord_inscription, submitted_at)
-      VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, unixepoch())
+      VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, unixepoch())
     `).run(
       normalized,
-      normalized,          // display_title defaults to token name; admin can rename
+      normalized,
       owner,
       artistHandle.trim().slice(0, 64),
       description.trim().slice(0, 2000),
       artUrl,
       artMime || 'image/png',
-      txid,
-      currency,
       Number(supply) || 0,
       cpVersion === 2 ? 2 : 1,
       safeInscription,
     );
+
+    // Fire AI judges non-blocking — response returns immediately to client
+    judgeToken(normalized).catch(err => console.error('[submit] judge error:', err.message));
 
     return NextResponse.json({
       ok: true,

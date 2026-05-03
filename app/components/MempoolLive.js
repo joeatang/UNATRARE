@@ -99,7 +99,16 @@ export default function MempoolLive({ initialStats, initialRecent, initialPendin
           ) : (
             pending3.map((t) => (
               <div key={t.token_name} className={styles.pendingCard}>
-                <div className={styles.pendingArt}></div>
+                <div style={{
+                  display:'flex', flexDirection:'column', alignItems:'center',
+                  justifyContent:'center', height:'100%', gap:6,
+                }}>
+                  <div style={{fontSize:28, opacity:0.2}}>?</div>
+                  <div style={{fontFamily:'var(--font-card)', fontSize:'7px',
+                    letterSpacing:'2px', color:'var(--text-dim)', textAlign:'center'}}>
+                    UNDER<br/>REVIEW
+                  </div>
+                </div>
                 <div className={styles.pendingLabel}>PENDING</div>
               </div>
             ))
