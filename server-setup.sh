@@ -5,7 +5,7 @@ set -e
 export DEBIAN_FRONTEND=noninteractive
 
 echo "=== [1/7] System update ==="
-apt-get update -qq && apt-get upgrade -y -qq -o Dpkg::Options::="--force-confkeep"
+apt-get update -qq && apt-get upgrade -y -qq -o Dpkg::Options::="--force-confold" -o Dpkg::Options::="--force-confdef"
 
 echo "=== [2/7] Install Node.js 22 ==="
 curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
