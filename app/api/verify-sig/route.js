@@ -28,8 +28,15 @@ export async function POST(request) {
     }, { status: 422 });
   }
 
-  // Perform real BIP-137 cryptographic verification
-  const result = verifyBitcoinMessage(address, message, signature);
+  // Perform real BIP-137 cryptographic verification.
+  // Some wallets (Freewallet, Counterwallet) append \r\n to the message before signing.
+  // Try the exact message first, then with common trailing newline variants.
+  const candidates = [message, message + '\r\n', message + '\n', message + '\r'];
+  let result;
+  for (const candidate of candidates) {
+    result = verifyBitcoinMessage(address, candidate, signature);
+    if (result.ok) break;
+  }
 
   if (!result.ok) {
     return NextResponse.json({ ok: false, error: result.error }, { status: 422 });
