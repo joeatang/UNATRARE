@@ -53,7 +53,7 @@ function LoginGate({ onAuth }) {
 
 // ── Single token row in review queue ──────────────────────────
 function TokenRow({ token, authToken, onAction }) {
-  const [loading, setLoading] = useState(null); // 'approve' | 'reject' | 'judge' | 'genesis' | null
+  const [loading, setLoading] = useState(null); // 'approve' | 'reject' | 'judge' | 'genesis' | 'purge' | null
   const [note, setNote] = useState('');
   const [expanded, setExpanded] = useState(false);
 
@@ -198,6 +198,16 @@ function TokenRow({ token, authToken, onAction }) {
                 title="Certify as SERIES 0 — founding collection, no AI judge"
               >
                 {loading === 'genesis' ? 'certifying...' : '★ genesis'}
+              </button>
+              <button
+                className={`${styles.actionBtn} ${styles.purgeBtn}`}
+                onClick={() => {
+                  if (confirm(`Permanently delete ${token.token_name} from the database?`)) act('purge');
+                }}
+                disabled={!!loading}
+                title="Delete this submission entirely — for test cleanup"
+              >
+                {loading === 'purge' ? 'deleting...' : '✕ purge'}
               </button>
             </div>
           </div>

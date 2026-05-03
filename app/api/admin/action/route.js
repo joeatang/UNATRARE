@@ -20,7 +20,7 @@ export async function POST(request) {
   }
 
   const name = tokenName.toUpperCase().trim();
-  const actions = ['approve', 'reject', 'judge', 'genesis'];
+  const actions = ['approve', 'reject', 'judge', 'genesis', 'purge'];
   if (!actions.includes(action)) {
     return NextResponse.json({ error: 'invalid action' }, { status: 400 });
   }
@@ -122,6 +122,12 @@ export async function POST(request) {
       ).run(reason, name);
 
       return NextResponse.json({ ok: true, action: 'rejected' });
+    }
+
+    if (action === 'purge') {
+      // Hard delete — removes from DB entirely. Art file left on disk (harmless).
+      db.prepare('DELETE FROM tokens WHERE token_name = ?').run(name);
+      return NextResponse.json({ ok: true, action: 'purged' });
     }
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });

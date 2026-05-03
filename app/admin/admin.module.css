@@ -438,3 +438,15 @@
   background: #C9A84C;
   color: var(--bg);
 }
+.purgeBtn {
+  color: #555;
+  border-color: #333;
+  font-size: 10px;
+  opacity: 0.6;
+}
+.purgeBtn:hover:not(:disabled) {
+  background: #c0392b;
+  border-color: #c0392b;
+  color: #fff;
+  opacity: 1;
+}
