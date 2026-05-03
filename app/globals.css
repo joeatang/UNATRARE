@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&family=IBM+Plex+Mono:wght@400;700&display=swap');
+
+:root {
+  --bg:          #080808;
+  --surface:     #0f0f0f;
+  --border-dim:  #1a1a1a;
+  --border:      #2a2a2a;
+  --amber:       #8B7355;
+  --amber-hot:   #C9A84C;
+  --green:       #3d9e3d;
+  --green-hot:   #5abf5a;
+  --orange:      #F7931A;
+  --red:         #c0392b;
+  --text:        #d4d4d4;
+  --text-dim:    #666666;
+  --font-display: 'VT323', monospace;
+  --font-card:    'Share Tech Mono', monospace;
+  --font-body:    'IBM Plex Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+a { color: var(--amber); text-decoration: none; }
+a:hover { color: var(--amber-hot); }
+
+button {
+  cursor: pointer;
+  font-family: var(--font-card);
+  letter-spacing: 2px;
+}
+
+input, textarea {
+  font-family: var(--font-body);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 14px;
+  outline: none;
+  width: 100%;
+}
+
+input:focus, textarea:focus {
+  border-color: var(--amber);
+}
+
+/* Scanline overlay — applied to .scanlines wrapper */
+.scanlines {
+  position: relative;
+}
+.scanlines::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.04) 2px,
+    rgba(0,0,0,0.04) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Utility */
+.mono   { font-family: var(--font-body); }
+.card-font { font-family: var(--font-card); }
+.display-font { font-family: var(--font-display); }
+.text-dim { color: var(--text-dim); }
+.text-amber { color: var(--amber); }
+.text-green { color: var(--green); }
+.text-orange { color: var(--orange); }
+.text-red { color: var(--red); }
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background: var(--border-dim);
+  margin: 24px 0;
+}

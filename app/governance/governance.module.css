@@ -1,0 +1,381 @@
+.page {
+  min-height: 100vh;
+  padding-top: 64px;
+}
+
+/* ─── Header ─────────────────────────────────────────────── */
+.header {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 64px 32px 40px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.eyebrow {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 5px;
+  color: var(--green);
+  margin-bottom: 12px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 64px;
+  letter-spacing: 6px;
+  color: var(--text);
+  margin: 0 0 16px;
+  line-height: 1;
+}
+
+.title span {
+  color: var(--amber-hot);
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.9;
+}
+
+/* ─── Sections ───────────────────────────────────────────── */
+.section {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 32px;
+}
+
+.sectionLabel {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 5px;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-dim);
+  padding-bottom: 10px;
+}
+
+/* ─── Proposal card ──────────────────────────────────────── */
+.proposal {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-bottom: 16px;
+}
+
+.proposalClosed {
+  opacity: 0.65;
+}
+
+.proposalHeader {
+  padding: 20px 24px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.proposalHeader:hover {
+  border-left: 2px solid var(--amber);
+}
+
+.proposalMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.proposalType {
+  font-family: var(--font-card);
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+}
+
+.proposalStatus {
+  font-family: var(--font-card);
+  font-size: 8px;
+  letter-spacing: 3px;
+  padding: 2px 8px;
+  border: 1px solid;
+}
+
+.statusActive {
+  color: var(--green-hot);
+  border-color: var(--green);
+}
+
+.statusClosed {
+  color: var(--text-dim);
+  border-color: var(--border);
+}
+
+.proposalTitle {
+  font-family: var(--font-display);
+  font-size: 26px;
+  letter-spacing: 2px;
+  color: var(--text);
+  margin-bottom: 14px;
+  line-height: 1.2;
+}
+
+.proposalExpand {
+  font-family: var(--font-card);
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin-top: 10px;
+  text-align: right;
+}
+
+/* ─── Vote bar ───────────────────────────────────────────── */
+.voteBarEmpty {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.voteBarWrap {
+  margin: 4px 0;
+}
+
+.voteBarTrack {
+  height: 6px;
+  background: var(--border-dim);
+  display: flex;
+  overflow: hidden;
+}
+
+.voteBarYes {
+  height: 100%;
+  background: var(--green);
+  transition: width 0.3s;
+}
+
+.voteBarNo {
+  height: 100%;
+  background: var(--red);
+  transition: width 0.3s;
+}
+
+.voteBarLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-family: var(--font-card);
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+
+.voteBarYesLabel  { color: var(--green); }
+.voteBarNoLabel   { color: var(--red); }
+.voteBarTotalLabel { color: var(--text-dim); }
+
+/* ─── Proposal body ──────────────────────────────────────── */
+.proposalBody {
+  padding: 0 24px 24px;
+  border-top: 1px solid var(--border-dim);
+}
+
+.proposalDesc {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.9;
+  padding: 20px 0 16px;
+  white-space: pre-wrap;
+}
+
+.proposalResult {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--amber-hot);
+  border-left: 2px solid var(--amber);
+  padding: 8px 12px;
+  margin-bottom: 16px;
+}
+
+.resultLabel {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 3px;
+}
+
+/* ─── Voter list ─────────────────────────────────────────── */
+.voteList {
+  margin-bottom: 20px;
+  border: 1px solid var(--border-dim);
+}
+
+.voteRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border-dim);
+  font-family: var(--font-body);
+  font-size: 11px;
+}
+
+.voteRow:last-child { border-bottom: none; }
+
+.voteAddr { color: var(--text-dim); }
+
+.voteChoice {
+  font-family: var(--font-card);
+  font-size: 8px;
+  letter-spacing: 2px;
+}
+
+.choice_yes     { color: var(--green-hot); }
+.choice_no      { color: var(--red); }
+.choice_abstain { color: var(--text-dim); }
+
+.voteMore {
+  padding: 6px 12px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+/* ─── Vote form ──────────────────────────────────────────── */
+.voteForm {
+  border: 1px solid var(--border);
+  padding: 20px;
+  margin-top: 16px;
+}
+
+.voteFormLabel {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--amber);
+  margin-bottom: 6px;
+}
+
+.voteFormNote {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+}
+
+.voteInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.voteInput:focus {
+  outline: none;
+  border-color: var(--amber);
+}
+
+.voteChoices {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.voteChoiceBtn {
+  flex: 1;
+  padding: 8px;
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 3px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: border-color 0.1s, color 0.1s;
+}
+
+.choiceColor_yes:hover,     .choiceSelected.choiceColor_yes     { border-color: var(--green-hot); color: var(--green-hot); }
+.choiceColor_no:hover,      .choiceSelected.choiceColor_no      { border-color: var(--red);       color: var(--red); }
+.choiceColor_abstain:hover, .choiceSelected.choiceColor_abstain { border-color: var(--amber);     color: var(--amber); }
+
+.voteSubmitBtn {
+  width: 100%;
+  padding: 12px;
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 4px;
+  border: 1px solid var(--green);
+  background: var(--bg);
+  color: var(--green);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.voteSubmitBtn:hover:not(:disabled) {
+  background: var(--green);
+  color: var(--bg);
+}
+
+.voteSubmitBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.voteMsg {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--green);
+  margin-top: 10px;
+}
+
+.voteMsgError {
+  color: var(--red);
+}
+
+.voteSuccess {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--green-hot);
+  letter-spacing: 3px;
+  margin-top: 20px;
+  border-left: 2px solid var(--green);
+  padding-left: 12px;
+}
+
+/* ─── States ─────────────────────────────────────────────── */
+.loading, .error {
+  max-width: 800px;
+  margin: 80px auto;
+  padding: 0 32px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.error { color: var(--red); }
+
+.empty {
+  max-width: 800px;
+  margin: 80px auto;
+  padding: 0 32px;
+}
+
+.emptyTitle {
+  font-family: var(--font-display);
+  font-size: 32px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+}
+
+.emptyText {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.9;
+}

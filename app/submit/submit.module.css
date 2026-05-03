@@ -1,0 +1,263 @@
+.page {
+  padding-top: 48px;
+  min-height: 100vh;
+  max-width: 720px;
+  margin: 0 auto;
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+/* ─── Progress bar ───────────────────────────────────── */
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 32px 0 40px;
+  border-bottom: 1px solid var(--border-dim);
+  margin-bottom: 48px;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.stepNum {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-card);
+  font-size: 11px;
+  color: var(--text-dim);
+  background: var(--bg);
+  position: relative;
+  z-index: 1;
+}
+
+.stepNum.active {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.stepNum.done {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(61,158,61,0.08);
+}
+
+.stepLabel {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.stepLabel.active { color: var(--amber); }
+.stepLabel.done   { color: var(--green); }
+
+.stepConnector {
+  flex: 1;
+  height: 1px;
+  background: var(--border-dim);
+  margin-bottom: 22px;
+}
+
+/* ─── Step container ─────────────────────────────────── */
+.stepBox {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 40px;
+}
+
+.stepEyebrow {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--green);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.stepTitle {
+  font-family: var(--font-display);
+  font-size: 44px;
+  letter-spacing: 3px;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stepTitle span { color: var(--amber); }
+
+.stepDesc {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.9;
+  margin-bottom: 32px;
+  border-left: 2px solid var(--border);
+  padding-left: 16px;
+}
+
+.stepDesc strong {
+  color: var(--text);
+  font-weight: 400;
+}
+
+/* ─── Input area ─────────────────────────────────────── */
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.inputLabel {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.tokenInput {
+  font-family: var(--font-card) !important;
+  font-size: 22px !important;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  padding: 14px 16px !important;
+  border: 1px solid var(--border) !important;
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+.tokenInput:focus {
+  border-color: var(--amber) !important;
+}
+
+.tokenInput.valid { border-color: var(--green) !important; }
+.tokenInput.invalid { border-color: var(--red) !important; }
+
+.inputError {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--red);
+  letter-spacing: 0.5px;
+  min-height: 18px;
+}
+
+.inputHint {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+/* ─── URL result box ─────────────────────────────────── */
+.urlBox {
+  border: 1px solid var(--green);
+  background: rgba(61,158,61,0.04);
+  padding: 20px 24px;
+  margin: 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.urlBoxLabel {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: var(--green);
+  text-transform: uppercase;
+}
+
+.urlBoxValue {
+  font-family: var(--font-card);
+  font-size: 14px;
+  color: var(--text);
+  letter-spacing: 1px;
+  word-break: break-all;
+}
+
+.urlBoxMeta {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.copyBtn {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 3px;
+  background: var(--green);
+  color: var(--bg);
+  border: none;
+  padding: 8px 20px;
+  cursor: pointer;
+  text-transform: uppercase;
+  align-self: flex-start;
+  transition: background 0.15s;
+}
+
+.copyBtn:hover { background: var(--green-hot); }
+.copyBtn.copied { background: var(--amber); }
+
+/* ─── Warning box ────────────────────────────────────── */
+.warningBox {
+  border: 1px solid var(--amber);
+  background: rgba(139,115,85,0.05);
+  padding: 20px 24px;
+  margin: 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.warningTitle {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--amber);
+  text-transform: uppercase;
+}
+
+.warningText {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+
+.warningText strong { color: var(--amber); font-weight: 400; }
+
+/* ─── Next button ────────────────────────────────────── */
+.nextBtn {
+  font-family: var(--font-card);
+  font-size: 12px;
+  letter-spacing: 4px;
+  background: var(--amber);
+  color: var(--bg);
+  border: none;
+  padding: 14px 32px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background 0.15s;
+  margin-top: 8px;
+}
+
+.nextBtn:hover { background: var(--amber-hot); }
+.nextBtn:disabled {
+  background: var(--border);
+  color: var(--text-dim);
+  cursor: not-allowed;
+}

@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Environment variables — NEVER commit these
+.env.local
+.env.*.local
+.env
+
+# SQLite database — lives on server, not in git
+*.db
+*.db-shm
+*.db-wal
+
+# Uploads (local dev only — production uses R2)
+/tmp/unatrare_uploads/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

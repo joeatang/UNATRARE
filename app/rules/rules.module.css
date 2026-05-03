@@ -1,0 +1,304 @@
+.page {
+  padding-top: 48px;
+  min-height: 100vh;
+}
+
+.inner {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 56px 32px 80px;
+}
+
+/* ─── Header ─────────────────────────────────────────────── */
+.header {
+  margin-bottom: 48px;
+  border-bottom: 1px solid var(--border-dim);
+  padding-bottom: 40px;
+}
+
+.eyebrow {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 5px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 52px;
+  letter-spacing: 4px;
+  line-height: 1;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.title span { color: var(--amber); }
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+
+/* ─── Critical callout ───────────────────────────────────── */
+.criticalBox {
+  border: 1px solid var(--amber);
+  background: rgba(139,115,85,0.05);
+  padding: 24px 28px;
+  margin-bottom: 48px;
+}
+
+.criticalLabel {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--amber);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.criticalText {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.9;
+}
+
+.criticalText strong { color: var(--text); font-weight: 400; }
+
+.inlineLink {
+  color: var(--amber);
+  text-decoration: none;
+  font-family: var(--font-card);
+}
+
+.inlineLink:hover { color: var(--amber-hot); }
+
+/* ─── Sections ───────────────────────────────────────────── */
+.section {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 24px;
+  margin-bottom: 56px;
+  padding-bottom: 56px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.section:last-of-type { border-bottom: none; }
+
+.sectionNum {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--border);
+  line-height: 1;
+  padding-top: 4px;
+}
+
+.sectionBody {}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 32px;
+  letter-spacing: 3px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.sectionNote {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+/* ─── Table ──────────────────────────────────────────────── */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border-dim);
+}
+
+.td {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-dim);
+  vertical-align: top;
+  line-height: 1.6;
+}
+
+tr:last-child .td { border-bottom: none; }
+
+tr .td:first-child {
+  font-family: var(--font-card);
+  color: var(--text);
+  font-size: 11px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  width: 240px;
+}
+
+/* ─── Judge list ─────────────────────────────────────────── */
+.judgeList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--border-dim);
+  margin-bottom: 24px;
+}
+
+.judgeRow {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.judgeRow:last-child { border-bottom: none; }
+
+.judgeName {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--amber);
+  align-self: center;
+}
+
+.judgeRole {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  align-self: center;
+}
+
+/* ─── Rubric ─────────────────────────────────────────────── */
+.rubricBlock {
+  border: 1px solid var(--border-dim);
+  margin-bottom: 16px;
+}
+
+.rubricTitle {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-dim);
+  text-transform: uppercase;
+}
+
+.rubricRow {
+  display: flex;
+  gap: 16px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-dim);
+  align-items: baseline;
+}
+
+.rubricRow:last-child { border-bottom: none; }
+
+.rubricCat {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text);
+  min-width: 120px;
+}
+
+.rubricDesc {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.infoNote {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+  padding-left: 16px;
+  border-left: 2px solid var(--border);
+  line-height: 1.6;
+}
+
+/* ─── Outcome blocks ─────────────────────────────────────── */
+.outcomeBlock {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .outcomeBlock { grid-template-columns: 1fr; }
+}
+
+.outcomeApproved {
+  border: 1px solid var(--green);
+  padding: 20px;
+}
+
+.outcomeRejected {
+  border: 1px solid var(--red);
+  padding: 20px;
+}
+
+.outcomeLabel {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 3px;
+  margin-bottom: 12px;
+}
+
+.outcomeApproved .outcomeLabel { color: var(--green); }
+.outcomeRejected .outcomeLabel { color: var(--red); }
+
+.outcomeList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.outcomeList li {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+  padding-left: 14px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.outcomeList li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: var(--text-dim);
+}
+
+/* ─── CTA ────────────────────────────────────────────────── */
+.cta {
+  text-align: center;
+  padding-top: 16px;
+}
+
+.ctaBtn {
+  display: inline-block;
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--amber);
+  padding: 14px 36px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.ctaBtn:hover { background: var(--amber-hot); }

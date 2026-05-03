@@ -1,0 +1,169 @@
+.main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 80px 24px 100px;
+}
+
+/* ── Header ── */
+.header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 40px;
+  margin-bottom: 56px;
+}
+
+.eyebrow {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 64px;
+  letter-spacing: 8px;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.title span {
+  color: var(--amber-hot);
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  max-width: 520px;
+}
+
+/* ── Sections ── */
+.section {
+  margin-bottom: 56px;
+}
+
+.sectionTitle {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 5px;
+  color: var(--amber);
+  margin-bottom: 24px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.prose {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.prose p {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--text);
+}
+
+.prose a {
+  color: var(--amber);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prose a:hover {
+  color: var(--amber-hot);
+}
+
+.prose code {
+  font-family: var(--font-card);
+  font-size: 11px;
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
+  padding: 1px 5px;
+  color: var(--text);
+}
+
+/* ── How it works steps ── */
+.steps {
+  display: flex;
+  flex-direction: column;
+}
+
+.step {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.stepLine {
+  width: 1px;
+  height: 24px;
+  background: var(--border-dim);
+  margin-left: 19px;
+}
+
+.stepNum {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--amber);
+  line-height: 1;
+  min-width: 38px;
+  padding-top: 2px;
+}
+
+.stepBody {
+  flex: 1;
+  padding-bottom: 4px;
+}
+
+.stepHead {
+  font-family: var(--font-card);
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.stepText {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text-dim);
+}
+
+/* ── CTA row ── */
+.cta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 40px;
+  border-top: 1px solid var(--border);
+  margin-top: 56px;
+}
+
+.ctaBtn {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--amber);
+  border: 1px solid var(--amber);
+  padding: 10px 20px;
+  text-decoration: none;
+  display: inline-block;
+}
+.ctaBtn:hover {
+  color: var(--amber-hot);
+  border-color: var(--amber-hot);
+}
+.ctaBtn[data-primary="true"] {
+  background: var(--amber);
+  color: var(--bg);
+}
+.ctaBtn[data-primary="true"]:hover {
+  background: var(--amber-hot);
+  border-color: var(--amber-hot);
+  color: var(--bg);
+}

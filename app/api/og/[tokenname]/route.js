@@ -1,0 +1,146 @@
+import { ImageResponse } from 'next/og';
+import { getDb } from '../../../../lib/db';
+
+export const runtime = 'nodejs';
+
+const W = 400, H = 560;
+
+function getToken(tokenname) {
+  try {
+    const db = getDb();
+    return db.prepare('SELECT * FROM tokens WHERE token_name = ?').get(tokenname.toUpperCase());
+  } catch {
+    return null;
+  }
+}
+
+export async function GET(request, { params }) {
+  const token = getToken(params.tokenname);
+
+  const isApproved = token?.status === 'approved';
+  const isPending  = !token || token.status === 'pending';
+  const isRejected = token?.status === 'rejected';
+
+  const statusColor  = isApproved ? '#5abf5a' : isPending ? '#C9A84C' : '#c0392b';
+  const statusLabel  = isApproved ? 'CERTIFIED' : isPending ? 'PENDING' : 'REJECTED';
+  const tokenName    = token?.token_name ?? params.tokenname.toUpperCase();
+  const artUrl       = isApproved && token?.art_url ? token.art_url : null;
+
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: 400,
+          height: 560,
+          background: '#080808',
+          display: 'flex',
+          flexDirection: 'column',
+          border: '1px solid #2a2a2a',
+          fontFamily: '"Share Tech Mono", monospace',
+          overflow: 'hidden',
+          position: 'relative',
+        }}
+      >
+        {/* Header strip */}
+        <div
+          style={{
+            height: 36,
+            borderBottom: `1px solid ${statusColor}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0 12px',
+            flexShrink: 0,
+          }}
+        >
+          <span style={{ fontSize: 11, letterSpacing: 4, color: '#C9A84C' }}>UNATRARE</span>
+          <span style={{ fontSize: 9, letterSpacing: 3, color: statusColor }}>{statusLabel}</span>
+        </div>
+
+        {/* Art area */}
+        <div
+          style={{
+            flex: 1,
+            background: '#0f0f0f',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            position: 'relative',
+          }}
+        >
+          {artUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={artUrl}
+              alt={tokenName}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                filter: isPending ? 'blur(20px)' : 'none',
+              }}
+            />
+          ) : (
+            /* Hatch pattern placeholder */
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <span style={{ fontSize: 11, letterSpacing: 4, color: '#333' }}>NO IMAGE</span>
+            </div>
+          )}
+
+          {/* Pending blur overlay label */}
+          {isPending && (
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 12,
+                left: 0,
+                right: 0,
+                textAlign: 'center',
+                fontSize: 10,
+                letterSpacing: 5,
+                color: '#C9A84C',
+              }}
+            >
+              PENDING JUDGMENT
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div
+          style={{
+            height: 52,
+            borderTop: `1px solid #1a1a1a`,
+            padding: '8px 12px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ fontSize: 13, letterSpacing: 2, color: '#d4d4d4', marginBottom: 3 }}>
+            {tokenName}
+          </div>
+          <div style={{ fontSize: 9, letterSpacing: 2, color: '#666666' }}>
+            {isApproved && token?.series && token?.card_number
+              ? `Series ${token.series} · #${String(token.card_number).padStart(4, '0')} · unatrare.wtf`
+              : 'unatrare.wtf'}
+          </div>
+        </div>
+      </div>
+    ),
+    {
+      width: W,
+      height: H,
+    }
+  );
+}

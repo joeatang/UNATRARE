@@ -1,0 +1,101 @@
+import { NextResponse } from 'next/server';
+import { getDb } from '../../../../lib/db';
+import { verifyAdminToken } from '../auth/route';
+import { judgeToken } from '../../../../lib/judge';
+
+export async function POST(request) {
+  if (!verifyAdminToken(request)) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  }
+
+  let body;
+  try { body = await request.json(); } catch {
+    return NextResponse.json({ error: 'invalid JSON' }, { status: 400 });
+  }
+
+  const { tokenName, action, note } = body;
+
+  if (!tokenName || typeof tokenName !== 'string') {
+    return NextResponse.json({ error: 'tokenName required' }, { status: 400 });
+  }
+
+  const name = tokenName.toUpperCase().trim();
+  const actions = ['approve', 'reject', 'judge'];
+  if (!actions.includes(action)) {
+    return NextResponse.json({ error: 'invalid action' }, { status: 400 });
+  }
+
+  try {
+    const db = getDb();
+    const token = db.prepare('SELECT * FROM tokens WHERE token_name = ?').get(name);
+    if (!token) {
+      return NextResponse.json({ error: 'token not found' }, { status: 404 });
+    }
+
+    if (action === 'judge') {
+      // Trigger AI judge pipeline
+      const result = await judgeToken(name);
+      return NextResponse.json({ ok: true, result });
+    }
+
+    if (action === 'approve') {
+      // Assign card number + series if not already set
+      let { series, card_number } = token;
+      if (!card_number) {
+        // Find current series (fills at 300 then increments)
+        const seriesRow = db.prepare(
+          `SELECT series, COUNT(*) as n FROM tokens WHERE status='approved'
+           GROUP BY series ORDER BY series DESC LIMIT 1`
+        ).get();
+        const seriesNum = (!seriesRow || seriesRow.n >= 300)
+          ? (seriesRow ? seriesRow.series + 1 : 1)
+          : seriesRow.series;
+        const last = db.prepare(
+          'SELECT MAX(card_number) as mx FROM tokens WHERE status=? AND series=?'
+        ).get('approved', seriesNum);
+        card_number = (last?.mx ?? 0) + 1;
+        series = seriesNum;
+      }
+
+      // Fetch supply from tokenscan if not cached
+      let supply = token.supply || 0;
+      if (supply <= 0) {
+        try {
+          const res = await fetch(
+            `https://tokenscan.io/api/asset/${encodeURIComponent(name)}`,
+            { headers: { 'User-Agent': 'UNATRARE/1.0' } }
+          );
+          if (res.ok) {
+            const data = await res.json();
+            supply = Number(data.supply) || 0;
+          }
+        } catch { /* non-critical */ }
+      }
+
+      db.prepare(
+        `UPDATE tokens
+         SET status='approved', judged_at=unixepoch(), series=?, card_number=?,
+             rejection_reason=?, supply=?
+         WHERE token_name=?`
+      ).run(series, card_number, note ? `Admin note: ${note}` : '', supply, name);
+
+      return NextResponse.json({ ok: true, action: 'approved', series, card_number, supply });
+    }
+
+    if (action === 'reject') {
+      const reason = note
+        ? `Admin rejection: ${note}`
+        : (token.rejection_reason || 'Does not meet UNATRARE standards.');
+
+      db.prepare(
+        `UPDATE tokens
+         SET status='rejected', judged_at=unixepoch(), rejection_reason=?
+         WHERE token_name=?`
+      ).run(reason, name);
+
+      return NextResponse.json({ ok: true, action: 'rejected' });
+    }
+  } catch (err) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}

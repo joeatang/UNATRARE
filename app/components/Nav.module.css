@@ -1,0 +1,67 @@
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 48px;
+  background: rgba(8,8,8,0.96);
+  border-bottom: 1px solid var(--border-dim);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+}
+
+/* Amber top edge */
+.nav::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--amber);
+  opacity: 0.5;
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--text);
+  letter-spacing: 4px;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.nav-logo span { color: var(--amber); }
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.nav-links a:hover { color: var(--amber); }
+
+.nav-submit {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--bg);
+  background: var(--amber);
+  border: none;
+  padding: 7px 18px;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.nav-submit:hover { background: var(--amber-hot); color: var(--bg); }

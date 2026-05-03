@@ -1,0 +1,210 @@
+.main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 80px 24px 80px;
+}
+
+/* ── Header ── */
+.header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 32px;
+  margin-bottom: 48px;
+}
+
+.eyebrow {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.address {
+  font-family: var(--font-card);
+  font-size: 20px;
+  letter-spacing: 2px;
+  color: var(--text);
+  word-break: break-all;
+  margin-bottom: 20px;
+}
+
+.statsRow {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Status dots ── */
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot[data-color="green"]  { background: var(--green-hot); }
+.dot[data-color="amber"]  { background: var(--amber-hot); animation: blink 1.4s step-end infinite; }
+.dot[data-color="red"]    { background: var(--red); }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ── Sections ── */
+.section {
+  margin-bottom: 56px;
+}
+
+.sectionTitle {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+/* ── Card thumbnail ── */
+.card {
+  display: block;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: border-color 0.15s;
+  text-decoration: none;
+}
+.card:hover {
+  border-color: var(--amber);
+}
+
+.cardArt {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 5 / 7;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.cardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.cardImgPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--border-dim) 0px,
+    var(--border-dim) 1px,
+    transparent 1px,
+    transparent 8px
+  );
+}
+
+.cardPendingLabel {
+  position: absolute;
+  bottom: 6px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--amber-hot);
+  animation: blink 1.4s step-end infinite;
+}
+
+.cardRejectedLabel {
+  position: absolute;
+  bottom: 6px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--red);
+}
+
+.cardFooter {
+  padding: 8px;
+  border-top: 1px solid var(--border-dim);
+}
+
+.cardName {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardNum {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* ── Empty state ── */
+.empty {
+  text-align: center;
+  padding: 80px 0;
+  border: 1px solid var(--border-dim);
+}
+
+.emptyTitle {
+  font-family: var(--font-display);
+  font-size: 32px;
+  letter-spacing: 6px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.emptyText {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 28px;
+}
+
+.emptyBtn {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--amber);
+  text-decoration: none;
+  border: 1px solid var(--amber);
+  padding: 10px 20px;
+  display: inline-block;
+}
+.emptyBtn:hover {
+  color: var(--amber-hot);
+  border-color: var(--amber-hot);
+}
