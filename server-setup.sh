@@ -2,9 +2,10 @@
 # UNATRARE — DigitalOcean Ubuntu 24.04 setup script
 # Run as root on a fresh droplet: bash server-setup.sh
 set -e
+export DEBIAN_FRONTEND=noninteractive
 
 echo "=== [1/7] System update ==="
-apt-get update -qq && apt-get upgrade -y -qq
+apt-get update -qq && apt-get upgrade -y -qq -o Dpkg::Options::="--force-confkeep"
 
 echo "=== [2/7] Install Node.js 22 ==="
 curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
