@@ -267,7 +267,14 @@ function Step2({ data, onNext, onBack }) {
       form.append('file', file);
       form.append('tokenName', data.tokenName);
       const res = await fetch('/api/upload-art', { method: 'POST', body: form });
-      const json = await res.json();
+      // Read body as text first so we can handle non-JSON error pages gracefully
+      const text = await res.text();
+      let json;
+      try { json = JSON.parse(text); } catch {
+        setErrMsg(`Upload failed (HTTP ${res.status}) — try a smaller file or PNG`);
+        setUploading(false);
+        return;
+      }
       if (json.ok) {
         onNext({ ...data, artUrl: json.url, artMime: file.type });
       } else {

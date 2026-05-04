@@ -2,15 +2,13 @@ import { NextResponse } from 'next/server';
 import { validateTokenName } from '../../../lib/tokenValidator';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
 // Uploads are stored in /public/uploads/ — served by Next.js as /uploads/FILENAME
 // This directory persists on the server across restarts.
 // Max size: 10 MB. Allowed: PNG, JPG, GIF, WebP.
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// Resolve to [project root]/public/uploads/
-const UPLOAD_DIR = path.resolve(__dirname, '..', '..', '..', '..', 'public', 'uploads');
+// process.cwd() is always the Next.js project root in both dev and production
+const UPLOAD_DIR = path.resolve(process.cwd(), 'public', 'uploads');
 
 const ALLOWED_MIME = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
