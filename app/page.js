@@ -84,6 +84,19 @@ export default function HomePage() {
           </Link>
         </div>
 
+        {/* ── UNATPEPE holder CTA ── */}
+        <div className={styles.holderStrip}>
+          <div className={styles.holderLeft}>
+            <div className={styles.holderTitle}>✦ UNATPEPE HOLDER?</div>
+            <div className={styles.holderSub}>
+              Register your address to unlock early access windows and a discount on every drop.
+            </div>
+          </div>
+          <Link href="/register" className={styles.holderBtn}>
+            register now →
+          </Link>
+        </div>
+
       </main>
     </>
   );

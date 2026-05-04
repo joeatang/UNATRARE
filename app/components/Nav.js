@@ -12,6 +12,7 @@ export default function Nav() {
         <li><Link href="/governance">Governance</Link></li>
         <li><Link href="/rules">Rules</Link></li>
         <li><Link href="/about">About</Link></li>
+        <li><Link href="/register" className={styles['nav-register']}>✦ Register</Link></li>
       </ul>
       <Link href="/submit" className={styles['nav-submit']}>
         Submit

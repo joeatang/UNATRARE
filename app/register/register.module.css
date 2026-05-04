@@ -1,0 +1,70 @@
+/* register.module.css — UNATPEPE holder registration page */
+
+.infoBox {
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
+  border-left: 2px solid var(--amber);
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+
+.infoTitle {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--amber);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.infoText {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+.infoText a {
+  color: var(--amber);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ── Confirmation card ── */
+.confirmCard {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin: 20px 0;
+  overflow: hidden;
+}
+
+.confirmRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.confirmRow:last-child {
+  border-bottom: none;
+}
+
+.confirmKey {
+  font-family: var(--font-card);
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  min-width: 120px;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+
+.confirmVal {
+  font-family: var(--font-card);
+  font-size: 12px;
+  color: var(--text);
+  letter-spacing: 1px;
+  flex: 1;
+}

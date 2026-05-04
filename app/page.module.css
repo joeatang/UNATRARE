@@ -284,6 +284,59 @@
   color: var(--bg);
 }
 
+/* ─── UNATPEPE holder strip ──────────────────────────────── */
+.holderStrip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px 32px;
+  background: var(--bg);
+  border-top: 1px solid rgba(139,115,85,0.2);
+  border-bottom: 1px solid rgba(139,115,85,0.2);
+  max-width: 100%;
+}
+
+.holderLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.holderTitle {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: var(--amber);
+}
+
+.holderSub {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+  max-width: 480px;
+  line-height: 1.6;
+}
+
+.holderBtn {
+  display: inline-block;
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--amber);
+  border: 1px solid var(--amber);
+  padding: 10px 24px;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.holderBtn:hover {
+  background: var(--amber);
+  color: var(--bg);
+}
+
 /* ─── Featured Artists ───────────────────────────────────── */
 .artistsSection {
   max-width: 1440px;
@@ -334,6 +387,8 @@
   .statValue { font-size: 32px; }
 
   .ctaTitle { font-size: 32px; }
+
+  .holderStrip { padding: 20px; }
 }
 
 /* Mobile — ≤600px */
@@ -362,6 +417,15 @@
 
   .activityToken { min-width: 90px; font-size: 10px; }
   .activityItem  { font-size: 10px; gap: 10px; }
+
+  /* Stack holder strip vertically */
+  .holderStrip {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px 16px;
+    gap: 16px;
+  }
+  .holderBtn { width: 100%; text-align: center; }
 }
 
 /* Tiny mobile — ≤380px (iPhone SE) */

@@ -51,6 +51,13 @@
 
 .nav-links a:hover { color: var(--amber); }
 
+/* UNATPEPE register highlight */
+.nav-register {
+  color: var(--amber) !important;
+  opacity: 0.8;
+}
+.nav-register:hover { opacity: 1 !important; }
+
 .nav-submit {
   font-family: var(--font-card);
   font-size: 10px;
