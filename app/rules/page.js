@@ -7,12 +7,13 @@ export const metadata = {
   description: 'Requirements and process for submitting art to the UNATRARE curated directory on Bitcoin/Counterparty.',
 };
 
+// Judge list — kept in sync with judges.config.json
 const JUDGES = [
   { id: 'PROF NAKA C',      role: 'The origin. Inspired by Series I Card #1 — the Nakamoto Card. Silent, ancient, breaks all ties.' },
   { id: 'DR. M. CATALOGUS', role: 'Chief Archivist. Sole scientist of the first 1,000 directory cards in spirit. Uncompromising on quality.' },
   { id: 'PROF. J. LOONEY',  role: 'Market mind. Built the rails, knows what moves. Judges cultural resonance and tradability.' },
   { id: 'SHAWN-L',          role: 'Community anchor. Judges for spirit and community fit.' },
-  { id: 'RARE SRILLA',      role: 'Dankness calibration specialist. Wild card. If Srilla says no, it\'s no.' },
+  { id: 'DJ PEPAI',         role: 'Dankness calibration specialist. Wild card. If DJ PEPAI says no, it\'s no.' },
 ];
 
 export default function RulesPage() {
