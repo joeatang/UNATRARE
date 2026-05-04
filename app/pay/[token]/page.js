@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Nav from '../../components/Nav';
+import { QRCodeSVG } from 'qrcode.react';
 import styles from '../../submit/submit.module.css';
 
 function buildUrl(tokenName) {
@@ -155,6 +156,20 @@ function PaymentForm({ tokenData, tokenName }) {
           )}
           <div className={styles.urlBoxLabel} style={{marginTop:8}}>to address</div>
           <div className={styles.urlBoxValue} style={{fontSize:11}}>{addr}</div>
+          <div style={{marginTop:16, display:'flex', justifyContent:'center'}}>
+            <div style={{
+              background:'#fff', padding:10, display:'inline-block',
+              border:'1px solid var(--border)'
+            }}>
+              <QRCodeSVG value={addr} size={140} bgColor="#ffffff" fgColor="#000000" level="M" />
+            </div>
+          </div>
+          <div style={{
+            marginTop:10, fontFamily:'var(--font-card)', fontSize:'8px',
+            letterSpacing:'2px', color:'var(--text-dim)', textAlign:'center'
+          }}>
+            scan to copy address
+          </div>
         </div>
       )}
 

@@ -192,11 +192,26 @@ export async function POST(request) {
       }, { status: 422 });
     }
 
-    const alreadySubmitted = db.prepare("SELECT token_name FROM tokens WHERE token_name = ?").get(normalized);
-    if (alreadySubmitted) {
+    // Check if this token already has a confirmed payment
+    const alreadyPaid = db.prepare(
+      "SELECT token_name FROM tokens WHERE token_name = ? AND payment_txid IS NOT NULL"
+    ).get(normalized);
+    if (alreadyPaid) {
       return NextResponse.json({
         ok: false,
-        error: `${normalized} has already been submitted`,
+        error: `${normalized} has already been paid`,
+      }, { status: 422 });
+    }
+
+    // Check token exists and is approved
+    const token = db.prepare("SELECT status FROM tokens WHERE token_name = ?").get(normalized);
+    if (!token) {
+      return NextResponse.json({ ok: false, error: 'Token not found' }, { status: 404 });
+    }
+    if (token.status !== 'approved') {
+      return NextResponse.json({
+        ok: false,
+        error: 'Token must be approved before payment can be confirmed',
       }, { status: 422 });
     }
   } catch {
@@ -225,6 +240,17 @@ export async function POST(request) {
 
   if (!onChain.ok) {
     return NextResponse.json({ ok: false, error: onChain.error }, { status: 422 });
+  }
+
+  // ── Persist payment to DB ─────────────────────────────────────
+  try {
+    const db = getDb();
+    db.prepare(
+      "UPDATE tokens SET payment_txid=?, payment_currency=? WHERE token_name=?"
+    ).run(txid, currency, normalized);
+  } catch (err) {
+    // Non-fatal: verification passed, just log the DB write failure
+    console.error('[confirm-payment] DB write failed:', err.message);
   }
 
   return NextResponse.json({ ok: true, tokenName: normalized, txid, currency });
