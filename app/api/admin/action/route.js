@@ -20,7 +20,7 @@ export async function POST(request) {
   }
 
   const name = tokenName.toUpperCase().trim();
-  const actions = ['approve', 'reject', 'judge', 'genesis', 'purge'];
+  const actions = ['approve', 'reject', 'judge', 'genesis', 'purge', 'reveal'];
   if (!actions.includes(action)) {
     return NextResponse.json({ error: 'invalid action' }, { status: 400 });
   }
@@ -128,6 +128,18 @@ export async function POST(request) {
       // Hard delete — removes from DB entirely. Art file left on disk (harmless).
       db.prepare('DELETE FROM tokens WHERE token_name = ?').run(name);
       return NextResponse.json({ ok: true, action: 'purged' });
+    }
+
+    if (action === 'reveal') {
+      // Drop the art publicly — sets revealed_at so art goes live everywhere.
+      // Token must be approved first.
+      if (token.status !== 'approved') {
+        return NextResponse.json({ error: 'token must be approved before reveal' }, { status: 400 });
+      }
+      db.prepare(
+        "UPDATE tokens SET revealed_at=unixepoch() WHERE token_name=?"
+      ).run(name);
+      return NextResponse.json({ ok: true, action: 'revealed' });
     }
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });

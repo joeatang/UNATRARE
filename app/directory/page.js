@@ -136,12 +136,22 @@ export default function DirectoryPage({ searchParams }) {
                     className={styles.card}
                   >
                     <div className={styles.cardArt}>
-                      {token.art_url ? (
+                      {token.revealed_at && token.art_url ? (
                         <img
                           src={token.art_url}
                           alt={token.display_title || token.token_name}
                           loading="lazy"
                         />
+                      ) : !token.revealed_at ? (
+                        /* Mystery pack — drop pending */
+                        <div style={{
+                          width:'100%', height:'100%',
+                          background:'repeating-linear-gradient(45deg,#1a1a1a 0,#1a1a1a 4px,#111 4px,#111 8px)',
+                          display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:4
+                        }}>
+                          <span style={{fontSize:'24px', lineHeight:1}}>🐸</span>
+                          <span style={{fontFamily:'var(--font-card)', fontSize:'7px', letterSpacing:'2px', color:'var(--amber)'}}>MYSTERY</span>
+                        </div>
                       ) : (
                         <div style={{
                           width:'100%', height:'100%',
@@ -151,7 +161,7 @@ export default function DirectoryPage({ searchParams }) {
                     </div>
                     <div className={styles.cardFooter}>
                       <div className={styles.cardName}>
-                        {token.display_title || token.token_name}
+                        {token.revealed_at ? (token.display_title || token.token_name) : '???'}
                       </div>
                       <div className={styles.cardMeta}>
                         S{toRoman(token.series)} · #{String(token.card_number).padStart(3,'0')}

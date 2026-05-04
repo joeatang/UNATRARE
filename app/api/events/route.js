@@ -75,7 +75,7 @@ export async function GET() {
           // Find any tokens touched since lastSeen
           const changed = db.prepare(
             `SELECT token_name, status, display_title, art_url, series, card_number,
-                    submitted_at, judged_at
+                    submitted_at, judged_at, revealed_at
              FROM tokens
              WHERE submitted_at > ? OR (judged_at IS NOT NULL AND judged_at > ?)
              ORDER BY COALESCE(judged_at, submitted_at) ASC

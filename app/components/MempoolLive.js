@@ -155,28 +155,40 @@ export default function MempoolLive({ initialStats, initialRecent, initialPendin
           ) : (
             recent
               .filter(t => t.status === 'approved')
-              .map(t => (
-                <Link href={`/card/${t.token_name}`} key={t.token_name}
-                  style={{
-                    display:'block',
-                    border: `1px solid ${pulse === t.token_name ? 'var(--green-hot)' : 'var(--amber)'}`,
-                    padding:'8px', flexShrink:0, width:120,
-                    transition: 'border-color 0.4s',
-                  }}>
-                  <div style={{width:'100%', height:96, background:'var(--surface)',
-                    marginBottom:6, overflow:'hidden'}}>
-                    {t.art_url && (
-                      <img src={t.art_url} alt={t.display_title || t.token_name}
-                        style={{width:'100%', height:'100%', objectFit:'contain'}} />
-                    )}
-                  </div>
-                  <div style={{fontFamily:'var(--font-card)', fontSize:'8px', letterSpacing:'1px',
-                    color:'var(--text)', textAlign:'center', whiteSpace:'nowrap',
-                    overflow:'hidden', textOverflow:'ellipsis'}}>
-                    {t.display_title || t.token_name}
-                  </div>
-                </Link>
-              ))
+              .map(t => {
+                const isRevealed = !!t.revealed_at;
+                return (
+                  <Link href={`/card/${t.token_name}`} key={t.token_name}
+                    style={{
+                      display:'block',
+                      border: `1px solid ${pulse === t.token_name ? 'var(--green-hot)' : isRevealed ? 'var(--amber)' : 'var(--text-dim)'}`,
+                      padding:'8px', flexShrink:0, width:120,
+                      transition: 'border-color 0.4s',
+                    }}>
+                    <div style={{width:'100%', height:96, background:'var(--surface)',
+                      marginBottom:6, overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', position:'relative'}}>
+                      {isRevealed && t.art_url ? (
+                        <img src={t.art_url} alt={t.display_title || t.token_name}
+                          style={{width:'100%', height:'100%', objectFit:'contain'}} />
+                      ) : (
+                        /* Mystery pack — art not yet dropped */
+                        <div style={{width:'100%', height:'100%', display:'flex', flexDirection:'column',
+                          alignItems:'center', justifyContent:'center', gap:4,
+                          background:'repeating-linear-gradient(45deg,#1a1a1a 0px,#1a1a1a 4px,#111 4px,#111 8px)'}}>
+                          <span style={{fontSize:'28px', lineHeight:1}}>🐸</span>
+                          <span style={{fontFamily:'var(--font-card)', fontSize:'7px', letterSpacing:'2px',
+                            color:'var(--amber)', textAlign:'center'}}>MYSTERY PACK</span>
+                        </div>
+                      )}
+                    </div>
+                    <div style={{fontFamily:'var(--font-card)', fontSize:'8px', letterSpacing:'1px',
+                      color: isRevealed ? 'var(--text)' : 'var(--text-dim)', textAlign:'center', whiteSpace:'nowrap',
+                      overflow:'hidden', textOverflow:'ellipsis'}}>
+                      {isRevealed ? (t.display_title || t.token_name) : '???'}
+                    </div>
+                  </Link>
+                );
+              })
           )}
         </div>
       </section>

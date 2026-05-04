@@ -12,15 +12,16 @@ function getStats() {
     const approved = db.prepare("SELECT COUNT(*) as n FROM tokens WHERE status='approved'").get().n;
     const rejected = db.prepare("SELECT COUNT(*) as n FROM tokens WHERE status='rejected'").get().n;
     const recent   = db.prepare(
-      "SELECT * FROM tokens WHERE status IN ('approved','rejected') ORDER BY judged_at DESC LIMIT 20"
+      "SELECT token_name, display_title, status, art_url, art_mime, series, card_number, judged_at, revealed_at " +
+      "FROM tokens WHERE status IN ('approved','rejected') ORDER BY judged_at DESC LIMIT 20"
     ).all();
     const pending3 = db.prepare(
       "SELECT token_name FROM tokens WHERE status='pending' ORDER BY submitted_at DESC LIMIT 3"
     ).all();
-    // Featured artists — approved tokens with art, sorted by judge_score desc
+    // Featured artists — only revealed tokens (revealed_at IS NOT NULL)
     const artists = db.prepare(
-      "SELECT token_name, artist_handle, artist_address, art_url, art_mime, judge_score, series, card_number " +
-      "FROM tokens WHERE status='approved' AND art_url != '' ORDER BY judge_score DESC LIMIT 12"
+      "SELECT token_name, artist_handle, artist_address, art_url, art_mime, judge_score, series, card_number, revealed_at " +
+      "FROM tokens WHERE status='approved' AND art_url != '' AND revealed_at IS NOT NULL ORDER BY judge_score DESC LIMIT 12"
     ).all();
     // Spread all rows into plain objects — node:sqlite returns null-prototype objects
     // which Next.js rejects when passing from Server → Client components

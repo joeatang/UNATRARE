@@ -84,15 +84,14 @@ export async function GET(request, { params }) {
   }
 
   const json = buildMetadataResponse(token);
-  const isApproved = token?.status === 'approved';
+  const isRevealed = token?.status === 'approved' && token?.revealed_at != null;
 
   return Response.json(json, {
     status: 200,
     headers: {
       ...CORS,
-      // Approved art: 1hr CDN cache. R2/Cloudflare will serve this globally.
-      // Pending/rejected: no cache — status changes frequently during review.
-      'Cache-Control': isApproved
+      // Art revealed publicly: 1hr CDN cache. Pending/unrevealed: no-store.
+      'Cache-Control': isRevealed
         ? 'public, max-age=3600, s-maxage=3600'
         : 'no-store',
       'Content-Type': 'application/json',

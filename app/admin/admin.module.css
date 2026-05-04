@@ -450,3 +450,13 @@
   color: #fff;
   opacity: 1;
 }
+.dropBtn {
+  color: #00ff87;
+  border-color: #00ff87;
+  font-weight: 700;
+}
+.dropBtn:hover:not(:disabled) {
+  background: #00ff87;
+  border-color: #00ff87;
+  color: #000;
+}

@@ -53,11 +53,12 @@ function LoginGate({ onAuth }) {
 
 // ── Single token row in review queue ──────────────────────────
 function TokenRow({ token, authToken, onAction }) {
-  const [loading, setLoading] = useState(null); // 'approve' | 'reject' | 'judge' | 'genesis' | 'purge' | null
+  const [loading, setLoading] = useState(null); // 'approve' | 'reject' | 'judge' | 'genesis' | 'purge' | 'reveal' | null
   const [note, setNote] = useState('');
   const [expanded, setExpanded] = useState(false);
   const [approvalResult, setApprovalResult] = useState(null); // set after approve/genesis
   const [msgCopied, setMsgCopied] = useState(false);
+  const [revealed, setRevealed] = useState(!!token.revealed_at); // tracks drop state
 
   async function act(action) {
     setLoading(action);
@@ -74,6 +75,8 @@ function TokenRow({ token, authToken, onAction }) {
     if (json.ok) {
       if (action === 'approve' || action === 'genesis') {
         setApprovalResult(json); // show branded message before dismissing
+      } else if (action === 'reveal') {
+        setRevealed(true); // update in place — token stays in Certified tab
       } else {
         onAction(token.token_name, action);
       }
@@ -250,6 +253,29 @@ function TokenRow({ token, authToken, onAction }) {
               >
                 {loading === 'genesis' ? 'certifying...' : '★ genesis'}
               </button>
+              {/* DROP button — only show for approved tokens not yet revealed */}
+              {token.status === 'approved' && (
+                revealed ? (
+                  <span
+                    className={styles.actionBtn}
+                    style={{ background: '#00ff87', color: '#000', fontWeight: 700, cursor: 'default', opacity: 1 }}
+                    title="Art is live publicly"
+                  >
+                    ● LIVE
+                  </span>
+                ) : (
+                  <button
+                    className={`${styles.actionBtn} ${styles.dropBtn}`}
+                    onClick={() => {
+                      if (confirm(`Drop art for ${token.token_name} publicly? This will reveal the art on the homepage and to wallets.`)) act('reveal');
+                    }}
+                    disabled={!!loading}
+                    title="Release art publicly — homepage + wallets can now see it"
+                  >
+                    {loading === 'reveal' ? 'dropping...' : '⬡ drop art'}
+                  </button>
+                )
+              )}
               <button
                 className={`${styles.actionBtn} ${styles.purgeBtn}`}
                 onClick={() => {

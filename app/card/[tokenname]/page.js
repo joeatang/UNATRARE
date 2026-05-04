@@ -95,11 +95,22 @@ export default function CardPage({ params }) {
                 <span className={styles.cardHeaderText}>#{String(token.card_number).padStart(3,'0')}</span>
               </div>
               <div className={styles.cardArt}>
-                {token.art_url ? (
+                {token.revealed_at && token.art_url ? (
                   <img
                     src={token.art_url}
                     alt={token.display_title || token.token_name}
                   />
+                ) : !token.revealed_at ? (
+                  /* Mystery pack — art not yet dropped */
+                  <div className={styles.artPlaceholder} style={{
+                    display:'flex', flexDirection:'column', alignItems:'center',
+                    justifyContent:'center', gap:8,
+                    background:'repeating-linear-gradient(45deg,#1a1a1a 0px,#1a1a1a 4px,#111 4px,#111 8px)'
+                  }}>
+                    <span style={{fontSize:'48px', lineHeight:1}}>🐸</span>
+                    <span style={{fontFamily:'var(--font-card)', fontSize:'10px', letterSpacing:'3px', color:'var(--amber)', textAlign:'center'}}>MYSTERY PACK</span>
+                    <span style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px', color:'var(--text-dim)', textAlign:'center'}}>drop pending</span>
+                  </div>
                 ) : (
                   <div className={styles.artPlaceholder} />
                 )}
