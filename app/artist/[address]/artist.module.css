@@ -20,6 +20,14 @@
   text-transform: uppercase;
 }
 
+.handle {
+  font-family: var(--font-card);
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: var(--amber);
+  margin-bottom: 8px;
+}
+
 .address {
   font-family: var(--font-card);
   font-size: 20px;
