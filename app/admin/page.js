@@ -59,6 +59,8 @@ function TokenRow({ token, authToken, onAction }) {
   const [approvalResult, setApprovalResult] = useState(null); // set after approve/genesis
   const [msgCopied, setMsgCopied] = useState(false);
   const [revealed, setRevealed] = useState(!!token.revealed_at); // tracks drop state
+  const [announceText, setAnnounceText] = useState(null); // set after drop art
+  const [announceCopied, setAnnounceCopied] = useState(false);
 
   async function act(action) {
     setLoading(action);
@@ -76,7 +78,23 @@ function TokenRow({ token, authToken, onAction }) {
       if (action === 'approve' || action === 'genesis') {
         setApprovalResult(json); // show branded message before dismissing
       } else if (action === 'reveal') {
-        setRevealed(true); // update in place — token stays in Certified tab
+        setRevealed(true);
+        const cardUrl = `https://unatrare.wtf/card/${token.token_name}`;
+        const title = token.display_title && token.display_title !== token.token_name
+          ? `${token.display_title} (${token.token_name})`
+          : token.token_name;
+        const byLine = token.artist_handle ? ` by @${token.artist_handle}` : '';
+        const cardLine = token.series && token.card_number
+          ? `Series ${token.series} · Card #${String(token.card_number).padStart(3,'0')}`
+          : '';
+        const tweet = [
+          `🐸 NEW DROP: ${title}${byLine}`,
+          cardLine,
+          `Certified Dank on UNATRARE`,
+          cardUrl,
+          `#Counterparty #UNATPEPE #RarePepe`,
+        ].filter(Boolean).join('\n');
+        setAnnounceText(tweet);
       } else {
         onAction(token.token_name, action);
       }
@@ -359,6 +377,58 @@ function TokenRow({ token, authToken, onAction }) {
           </div>
         );
       })()}
+
+      {/* Drop announcement — shown after ⬡ drop art */}
+      {announceText && (
+        <div style={{
+          margin:'0', padding:'16px', background:'rgba(0,136,255,0.04)',
+          borderTop:'1px solid var(--amber)', borderBottom:'1px solid var(--amber)',
+        }}>
+          <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'3px',
+            color:'var(--amber)', marginBottom:10}}>
+            ⬡ DROP LIVE — COPY THIS TWEET
+          </div>
+          <pre style={{
+            fontFamily:'var(--font-card)', fontSize:'11px', letterSpacing:'1px',
+            color:'var(--text)', whiteSpace:'pre-wrap', wordBreak:'break-word',
+            lineHeight:1.9, marginBottom:12, background:'var(--bg)',
+            padding:'12px', border:'1px solid var(--border)',
+          }}>
+            {announceText}
+          </pre>
+          <div style={{display:'flex', gap:8}}>
+            <button
+              onClick={async () => {
+                try { await navigator.clipboard.writeText(announceText); } catch {}
+                setAnnounceCopied(true);
+                setTimeout(() => setAnnounceCopied(false), 2000);
+              }}
+              style={{fontFamily:'var(--font-card)', fontSize:'10px', letterSpacing:'2px',
+                padding:'8px 16px', border:'1px solid var(--amber)',
+                background: announceCopied ? 'var(--amber)' : 'transparent',
+                color: announceCopied ? 'var(--bg)' : 'var(--amber)', cursor:'pointer'}}>
+              {announceCopied ? 'copied!' : '⎘ copy tweet'}
+            </button>
+            <a
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(announceText)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{fontFamily:'var(--font-card)', fontSize:'10px', letterSpacing:'2px',
+                padding:'8px 16px', border:'1px solid var(--border)',
+                background:'transparent', color:'var(--text-dim)',
+                textDecoration:'none', display:'flex', alignItems:'center'}}>
+              post on X →
+            </a>
+            <button
+              onClick={() => setAnnounceText(null)}
+              style={{fontFamily:'var(--font-card)', fontSize:'10px', letterSpacing:'2px',
+                padding:'8px 16px', border:'1px solid var(--border)',
+                background:'transparent', color:'var(--text-dim)', cursor:'pointer'}}>
+              dismiss
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
