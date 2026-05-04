@@ -41,16 +41,17 @@
 /* Stats bar */
 .stats {
   display: flex;
-  gap: 48px;
-  margin-top: 32px;
-  padding-top: 24px;
+  gap: 64px;
+  margin-top: 48px;
+  padding-top: 32px;
   border-top: 1px solid var(--border-dim);
 }
 
 .stat {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  gap: 6px;
 }
 
 .statValue {
@@ -66,6 +67,7 @@
   letter-spacing: 3px;
   color: var(--text-dim);
   text-transform: uppercase;
+  text-align: center;
 }
 
 .statValue.green { color: var(--green); }
@@ -76,7 +78,7 @@
 .mempoolSection {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 40px 32px;
+  padding: 56px 32px;
   border-bottom: 1px solid var(--border-dim);
 }
 
@@ -102,9 +104,9 @@
 /* Pending card stubs in mempool */
 .pendingRow {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   align-items: flex-end;
-  min-height: 180px;
+  min-height: 200px;
 }
 
 .pendingCard {
@@ -178,7 +180,7 @@
 .certifiedSection {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 40px 32px;
+  padding: 56px 32px;
   border-bottom: 1px solid var(--border-dim);
 }
 

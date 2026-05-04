@@ -94,24 +94,52 @@ export default function MempoolLive({ initialStats, initialRecent, initialPendin
       <section className={styles.mempoolSection}>
         <div className={styles.sectionLabel}>· under review ·</div>
         <div className={styles.pendingRow}>
-          {pending3.length === 0 ? (
-            <span className={styles.emptyMempool}>no submissions pending · be the first →</span>
-          ) : (
-            pending3.map((t) => (
-              <div key={t.token_name} className={styles.pendingCard}>
-                <div style={{
-                  display:'flex', flexDirection:'column', alignItems:'center',
-                  justifyContent:'center', height:'100%', gap:6,
+          {/* Always show 3 mystery card slots — filled if pending, ghost if empty */}
+          {[0, 1, 2].map((i) => {
+            const t = pending3[i];
+            return (
+              <div key={t ? t.token_name : `ghost-${i}`} className={styles.pendingCard}
+                style={{ opacity: t ? 1 : 0.28 }}>
+                {/* Art area — blurred hatch pattern */}
+                <div className={styles.pendingArt} style={{
+                  display:'flex', flexDirection:'column',
+                  alignItems:'center', justifyContent:'center', gap:4,
                 }}>
-                  <div style={{fontSize:28, opacity:0.2}}>?</div>
-                  <div style={{fontFamily:'var(--font-card)', fontSize:'7px',
-                    letterSpacing:'2px', color:'var(--text-dim)', textAlign:'center'}}>
-                    UNDER<br/>REVIEW
+                  {/* Mystery pack icon */}
+                  <div style={{
+                    width:52, height:52, border:'1px solid rgba(139,115,85,0.4)',
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    background:'rgba(0,0,0,0.4)',
+                  }}>
+                    <span style={{
+                      fontFamily:'var(--font-display)', fontSize:26,
+                      color:'rgba(139,115,85,0.5)', lineHeight:1,
+                    }}>?</span>
+                  </div>
+                  <div style={{
+                    fontFamily:'var(--font-card)', fontSize:'6px',
+                    letterSpacing:'2px', color:'rgba(139,115,85,0.4)',
+                    textAlign:'center', textTransform:'uppercase',
+                  }}>
+                    {t ? 'COUNCIL\nJUDGING' : 'AWAITING\nSUBMISSION'}
                   </div>
                 </div>
-                <div className={styles.pendingLabel}>PENDING</div>
+                {/* Card footer */}
+                <div className={styles.pendingLabel} style={{ opacity: t ? 1 : 0.5 }}>
+                  {t ? 'PENDING' : '· · ·'}
+                </div>
               </div>
-            ))
+            );
+          })}
+          {pending3.length === 0 && (
+            <div style={{
+              display:'flex', alignItems:'center',
+              fontFamily:'var(--font-card)', fontSize:'10px',
+              letterSpacing:'3px', color:'var(--text-dim)',
+              paddingLeft:8, paddingBottom:24,
+            }}>
+              be the first →
+            </div>
           )}
         </div>
       </section>
