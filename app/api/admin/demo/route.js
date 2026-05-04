@@ -68,10 +68,10 @@ export async function POST(request) {
       )
     `).run(name, name, handle, desc, artUrl, mime);
 
-    // Run judge pipeline so it gets real AI scores
+    // Run judge pipeline with force=true (token already approved, scores only)
     let judgeResult = null;
     try {
-      judgeResult = await judgeToken(name);
+      judgeResult = await judgeToken(name, { force: true });
     } catch (err) {
       // Judge failure is non-fatal for demo cards
       judgeResult = { error: err.message };

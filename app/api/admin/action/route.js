@@ -20,7 +20,7 @@ export async function POST(request) {
   }
 
   const name = tokenName.toUpperCase().trim();
-  const actions = ['approve', 'reject', 'judge', 'genesis', 'purge', 'reveal'];
+  const actions = ['approve', 'reject', 'judge', 'rejudge', 'genesis', 'purge', 'reveal'];
   if (!actions.includes(action)) {
     return NextResponse.json({ error: 'invalid action' }, { status: 400 });
   }
@@ -35,6 +35,12 @@ export async function POST(request) {
     if (action === 'judge') {
       // Trigger AI judge pipeline
       const result = await judgeToken(name);
+      return NextResponse.json({ ok: true, result });
+    }
+
+    if (action === 'rejudge') {
+      // Force re-score without changing status/series/card_number (used for demos + corrections)
+      const result = await judgeToken(name, { force: true });
       return NextResponse.json({ ok: true, result });
     }
 

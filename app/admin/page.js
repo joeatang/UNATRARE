@@ -504,6 +504,17 @@ function DemoPanel({ authToken }) {
     }
   }
 
+  async function handleRejudge(tokenName) {
+    const res = await fetch('/api/admin/action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ tokenName, action: 'rejudge' }),
+    });
+    const json = await res.json();
+    if (json.ok) fetchDemos();
+    return json;
+  }
+
   async function handleDelete(tokenName) {
     if (!confirm(`Delete demo card ${tokenName}?`)) return;
     const res = await fetch('/api/admin/demo', {
@@ -631,7 +642,7 @@ function DemoPanel({ authToken }) {
                   <div style={{ flex: 1 }}>
                     <div style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--amber)' }}>{d.token_name}</div>
                     <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)' }}>
-                      score: {d.judge_score ?? '—'} · {d.artist_handle || 'no handle'}
+                    score: {d.judge_score != null ? d.judge_score.toFixed(1) : <span style={{color:'var(--red)'}}>not judged</span>} · {d.artist_handle || 'no handle'}
                     </div>
                   </div>
                   <a
@@ -642,6 +653,19 @@ function DemoPanel({ authToken }) {
                   >
                     view →
                   </a>
+                  <button
+                    onClick={async () => {
+                      const json = await handleRejudge(d.token_name);
+                      if (!json.ok) alert(json.error || 'rejudge failed');
+                    }}
+                    style={{
+                      padding: '4px 10px', border: '1px solid var(--amber)', background: 'transparent',
+                      color: 'var(--amber)', fontFamily: 'var(--font-card)', fontSize: '9px',
+                      letterSpacing: '2px', cursor: 'pointer',
+                    }}
+                  >
+                    re-judge
+                  </button>
                   <button
                     onClick={() => handleDelete(d.token_name)}
                     style={{

@@ -92,7 +92,8 @@ export default async function CardPage({ params }) {
   // Prefer permanent hash-based art URL
   const artDisplayUrl = token.art_hash
     ? `https://unatrare.wtf/art/${token.art_hash}`
-    : token.art_url?.startsWith('http') ? token.art_url : token.art_url ? `https://unatrare.wtf${token.art_url}` : null;
+    : token.art_url?.startsWith('http') ? token.art_url
+    : token.art_url ? `https://unatrare.wtf${token.art_url}` : null;
 
   return (
     <>

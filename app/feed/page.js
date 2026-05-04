@@ -33,7 +33,7 @@ function getFeedTokens() {
   try {
     const db = getDb();
     const rows = db.prepare(`
-      SELECT token_name, display_title, status, artist_handle, art_hash, art_mime,
+      SELECT token_name, display_title, status, artist_handle, art_hash, art_url, art_mime,
              judge_score, judge_notes, judged_at, revealed_at, series, card_number,
              rejection_reason, is_demo
       FROM tokens
@@ -110,7 +110,7 @@ export default function FeedPage() {
             const isDemo = !!token.is_demo;
             const artUrl = token.art_hash
               ? `https://unatrare.wtf/art/${token.art_hash}`
-              : null;
+              : (token.art_url || null);
 
             return (
               <article key={token.token_name} className={`${styles.verdict}${isDemo ? ` ${styles.verdictDemo}` : ''}`}>
