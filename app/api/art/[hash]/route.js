@@ -2,20 +2,24 @@
  * /art/[hash] — Permanent HTTPS gateway for approved UNATRARE art
  *
  * Counterparty tokens point to: https://unatrare.wtf/art/{sha256-hash}
- * This route resolves the hash via SQLite and serves the file from
- * public/uploads/. Long Cache-Control since the hash is immutable.
+ * This route resolves the hash via SQLite and serves the file from:
+ *   1. Local disk (public/uploads/) — fast path
+ *   2. Hyperdrive P2P network via SC-Bridge — fallback if file not on disk
  *
- * Falls back to 404 if art was never approved / file is missing.
+ * Long Cache-Control since the hash is immutable content-addressing.
  */
 
 import { NextResponse } from 'next/server';
 import { getDb } from '../../../../lib/db.js';
+import { getArt } from '../../../../lib/tracBridge.js';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOAD_DIR = path.resolve(__dirname, '..', '..', '..', '..', 'public', 'uploads');
+
+const CACHE = 'public, max-age=31536000, immutable';
 
 export async function GET(_request, { params }) {
   const { hash } = await params;
@@ -33,24 +37,40 @@ export async function GET(_request, { params }) {
     return new NextResponse('Server error', { status: 500 });
   }
 
-  if (!token?.art_url) {
-    return new NextResponse('Not found', { status: 404 });
+  // ── Fast path: local disk ──────────────────────────────────────────────
+  if (token?.art_url) {
+    const filename = token.art_url.replace(/^\/uploads\//, '');
+    const filePath = path.join(UPLOAD_DIR, filename);
+    try {
+      const buf = await readFile(filePath);
+      return new NextResponse(buf, {
+        status: 200,
+        headers: {
+          'Content-Type': token.art_mime || 'application/octet-stream',
+          'Cache-Control': CACHE,
+        },
+      });
+    } catch {
+      // File missing from disk — fall through to Hyperdrive
+    }
   }
 
-  const filename = token.art_url.replace(/^\/uploads\//, '');
-  const filePath = path.join(UPLOAD_DIR, filename);
-
+  // ── Hyperdrive fallback: P2P network ───────────────────────────────────
   try {
-    const buf = await readFile(filePath);
-    return new NextResponse(buf, {
-      status: 200,
-      headers: {
-        'Content-Type': token.art_mime || 'application/octet-stream',
-        // Immutable — hash guarantees content never changes
-        'Cache-Control': 'public, max-age=31536000, immutable',
-      },
-    });
+    const result = await getArt(hash);
+    if (result?.data) {
+      return new NextResponse(result.data, {
+        status: 200,
+        headers: {
+          'Content-Type': result.mime,
+          'Cache-Control': CACHE,
+          'X-Source': 'hyperdrive',
+        },
+      });
+    }
   } catch {
-    return new NextResponse('Not found', { status: 404 });
+    // Hyperdrive unavailable — peer not running
   }
+
+  return new NextResponse('Not found', { status: 404 });
 }

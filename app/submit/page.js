@@ -276,7 +276,7 @@ function Step2({ data, onNext, onBack }) {
         return;
       }
       if (json.ok) {
-        onNext({ ...data, artUrl: json.url, artMime: file.type });
+        onNext({ ...data, artUrl: json.url, artMime: file.type, artHash: json.hash || '' });
       } else {
         setErrMsg(json.error || 'Upload failed');
         setUploading(false);
@@ -566,6 +566,7 @@ function Step5({ data }) {
             cpVersion:      data.cpVersion || 1,
             artUrl:         data.artUrl,
             artMime:        data.artMime,
+            artHash:        data.artHash || '',
             signature:      data.signature,
             artistHandle:   data.artistHandle   || '',
             description:    data.description    || '',

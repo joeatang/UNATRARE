@@ -18,6 +18,7 @@ export async function POST(request) {
     cpVersion,
     artUrl,
     artMime,
+    artHash,
     signature,
     txid,
     currency,
@@ -100,9 +101,9 @@ export async function POST(request) {
     db.prepare(`
       INSERT INTO tokens
         (token_name, display_title, artist_address, artist_handle,
-         description, status, art_url, art_mime,
+         description, status, art_url, art_mime, art_hash,
          supply, cp_version, ord_inscription, submitted_at)
-      VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, unixepoch())
+      VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, unixepoch())
     `).run(
       normalized,
       normalized,
@@ -111,6 +112,7 @@ export async function POST(request) {
       description.trim().slice(0, 2000),
       artUrl,
       artMime || 'image/png',
+      artHash && /^[0-9a-f]{64}$/i.test(artHash) ? artHash : '',
       Number(supply) || 0,
       cpVersion === 2 ? 2 : 1,
       safeInscription,

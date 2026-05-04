@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { validateTokenName } from '../../../lib/tokenValidator';
 import { writeFile, mkdir } from 'fs/promises';
+import { createHash } from 'node:crypto';
 import path from 'path';
+import { storeArt } from '../../../lib/tracBridge.js';
 
 // Uploads are stored in /public/uploads/ — served by Next.js as /uploads/FILENAME
 // This directory persists on the server across restarts.
@@ -52,16 +54,21 @@ export async function POST(request) {
     }, { status: 422 });
   }
 
+  const buf      = Buffer.from(bytes);
+  const hash     = createHash('sha256').update(buf).digest('hex');
   const ext      = file.type.split('/')[1].replace('jpeg', 'jpg');
   const filename = `${normalized}.${ext}`;
 
   try {
     await mkdir(UPLOAD_DIR, { recursive: true });
-    await writeFile(path.join(UPLOAD_DIR, filename), Buffer.from(bytes));
+    await writeFile(path.join(UPLOAD_DIR, filename), buf);
+
+    // Fire-and-forget: also store in Hyperdrive for P2P redundancy
+    storeArt(hash, buf.toString('base64'), file.type).catch(() => {});
 
     // Public URL — served by Next.js static file serving
     const url = `/uploads/${filename}`;
-    return NextResponse.json({ ok: true, url, filename });
+    return NextResponse.json({ ok: true, url, filename, hash });
   } catch (err) {
     console.error('Upload error:', err);
     return NextResponse.json({ ok: false, error: 'Storage error — please try again' }, { status: 500 });
