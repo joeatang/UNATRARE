@@ -68,3 +68,10 @@
   letter-spacing: 1px;
   flex: 1;
 }
+
+/* ─── Mobile ≤600px ─────────────────────────────────────── */
+@media (max-width: 600px) {
+  .confirmRow { flex-direction: column; gap: 4px; }
+  .confirmKey { min-width: unset; }
+  .confirmVal { font-size: 11px; word-break: break-all; }
+}

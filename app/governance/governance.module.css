@@ -379,3 +379,22 @@
   color: var(--text-dim);
   line-height: 1.9;
 }
+
+/* ─── Mobile ≤600px ──────────────────────────────────────── */
+@media (max-width: 600px) {
+  .page { padding-top: 48px; }
+  .header { padding: 32px 16px 28px; }
+  .title { font-size: 38px; letter-spacing: 3px; }
+  .section { padding: 28px 16px; }
+  .proposalHeader { padding: 14px 16px; }
+  .proposalTitle { font-size: 14px; }
+  .voteForm { padding: 16px; }
+  .voteOptions { flex-direction: column; gap: 8px; }
+  .voteBtn { width: 100%; text-align: center; }
+  .emptyTitle { font-size: 24px; }
+  .loading, .error, .empty { padding: 0 16px; }
+}
+
+@media (max-width: 380px) {
+  .title { font-size: 28px; letter-spacing: 2px; }
+}

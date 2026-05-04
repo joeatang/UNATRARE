@@ -167,3 +167,16 @@
   border-color: var(--amber-hot);
   color: var(--bg);
 }
+
+/* ─── Mobile ≤600px ─────────────────────────────────────── */
+@media (max-width: 600px) {
+  .main { padding: 60px 16px 60px; }
+  .title { font-size: 40px; letter-spacing: 4px; }
+  .header { margin-bottom: 36px; padding-bottom: 28px; }
+  .cta { flex-direction: column; gap: 10px; }
+  .ctaBtn { text-align: center; }
+}
+
+@media (max-width: 380px) {
+  .title { font-size: 30px; letter-spacing: 2px; }
+}
