@@ -147,8 +147,8 @@ function Step0({ onNext }) {
           {/* Supply commitment panel */}
           <div className={styles.urlBox} style={{marginBottom:16, borderColor:'var(--amber)'}}>
             <div className={styles.urlBoxLabel}>supply commitment (path a — default)</div>
-            <div style={{display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, margin:'12px 0'}}>
-              {[{n:HOLDER_COUNT, label:'to holders'},{n:calcSplit(MIN_SUPPLY).artist,label:'to you'},{n:calcSplit(MIN_SUPPLY).treasury,label:'to treasury'},{n:calcSplit(MIN_SUPPLY).burned,label:'burned'}].map(({n,label}) => (
+            <div style={{display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, margin:'12px 0'}}>
+              {[{n:HOLDER_COUNT, label:'to holders'},{n:calcSplit(MIN_SUPPLY).artist,label:'to you'},{n:calcSplit(MIN_SUPPLY).treasury,label:'to treasury'}].map(({n,label}) => (
                 <div key={label} style={{textAlign:'center'}}>
                   <div style={{fontFamily:'var(--font-display)',fontSize:22,letterSpacing:2,color:'var(--amber-hot)'}}>{n}</div>
                   <div style={{fontFamily:'var(--font-card)',fontSize:'9px',letterSpacing:2,color:'var(--text-dim)',textTransform:'uppercase'}}>{label}</div>
@@ -270,7 +270,7 @@ function Step1({ data, onNext, onBack }) {
             )}
             {!belowMin && (
               <div style={{marginBottom:16}}>
-                {[{n:HOLDER_COUNT,label:'to holders'},{n:calcSplit(result.supply).artist,label:'to you'},{n:calcSplit(result.supply).treasury,label:'to treasury'},{n:calcSplit(result.supply).burned,label:'burned'}].map(({n,label}) => (
+                {[{n:HOLDER_COUNT,label:'to holders'},{n:calcSplit(result.supply).artist,label:'to you'},{n:calcSplit(result.supply).treasury,label:'to treasury'}].map(({n,label}) => (
                   <span key={label} style={{fontFamily:'var(--font-card)',fontSize:'10px',letterSpacing:2,
                     color:'var(--amber)',marginRight:20,whiteSpace:'nowrap'}}>{n} {label}</span>
                 ))}

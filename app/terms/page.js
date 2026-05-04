@@ -99,8 +99,8 @@ export default function TermsPage() {
             </div>
             <div className={styles.splitRow}>
               <div className={styles.splitPct} style={{color:'var(--text-dim)'}}>11%</div>
-              <div className={styles.splitWho}>Burned</div>
-              <div className={styles.splitNote}>sent to an unspendable address, permanently</div>
+              <div className={styles.splitWho}>Claim Window Reserve</div>
+              <div className={styles.splitNote}>held in reserve until claim window closes</div>
             </div>
           </div>
 
@@ -110,15 +110,20 @@ export default function TermsPage() {
               <span>420 to holders</span>
               <span>~13 to you</span>
               <span>~13 to treasury</span>
-              <span>~54 burned</span>
+              <span>~54 in reserve</span>
             </div>
           </div>
 
           <div className={styles.prose}>
             <p>
-              Holder distribution happens after certification. UNATRARE dispatches tokens
-              to registered holder addresses. Holders have <strong>30 days</strong> to claim.
-              Unclaimed tokens: 50% go to treasury, 50% are burned.
+              Holder distribution happens after certification. UNATRARE opens a
+              <strong> 30-day claim window</strong> during which registered holders
+              can collect their token.
+            </p>
+            <p>
+              After the window closes: unclaimed tokens from the 11% reserve are announced
+              publicly, then split — 50% to treasury, 50% burned to an unspendable address.
+              The burn is announced when the window opens, not before.
             </p>
           </div>
         </section>
