@@ -170,7 +170,7 @@ function TokenRow({ token, authToken, onAction }) {
             )}
             {token.rejection_reason && (
               <div className={styles.detailRow}>
-                <span className={styles.detailKey}>AI Reason</span>
+                <span className={styles.detailKey}>Pepai Reason</span>
                 <span className={styles.detailVal}>{token.rejection_reason}</span>
               </div>
             )}
@@ -246,7 +246,7 @@ function TokenRow({ token, authToken, onAction }) {
                 className={`${styles.actionBtn} ${styles.genesisBtn}`}
                 onClick={() => act('genesis')}
                 disabled={!!loading}
-                title="Certify as SERIES 0 — founding collection, no AI judge"
+                title="Certify as SERIES 0 — founding collection, no pepai judgment"
               >
                 {loading === 'genesis' ? 'certifying...' : '★ genesis'}
               </button>
@@ -275,7 +275,7 @@ function TokenRow({ token, authToken, onAction }) {
           '✦  UNATRARE — CERTIFIED DANK  ✦',
           '',
           `${token.token_name} has been evaluated by the`,
-          'UNATRARE scientist panel and certified DANK.',
+          'UNATRARE pepai scientist panel and certified DANK.',
           '',
           'Your art has earned a place in the directory.',
           '',

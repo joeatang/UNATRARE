@@ -14,6 +14,12 @@ export const metadata = {
   twitter: { card: 'summary_large_image' },
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">

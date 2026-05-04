@@ -65,3 +65,16 @@
 }
 
 .nav-submit:hover { background: var(--amber-hot); color: var(--bg); }
+
+/* ─── Responsive nav ─────────────────────────────────────── */
+@media (max-width: 700px) {
+  .nav { padding: 0 16px; }
+  .nav-logo { font-size: 20px; letter-spacing: 2px; }
+  /* Collapse middle links on small screens */
+  .nav-links { display: none; }
+  .nav-submit { padding: 6px 12px; font-size: 9px; }
+}
+
+@media (max-width: 480px) {
+  .nav-logo { font-size: 17px; letter-spacing: 1px; }
+}

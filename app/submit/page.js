@@ -678,7 +678,10 @@ export default function SubmitPage() {
     <>
       <Nav />
       <main className={styles.page} style={{paddingTop:80}}>
-
+        {/* Pepe Wizard header */}
+        <div style={{textAlign:'center', paddingTop:16, paddingBottom:4}}>
+          <div style={{fontFamily:'var(--font-display)', fontSize:22, letterSpacing:6, color:'var(--amber)'}}>PEPE WIZARD</div>
+        </div>
         {/* Progress bar */}
         <nav className={styles.progress} aria-label="submission steps">
           {STEPS.map((s, i) => (

@@ -283,3 +283,106 @@
   background: var(--amber-hot);
   color: var(--bg);
 }
+
+/* ─── Featured Artists ───────────────────────────────────── */
+.artistsSection {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 48px 32px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.artistSubhead {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin-bottom: 32px;
+}
+
+.artistRow {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  /* Fade edges on overflow */
+  mask-image: linear-gradient(to right, transparent 0%, black 2%, black 94%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 2%, black 94%, transparent 100%);
+}
+
+.artistRow::-webkit-scrollbar { height: 2px; }
+.artistRow::-webkit-scrollbar-track { background: var(--border-dim); }
+.artistRow::-webkit-scrollbar-thumb { background: var(--amber); }
+
+/* ─── Responsive ─────────────────────────────────────────── */
+
+/* Tablet — ≤900px */
+@media (max-width: 900px) {
+  .heroTitle { font-size: 40px; letter-spacing: 3px; }
+
+  .hero,
+  .mempoolSection,
+  .certifiedSection,
+  .activitySection,
+  .artistsSection,
+  .ctaStrip {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .stats { gap: 28px; }
+  .statValue { font-size: 32px; }
+
+  .ctaTitle { font-size: 32px; }
+}
+
+/* Mobile — ≤600px */
+@media (max-width: 600px) {
+  .heroTitle { font-size: 28px; letter-spacing: 2px; }
+  .heroSub   { font-size: 9px;  letter-spacing: 2px; }
+
+  .hero,
+  .mempoolSection,
+  .certifiedSection,
+  .activitySection,
+  .artistsSection,
+  .ctaStrip {
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 28px;
+    padding-bottom: 28px;
+  }
+
+  .stats { gap: 20px; flex-wrap: wrap; }
+  .statValue { font-size: 28px; }
+
+  .ctaTitle  { font-size: 22px; letter-spacing: 2px; }
+  .ctaSub    { font-size: 11px; }
+  .ctaButton { padding: 12px 24px; font-size: 10px; }
+
+  .activityToken { min-width: 90px; font-size: 10px; }
+  .activityItem  { font-size: 10px; gap: 10px; }
+}
+
+/* Tiny mobile — ≤380px (iPhone SE) */
+@media (max-width: 380px) {
+  .heroTitle { font-size: 22px; }
+  .ctaTitle  { font-size: 18px; }
+}
+
+/* Wide / TV — ≥1600px */
+@media (min-width: 1600px) {
+  .hero,
+  .mempoolSection,
+  .certifiedSection,
+  .activitySection,
+  .artistsSection,
+  .ctaStrip {
+    padding-left: 64px;
+    padding-right: 64px;
+  }
+
+  .heroTitle { font-size: 72px; letter-spacing: 6px; }
+  .ctaTitle  { font-size: 56px; }
+  .artistSubhead { font-size: 13px; }
+}

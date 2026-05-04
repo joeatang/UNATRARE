@@ -86,7 +86,7 @@ export default function RulesPage() {
             <div className={styles.sectionNum}>03</div>
             <div className={styles.sectionBody}>
               <h2 className={styles.sectionTitle}>THE JUDGING PANEL</h2>
-              <p className={styles.sectionNote}>Five AI scientist judges. Majority rules (3 of 5). All ties broken by PROF NAKA C.</p>
+              <p className={styles.sectionNote}>Five pepai scientists. Majority rules (3 of 5). All ties broken by PROF NAKA C.</p>
 
               <div className={styles.judgeList}>
                 {JUDGES.map(j => (
