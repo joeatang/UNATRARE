@@ -9,11 +9,41 @@ export const metadata = {
 
 // Judge list — kept in sync with judges.config.json
 const JUDGES = [
-  { id: 'PROF NAKA C',      role: 'The origin. Inspired by Series I Card #1 — the Nakamoto Card. Silent, ancient, breaks all ties.' },
-  { id: 'DR. M. CATALOGUS', role: 'Chief Archivist. Sole scientist of the first 1,000 directory cards in spirit. Uncompromising on quality.' },
-  { id: 'PROF. J. LOONEY',  role: 'Market mind. Built the rails, knows what moves. Judges cultural resonance and tradability.' },
-  { id: 'SHAWN-L',          role: 'Community anchor. Judges for spirit and community fit.' },
-  { id: 'DJ PEPAI',         role: 'Dankness calibration specialist. Wild card. If DJ PEPAI says no, it\'s no.' },
+  {
+    num: 'I',
+    id: 'PROF NAKA C',
+    title: 'The Origin · Tie-Breaker',
+    role: 'Inspired by Series I Card #1 — the Nakamoto Card, the beginning of everything. Silent, ancient authority. Evaluates with final, unambiguous judgment. Breaks all ties. His word ends the deliberation.',
+    accent: true,
+  },
+  {
+    num: 'II',
+    id: 'DR. M. CATALOGUS',
+    title: 'Chief Archivist',
+    role: 'The sole scientist who curated the first 1,000 Rare Pepe directory cards in spirit. Uncompromising on quality and intentionality. If a card does not belong, he will tell you precisely why — not harshly, but without softening the truth.',
+    accent: false,
+  },
+  {
+    num: 'III',
+    id: 'PROF. J. LOONEY',
+    title: 'Market Mind',
+    role: 'Built the rails that made Rare Pepes tradeable and collectible. Judges cultural resonance and tradability. Does this card have a reason to exist? Does it move?',
+    accent: false,
+  },
+  {
+    num: 'IV',
+    id: 'DANK SHAWN',
+    title: 'Community Anchor',
+    role: 'Community veteran who knows when something fits and when it is merely trying to fit. Judges for spirit — does this card feel like it belongs here, or is it just wearing the costume?',
+    accent: false,
+  },
+  {
+    num: 'V',
+    id: 'DJ PEPAI',
+    title: 'Dankness Calibration · Wild Card',
+    role: "Stole Yer Girl since block 434,102. Manager of talent. Knows what's fire before anyone else does. Grades hard on Spirit — the energy no amount of technique can fake. If DJ PEPAI says no, it's no.",
+    accent: true,
+  },
 ];
 
 export default function RulesPage() {
@@ -86,14 +116,16 @@ export default function RulesPage() {
           <section className={styles.section}>
             <div className={styles.sectionNum}>03</div>
             <div className={styles.sectionBody}>
-              <h2 className={styles.sectionTitle}>THE JUDGING PANEL</h2>
-              <p className={styles.sectionNote}>Five pepai scientists. Majority rules (3 of 5). All ties broken by PROF NAKA C.</p>
+              <h2 className={styles.sectionTitle}>THE PEPE COUNCIL</h2>
+              <p className={styles.sectionNote}>Five council members. Majority rules (3 of 5). All ties broken by PROF NAKA C.</p>
 
-              <div className={styles.judgeList}>
+              <div className={styles.councilGrid}>
                 {JUDGES.map(j => (
-                  <div key={j.id} className={styles.judgeRow}>
-                    <div className={styles.judgeName}>{j.id}</div>
-                    <div className={styles.judgeRole}>{j.role}</div>
+                  <div key={j.id} className={`${styles.councilCard} ${j.accent ? styles.councilCardAccent : ''}`}>
+                    <div className={styles.councilNum}>{j.num}</div>
+                    <div className={styles.councilName}>{j.id}</div>
+                    <div className={styles.councilTitle}>{j.title}</div>
+                    <div className={styles.councilBio}>{j.role}</div>
                   </div>
                 ))}
               </div>

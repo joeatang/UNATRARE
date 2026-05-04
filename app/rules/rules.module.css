@@ -142,7 +142,88 @@ tr .td:first-child {
   width: 240px;
 }
 
-/* ─── Judge list ─────────────────────────────────────────── */
+/* ─── Pepe Council grid ──────────────────────────────────── */
+.councilGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+/* Last card full-width if odd count (5 cards → card V spans both cols) */
+.councilCard:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+.councilCard {
+  border: 1px solid var(--border);
+  padding: 20px 20px 18px;
+  background: rgba(255,255,255,0.01);
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+}
+
+.councilCard:hover {
+  border-color: var(--border-dim);
+  background: rgba(139,115,85,0.03);
+}
+
+.councilCardAccent {
+  border-color: var(--amber);
+  border-opacity: 0.4;
+  background: rgba(139,115,85,0.04);
+}
+
+.councilCardAccent::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--amber);
+  opacity: 0.6;
+}
+
+.councilNum {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 2px;
+  color: var(--border);
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.councilCardAccent .councilNum {
+  color: var(--amber);
+  opacity: 0.7;
+}
+
+.councilName {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--text);
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.councilTitle {
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--amber);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  opacity: 0.75;
+}
+
+.councilBio {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.75;
+}
+
+/* ─── Judge list (legacy — keep for admin panel compat) ──── */
 .judgeList {
   display: flex;
   flex-direction: column;
@@ -175,6 +256,16 @@ tr .td:first-child {
   color: var(--text-dim);
   line-height: 1.6;
   align-self: center;
+}
+
+/* Responsive council grid */
+@media (max-width: 600px) {
+  .councilGrid {
+    grid-template-columns: 1fr;
+  }
+  .councilCard:last-child:nth-child(odd) {
+    grid-column: auto;
+  }
 }
 
 /* ─── Rubric ─────────────────────────────────────────────── */
