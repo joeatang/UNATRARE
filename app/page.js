@@ -22,7 +22,16 @@ function getStats() {
       "SELECT token_name, artist_handle, artist_address, art_url, art_mime, judge_score, series, card_number " +
       "FROM tokens WHERE status='approved' AND art_url != '' ORDER BY judge_score DESC LIMIT 12"
     ).all();
-    return { pending, approved, rejected, recent, pending3, artists };
+    // Spread all rows into plain objects — node:sqlite returns null-prototype objects
+    // which Next.js rejects when passing from Server → Client components
+    return {
+      pending,
+      approved,
+      rejected,
+      recent:   recent.map(r => ({ ...r })),
+      pending3: pending3.map(r => ({ ...r })),
+      artists:  artists.map(r => ({ ...r })),
+    };
   } catch {
     return { pending: 0, approved: 0, rejected: 0, recent: [], pending3: [], artists: [] };
   }

@@ -19,6 +19,7 @@ export default function Nav() {
           <li><Link href="/directory">Directory</Link></li>
           <li><Link href="/governance">Governance</Link></li>
           <li><Link href="/rules">Rules</Link></li>
+          <li><Link href="/status">My Status</Link></li>
           <li><Link href="/about">About</Link></li>
           <li><Link href="/register" className={styles['nav-register']}>✦ Register</Link></li>
         </ul>
@@ -48,6 +49,7 @@ export default function Nav() {
             <li><Link href="/directory">Directory</Link></li>
             <li><Link href="/governance">Governance</Link></li>
             <li><Link href="/rules">Rules</Link></li>
+            <li><Link href="/status">My Status</Link></li>
             <li><Link href="/about">About</Link></li>
             <li><Link href="/register" className={styles['nav-register']}>✦ Register</Link></li>
             <li><Link href="/submit" className={styles.drawerSubmit}>Open Pepe Wizard →</Link></li>

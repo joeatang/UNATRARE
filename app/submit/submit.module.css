@@ -262,6 +262,22 @@
   cursor: not-allowed;
 }
 
+.backBtn {
+  font-family: var(--font-card);
+  font-size: 12px;
+  letter-spacing: 4px;
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  padding: 14px 24px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: border-color 0.15s, color 0.15s;
+  margin-top: 8px;
+}
+.backBtn:hover { border-color: var(--text-dim); color: var(--text); }
+.backBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
 /* ─── Responsive ─────────────────────────────────────── */
 @media (max-width: 600px) {
   .page { padding-top: 56px; }

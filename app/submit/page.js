@@ -155,7 +155,7 @@ function Step0({ onNext }) {
 // ─────────────────────────────────────────────────────────────────
 //  Step 1 — Verify Token on Counterparty
 // ─────────────────────────────────────────────────────────────────
-function Step1({ data, onNext }) {
+function Step1({ data, onNext, onBack }) {
   const [status, setStatus] = useState('idle'); // idle | loading | ok | error
   const [result, setResult] = useState(null);
   const [errMsg, setErrMsg] = useState('');
@@ -189,9 +189,10 @@ function Step1({ data, onNext }) {
       </p>
 
       {status === 'idle' && (
-        <button className={styles.nextBtn} onClick={verify}>
-          verify {data.tokenName} →
-        </button>
+        <div style={{display:'flex', gap:12, flexWrap:'wrap'}}>
+          <button className={styles.backBtn} onClick={onBack}>← back</button>
+          <button className={styles.nextBtn} onClick={verify}>verify {data.tokenName} →</button>
+        </div>
       )}
 
       {status === 'loading' && (
@@ -220,9 +221,10 @@ function Step1({ data, onNext }) {
               Supply: {result.supply} · Owner: {result.owner?.slice(0,12)}…
             </div>
           </div>
-          <button className={styles.nextBtn} onClick={() => onNext({ ...data, owner: result.owner, supply: result.supply })}>
-            continue → upload art
-          </button>
+          <div style={{display:'flex', gap:12, flexWrap:'wrap'}}>
+            <button className={styles.backBtn} onClick={onBack}>← back</button>
+            <button className={styles.nextBtn} onClick={() => onNext({ ...data, owner: result.owner, supply: result.supply })}>continue → upload art</button>
+          </div>
         </>
       )}
     </div>
@@ -232,7 +234,7 @@ function Step1({ data, onNext }) {
 // ─────────────────────────────────────────────────────────────────
 //  Step 2 — Upload Art + Card Preview
 // ─────────────────────────────────────────────────────────────────
-function Step2({ data, onNext }) {
+function Step2({ data, onNext, onBack }) {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -308,11 +310,12 @@ function Step2({ data, onNext }) {
 
           {errMsg && <div className={styles.inputError}>{errMsg}</div>}
 
-          {file && !uploading && (
-            <button className={styles.nextBtn} onClick={handleUpload}>
-              upload + continue →
-            </button>
-          )}
+          <div style={{display:'flex', gap:12, flexWrap:'wrap', marginTop: file ? 0 : 8}}>
+            <button className={styles.backBtn} onClick={onBack}>← back</button>
+            {file && !uploading && (
+              <button className={styles.nextBtn} onClick={handleUpload}>upload + continue →</button>
+            )}
+          </div>
           {uploading && (
             <div style={{fontFamily:'var(--font-card)', fontSize:'12px', letterSpacing:'3px', color:'var(--amber)'}}>
               uploading...
@@ -368,7 +371,7 @@ function Step2({ data, onNext }) {
 // ─────────────────────────────────────────────────────────────────
 //  Step 3 — Artist Details (optional metadata)
 // ─────────────────────────────────────────────────────────────────
-function Step3({ data, onNext }) {
+function Step3({ data, onNext, onBack }) {
   const [handle, setHandle] = useState('');
   const [desc, setDesc] = useState('');
   const [inscription, setInscription] = useState('');
@@ -454,9 +457,10 @@ function Step3({ data, onNext }) {
         {errMsg && <div className={styles.inputError}>{errMsg}</div>}
       </div>
 
-      <button className={styles.nextBtn} onClick={handleContinue}>
-        continue → prove ownership
-      </button>
+      <div style={{display:'flex', gap:12, flexWrap:'wrap'}}>
+        <button className={styles.backBtn} onClick={onBack}>← back</button>
+        <button className={styles.nextBtn} onClick={handleContinue}>continue → prove ownership</button>
+      </div>
     </div>
   );
 }
@@ -464,7 +468,7 @@ function Step3({ data, onNext }) {
 // ─────────────────────────────────────────────────────────────────
 //  Step 4 — Sign Message (prove ownership)
 // ─────────────────────────────────────────────────────────────────
-function Step4({ data, onNext }) {
+function Step4({ data, onNext, onBack }) {
   const [sig, setSig] = useState('');
   const [errMsg, setErrMsg] = useState('');
   const [verifying, setVerifying] = useState(false);
@@ -525,9 +529,10 @@ function Step4({ data, onNext }) {
         {errMsg && <div className={styles.inputError}>{errMsg}</div>}
       </div>
 
-      <button className={styles.nextBtn} disabled={verifying} onClick={handleVerify}>
-        {verifying ? 'verifying...' : 'verify signature →'}
-      </button>
+      <div style={{display:'flex', gap:12, flexWrap:'wrap'}}>
+        <button className={styles.backBtn} onClick={onBack} disabled={verifying}>← back</button>
+        <button className={styles.nextBtn} disabled={verifying} onClick={handleVerify}>{verifying ? 'verifying...' : 'verify signature →'}</button>
+      </div>
     </div>
   );
 }
@@ -674,6 +679,10 @@ export default function SubmitPage() {
     setCurrentStep(s => s + 1);
   }
 
+  function handleBack() {
+    setCurrentStep(s => Math.max(0, s - 1));
+  }
+
   return (
     <>
       <Nav />
@@ -705,10 +714,10 @@ export default function SubmitPage() {
 
         {/* Step components */}
         {currentStep === 0 && <Step0 onNext={handleNext} />}
-        {currentStep === 1 && <Step1 data={formData} onNext={handleNext} />}
-        {currentStep === 2 && <Step2 data={formData} onNext={handleNext} />}
-        {currentStep === 3 && <Step3 data={formData} onNext={handleNext} />}
-        {currentStep === 4 && <Step4 data={formData} onNext={handleNext} />}
+        {currentStep === 1 && <Step1 data={formData} onNext={handleNext} onBack={handleBack} />}
+        {currentStep === 2 && <Step2 data={formData} onNext={handleNext} onBack={handleBack} />}
+        {currentStep === 3 && <Step3 data={formData} onNext={handleNext} onBack={handleBack} />}
+        {currentStep === 4 && <Step4 data={formData} onNext={handleNext} onBack={handleBack} />}
         {currentStep === 5 && <Step5 data={formData} />}
 
       </main>
