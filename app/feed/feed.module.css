@@ -1,0 +1,431 @@
+.main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 80px 24px 100px;
+}
+
+/* ── Header ── */
+.header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 36px;
+  margin-bottom: 48px;
+}
+
+.eyebrow {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 64px;
+  letter-spacing: 8px;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.title span {
+  color: var(--amber-hot);
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.headerStats {
+  display: flex;
+  gap: 0;
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--amber);
+}
+
+.statDivider {
+  color: var(--border);
+  margin: 0 12px;
+}
+
+/* ── Empty state ── */
+.emptyState {
+  text-align: center;
+  padding: 80px 0;
+}
+
+.emptyGlyph {
+  font-family: var(--font-display);
+  font-size: 80px;
+  color: var(--border);
+  margin-bottom: 16px;
+}
+
+.emptyText {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.emptySubtext {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--border);
+}
+
+/* ── Feed list ── */
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ── Verdict card ── */
+.verdict {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.verdict + .verdict {
+  border-top: none;
+}
+
+/* ── Verdict header row ── */
+.verdictHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.verdictLeft {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Thumbnail */
+.thumb {
+  width: 60px;
+  height: 84px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-dim);
+  overflow: hidden;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.thumbPlaceholder {
+  font-size: 24px;
+  opacity: 0.3;
+}
+
+/* Meta */
+.verdictMeta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.verdictToken {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tokenLink {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 4px;
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.tokenLink:hover {
+  color: var(--amber-hot);
+}
+
+.verdictBadge {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 3px;
+  padding: 3px 8px;
+  border: 1px solid;
+}
+
+.certified {
+  color: var(--green-hot);
+  border-color: var(--green);
+  background: rgba(61,158,61,0.06);
+}
+
+.rejected {
+  color: var(--red);
+  border-color: var(--red);
+  background: rgba(192,57,43,0.06);
+}
+
+.cardLabel {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--amber);
+}
+
+.artistHandle {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.verdictDate {
+  font-family: var(--font-body);
+  font-size: 10px;
+  color: var(--border);
+  margin-top: 2px;
+}
+
+/* Score block */
+.scoreBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  gap: 2px;
+  padding-top: 4px;
+}
+
+.scoreNum {
+  font-family: var(--font-display);
+  font-size: 36px;
+  letter-spacing: 2px;
+  line-height: 1;
+}
+
+.scoreLabel {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.scoreBar {
+  width: 80px;
+  height: 2px;
+  background: var(--border-dim);
+  overflow: hidden;
+}
+
+.scoreBarFill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+/* ── Judge grid ── */
+.judgeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1px;
+  background: var(--border-dim);
+  border-top: 1px solid var(--border-dim);
+}
+
+.judgeCard {
+  background: var(--bg);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.judgeHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.judgeSigil {
+  font-size: 18px;
+  color: var(--border);
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.judgeName {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--amber);
+}
+
+.judgeRole {
+  font-family: var(--font-body);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.judgeScore {
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: 2px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Category scores */
+.judgeCats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.judgeCat {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.judgeCatLabel {
+  font-family: var(--font-card);
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+}
+
+.judgeCatVal {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--amber);
+}
+
+.judgeReason {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* ── Rejection note ── */
+.rejectionNote {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-dim);
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.rejectionLabel {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--red);
+  margin-right: 10px;
+}
+
+/* ── Bottom CTA ── */
+.bottomCta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 48px;
+  margin-top: 48px;
+  border-top: 1px solid var(--border);
+}
+
+.ctaButton {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  background: var(--amber);
+  color: var(--bg);
+  border: 1px solid var(--amber);
+  padding: 12px 24px;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.15s, color 0.15s;
+}
+
+.ctaButton:hover {
+  background: var(--amber-hot);
+  border-color: var(--amber-hot);
+  color: var(--bg);
+}
+
+.ctaSecondary {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--amber);
+  border: 1px solid var(--border);
+  padding: 12px 24px;
+  text-decoration: none;
+  display: inline-block;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.ctaSecondary:hover {
+  border-color: var(--amber);
+  color: var(--amber-hot);
+}
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  .title {
+    font-size: 44px;
+    letter-spacing: 5px;
+  }
+
+  .verdictHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .scoreBlock {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .scoreNum {
+    font-size: 28px;
+  }
+
+  .judgeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .thumb {
+    width: 48px;
+    height: 67px;
+  }
+}

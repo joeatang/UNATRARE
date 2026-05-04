@@ -62,6 +62,25 @@ export default function HomePage() {
           initialPending3={pending3}
         />
 
+        {/* ── Verdict Feed strip ── */}
+        {recent.filter(t => t.status === 'approved' || t.status === 'rejected').length > 0 && (
+          <section className={styles.feedStrip}>
+            <div className={styles.feedStripHeader}>
+              <div className={styles.feedStripLabel}>⬡ recent verdicts</div>
+              <Link href="/feed" className={styles.feedStripAll}>see all →</Link>
+            </div>
+            <div className={styles.feedTicker}>
+              {recent.filter(t => t.status === 'approved' || t.status === 'rejected').slice(0, 5).map(t => (
+                <Link key={t.token_name} href={`/card/${t.token_name}`} className={styles.feedTickerItem}>
+                  <span className={`${styles.feedTickerDot} ${t.status === 'approved' ? styles.dotApproved : styles.dotRejected}`} />
+                  <span className={styles.feedTickerName}>{t.token_name}</span>
+                  <span className={styles.feedTickerStatus}>{t.status === 'approved' ? 'CERTIFIED' : 'REJECTED'}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* ── Featured Artists ── */}
         {artists.length > 0 && (
           <section className={styles.artistsSection}>
@@ -92,6 +111,11 @@ export default function HomePage() {
           <Link href="/submit" className={styles.ctaButton}>
             open pepe wizard →
           </Link>
+          <div style={{marginTop:16}}>
+            <Link href="/terms" style={{fontFamily:'var(--font-card)',fontSize:'10px',letterSpacing:'3px',color:'var(--text-dim)',textDecoration:'none'}}>
+              read enrollment rules →
+            </Link>
+          </div>
         </div>
 
         {/* ── UNATPEPE holder CTA ── */}

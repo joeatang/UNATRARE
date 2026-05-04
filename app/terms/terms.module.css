@@ -1,0 +1,331 @@
+.main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 80px 24px 100px;
+}
+
+/* ── Header ── */
+.header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 40px;
+  margin-bottom: 56px;
+}
+
+.eyebrow {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 64px;
+  letter-spacing: 8px;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.title span {
+  color: var(--amber-hot);
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+/* ── Sections ── */
+.section {
+  margin-bottom: 56px;
+}
+
+.sectionTitle {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 5px;
+  color: var(--amber);
+  margin-bottom: 24px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.prose {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.prose p {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text);
+}
+
+.prose strong {
+  color: var(--amber-hot);
+  font-weight: 700;
+}
+
+/* ── Formula box ── */
+.formulaBox {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 24px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.formulaLabel {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.formula {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 4px;
+  color: var(--amber-hot);
+  margin-bottom: 8px;
+}
+
+.formulaNote {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* ── Supply split table ── */
+.splitTable {
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.splitRow {
+  display: grid;
+  grid-template-columns: 60px 1fr 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.splitRow:last-child {
+  border-bottom: none;
+}
+
+.splitPct {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 2px;
+}
+
+.splitWho {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+
+.splitNote {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* ── Example box ── */
+.exampleBox {
+  border: 1px solid var(--border-dim);
+  background: var(--bg);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.exampleLabel {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.exampleGrid {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.exampleGrid span {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--amber);
+}
+
+/* ── Fee table ── */
+.feeTable {
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.feeRow {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.feeRow:last-child {
+  border-bottom: none;
+}
+
+.feeCurrency {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+}
+
+.feeAmount {
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: 3px;
+  color: var(--amber-hot);
+}
+
+/* ── Rubric grid ── */
+.rubricGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.rubricItem {
+  padding: 16px 20px;
+  background: var(--surface);
+  border-right: 1px solid var(--border-dim);
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.rubricItem:nth-child(even) {
+  border-right: none;
+}
+
+.rubricItem:nth-last-child(-n+2) {
+  border-bottom: none;
+}
+
+.rubricName {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--amber);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.rubricDesc {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+/* ── CTA row ── */
+.ctaRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.ctaButton {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  background: var(--amber);
+  color: var(--bg);
+  border: 1px solid var(--amber);
+  padding: 12px 24px;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.15s, color 0.15s;
+}
+
+.ctaButton:hover {
+  background: var(--amber-hot);
+  border-color: var(--amber-hot);
+  color: var(--bg);
+}
+
+.ctaSecondary {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  background: transparent;
+  color: var(--amber);
+  border: 1px solid var(--border);
+  padding: 12px 24px;
+  text-decoration: none;
+  display: inline-block;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.ctaSecondary:hover {
+  border-color: var(--amber);
+  color: var(--amber-hot);
+}
+
+/* ── Mobile ── */
+@media (max-width: 540px) {
+  .title {
+    font-size: 44px;
+    letter-spacing: 5px;
+  }
+
+  .splitRow {
+    grid-template-columns: 52px 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .splitNote {
+    grid-column: 2;
+    margin-top: -4px;
+  }
+
+  .rubricGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .rubricItem:nth-child(even) {
+    border-right: none;
+  }
+
+  .rubricItem:nth-last-child(-n+2) {
+    border-bottom: 1px solid var(--border-dim);
+  }
+
+  .rubricItem:last-child {
+    border-bottom: none;
+  }
+}
