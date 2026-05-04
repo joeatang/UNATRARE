@@ -59,6 +59,19 @@ export async function POST(request) {
   try {
     const db = getDb();
 
+    // ── Early access gate ────────────────────────────────────────────────
+    const eaRow = db.prepare("SELECT value FROM settings WHERE key='early_access_mode'").get();
+    if (eaRow?.value === '1') {
+      const isHolder = db.prepare('SELECT btc_address FROM holders WHERE btc_address = ?').get(owner);
+      if (!isHolder) {
+        return NextResponse.json({
+          ok: false,
+          error: 'EARLY_ACCESS',
+          message: 'Early access is active — UNATPEPE holders only. Register at unatrare.wtf/register to unlock submission.',
+        }, { status: 403 });
+      }
+    }
+
     // Duplicate checks
     const existing = db.prepare('SELECT token_name, status FROM tokens WHERE token_name = ?').get(normalized);
     if (existing) {

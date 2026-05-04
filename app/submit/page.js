@@ -605,15 +605,35 @@ function Step5({ data }) {
   }
 
   if (submitState === 'error') {
+    const isEarlyAccess = errMsg === 'EARLY_ACCESS';
     return (
       <div className={styles.stepBox}>
-        <div className={styles.stepEyebrow}>Error</div>
-        <div style={{fontFamily:'var(--font-body)', fontSize:'13px', color:'var(--red)', marginBottom:16}}>
-          {errMsg}
-        </div>
-        <button className={styles.nextBtn} onClick={() => setSubmitState('idle')}>
-          try again →
-        </button>
+        <div className={styles.stepEyebrow}>{isEarlyAccess ? 'Holders Only' : 'Error'}</div>
+        {isEarlyAccess ? (
+          <>
+            <h2 className={styles.stepTitle}>EARLY<span> </span>ACCESS</h2>
+            <p className={styles.stepDesc}>
+              Submissions are currently open to <strong>UNATPEPE holders only</strong>.<br />
+              Register your address to unlock early access + a {parseInt(process.env.NEXT_PUBLIC_UNAT_DISCOUNT || '20')}% discount on every drop.
+            </p>
+            <a href="/register" className={styles.nextBtn} style={{ display: 'block', textAlign: 'center', textDecoration: 'none', marginBottom: 12 }}>
+              register as holder →
+            </a>
+            <a href="https://tap3.link" target="_blank" rel="noopener noreferrer" className={styles.nextBtn}
+              style={{ display: 'block', textAlign: 'center', textDecoration: 'none', background: 'var(--surface)', color: 'var(--amber)', border: '1px solid var(--amber)' }}>
+              get unatpepe at tap3.link ↗
+            </a>
+          </>
+        ) : (
+          <>
+            <div style={{fontFamily:'var(--font-body)', fontSize:'13px', color:'var(--red)', marginBottom:16}}>
+              {errMsg}
+            </div>
+            <button className={styles.nextBtn} onClick={() => setSubmitState('idle')}>
+              try again →
+            </button>
+          </>
+        )}
       </div>
     );
   }

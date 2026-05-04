@@ -395,6 +395,8 @@ export default function AdminPage() {
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(false);
   const [judgeAllLoading, setJudgeAllLoading] = useState(false);
+  const [earlyAccess, setEarlyAccess] = useState(false);
+  const [eaToggling, setEaToggling] = useState(false);
 
   // Try to restore session token from sessionStorage
   useEffect(() => {
@@ -416,11 +418,14 @@ export default function AdminPage() {
     if (!authToken) return;
     setLoading(true);
     try {
-      const [tokenRes, statsRes] = await Promise.all([
+      const [tokenRes, statsRes, settingsRes] = await Promise.all([
         fetch(`/api/admin/tokens?status=${tab}`, {
           headers: { Authorization: `Bearer ${authToken}` },
         }),
         fetch('/api/admin/stats', {
+          headers: { Authorization: `Bearer ${authToken}` },
+        }),
+        fetch('/api/admin/settings', {
           headers: { Authorization: `Bearer ${authToken}` },
         }),
       ]);
@@ -430,8 +435,10 @@ export default function AdminPage() {
       }
       const tokenData = await tokenRes.json();
       const statsData = await statsRes.json();
+      const settingsData = await settingsRes.json();
       setTokens(tokenData.tokens ?? []);
       setStats(statsData);
+      if (settingsData.ok) setEarlyAccess(settingsData.settings?.early_access_mode === '1');
     } finally {
       setLoading(false);
     }
@@ -466,6 +473,22 @@ export default function AdminPage() {
     }
   }
 
+  async function toggleEarlyAccess() {
+    setEaToggling(true);
+    const newVal = earlyAccess ? '0' : '1';
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({ key: 'early_access_mode', value: newVal }),
+      });
+      const json = await res.json();
+      if (json.ok) setEarlyAccess(newVal === '1');
+    } finally {
+      setEaToggling(false);
+    }
+  }
+
   if (!authToken) return <LoginGate onAuth={handleAuth} />;
 
   const TABS = [
@@ -480,6 +503,18 @@ export default function AdminPage() {
       <header className={styles.header}>
         <div className={styles.headerLogo}>UNATR<span>A</span>RE <span className={styles.headerSub}>ADMIN</span></div>
         <div className={styles.headerActions}>
+          <button
+            className={styles.judgeAllBtn}
+            onClick={toggleEarlyAccess}
+            disabled={eaToggling}
+            style={{
+              background: earlyAccess ? 'var(--amber)' : 'var(--surface)',
+              color: earlyAccess ? 'var(--bg)' : 'var(--amber)',
+              border: '1px solid var(--amber)',
+            }}
+          >
+            {eaToggling ? '...' : earlyAccess ? '⚡ HOLDER-ONLY: ON' : '⚡ HOLDER-ONLY: OFF'}
+          </button>
           <button
             className={styles.judgeAllBtn}
             onClick={handleJudgeAll}
