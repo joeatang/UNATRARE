@@ -19,6 +19,7 @@ import path from 'path';
 
 const UPLOAD_DIR = path.resolve(process.cwd(), 'public', 'uploads');
 const CACHE = 'public, max-age=31536000, immutable';
+const CORS  = '*';
 
 export async function GET(_request, { params }) {
   const { hash } = await params;
@@ -46,6 +47,7 @@ export async function GET(_request, { params }) {
         headers: {
           'Content-Type': token.art_mime || 'application/octet-stream',
           'Cache-Control': CACHE,
+          'Access-Control-Allow-Origin': CORS,
         },
       });
     } catch {
@@ -62,6 +64,7 @@ export async function GET(_request, { params }) {
         headers: {
           'Content-Type': result.mime,
           'Cache-Control': CACHE,
+          'Access-Control-Allow-Origin': CORS,
           'X-Source': 'hyperdrive',
         },
       });
@@ -70,5 +73,19 @@ export async function GET(_request, { params }) {
     // Hyperdrive unavailable — peer not running
   }
 
-  return new NextResponse('Not found', { status: 404 });
+  return new NextResponse('Not found', {
+    status: 404,
+    headers: { 'Access-Control-Allow-Origin': CORS },
+  });
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': CORS,
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
 }
