@@ -99,6 +99,22 @@ export default async function CardPage({ params }) {
       <Nav />
       <main className={styles.page}>
 
+        {token.is_demo === 1 && (
+          <div style={{
+            background: 'rgba(128,128,128,0.08)',
+            border: '1px solid #444',
+            borderLeft: '3px solid #888',
+            padding: '10px 20px',
+            marginBottom: 16,
+            fontFamily: 'var(--font-card)',
+            fontSize: '10px',
+            letterSpacing: '3px',
+            color: '#888',
+          }}>
+            ◈ DEMO SAMPLE — this card is for testing purposes only and is not an official UNATRARE enrollment
+          </div>
+        )}
+
         <div className={styles.layout}>
 
           {/* ── Card frame ── */}

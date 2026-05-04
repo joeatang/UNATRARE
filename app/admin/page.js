@@ -457,6 +457,214 @@ function StatsBar({ stats }) {
   );
 }
 
+// ── Demo card creation panel ───────────────────────────────────
+function DemoPanel({ authToken }) {
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ tokenName: '', artUrl: '', artMime: 'image/png', artistHandle: '', description: '' });
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null); // { ok, tokenName } | { error }
+  const [demos, setDemos] = useState([]);
+  const [loadingDemos, setLoadingDemos] = useState(false);
+
+  const MIME_OPTIONS = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml'];
+
+  async function fetchDemos() {
+    setLoadingDemos(true);
+    try {
+      const res = await fetch('/api/admin/demo', {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const json = await res.json();
+      setDemos(json.tokens ?? []);
+    } finally {
+      setLoadingDemos(false);
+    }
+  }
+
+  useEffect(() => { if (open) fetchDemos(); }, [open]);
+
+  async function handleCreate(e) {
+    e.preventDefault();
+    setLoading(true);
+    setResult(null);
+    try {
+      const res = await fetch('/api/admin/demo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify(form),
+      });
+      const json = await res.json();
+      setResult(json);
+      if (json.ok) {
+        setForm({ tokenName: '', artUrl: '', artMime: 'image/png', artistHandle: '', description: '' });
+        fetchDemos();
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDelete(tokenName) {
+    if (!confirm(`Delete demo card ${tokenName}?`)) return;
+    const res = await fetch('/api/admin/demo', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ tokenName }),
+    });
+    const json = await res.json();
+    if (json.ok) fetchDemos();
+  }
+
+  return (
+    <div style={{ margin: '24px 0', border: '1px solid var(--border-dim)', background: 'rgba(255,200,0,0.03)' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%', padding: '14px 20px', display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', background: 'transparent', border: 'none',
+          cursor: 'pointer', fontFamily: 'var(--font-card)', fontSize: '10px',
+          letterSpacing: '3px', color: 'var(--amber)',
+        }}
+      >
+        <span>◈ DEMO CARDS</span>
+        <span style={{ color: 'var(--text-dim)' }}>{open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <div style={{ padding: '0 20px 20px' }}>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)', marginBottom: 16, lineHeight: 1.6 }}>
+            Demo cards run the full judge pipeline and appear on the feed with a SAMPLE badge.
+            They are excluded from the directory, stats, and homepage counts.
+          </div>
+
+          <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: 4 }}>TOKEN NAME *</div>
+                <input
+                  value={form.tokenName}
+                  onChange={e => setForm(f => ({ ...f, tokenName: e.target.value }))}
+                  placeholder="DEMOPEPE"
+                  required
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', fontFamily: 'var(--font-card)', fontSize: '11px', letterSpacing: '1px' }}
+                />
+              </div>
+              <div>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: 4 }}>ARTIST HANDLE</div>
+                <input
+                  value={form.artistHandle}
+                  onChange={e => setForm(f => ({ ...f, artistHandle: e.target.value }))}
+                  placeholder="demo_artist"
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', fontFamily: 'var(--font-card)', fontSize: '11px', letterSpacing: '1px' }}
+                />
+              </div>
+            </div>
+            <div>
+              <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: 4 }}>ART URL *</div>
+              <input
+                value={form.artUrl}
+                onChange={e => setForm(f => ({ ...f, artUrl: e.target.value }))}
+                placeholder="https://..."
+                required
+                style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', fontFamily: 'var(--font-card)', fontSize: '11px', letterSpacing: '1px' }}
+              />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: 4 }}>MIME TYPE</div>
+                <select
+                  value={form.artMime}
+                  onChange={e => setForm(f => ({ ...f, artMime: e.target.value }))}
+                  style={{ width: '100%', padding: '8px 10px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', fontFamily: 'var(--font-card)', fontSize: '11px', letterSpacing: '1px' }}
+                >
+                  {MIME_OPTIONS.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </div>
+              <div>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: 4 }}>DESCRIPTION</div>
+                <input
+                  value={form.description}
+                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                  placeholder="Demo sample card."
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', fontFamily: 'var(--font-card)', fontSize: '11px', letterSpacing: '1px' }}
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={loading || !form.tokenName || !form.artUrl}
+              style={{
+                padding: '10px 20px', border: '1px solid var(--amber)', background: 'transparent',
+                color: 'var(--amber)', fontFamily: 'var(--font-card)', fontSize: '10px',
+                letterSpacing: '3px', cursor: 'pointer', alignSelf: 'flex-start',
+              }}
+            >
+              {loading ? 'creating + judging...' : '◈ CREATE DEMO CARD'}
+            </button>
+          </form>
+
+          {result && (
+            <div style={{
+              marginTop: 12, padding: '10px 14px',
+              border: `1px solid ${result.ok ? 'var(--green)' : 'var(--red)'}`,
+              fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px',
+              color: result.ok ? 'var(--green)' : 'var(--red)',
+            }}>
+              {result.ok
+                ? `✓ ${result.tokenName} created — judging complete`
+                : `✗ ${result.error}`}
+            </div>
+          )}
+
+          {/* Existing demo cards list */}
+          {demos.length > 0 && (
+            <div style={{ marginTop: 20 }}>
+              <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 10 }}>EXISTING DEMO CARDS</div>
+              {demos.map(d => (
+                <div key={d.token_name} style={{
+                  display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0',
+                  borderBottom: '1px solid var(--border-dim)',
+                }}>
+                  {d.art_url && (
+                    <img src={d.art_url} alt="" style={{ width: 36, height: 36, objectFit: 'cover', border: '1px solid var(--border)' }} />
+                  )}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--amber)' }}>{d.token_name}</div>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)' }}>
+                      score: {d.judge_score ?? '—'} · {d.artist_handle || 'no handle'}
+                    </div>
+                  </div>
+                  <a
+                    href={`/feed`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--text-dim)', textDecoration: 'none' }}
+                  >
+                    view →
+                  </a>
+                  <button
+                    onClick={() => handleDelete(d.token_name)}
+                    style={{
+                      padding: '4px 10px', border: '1px solid var(--red)', background: 'transparent',
+                      color: 'var(--red)', fontFamily: 'var(--font-card)', fontSize: '9px',
+                      letterSpacing: '2px', cursor: 'pointer',
+                    }}
+                  >
+                    delete
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          {!loadingDemos && demos.length === 0 && (
+            <div style={{ marginTop: 12, fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)' }}>no demo cards yet</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main admin dashboard ───────────────────────────────────────
 export default function AdminPage() {
   const [authToken, setAuthToken] = useState(null);
@@ -635,6 +843,8 @@ export default function AdminPage() {
           />
         ))}
       </div>
+
+      <DemoPanel authToken={authToken} />
     </div>
   );
 }

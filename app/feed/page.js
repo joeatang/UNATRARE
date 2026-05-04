@@ -35,11 +35,11 @@ function getFeedTokens() {
     const rows = db.prepare(`
       SELECT token_name, display_title, status, artist_handle, art_hash, art_mime,
              judge_score, judge_notes, judged_at, revealed_at, series, card_number,
-             rejection_reason
+             rejection_reason, is_demo
       FROM tokens
       WHERE status IN ('approved','rejected') AND judged_at IS NOT NULL
-      ORDER BY judged_at DESC
-      LIMIT 50
+      ORDER BY is_demo ASC, judged_at DESC
+      LIMIT 60
     `).all();
     return rows.map(r => ({ ...r }));
   } catch {
@@ -83,11 +83,11 @@ export default function FeedPage() {
             Permanent on Bitcoin.
           </p>
           <div className={styles.headerStats}>
-            <span>{tokens.filter(t => t.status === 'approved').length} certified</span>
+            <span>{tokens.filter(t => t.status === 'approved' && !t.is_demo).length} certified</span>
             <span className={styles.statDivider}>·</span>
-            <span>{tokens.filter(t => t.status === 'rejected').length} rejected</span>
+            <span>{tokens.filter(t => t.status === 'rejected' && !t.is_demo).length} rejected</span>
             <span className={styles.statDivider}>·</span>
-            <span>{tokens.length} total verdicts</span>
+            <span>{tokens.filter(t => !t.is_demo).length} total verdicts</span>
           </div>
         </header>
 
@@ -107,12 +107,13 @@ export default function FeedPage() {
             const bar = scoreBar(avgScore);
             const isApproved = token.status === 'approved';
             const isRevealed = !!token.revealed_at;
+            const isDemo = !!token.is_demo;
             const artUrl = token.art_hash
               ? `https://unatrare.wtf/art/${token.art_hash}`
               : null;
 
             return (
-              <article key={token.token_name} className={styles.verdict}>
+              <article key={token.token_name} className={`${styles.verdict}${isDemo ? ` ${styles.verdictDemo}` : ''}`}>
 
                 {/* ── Verdict header ── */}
                 <div className={styles.verdictHeader}>
@@ -134,6 +135,9 @@ export default function FeedPage() {
                         <Link href={`/card/${token.token_name}`} className={styles.tokenLink}>
                           {token.token_name}
                         </Link>
+                        {isDemo && (
+                          <span className={`${styles.verdictBadge} ${styles.sample}`}>SAMPLE</span>
+                        )}
                         <span className={`${styles.verdictBadge} ${isApproved ? styles.certified : styles.rejected}`}>
                           {isApproved ? 'CERTIFIED DANK' : 'REJECTED'}
                         </span>

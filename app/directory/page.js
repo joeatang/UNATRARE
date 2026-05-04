@@ -23,11 +23,11 @@ function getApproved(series, sort) {
     let rows;
     if (series) {
       rows = db.prepare(
-        `SELECT * FROM tokens WHERE status='approved' AND series=? ORDER BY ${orderBy}`
+        `SELECT * FROM tokens WHERE status='approved' AND series=? AND (is_demo IS NULL OR is_demo=0) ORDER BY ${orderBy}`
       ).all(Number(series));
     } else {
       rows = db.prepare(
-        `SELECT * FROM tokens WHERE status='approved' ORDER BY ${orderBy}`
+        `SELECT * FROM tokens WHERE status='approved' AND (is_demo IS NULL OR is_demo=0) ORDER BY ${orderBy}`
       ).all();
     }
     // Group by series
