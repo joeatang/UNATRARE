@@ -3,28 +3,41 @@ import { getDb } from '../../../../lib/db';
 
 export const runtime = 'nodejs';
 
+const SITE_URL = 'https://unatrare.wtf';
 const W = 400, H = 560;
 
 function getToken(tokenname) {
   try {
     const db = getDb();
-    return db.prepare('SELECT * FROM tokens WHERE token_name = ?').get(tokenname.toUpperCase());
+    const row = db.prepare('SELECT * FROM tokens WHERE token_name = ?').get(tokenname.toUpperCase());
+    return row ? { ...row } : null;
   } catch {
     return null;
   }
 }
 
 export async function GET(request, { params }) {
-  const token = getToken(params.tokenname);
+  const { tokenname } = await params;
+  const token = getToken(tokenname);
 
   const isApproved = token?.status === 'approved';
   const isPending  = !token || token.status === 'pending';
   const isRejected = token?.status === 'rejected';
+  const isRevealed = isApproved && !!token?.revealed_at;
 
   const statusColor  = isApproved ? '#5abf5a' : isPending ? '#C9A84C' : '#c0392b';
-  const statusLabel  = isApproved ? 'CERTIFIED' : isPending ? 'PENDING' : 'REJECTED';
-  const tokenName    = token?.token_name ?? params.tokenname.toUpperCase();
-  const artUrl       = isApproved && token?.art_url ? token.art_url : null;
+  const statusLabel  = isRevealed ? 'CERTIFIED' : isApproved ? 'UNREVEALED' : isPending ? 'PENDING' : 'REJECTED';
+  const tokenName    = token?.token_name ?? tokenname.toUpperCase();
+
+  // Always use absolute URLs — ImageResponse fetches them at render time
+  let artUrl = null;
+  if (isRevealed) {
+    if (token.art_hash) {
+      artUrl = `${SITE_URL}/art/${token.art_hash}`;
+    } else if (token.art_url) {
+      artUrl = token.art_url.startsWith('http') ? token.art_url : `${SITE_URL}${token.art_url}`;
+    }
+  }
 
   return new ImageResponse(
     (
@@ -78,39 +91,26 @@ export async function GET(request, { params }) {
                 width: '100%',
                 height: '100%',
                 objectFit: 'contain',
-                filter: isPending ? 'blur(20px)' : 'none',
               }}
             />
           ) : (
-            /* Hatch pattern placeholder */
+            /* Mystery / pending / no-image placeholder */
             <div
               style={{
                 width: '100%',
                 height: '100%',
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
+                gap: 8,
+                background: 'repeating-linear-gradient(45deg,#1a1a1a 0px,#1a1a1a 4px,#111111 4px,#111111 8px)',
               }}
             >
-              <span style={{ fontSize: 11, letterSpacing: 4, color: '#333' }}>NO IMAGE</span>
-            </div>
-          )}
-
-          {/* Pending blur overlay label */}
-          {isPending && (
-            <div
-              style={{
-                position: 'absolute',
-                bottom: 12,
-                left: 0,
-                right: 0,
-                textAlign: 'center',
-                fontSize: 10,
-                letterSpacing: 5,
-                color: '#C9A84C',
-              }}
-            >
-              PENDING JUDGMENT
+              <span style={{ fontSize: 48, lineHeight: 1 }}>🐸</span>
+              <span style={{ fontSize: 10, letterSpacing: 4, color: '#C9A84C' }}>
+                {isApproved ? 'UNREVEALED' : isPending ? 'PENDING JUDGMENT' : 'REJECTED'}
+              </span>
             </div>
           )}
         </div>

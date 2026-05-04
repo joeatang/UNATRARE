@@ -25,31 +25,38 @@ function getToken(tokenname) {
 }
 
 export async function generateMetadata({ params }) {
-  const token = getToken(params.tokenname);
-  const name = params.tokenname.toUpperCase();
+  const { tokenname } = await params;
+  const token = getToken(tokenname);
+  const name = tokenname.toUpperCase();
+  const ogUrl = `https://unatrare.wtf/api/og/${name}`;
   if (!token || token.status !== 'approved') {
     return {
       title: 'Card Not Found — UNATRARE',
-      openGraph: { images: [`https://unatrare.wtf/api/og/${name}`] },
+      openGraph: { images: [ogUrl] },
     };
   }
   return {
     title: `${token.display_title || token.token_name} — UNATRARE`,
     description: `Series ${toRoman(token.series)} · Card #${String(token.card_number).padStart(3,'0')} · Certified Dank`,
     openGraph: {
-      images: [`https://unatrare.wtf/api/og/${token.token_name}`],
+      title: `${token.display_title || token.token_name} — UNATRARE`,
+      description: `Series ${toRoman(token.series)} · Card #${String(token.card_number).padStart(3,'0')} · Certified Dank`,
+      images: [{ url: ogUrl, width: 400, height: 560, alt: token.token_name }],
     },
     twitter: {
       card: 'summary_large_image',
-      images: [`https://unatrare.wtf/api/og/${token.token_name}`],
+      title: `${token.display_title || token.token_name} — UNATRARE`,
+      description: `Certified Dank · unatrare.wtf`,
+      images: [ogUrl],
     },
   };
 }
 
 export const revalidate = 3600;
 
-export default function CardPage({ params }) {
-  const token = getToken(params.tokenname);
+export default async function CardPage({ params }) {
+  const { tokenname } = await params;
+  const token = getToken(tokenname);
 
   if (!token) notFound();
 
@@ -76,6 +83,16 @@ export default function CardPage({ params }) {
   const ordUrl   = token.ord_inscription
     ? `https://ordinals.com/inscription/${token.ord_inscription}`
     : null;
+  const cardUrl  = `https://unatrare.wtf/card/${token.token_name}`;
+  const shareText = encodeURIComponent(
+    `🐸 ${token.display_title || token.token_name} — Series ${toRoman(token.series)} Card #${String(token.card_number).padStart(3,'0')} · Certified Dank on UNATRARE\n${cardUrl}`
+  );
+  const tweetUrl = `https://twitter.com/intent/tweet?text=${shareText}`;
+
+  // Prefer permanent hash-based art URL
+  const artDisplayUrl = token.art_hash
+    ? `https://unatrare.wtf/art/${token.art_hash}`
+    : token.art_url?.startsWith('http') ? token.art_url : token.art_url ? `https://unatrare.wtf${token.art_url}` : null;
 
   return (
     <>
@@ -95,9 +112,9 @@ export default function CardPage({ params }) {
                 <span className={styles.cardHeaderText}>#{String(token.card_number).padStart(3,'0')}</span>
               </div>
               <div className={styles.cardArt}>
-                {token.revealed_at && token.art_url ? (
+                {token.revealed_at && artDisplayUrl ? (
                   <img
-                    src={token.art_url}
+                    src={artDisplayUrl}
                     alt={token.display_title || token.token_name}
                   />
                 ) : !token.revealed_at ? (
@@ -205,6 +222,9 @@ export default function CardPage({ params }) {
             </div>
 
             <div className={styles.actions}>
+              <a href={tweetUrl} target="_blank" rel="noopener noreferrer" className={styles.actionBtn}>
+                share on X →
+              </a>
               <a href={xcpUrl} target="_blank" rel="noopener noreferrer" className={styles.actionBtn}>
                 view on tokenscan.io →
               </a>
