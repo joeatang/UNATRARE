@@ -22,7 +22,11 @@ const CACHE = 'public, max-age=31536000, immutable';
 const CORS  = '*';
 
 export async function GET(_request, { params }) {
-  const { hash } = await params;
+  // Strip optional file extension (e.g. HASH.jpg, HASH.png, HASH.gif)
+  // Wallets require URLs to end in a known image extension — the extension is
+  // purely cosmetic; content is always served from the DB record's art_mime.
+  const rawHash = (await params).hash || '';
+  const hash = rawHash.replace(/\.(jpg|jpeg|png|gif|webp|svg)$/i, '');
 
   if (!hash || !/^[0-9a-f]{64}$/i.test(hash)) {
     return new NextResponse('Not found', { status: 404 });
