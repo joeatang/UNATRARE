@@ -38,6 +38,15 @@
   letter-spacing: 3px;
 }
 
+.heroExplainer {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.75;
+  max-width: 560px;
+  margin-top: 20px;
+}
+
 /* Stats bar */
 .stats {
   display: flex;

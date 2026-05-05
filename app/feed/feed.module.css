@@ -60,7 +60,60 @@
   padding: 80px 0;
 }
 
-/* ── Council Signal drops ── */
+/* ── Signal post (judge drop inline in timeline) ── */
+.signalPost {
+  border: 1px solid var(--border-dim);
+  background: rgba(255, 180, 0, 0.025);
+  padding: 16px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.signalPost + .verdict,
+.verdict + .signalPost,
+.signalPost + .signalPost {
+  border-top: none;
+}
+
+.signalPostHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.signalPostSigil {
+  font-size: 15px;
+  color: var(--amber);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.signalPostName {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--amber);
+}
+
+.signalPostTime {
+  margin-left: auto;
+  font-family: var(--font-body);
+  font-size: 10px;
+  color: var(--border);
+}
+
+.signalPostText {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--text-dim);
+  font-style: italic;
+  margin: 0;
+  padding-left: 25px;
+}
+
+/* ── Council Signal drops (legacy — kept for compat) ── */
 .councilDrops {
   margin: 0 0 32px;
   border: 1px solid var(--border-dim);

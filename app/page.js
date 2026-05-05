@@ -29,42 +29,38 @@ function scoreBar(score, max = 69) {
   return { pct, color };
 }
 
-function getCouncilDrops() {
+function getDropsHistory() {
   try {
-    const genPath = join(process.cwd(), 'data', 'generated_drops.json');
-    let generatedDrops = null;
-    if (existsSync(genPath)) {
-      try {
-        const gen = JSON.parse(readFileSync(genPath, 'utf8'));
-        const age = Date.now() - (gen.generated_at || 0);
-        if (age < 24 * 60 * 60 * 1000 && gen.drops) generatedDrops = gen.drops;
-      } catch { /* fall through */ }
+    const histPath = join(process.cwd(), 'data', 'drops_history.json');
+    if (existsSync(histPath)) {
+      const { drops } = JSON.parse(readFileSync(histPath, 'utf8'));
+      if (Array.isArray(drops) && drops.length) return drops;
     }
-    const cfg = JSON.parse(readFileSync(join(process.cwd(), 'judges.config.json'), 'utf8'));
-    const drops = cfg.council_drops;
-    const JUDGE_MAP = [
-      { genKey: 'prof_naka_c',    cfgKey: 'nakamojo',       name: 'NAKAMOJO',       sigil: '⬡' },
-      { genKey: 'prof_j_looney',  cfgKey: 'rarelooney',     name: 'RARELOONEY',     sigil: '◈' },
-      { genKey: 'dank_shawn',     cfgKey: 'dankshawn',      name: 'DANKSHAWN',      sigil: '◉' },
-      { genKey: 'dr_m_catalogus', cfgKey: 'm_catalogus',    name: 'M.CATALOGUS',    sigil: '⬢' },
-      { genKey: 'theo_goodman',   cfgKey: 'prof_tg00dman',  name: 'PROF.TG00DMAN',  sigil: '◆' },
-      { genKey: 'dj_pepai',       cfgKey: 'dj_pepai',       name: 'DJ PEPAI',       sigil: '◎' },
-    ];
-    const all = JUDGE_MAP.flatMap(j => {
-      const src = (generatedDrops?.[j.genKey]?.length) ? generatedDrops[j.genKey] : (drops[j.cfgKey] || []);
-      return src.map(d => ({ text: d, name: j.name, sigil: j.sigil }));
-    });
-    const seed = Math.floor(Date.now() / (8 * 60 * 60 * 1000));
-    const picked = [];
-    const used = new Set();
-    for (let i = 0; i < 4; i++) {
-      let idx = (seed * 7 + i * 13) % all.length;
-      let tries = 0;
-      while (used.has(idx) && tries < all.length) { idx = (idx + 1) % all.length; tries++; }
-      used.add(idx);
-      picked.push(all[idx]);
+    // Fallback: legacy generated_drops.json → flatten to entries with ts=0 (appear at bottom)
+    const legPath = join(process.cwd(), 'data', 'generated_drops.json');
+    if (existsSync(legPath)) {
+      const gen = JSON.parse(readFileSync(legPath, 'utf8'));
+      const age = Date.now() - (gen.generated_at || 0);
+      if (age < 24 * 60 * 60 * 1000 && gen.drops) {
+        const JUDGE_META_MAP = {
+          prof_naka_c:    { name: 'NAKAMOJO',      sigil: '⬡' },
+          prof_j_looney:  { name: 'RARELOONEY',    sigil: '◈' },
+          dank_shawn:     { name: 'DANKSHAWN',      sigil: '◉' },
+          dr_m_catalogus: { name: 'M.CATALOGUS',   sigil: '⬢' },
+          theo_goodman:   { name: 'PROF.TG00DMAN', sigil: '◆' },
+          dj_pepai:       { name: 'DJ PEPAI',       sigil: '◎' },
+        };
+        const ts = Math.floor((gen.generated_at || Date.now()) / 1000);
+        return Object.entries(gen.drops).flatMap(([judgeId, texts]) => {
+          const meta = JUDGE_META_MAP[judgeId] || { name: judgeId.toUpperCase(), sigil: '○' };
+          return texts.map((text, i) => ({
+            id: `legacy_${judgeId}_${i}`, judge_id: judgeId,
+            judge_name: meta.name, sigil: meta.sigil, text, ts,
+          }));
+        });
+      }
     }
-    return picked;
+    return [];
   } catch { return []; }
 }
 
@@ -94,9 +90,10 @@ function getPageData() {
       recent:     recent.map(r => ({ ...r })),
       pending3:   pending3.map(r => ({ ...r })),
       feedTokens: feedTokens.map(r => ({ ...r })),
+      drops:      getDropsHistory(),
     };
   } catch {
-    return { pending: 0, approved: 0, rejected: 0, recent: [], pending3: [], feedTokens: [] };
+    return { pending: 0, approved: 0, rejected: 0, recent: [], pending3: [], feedTokens: [], drops: [] };
   }
 }
 
@@ -117,9 +114,14 @@ function cardLabel(series, cardNumber) {
 }
 
 export default function HomePage() {
-  const { pending, approved, rejected, recent, pending3, feedTokens } = getPageData();
-  const drops = getCouncilDrops();
+  const { pending, approved, rejected, recent, pending3, feedTokens, drops } = getPageData();
   const nonDemo = feedTokens.filter(t => !t.is_demo);
+
+  // Unified chronological timeline — verdicts + signal drops interleaved by timestamp
+  const timeline = [
+    ...feedTokens.map(t => ({ _type: 'verdict', _ts: t.judged_at || 0, ...t })),
+    ...drops.map(d => ({ _type: 'drop', _ts: d.ts || 0, ...d })),
+  ].sort((a, b) => b._ts - a._ts);
 
   return (
     <>
@@ -131,6 +133,9 @@ export default function HomePage() {
           <div className={styles.eyebrow}>· bitcoin · counterparty · ordinals ·</div>
           <h1 className={styles.heroTitle}>PEPE MEMP<span>O</span>OL</h1>
           <div className={styles.heroSub}>real-time submission activity · unatrare curated directory</div>
+          <p className={styles.heroExplainer}>
+            A curated directory of Pepe art on Bitcoin. Submit your card — 6 judges with distinct personalities certify or reject it. Every verdict is permanent on-chain. Browse the feed to see what the council is saying.
+          </p>
         </section>
 
         <MempoolLive
@@ -139,28 +144,12 @@ export default function HomePage() {
           initialPending3={pending3}
         />
 
-        {/* ── Council Signal ── */}
-        {drops.length > 0 && (
-          <div className={feedStyles.councilDrops} style={{ marginTop: 48 }}>
-            <div className={feedStyles.councilDropsLabel}>⬡ COUNCIL SIGNAL</div>
-            <div className={feedStyles.councilDropsGrid}>
-              {drops.map((d, i) => (
-                <div key={i} className={feedStyles.councilDrop}>
-                  <span className={feedStyles.councilDropSigil}>{d.sigil}</span>
-                  <span className={feedStyles.councilDropText}>&ldquo;{d.text}&rdquo;</span>
-                  <span className={feedStyles.councilDropName}>{d.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ── Verdict Feed ── */}
+        {/* ── Unified Timeline: Verdicts + Council Signal drops ── */}
         <div className={feedStyles.header} style={{ marginTop: 48 }}>
-          <div className={feedStyles.eyebrow}>PEPE COUNCIL · ALL VERDICTS</div>
-          <h2 className={feedStyles.title}>VERDICT F<span>E</span>ED</h2>
+          <div className={feedStyles.eyebrow}>PEPE COUNCIL · LIVE FEED</div>
+          <h2 className={feedStyles.title}>THE F<span>E</span>ED</h2>
           <p className={feedStyles.subtitle}>
-            Every submission judged. Every score recorded. Permanent on Bitcoin.
+            Verdicts, council commentary, and cultural dispatches — all in one place.
           </p>
           <div className={feedStyles.headerStats}>
             <span>{nonDemo.filter(t => t.status === 'approved').length} certified</span>
@@ -168,10 +157,14 @@ export default function HomePage() {
             <span>{nonDemo.filter(t => t.status === 'rejected').length} rejected</span>
             <span className={feedStyles.statDivider}>·</span>
             <span>{nonDemo.length} total verdicts</span>
+            {drops.length > 0 && (<>
+              <span className={feedStyles.statDivider}>·</span>
+              <span>{drops.length} council posts</span>
+            </>)}
           </div>
         </div>
 
-        {feedTokens.length === 0 && (
+        {timeline.length === 0 && (
           <div className={feedStyles.emptyState}>
             <div className={feedStyles.emptyGlyph}>?</div>
             <div className={feedStyles.emptyText}>the panel is deliberating</div>
@@ -180,7 +173,26 @@ export default function HomePage() {
         )}
 
         <div className={feedStyles.feed}>
-          {feedTokens.map(token => {
+          {timeline.map((item, idx) => {
+            if (item._type === 'drop') {
+              return (
+                <div key={item.id || `drop-${idx}`} className={feedStyles.signalPost}>
+                  <div className={feedStyles.signalPostHeader}>
+                    <span className={feedStyles.signalPostSigil}>{item.sigil}</span>
+                    <div>
+                      <div className={feedStyles.signalPostName}>{item.judge_name}</div>
+                    </div>
+                    {item.ts > 0 && (
+                      <span className={feedStyles.signalPostTime}>{formatDate(item.ts)}</span>
+                    )}
+                  </div>
+                  <p className={feedStyles.signalPostText}>&ldquo;{item.text}&rdquo;</p>
+                </div>
+              );
+            }
+
+            // Verdict card
+            const token = item;
             let judges = [];
             try { judges = JSON.parse(token.judge_notes || '[]'); } catch { /* no-op */ }
             const avgScore = token.judge_score || 0;

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { verifyAdminToken } from '../auth/route';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { getDb } from '../../../../lib/db.js';
 // ── Call Groq (text only, no image) ──────────────────────────────
@@ -78,12 +78,21 @@ export async function POST(req) {
 
   try {
     const cfgPath  = join(process.cwd(), 'judges.config.json');
-    const dropPath = join(process.cwd(), 'data', 'generated_drops.json');
     const config   = JSON.parse(readFileSync(cfgPath, 'utf8'));
     const context  = getRecentContext();
 
     const judges = config.judges;
     const generated = {};
+
+    // Judge display meta for history entries
+    const JUDGE_META = {
+      prof_naka_c:    { name: 'NAKAMOJO',      sigil: '⬡' },
+      prof_j_looney:  { name: 'RARELOONEY',    sigil: '◈' },
+      dank_shawn:     { name: 'DANKSHAWN',      sigil: '◉' },
+      dr_m_catalogus: { name: 'M.CATALOGUS',   sigil: '⬢' },
+      theo_goodman:   { name: 'PROF.TG00DMAN', sigil: '◆' },
+      dj_pepai:       { name: 'DJ PEPAI',       sigil: '◎' },
+    };
 
     for (const judge of judges) {
       try {
@@ -101,19 +110,49 @@ export async function POST(req) {
       }
     }
 
-    // Save with timestamp
-    const output = {
-      generated_at: Date.now(),
-      drops: generated,
-    };
-    writeFileSync(dropPath, JSON.stringify(output, null, 2), 'utf8');
+    // ── Append to drops_history.json (persistent, accumulating) ──────────
+    const dataDir    = join(process.cwd(), 'data');
+    const histPath   = join(dataDir, 'drops_history.json');
+    const legacyPath = join(process.cwd(), 'data', 'generated_drops.json');
+
+    mkdirSync(dataDir, { recursive: true });
+
+    let history = [];
+    if (existsSync(histPath)) {
+      try { history = JSON.parse(readFileSync(histPath, 'utf8')).drops || []; } catch { /* start fresh */ }
+    }
+
+    const nowTs = Math.floor(Date.now() / 1000);
+    const newEntries = [];
+    for (const [judgeId, texts] of Object.entries(generated)) {
+      const meta = JUDGE_META[judgeId] || { name: judgeId.toUpperCase(), sigil: '○' };
+      texts.forEach((text, i) => {
+        newEntries.push({
+          id:         `${nowTs}_${judgeId}_${i}`,
+          judge_id:   judgeId,
+          judge_name: meta.name,
+          sigil:      meta.sigil,
+          text,
+          ts:         nowTs,
+        });
+      });
+    }
+
+    // Prepend new entries, cap at 300 total
+    history = [...newEntries, ...history].slice(0, 300);
+    writeFileSync(histPath, JSON.stringify({ drops: history }, null, 2), 'utf8');
+
+    // Also write legacy file so fallback paths still work
+    const legacyOutput = { generated_at: Date.now(), drops: generated };
+    writeFileSync(legacyPath, JSON.stringify(legacyOutput, null, 2), 'utf8');
 
     const total = Object.values(generated).reduce((s, arr) => s + arr.length, 0);
     return NextResponse.json({
       ok: true,
-      generated_at: output.generated_at,
+      generated_at: nowTs,
       judges_generated: Object.keys(generated).length,
       total_drops: total,
+      history_count: history.length,
       drops: generated,
     });
   } catch (err) {
