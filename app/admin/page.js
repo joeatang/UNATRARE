@@ -125,7 +125,7 @@ function TokenRow({ token, authToken, onAction }) {
           </div>
           {token.judge_score !== undefined && token.judge_score !== null && (
             <div className={styles.rowScore}>
-              judge score: <strong>{token.judge_score?.toFixed(1)}</strong>/37.5
+              judge score: <strong>{token.judge_score?.toFixed(1)}</strong>/69
             </div>
           )}
           {approvalResult && (
@@ -219,7 +219,7 @@ function TokenRow({ token, authToken, onAction }) {
                         <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px', color:'var(--amber)', marginBottom:2}}>
                           {j.display_name}
                           <span style={{color:'var(--text-dim)', marginLeft:8}}>
-                            {Object.values(j.scores || {}).reduce((a,b) => a+b, 0)}/40
+                            {Object.values(j.scores || {}).reduce((a,b) => a+b, 0)}/45
                           </span>
                         </div>
                         <div style={{fontFamily:'var(--font-body)', fontSize:'11px', color:'var(--text-dim)', lineHeight:1.5}}>

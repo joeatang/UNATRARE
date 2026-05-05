@@ -25,16 +25,27 @@ function getJudgeMeta(id) {
   return JUDGE_META[id] || { name: id.toUpperCase(), role: 'Judge', sigil: '○' };
 }
 
-function scoreBar(score, max = 40) {
+function scoreBar(score, max = 69) {
   const pct = Math.min(100, Math.round((score / max) * 100));
-  const color = score >= 32 ? 'var(--green-hot)' : score >= 25 ? 'var(--amber-hot)' : 'var(--red)';
+  // thresholds as % so they work for any scale
+  const color = pct >= 64 ? 'var(--green-hot)' : pct >= 48 ? 'var(--amber-hot)' : 'var(--red)';
   return { pct, color };
 }
 
-function getCouncilDrops() {
+function getCouncilDrops(preview = false) {
   try {
     const cfg = JSON.parse(readFileSync(join(process.cwd(), 'judges.config.json'), 'utf8'));
     const drops = cfg.council_drops;
+    // preview=1 — one from each judge so you can see all voices
+    if (preview) {
+      return [
+        { text: drops.nakamojo[0],    name: 'NAKAMOJO',      sigil: '⬡' },
+        { text: drops.walletorius[0], name: 'WALLETORIUS',   sigil: '◈' },
+        { text: drops.countershaw[0], name: 'COUNTERSHAW',   sigil: '◉' },
+        { text: drops.prof_tg00dman[0], name: 'PROF.TG00DMAN', sigil: '⬢' },
+        { text: drops.dj_pepai[0],    name: 'DJ PEPAI',      sigil: '◎' },
+      ];
+    }
     const all = [
       ...drops.nakamojo.map(d => ({ text: d, name: 'NAKAMOJO', sigil: '⬡' })),
       ...drops.walletorius.map(d => ({ text: d, name: 'WALLETORIUS', sigil: '◈' })),
@@ -42,7 +53,7 @@ function getCouncilDrops() {
       ...drops.prof_tg00dman.map(d => ({ text: d, name: 'PROF.TG00DMAN', sigil: '⬢' })),
       ...drops.dj_pepai.map(d => ({ text: d, name: 'DJ PEPAI', sigil: '◎' })),
     ];
-    // Rotate 3x/day (every 8 hours) — feels like sporadic social posts, not a ticker
+    // Rotate 3x/day (every 8 hours)
     const seed = Math.floor(Date.now() / (8 * 60 * 60 * 1000));
     const picked = [];
     const used = new Set();
@@ -67,7 +78,6 @@ function getFeedTokens() {
       FROM tokens
       WHERE status IN ('approved','rejected') AND judged_at IS NOT NULL
       ORDER BY is_demo ASC, judged_at DESC
-      LIMIT 60
     `).all();
     return rows.map(r => ({ ...r }));
   } catch {
@@ -95,9 +105,10 @@ function cardLabel(series, cardNumber) {
   return `Series ${toRoman(series)} · Card #${String(cardNumber).padStart(3,'0')}`;
 }
 
-export default function FeedPage() {
+export default function FeedPage({ searchParams }) {
   const tokens = getFeedTokens();
-  const drops = getCouncilDrops();
+  const preview = searchParams?.preview === '1';
+  const drops = getCouncilDrops(preview);
 
   return (
     <>
@@ -202,7 +213,7 @@ export default function FeedPage() {
                     <div className={styles.scoreNum} style={{color: bar.color}}>
                       {avgScore.toFixed(1)}
                     </div>
-                    <div className={styles.scoreLabel}>/ 40</div>
+                    <div className={styles.scoreLabel}>/ 69</div>
                     <div className={styles.scoreBar}>
                       <div className={styles.scoreBarFill}
                         style={{width: `${bar.pct}%`, background: bar.color}} />
@@ -215,7 +226,7 @@ export default function FeedPage() {
                   <div className={styles.judgeGrid}>
                     {judges.map((j) => {
                       const meta = getJudgeMeta(j.judge_id);
-                      const jBar = scoreBar(j.raw_score);
+                      const jBar = scoreBar(j.raw_score, 45);
                       return (
                         <div key={j.judge_id} className={styles.judgeCard}>
                           <div className={styles.judgeHeader}>
