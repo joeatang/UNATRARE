@@ -589,7 +589,7 @@ function Step4({ data, onNext, onBack }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-//  Step 5 — Submitted to the Pepe Mempool
+//  Step 5 — Submitted to the Pepempool
 // ─────────────────────────────────────────────────────────────────
 function Step5({ data }) {
   const [submitState, setSubmitState] = useState('idle'); // idle | loading | ok | error
@@ -641,10 +641,10 @@ function Step5({ data }) {
   if (submitState === 'loading' || submitState === 'idle') {
     return (
       <div className={styles.stepBox}>
-        <div className={styles.stepEyebrow}>Entering Mempool</div>
+        <div className={styles.stepEyebrow}>Entering Pepempool</div>
         <div style={{fontFamily:'var(--font-card)', fontSize:'14px', letterSpacing:'4px',
           color:'var(--amber)', padding:'40px 0', textAlign:'center'}}>
-          entering the pepe mempool...
+          entering the pepempool...
         </div>
       </div>
     );
@@ -684,10 +684,10 @@ function Step5({ data }) {
     );
   }
 
-  // 'ok' — in the mempool
+  // 'ok' — in the pepempool
   return (
     <div className={styles.stepBox}>
-      <div className={styles.stepEyebrow}>You Are In The Mempool</div>
+      <div className={styles.stepEyebrow}>You Are In The Pepempool</div>
       <h2 className={styles.stepTitle}>SUBM<span>I</span>TTED</h2>
 
       {/* Mystery card */}
@@ -716,7 +716,7 @@ function Step5({ data }) {
       </div>
 
       <p className={styles.stepDesc}>
-        <strong>{data.tokenName}</strong> is now in the Pepe Mempool.<br />
+        <strong>{data.tokenName}</strong> is now in the Pepempool.<br />
         The 6-judge council is evaluating your art against five criteria:<br />
         <span style={{fontFamily:'var(--font-card)',fontSize:'10px',letterSpacing:'2px',color:'var(--amber)',display:'block',marginTop:8,lineHeight:2}}>
           INEVITABILITY · MEMETIC DENSITY · CRAFT · CULTURAL CONTINUITY · ARCHIVAL VALUE
@@ -736,7 +736,7 @@ function Step5({ data }) {
           color:'var(--text-dim)', textDecoration:'none',
           border:'1px solid var(--border)', padding:'10px 20px',
         }}>
-          ← back to mempool
+          ← back to pepempool
         </Link>
       </div>
     </div>
