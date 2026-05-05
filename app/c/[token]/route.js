@@ -90,9 +90,10 @@ export async function GET(request, { params }) {
     status: 200,
     headers: {
       ...CORS,
-      // Art revealed publicly: 1hr CDN cache. Pending/unrevealed: no-store.
+      // Art revealed publicly: 5min CDN cache (short enough to propagate fixes fast).
+      // Pending/unrevealed: no-store.
       'Cache-Control': isRevealed
-        ? 'public, max-age=3600, s-maxage=3600'
+        ? 'public, max-age=300, s-maxage=300'
         : 'no-store',
       'Content-Type': 'application/json',
     },
