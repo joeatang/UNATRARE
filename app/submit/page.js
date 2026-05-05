@@ -97,7 +97,7 @@ function Step0({ onNext }) {
 
   return (
     <div className={styles.stepBox}>
-      <div className={styles.stepEyebrow}>Step 0 of 6</div>
+      <div className={styles.stepEyebrow}>Step 1 of 6</div>
       <h2 className={styles.stepTitle}>GET Y<span>O</span>UR URL</h2>
       <p className={styles.stepDesc}>
         <strong>Before you create your Counterparty token</strong>, you need your metadata URL.<br />
@@ -214,11 +214,11 @@ function Step1({ data, onNext, onBack }) {
 
   return (
     <div className={styles.stepBox}>
-      <div className={styles.stepEyebrow}>Step 1 of 5</div>
+      <div className={styles.stepEyebrow}>Step 2 of 6</div>
       <h2 className={styles.stepTitle}>VERIF<span>Y</span> TOKEN</h2>
       <p className={styles.stepDesc}>
         We check that <strong>{data.tokenName}</strong> exists on Counterparty,
-        is locked, non-divisible, and has a supply between 1 and 21,000.
+        is locked, non-divisible, and has a supply of at least {MIN_SUPPLY} (up to 21,000).
       </p>
 
       {status === 'idle' && (
@@ -347,7 +347,7 @@ function Step2({ data, onNext, onBack }) {
 
   return (
     <div className={styles.stepBox}>
-      <div className={styles.stepEyebrow}>Step 2 of 5</div>
+      <div className={styles.stepEyebrow}>Step 3 of 6</div>
       <h2 className={styles.stepTitle}>UPL<span>O</span>AD ART</h2>
       <p className={styles.stepDesc}>
         Upload the art for <strong>{data.tokenName}</strong>.<br />
@@ -459,7 +459,7 @@ function Step3({ data, onNext, onBack }) {
 
   return (
     <div className={styles.stepBox}>
-      <div className={styles.stepEyebrow}>Step 3 of 5</div>
+      <div className={styles.stepEyebrow}>Step 4 of 6</div>
       <h2 className={styles.stepTitle}>ART D<span>E</span>TAILS</h2>
       <p className={styles.stepDesc}>
         Optional. These appear in wallets and the directory.<br />
@@ -565,7 +565,7 @@ function Step4({ data, onNext, onBack }) {
 
   return (
     <div className={styles.stepBox}>
-      <div className={styles.stepEyebrow}>Step 4 of 5</div>
+      <div className={styles.stepEyebrow}>Step 5 of 6</div>
       <h2 className={styles.stepTitle}>PR<span>O</span>VE OWNERSHIP</h2>
       <p className={styles.stepDesc}>
         Sign the message below with <strong>{data.owner?.slice(0,16)}…</strong><br />
@@ -730,8 +730,11 @@ function Step5({ data }) {
 
       <p className={styles.stepDesc}>
         <strong>{data.tokenName}</strong> is now in the Pepe Mempool.<br />
-        The 5-judge scientist panel is evaluating your art.<br />
-        If certified DANK, you will be contacted with payment instructions.
+        The 5-judge scientist panel is evaluating your art against five criteria:<br />
+        <span style={{fontFamily:'var(--font-card)',fontSize:'10px',letterSpacing:'2px',color:'var(--amber)',display:'block',marginTop:8,lineHeight:2}}>
+          INEVITABILITY · MEMETIC DENSITY · CRAFT · CULTURAL CONTINUITY · ARCHIVAL VALUE
+        </span>
+        <span style={{display:'block',marginTop:8}}>Threshold: 44/69 to certify. Results appear live on the <Link href="/" style={{color:'var(--amber)',textDecoration:'none'}}>verdict feed →</Link></span>
       </p>
 
       <div className={styles.urlBox}>
