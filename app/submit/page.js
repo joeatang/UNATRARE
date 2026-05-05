@@ -37,21 +37,9 @@ function buildUrl(tokenName) {
   return `https://unatrare.wtf/c/${tokenName}.json`;
 }
 
-// ── Supply split calculator ──
-// At 420 holders, min = ceil(420 / 0.84) = 500
+// Min supply = number of UNATPEPE holder addresses (artist gets 2%)
 const HOLDER_COUNT = parseInt(process.env.NEXT_PUBLIC_HOLDER_COUNT || '420', 10);
-const MIN_SUPPLY   = Math.ceil(HOLDER_COUNT / 0.84);
-
-function calcSplit(supply) {
-  const s = Math.max(supply, MIN_SUPPLY);
-  return {
-    holders:  HOLDER_COUNT,
-    artist:   Math.floor(s * 0.025),
-    treasury: Math.floor(s * 0.025),
-    burned:   Math.floor(s * 0.11),
-    minSupply: MIN_SUPPLY,
-  };
-}
+const MIN_SUPPLY   = HOLDER_COUNT;
 
 // ─────────────────────────────────────────────────────────────────
 //  Step 0 — Get Your Metadata URL
@@ -142,23 +130,6 @@ function Step0({ onNext }) {
             >
               {copied ? 'copied ✓' : 'copy url →'}
             </button>
-          </div>
-
-          {/* Supply commitment panel */}
-          <div className={styles.urlBox} style={{marginBottom:16, borderColor:'var(--amber)'}}>
-            <div className={styles.urlBoxLabel}>supply commitment (path a — default)</div>
-            <div style={{display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, margin:'12px 0'}}>
-              {[{n:HOLDER_COUNT, label:'to holders'},{n:calcSplit(MIN_SUPPLY).artist,label:'to you'},{n:calcSplit(MIN_SUPPLY).treasury,label:'to treasury'}].map(({n,label}) => (
-                <div key={label} style={{textAlign:'center'}}>
-                  <div style={{fontFamily:'var(--font-display)',fontSize:22,letterSpacing:2,color:'var(--amber-hot)'}}>{n}</div>
-                  <div style={{fontFamily:'var(--font-card)',fontSize:'9px',letterSpacing:2,color:'var(--text-dim)',textTransform:'uppercase'}}>{label}</div>
-                </div>
-              ))}
-            </div>
-            <div className={styles.urlBoxMeta}>
-              minimum supply: {MIN_SUPPLY} · based on {HOLDER_COUNT} registered holders ·{' '}
-              <a href="/terms" target="_blank" style={{color:'var(--amber)',textDecoration:'none'}}>full rules →</a>
-            </div>
           </div>
 
           <div className={styles.warningBox}>
@@ -266,14 +237,6 @@ function Step1({ data, onNext, onBack }) {
                   You will need to issue additional supply on Counterparty before submitting.
                   See <a href="/terms" target="_blank" style={{color:'var(--amber)'}}>enrollment rules</a> for the full formula.
                 </div>
-              </div>
-            )}
-            {!belowMin && (
-              <div style={{marginBottom:16}}>
-                {[{n:HOLDER_COUNT,label:'to holders'},{n:calcSplit(result.supply).artist,label:'to you'},{n:calcSplit(result.supply).treasury,label:'to treasury'}].map(({n,label}) => (
-                  <span key={label} style={{fontFamily:'var(--font-card)',fontSize:'10px',letterSpacing:2,
-                    color:'var(--amber)',marginRight:20,whiteSpace:'nowrap'}}>{n} {label}</span>
-                ))}
               </div>
             )}
             <div style={{display:'flex', gap:12, flexWrap:'wrap'}}>
