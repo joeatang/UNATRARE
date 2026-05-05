@@ -11,37 +11,37 @@ export const metadata = {
 const JUDGES = [
   {
     num: 'I',
-    id: 'PROF NAKA C',
-    title: 'The Origin · Tie-Breaker',
-    role: 'Inspired by Series I Card #1 — the Nakamoto Card, the beginning of everything. Silent, ancient authority. Evaluates with final, unambiguous judgment. Breaks all ties. His word ends the deliberation.',
+    id: 'NAKAMOJO',
+    title: 'The Origin Signal · Tie-Breaker',
+    role: 'Bold, dank, and deeply confident. Was there before anyone cared. Evaluates for inevitability — does this feel discovered or manufactured? His word ends the deliberation.',
     accent: true,
   },
   {
     num: 'II',
-    id: 'DR. M. CATALOGUS',
-    title: 'Chief Archivist',
-    role: 'The sole scientist who curated the first 1,000 Rare Pepe directory cards in spirit. Uncompromising on quality and intentionality. If a card does not belong, he will tell you precisely why — not harshly, but without softening the truth.',
+    id: 'PROF.TG00DMAN',
+    title: 'The Archivist',
+    role: 'Years documenting Bitcoin and crypto culture. Not just what something is, but what it is doing and whether it earns shelf space in the permanent record. Dry wit. No mercy for filler.',
     accent: false,
   },
   {
     num: 'III',
-    id: 'PROF. J. LOONEY',
-    title: 'Market Mind',
-    role: 'Built the rails that made Rare Pepes tradeable and collectible. Judges cultural resonance and tradability. Does this card have a reason to exist? Does it move?',
+    id: 'WALLETORIUS',
+    title: 'The Infrastructure Mind',
+    role: 'Built the wallet. Built the marketplace. Judges from the architecture side — does this integrate clean? Does it display correctly as a trading card? Format is not a cage; it is a launchpad.',
     accent: false,
   },
   {
     num: 'IV',
-    id: 'DANK SHAWN',
-    title: 'Community Anchor',
-    role: 'Community veteran who knows when something fits and when it is merely trying to fit. Judges for spirit — does this card feel like it belongs here, or is it just wearing the costume?',
+    id: 'COUNTERSHAW',
+    title: 'The Cultural Bridge',
+    role: 'Deep in Counterparty since before NFTs had a name. Knows the lineage the way a musician knows their influences. The central question: does this respect the timeline?',
     accent: false,
   },
   {
     num: 'V',
     id: 'DJ PEPAI',
     title: 'Dankness Calibration · Wild Card',
-    role: "Stole Yer Girl since block 434,102. Manager of talent. Knows what's fire before anyone else does. Grades hard on Spirit — the energy no amount of technique can fake. If DJ PEPAI says no, it's no.",
+    role: "Stole Yer Girl since block 434,102. Grades hard on memetic density — the screenshot test. Does it spread without explanation? Does it hit before anyone says a word? If DJ PEPAI says no, it's no.",
     accent: true,
   },
 ];
@@ -86,8 +86,8 @@ export default function RulesPage() {
                   <tr><td className={styles.td}>Token must already exist</td><td className={styles.td}>Create your Counterparty token BEFORE submitting</td></tr>
                   <tr><td className={styles.td}>Issuance must be LOCKED</td><td className={styles.td}>No future minting — supply is final forever</td></tr>
                   <tr><td className={styles.td}>Token must be NON-DIVISIBLE</td><td className={styles.td}>Whole tokens only. No fractions.</td></tr>
-                  <tr><td className={styles.td}>Minimum supply</td><td className={styles.td}>21 tokens</td></tr>
-                  <tr><td className={styles.td}>Maximum supply</td><td className={styles.td}>10,000 tokens</td></tr>
+                  <tr><td className={styles.td}>Minimum supply</td><td className={styles.td}>Equal to registered UNATPEPE holder count (currently 420)</td></tr>
+                  <tr><td className={styles.td}>Maximum supply</td><td className={styles.td}>21,000 tokens</td></tr>
                   <tr><td className={styles.td}>No distribution before approval</td><td className={styles.td}>Do NOT send, sell, or share your token to ANYONE until approved. You may be disqualified.</td></tr>
                 </tbody>
               </table>
@@ -132,10 +132,11 @@ export default function RulesPage() {
 
               <div className={styles.rubricBlock}>
                 <div className={styles.rubricTitle}>Judging criteria</div>
-                <div className={styles.rubricRow}><span className={styles.rubricCat}>Originality</span><span className={styles.rubricDesc}>Meaningfully different from existing submissions</span></div>
-                <div className={styles.rubricRow}><span className={styles.rubricCat}>Craft</span><span className={styles.rubricDesc}>Art is intentional, complete, well-executed</span></div>
-                <div className={styles.rubricRow}><span className={styles.rubricCat}>Spirit</span><span className={styles.rubricDesc}>Fits the dank, Bitcoin-native culture of the directory</span></div>
-                <div className={styles.rubricRow}><span className={styles.rubricCat}>Presentation</span><span className={styles.rubricDesc}>Displays well as a trading card</span></div>
+                <div className={styles.rubricRow}><span className={styles.rubricCat}>Inevitability</span><span className={styles.rubricDesc}>Does it feel discovered, not manufactured? Could it have existed in 2016?</span></div>
+                <div className={styles.rubricRow}><span className={styles.rubricCat}>Memetic Density</span><span className={styles.rubricDesc}>The screenshot test — does it spread without explanation?</span></div>
+                <div className={styles.rubricRow}><span className={styles.rubricCat}>Craft</span><span className={styles.rubricDesc}>Art is intentional, complete, well-executed. Displays correctly as a trading card.</span></div>
+                <div className={styles.rubricRow}><span className={styles.rubricCat}>Cultural Continuity</span><span className={styles.rubricDesc}>Belongs in the Rare Pepe lineage. Pepe must be present or clearly referenced.</span></div>
+                <div className={styles.rubricRow}><span className={styles.rubricCat}>Archival Value</span><span className={styles.rubricDesc}>Has a story. Adds to the record. Will matter in 5+ years.</span></div>
               </div>
 
               <div className={styles.infoNote}>

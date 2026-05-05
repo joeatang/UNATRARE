@@ -47,16 +47,16 @@ export default function TermsPage() {
             <p>
               UNATPEPE currently has <strong>420 registered holders</strong>.
               Every holder gets exactly 1 copy of every certified card — so the
-              minimum supply is calculated from that number.
+              minimum supply must at least equal that number.
             </p>
           </div>
           <div className={styles.formulaBox}>
-            <div className={styles.formulaLabel}>minimum supply formula</div>
+            <div className={styles.formulaLabel}>minimum supply rule</div>
             <div className={styles.formula}>
-              min = ceil(holders ÷ 0.84)
+              min = registered UNATPEPE holder count
             </div>
             <div className={styles.formulaNote}>
-              At 420 holders → minimum supply = 500
+              At 420 holders → minimum supply = 420
             </div>
           </div>
           <div className={styles.prose}>
@@ -88,12 +88,12 @@ export default function TermsPage() {
               <div className={styles.splitNote}>1 token per holder address, guaranteed</div>
             </div>
             <div className={styles.splitRow}>
-              <div className={styles.splitPct} style={{color:'var(--green-hot)'}}>2.5%</div>
+              <div className={styles.splitPct} style={{color:'var(--green-hot)'}}>2%</div>
               <div className={styles.splitWho}>You (Artist)</div>
               <div className={styles.splitNote}>your allocation, yours to sell or hold</div>
             </div>
             <div className={styles.splitRow}>
-              <div className={styles.splitPct} style={{color:'var(--amber)'}}>2.5%</div>
+              <div className={styles.splitPct} style={{color:'var(--amber)'}}>2%</div>
               <div className={styles.splitWho}>UNATRARE Treasury</div>
               <div className={styles.splitNote}>funds operations + future distributions</div>
             </div>
@@ -108,9 +108,9 @@ export default function TermsPage() {
             <div className={styles.exampleLabel}>example at 500 supply</div>
             <div className={styles.exampleGrid}>
               <span>420 to holders</span>
-              <span>~13 to you</span>
-              <span>~13 to treasury</span>
-              <span>~54 in reserve</span>
+              <span>~10 to you</span>
+              <span>~10 to treasury</span>
+              <span>~60 in reserve</span>
             </div>
           </div>
 
@@ -230,7 +230,7 @@ export default function TermsPage() {
             </p>
             <p>
               Every verdict is permanent and public. Full reasoning from each council member
-              is recorded on the <a href="/feed" style={{color: 'var(--amber)'}}>verdict feed</a>.
+              is recorded on the <a href="/" style={{color: 'var(--amber)'}}>verdict feed</a>.
             </p>
           </div>
         </section>
@@ -262,7 +262,7 @@ export default function TermsPage() {
           <Link href="/submit" className={styles.ctaButton}>
             open pepe wizard →
           </Link>
-          <Link href="/feed" className={styles.ctaSecondary}>
+          <Link href="/" className={styles.ctaSecondary}>
             see the verdict feed →
           </Link>
         </div>
