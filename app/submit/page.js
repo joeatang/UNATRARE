@@ -717,11 +717,11 @@ function Step5({ data }) {
 
       <p className={styles.stepDesc}>
         <strong>{data.tokenName}</strong> is now in the Pepe Mempool.<br />
-        The 5-judge scientist panel is evaluating your art against five criteria:<br />
+        The 6-judge council is evaluating your art against five criteria:<br />
         <span style={{fontFamily:'var(--font-card)',fontSize:'10px',letterSpacing:'2px',color:'var(--amber)',display:'block',marginTop:8,lineHeight:2}}>
           INEVITABILITY · MEMETIC DENSITY · CRAFT · CULTURAL CONTINUITY · ARCHIVAL VALUE
         </span>
-        <span style={{display:'block',marginTop:8}}>Threshold: 44/69 to certify. Results appear live on the <Link href="/" style={{color:'var(--amber)',textDecoration:'none'}}>verdict feed →</Link></span>
+        <span style={{display:'block',marginTop:8}}>Threshold: 42/69 to certify. Results appear live on the <Link href="/" style={{color:'var(--amber)',textDecoration:'none'}}>verdict feed →</Link></span>
       </p>
 
       <div className={styles.urlBox}>
