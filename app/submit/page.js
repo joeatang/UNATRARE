@@ -48,6 +48,7 @@ function Step0({ onNext }) {
   const [raw, setRaw] = useState('');
   const [result, setResult] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [inviteCode, setInviteCode] = useState('');
 
   function handleChange(e) {
     const v = e.target.value.toUpperCase().replace(/[^A-Z0-9.]/g, '');
@@ -144,9 +145,31 @@ function Step0({ onNext }) {
             </div>
           </div>
 
+          {/* Optional Series 0 invite code */}
+          <div style={{marginTop:20, padding:'14px 16px', border:'1px solid var(--border-dim)', background:'rgba(255,200,0,0.03)'}}>
+            <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'3px', color:'var(--amber)', marginBottom:8}}>
+              ★ SERIES 0 INVITE CODE — OPTIONAL
+            </div>
+            <div style={{fontFamily:'var(--font-body)', fontSize:'12px', color:'var(--text-dim)', marginBottom:10, lineHeight:1.5}}>
+              If you received a Series 0 honorary invite code, enter it here.
+            </div>
+            <input
+              type="text"
+              value={inviteCode}
+              onChange={e => setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 9))}
+              placeholder="S0-XXXXXX"
+              style={{
+                width:'100%', boxSizing:'border-box', padding:'8px 12px',
+                background:'var(--bg)', border:'1px solid var(--border)',
+                color:'var(--text)', fontFamily:'var(--font-card)', fontSize:'12px',
+                letterSpacing:'3px',
+              }}
+            />
+          </div>
+
           <button
             className={styles.nextBtn}
-            onClick={() => onNext({ tokenName: result.normalized })}
+            onClick={() => onNext({ tokenName: result.normalized, inviteCode: inviteCode.trim().toUpperCase() || '' })}
           >
             i created the token → continue
           </button>
@@ -592,6 +615,7 @@ function Step5({ data }) {
             artistHandle:   data.artistHandle   || '',
             description:    data.description    || '',
             ordInscription: data.ordInscription || '',
+            inviteCode:     data.inviteCode     || '',
           }),
         });
         const json = await res.json();

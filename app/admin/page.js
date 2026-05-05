@@ -61,6 +61,7 @@ function TokenRow({ token, authToken, onAction }) {
   const [revealed, setRevealed] = useState(!!token.revealed_at); // tracks drop state
   const [announceText, setAnnounceText] = useState(null); // set after drop art
   const [announceCopied, setAnnounceCopied] = useState(false);
+  const [dirHidden, setDirHidden] = useState(!!token.directory_hidden);
 
   async function act(action) {
     setLoading(action);
@@ -75,7 +76,11 @@ function TokenRow({ token, authToken, onAction }) {
     const json = await res.json();
     setLoading(null);
     if (json.ok) {
-      if (action === 'approve' || action === 'genesis') {
+      if (action === 'hide_from_directory') {
+        setDirHidden(true);
+      } else if (action === 'show_in_directory') {
+        setDirHidden(false);
+      } else if (action === 'approve' || action === 'genesis') {
         setApprovalResult(json); // show branded message before dismissing
       } else if (action === 'reveal') {
         setRevealed(true);
@@ -303,6 +308,20 @@ function TokenRow({ token, authToken, onAction }) {
                 title="Delete this submission entirely — for test cleanup"
               >
                 {loading === 'purge' ? 'deleting...' : '✕ purge'}
+              </button>
+              <button
+                className={styles.actionBtn}
+                onClick={() => act(dirHidden ? 'show_in_directory' : 'hide_from_directory')}
+                disabled={!!loading}
+                title={dirHidden ? 'Show in public directory' : 'Hide from public directory (still shows in feed)'}
+                style={{
+                  border: dirHidden ? '1px solid var(--amber)' : '1px solid var(--border-dim)',
+                  color: dirHidden ? 'var(--amber)' : 'var(--text-dim)',
+                }}
+              >
+                {loading === 'hide_from_directory' || loading === 'show_in_directory'
+                  ? '...'
+                  : dirHidden ? '◎ show dir' : '◯ hide dir'}
               </button>
             </div>
           </div>
@@ -689,6 +708,229 @@ function DemoPanel({ authToken }) {
   );
 }
 
+// ── Series 0 invite codes panel ────────────────────────────────
+function S0CodesPanel({ authToken }) {
+  const [open, setOpen] = useState(false);
+  const [note, setNote] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [codes, setCodes] = useState([]);
+  const [generated, setGenerated] = useState(null);
+
+  async function fetchCodes() {
+    const res = await fetch('/api/admin/series0-codes', {
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    const json = await res.json();
+    if (json.ok) setCodes(json.codes);
+  }
+
+  useEffect(() => { if (open) fetchCodes(); }, [open]);
+
+  async function handleGenerate() {
+    setLoading(true);
+    setGenerated(null);
+    const res = await fetch('/api/admin/series0-codes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ note }),
+    });
+    const json = await res.json();
+    setLoading(false);
+    if (json.ok) {
+      setGenerated(json.code);
+      setNote('');
+      fetchCodes();
+    }
+  }
+
+  async function handleRevoke(code) {
+    if (!confirm(`Revoke code ${code}? (Cannot revoke used codes)`)) return;
+    const res = await fetch('/api/admin/series0-codes', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ code }),
+    });
+    const json = await res.json();
+    if (json.ok) fetchCodes();
+    else alert(json.error);
+  }
+
+  return (
+    <div style={{ margin: '24px 0', border: '1px solid var(--border-dim)', background: 'rgba(255,200,0,0.03)' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%', padding: '14px 20px', display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', background: 'transparent', border: 'none',
+          cursor: 'pointer', fontFamily: 'var(--font-card)', fontSize: '10px',
+          letterSpacing: '3px', color: 'var(--amber)',
+        }}
+      >
+        <span>★ SERIES 0 INVITE CODES</span>
+        <span style={{ color: 'var(--text-dim)' }}>{open ? '▲' : '▼'}</span>
+      </button>
+      {open && (
+        <div style={{ padding: '0 20px 20px' }}>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)', marginBottom: 16, lineHeight: 1.6 }}>
+            Generate a single-use code to give to a Series 0 honorary artist. They enter it in the submit wizard Step 1.
+          </div>
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+            <input
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              placeholder="note (e.g. 'for SOFTPWAR artist')"
+              style={{ flex: 1, padding: '8px 10px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', fontFamily: 'var(--font-card)', fontSize: '11px', letterSpacing: '1px' }}
+            />
+            <button
+              onClick={handleGenerate}
+              disabled={loading}
+              style={{ padding: '8px 16px', border: '1px solid var(--amber)', background: 'transparent', color: 'var(--amber)', fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', cursor: 'pointer' }}
+            >
+              {loading ? '...' : '★ generate'}
+            </button>
+          </div>
+          {generated && (
+            <div style={{ padding: '10px 14px', border: '1px solid var(--green)', fontFamily: 'var(--font-card)', fontSize: '14px', letterSpacing: '4px', color: 'var(--green)', marginBottom: 16 }}>
+              ✓ {generated} — send this to the artist
+            </div>
+          )}
+          {codes.length > 0 && (
+            <div>
+              <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 8 }}>ALL CODES</div>
+              {codes.map(c => (
+                <div key={c.code} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0', borderBottom: '1px solid var(--border-dim)', fontFamily: 'var(--font-card)', fontSize: '10px' }}>
+                  <span style={{ letterSpacing: '3px', color: c.used_by ? 'var(--text-dim)' : 'var(--amber)', flex: 0 }}>{c.code}</span>
+                  <span style={{ flex: 1, color: 'var(--text-dim)', fontSize: '9px', letterSpacing: '1px' }}>
+                    {c.note && `${c.note} · `}{c.used_by ? `used by ${c.used_by}` : 'unused'}
+                  </span>
+                  {!c.used_by && (
+                    <button
+                      onClick={() => handleRevoke(c.code)}
+                      style={{ padding: '3px 8px', border: '1px solid var(--border-dim)', background: 'transparent', color: 'var(--text-dim)', fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '1px', cursor: 'pointer' }}
+                    >
+                      revoke
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          {codes.length === 0 && <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)' }}>no codes generated yet</div>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── UNATAMOTO claims panel ─────────────────────────────────────
+function ClaimsPanel({ authToken }) {
+  const [open, setOpen] = useState(false);
+  const [claims, setClaims] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [eligible, setEligible] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  async function fetchClaims() {
+    setLoading(true);
+    const res = await fetch('/api/admin/claims', {
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    const json = await res.json();
+    setLoading(false);
+    if (json.ok) { setClaims(json.claims); setTotal(json.total); setEligible(json.eligible); }
+  }
+
+  useEffect(() => { if (open) fetchClaims(); }, [open]);
+
+  async function markDistributed(address) {
+    const res = await fetch('/api/admin/claims', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ address }),
+    });
+    const json = await res.json();
+    if (json.ok) fetchClaims();
+  }
+
+  function exportCsv() {
+    const rows = [['address','unatpepe','softpwar','eligible','distributed','verified_at']];
+    for (const c of claims) {
+      const el = c.unatpepe_qty > 0 && c.softpwar_qty > 0;
+      rows.push([c.address, c.unatpepe_qty, c.softpwar_qty, el ? 'yes' : 'no', c.distributed ? 'yes' : 'no', new Date(c.verified_at * 1000).toISOString()]);
+    }
+    const csv = rows.map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'unatamoto-claims.csv'; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <div style={{ margin: '24px 0', border: '1px solid var(--border-dim)', background: 'rgba(0,255,136,0.02)' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%', padding: '14px 20px', display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', background: 'transparent', border: 'none',
+          cursor: 'pointer', fontFamily: 'var(--font-card)', fontSize: '10px',
+          letterSpacing: '3px', color: 'var(--green)',
+        }}
+      >
+        <span>⬡ UNATAMOTO CLAIMS {total > 0 ? `(${eligible}/${total} eligible)` : ''}</span>
+        <span style={{ color: 'var(--text-dim)' }}>{open ? '▲' : '▼'}</span>
+      </button>
+      {open && (
+        <div style={{ padding: '0 20px 20px' }}>
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16, alignItems: 'center' }}>
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)' }}>
+              Wallets that submitted a claim. Eligible = holds UNATPEPE + SOFTPWAR.
+            </div>
+            {claims.length > 0 && (
+              <button
+                onClick={exportCsv}
+                style={{ padding: '6px 14px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-dim)', fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
+                ↓ csv
+              </button>
+            )}
+            <button
+              onClick={fetchClaims}
+              disabled={loading}
+              style={{ padding: '6px 14px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-dim)', fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', cursor: 'pointer' }}
+            >
+              {loading ? '...' : '↻'}
+            </button>
+          </div>
+          {claims.length === 0 && !loading && <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)' }}>no claims yet</div>}
+          {claims.map(c => {
+            const el = c.unatpepe_qty > 0 && c.softpwar_qty > 0;
+            return (
+              <div key={c.address} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: '1px solid var(--border-dim)', fontFamily: 'var(--font-card)', fontSize: '10px' }}>
+                <span style={{ flex: 1, color: el ? 'var(--text)' : 'var(--text-dim)', wordBreak: 'break-all' }}>{c.address}</span>
+                <span style={{ color: c.unatpepe_qty > 0 ? 'var(--green)' : 'var(--red)', letterSpacing: '1px' }}>UNATPEPE:{c.unatpepe_qty}</span>
+                <span style={{ color: c.softpwar_qty > 0 ? 'var(--green)' : 'var(--red)', letterSpacing: '1px' }}>SOFTPWAR:{c.softpwar_qty}</span>
+                {c.distributed ? (
+                  <span style={{ color: 'var(--green)', letterSpacing: '1px' }}>✓ sent</span>
+                ) : el ? (
+                  <button
+                    onClick={() => markDistributed(c.address)}
+                    style={{ padding: '3px 10px', border: '1px solid var(--green)', background: 'transparent', color: 'var(--green)', fontFamily: 'var(--font-card)', fontSize: '9px', cursor: 'pointer' }}
+                  >
+                    mark sent
+                  </button>
+                ) : (
+                  <span style={{ color: 'var(--text-dim)', letterSpacing: '1px' }}>ineligible</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main admin dashboard ───────────────────────────────────────
 export default function AdminPage() {
   const [authToken, setAuthToken] = useState(null);
@@ -905,6 +1147,8 @@ export default function AdminPage() {
       </div>
 
       <DemoPanel authToken={authToken} />
+      <S0CodesPanel authToken={authToken} />
+      <ClaimsPanel authToken={authToken} />
     </div>
   );
 }

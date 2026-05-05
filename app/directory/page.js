@@ -23,11 +23,11 @@ function getApproved(series, sort) {
     let rows;
     if (series) {
       rows = db.prepare(
-        `SELECT * FROM tokens WHERE status='approved' AND series=? AND (is_demo IS NULL OR is_demo=0) ORDER BY ${orderBy}`
+        `SELECT * FROM tokens WHERE status='approved' AND series=? AND (is_demo IS NULL OR is_demo=0) AND (directory_hidden IS NULL OR directory_hidden=0) ORDER BY ${orderBy}`
       ).all(Number(series));
     } else {
       rows = db.prepare(
-        `SELECT * FROM tokens WHERE status='approved' AND (is_demo IS NULL OR is_demo=0) ORDER BY ${orderBy}`
+        `SELECT * FROM tokens WHERE status='approved' AND (is_demo IS NULL OR is_demo=0) AND (directory_hidden IS NULL OR directory_hidden=0) ORDER BY ${orderBy}`
       ).all();
     }
     // Group by series
@@ -56,7 +56,7 @@ export default function DirectoryPage({ searchParams }) {
   try {
     const db = getDb();
     allSeries = db.prepare(
-      "SELECT DISTINCT series FROM tokens WHERE status='approved' ORDER BY series ASC"
+      "SELECT DISTINCT series FROM tokens WHERE status='approved' AND (directory_hidden IS NULL OR directory_hidden=0) ORDER BY series ASC"
     ).all().map(r => r.series);
   } catch { /* empty */ }
 

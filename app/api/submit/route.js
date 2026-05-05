@@ -25,6 +25,7 @@ export async function POST(request) {
     artistHandle   = '',
     description    = '',
     ordInscription = '',
+    inviteCode     = '',
   } = body || {};
 
   // ── Required field checks ───────────────────────────────────
@@ -73,6 +74,22 @@ export async function POST(request) {
       }
     }
 
+    // ── Validate Series 0 invite code (optional) ─────────────────────────
+    let s0CodeUsed = '';
+    if (inviteCode && typeof inviteCode === 'string') {
+      const codeNorm = inviteCode.trim().toUpperCase();
+      if (!/^S0-[A-Z2-9]{6}$/.test(codeNorm)) {
+        return NextResponse.json({ ok: false, error: 'Invalid invite code format' }, { status: 422 });
+      }
+      const codeRow = db.prepare(
+        "SELECT * FROM series0_codes WHERE code=? AND used_by=''"
+      ).get(codeNorm);
+      if (!codeRow) {
+        return NextResponse.json({ ok: false, error: 'Invite code is invalid or has already been used' }, { status: 422 });
+      }
+      s0CodeUsed = codeNorm;
+    }
+
     // Duplicate checks
     const existing = db.prepare('SELECT token_name, status FROM tokens WHERE token_name = ?').get(normalized);
     if (existing) {
@@ -102,8 +119,8 @@ export async function POST(request) {
       INSERT INTO tokens
         (token_name, display_title, artist_address, artist_handle,
          description, status, art_url, art_mime, art_hash,
-         supply, cp_version, ord_inscription, submitted_at)
-      VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, unixepoch())
+         supply, cp_version, ord_inscription, submitted_at, series0_code_used)
+      VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, unixepoch(), ?)
     `).run(
       normalized,
       normalized,
@@ -116,7 +133,15 @@ export async function POST(request) {
       Number(supply) || 0,
       cpVersion === 2 ? 2 : 1,
       safeInscription,
+      s0CodeUsed,
     );
+
+    // Consume invite code if used
+    if (s0CodeUsed) {
+      db.prepare(
+        "UPDATE series0_codes SET used_by=?, used_at=unixepoch() WHERE code=?"
+      ).run(normalized, s0CodeUsed);
+    }
 
     // Fire AI judges non-blocking — response returns immediately to client
     judgeToken(normalized).catch(err => console.error('[submit] judge error:', err.message));

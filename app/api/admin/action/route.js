@@ -20,7 +20,8 @@ export async function POST(request) {
   }
 
   const name = tokenName.toUpperCase().trim();
-  const actions = ['approve', 'reject', 'judge', 'rejudge', 'genesis', 'purge', 'reveal'];
+  const actions = ['approve', 'reject', 'judge', 'rejudge', 'genesis', 'purge', 'reveal',
+                   'hide_from_directory', 'show_in_directory'];
   if (!actions.includes(action)) {
     return NextResponse.json({ error: 'invalid action' }, { status: 400 });
   }
@@ -30,6 +31,16 @@ export async function POST(request) {
     const token = db.prepare('SELECT * FROM tokens WHERE token_name = ?').get(name);
     if (!token) {
       return NextResponse.json({ error: 'token not found' }, { status: 404 });
+    }
+
+    if (action === 'hide_from_directory') {
+      db.prepare('UPDATE tokens SET directory_hidden=1 WHERE token_name=?').run(name);
+      return NextResponse.json({ ok: true, action: 'hidden_from_directory' });
+    }
+
+    if (action === 'show_in_directory') {
+      db.prepare('UPDATE tokens SET directory_hidden=0 WHERE token_name=?').run(name);
+      return NextResponse.json({ ok: true, action: 'shown_in_directory' });
     }
 
     if (action === 'judge') {
