@@ -11,11 +11,12 @@ export const dynamic = 'force-dynamic';
 
 // ── Judge persona display config ─────────────────────────
 const JUDGE_META = {
-  prof_naka_c:    { name: 'NAKAMOJO',       role: 'The Origin Signal',      sigil: '⬡' },
-  dr_m_catalogus: { name: 'PROF.TG00DMAN',  role: 'The Archivist',          sigil: '⬢' },
-  prof_j_looney:  { name: 'WALLETORIUS',    role: 'The Infrastructure Mind', sigil: '◈' },
-  dank_shawn:     { name: 'COUNTERSHAW',    role: 'The Cultural Bridge',     sigil: '◉' },
-  dj_pepai:       { name: 'DJ PEPAI',       role: 'The Culture Engine',      sigil: '◎' },
+  prof_naka_c:    { name: 'NAKAMOJO',        role: 'The Origin Signal',        sigil: '⬡' },
+  dr_m_catalogus: { name: 'M.CATALOGUS',     role: 'The Anonymous Archivist',  sigil: '⬢' },
+  prof_j_looney:  { name: 'RARELOONEY',      role: 'The Infrastructure Mind',  sigil: '◈' },
+  dank_shawn:     { name: 'DANKSHAWN',       role: 'The Cultural Bridge',      sigil: '◉' },
+  theo_goodman:   { name: 'PROF.TG00DMAN',   role: 'The Bitcoin Comedian',     sigil: '◆' },
+  dj_pepai:       { name: 'DJ PEPAI',        role: 'The Culture Engine',       sigil: '◎' },
 };
 
 function getJudgeMeta(id) {
@@ -42,11 +43,12 @@ function getCouncilDrops() {
     const cfg = JSON.parse(readFileSync(join(process.cwd(), 'judges.config.json'), 'utf8'));
     const drops = cfg.council_drops;
     const JUDGE_MAP = [
-      { genKey: 'prof_naka_c',    cfgKey: 'nakamojo',      name: 'NAKAMOJO',      sigil: '⬡' },
-      { genKey: 'prof_j_looney',  cfgKey: 'walletorius',   name: 'WALLETORIUS',   sigil: '◈' },
-      { genKey: 'dank_shawn',     cfgKey: 'countershaw',   name: 'COUNTERSHAW',   sigil: '◉' },
-      { genKey: 'dr_m_catalogus', cfgKey: 'prof_tg00dman', name: 'PROF.TG00DMAN', sigil: '⬢' },
-      { genKey: 'dj_pepai',       cfgKey: 'dj_pepai',      name: 'DJ PEPAI',      sigil: '◎' },
+      { genKey: 'prof_naka_c',    cfgKey: 'nakamojo',       name: 'NAKAMOJO',       sigil: '⬡' },
+      { genKey: 'prof_j_looney',  cfgKey: 'rarelooney',     name: 'RARELOONEY',     sigil: '◈' },
+      { genKey: 'dank_shawn',     cfgKey: 'dankshawn',      name: 'DANKSHAWN',      sigil: '◉' },
+      { genKey: 'dr_m_catalogus', cfgKey: 'm_catalogus',    name: 'M.CATALOGUS',    sigil: '⬢' },
+      { genKey: 'theo_goodman',   cfgKey: 'prof_tg00dman',  name: 'PROF.TG00DMAN',  sigil: '◆' },
+      { genKey: 'dj_pepai',       cfgKey: 'dj_pepai',       name: 'DJ PEPAI',       sigil: '◎' },
     ];
     const all = JUDGE_MAP.flatMap(j => {
       const src = (generatedDrops?.[j.genKey]?.length) ? generatedDrops[j.genKey] : (drops[j.cfgKey] || []);
