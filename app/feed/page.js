@@ -42,8 +42,8 @@ function getCouncilDrops() {
       ...drops.prof_tg00dman.map(d => ({ text: d, name: 'PROF.TG00DMAN', sigil: '⬢' })),
       ...drops.dj_pepai.map(d => ({ text: d, name: 'DJ PEPAI', sigil: '◎' })),
     ];
-    // Pick 4 deterministic-by-minute so they feel fresh on reload without being random server/client
-    const seed = Math.floor(Date.now() / 60000);
+    // Rotate 3x/day (every 8 hours) — feels like sporadic social posts, not a ticker
+    const seed = Math.floor(Date.now() / (8 * 60 * 60 * 1000));
     const picked = [];
     const used = new Set();
     for (let i = 0; i < 4; i++) {
