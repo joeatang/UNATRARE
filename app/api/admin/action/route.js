@@ -50,8 +50,18 @@ export async function POST(request) {
     }
 
     if (action === 'rejudge') {
-      // Force re-score without changing status/series/card_number (used for demos + corrections)
+      // Force re-score; also update verdict if score now passes/fails threshold
       const result = await judgeToken(name, { force: true });
+      const config = result?.config ?? {};
+      const threshold = config?.scoring?.approval_threshold ?? 0;
+      const score = result?.score ?? 0;
+      if (score > 0) {
+        const newStatus = score >= threshold ? 'approved' : 'rejected';
+        db.prepare(
+          "UPDATE tokens SET status=?, judge_score=?, judged_at=unixepoch() WHERE token_name=?"
+        ).run(newStatus, score, name);
+        result.verdict_updated = newStatus;
+      }
       return NextResponse.json({ ok: true, result });
     }
 
