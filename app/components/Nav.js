@@ -16,7 +16,6 @@ export default function Nav() {
 
         {/* Desktop links */}
         <ul className={styles['nav-links']}>
-          <li><Link href="/feed">Feed</Link></li>
           <li><Link href="/directory">Directory</Link></li>
           <li><Link href="/governance">Governance</Link></li>
           <li><Link href="/terms">Terms</Link></li>
@@ -46,7 +45,6 @@ export default function Nav() {
       {open && (
         <div className={styles.drawer} onClick={() => setOpen(false)}>
           <ul className={styles.drawerLinks}>
-            <li><Link href="/feed">Feed</Link></li>
             <li><Link href="/directory">Directory</Link></li>
             <li><Link href="/governance">Governance</Link></li>
             <li><Link href="/terms">Terms</Link></li>
