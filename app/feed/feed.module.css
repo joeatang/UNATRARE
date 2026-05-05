@@ -77,8 +77,8 @@
 }
 
 .councilDropsGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 0;
 }
 
@@ -87,15 +87,10 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  border-right: 1px solid var(--border-dim);
   border-bottom: 1px solid var(--border-dim);
 }
 
-.councilDrop:nth-child(2n) {
-  border-right: none;
-}
-
-.councilDrop:nth-last-child(-n+2) {
+.councilDrop:last-child {
   border-bottom: none;
 }
 
@@ -122,16 +117,10 @@
 
 @media (max-width: 600px) {
   .councilDropsGrid {
-    grid-template-columns: 1fr;
+    /* already single column */
   }
   .councilDrop {
     border-right: none;
-  }
-  .councilDrop:nth-last-child(-n+2) {
-    border-bottom: 1px solid var(--border-dim);
-  }
-  .councilDrop:last-child {
-    border-bottom: none;
   }
 }
 
