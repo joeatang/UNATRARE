@@ -2,6 +2,8 @@ import Link from 'next/link';
 import Nav from '../components/Nav';
 import styles from './feed.module.css';
 import { getDb } from '../../lib/db.js';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 export const metadata = {
   title: 'Verdict Feed — UNATRARE',
@@ -12,11 +14,11 @@ export const revalidate = 60;
 
 // ── Judge persona display config ──────────────────────────────────
 const JUDGE_META = {
-  prof_naka_c:    { name: 'PROF NAKA C',     role: 'Chief Scientist',       sigil: '⬡' },
-  dr_m_catalogus: { name: 'DR. M. CATALOGUS', role: 'Cultural Archivist',    sigil: '⬢' },
-  prof_j_looney:  { name: 'PROF. J. LOONEY',  role: 'Craft Inspector',       sigil: '◈' },
-  dank_shawn:     { name: 'DANK SHAWN',        role: 'Spirit Assessor',       sigil: '◉' },
-  dj_pepai:       { name: 'DJ PEPAI',          role: 'Vibe Verification',     sigil: '◎' },
+  prof_naka_c:    { name: 'NAKAMOJO',       role: 'The Origin Signal',      sigil: '⬡' },
+  dr_m_catalogus: { name: 'PROF.TG00DMAN',  role: 'The Archivist',          sigil: '⬢' },
+  prof_j_looney:  { name: 'WALLETORIUS',    role: 'The Infrastructure Mind', sigil: '◈' },
+  dank_shawn:     { name: 'COUNTERSHAW',    role: 'The Cultural Bridge',     sigil: '◉' },
+  dj_pepai:       { name: 'DJ PEPAI',       role: 'The Culture Engine',      sigil: '◎' },
 };
 
 function getJudgeMeta(id) {
@@ -27,6 +29,32 @@ function scoreBar(score, max = 40) {
   const pct = Math.min(100, Math.round((score / max) * 100));
   const color = score >= 32 ? 'var(--green-hot)' : score >= 25 ? 'var(--amber-hot)' : 'var(--red)';
   return { pct, color };
+}
+
+function getCouncilDrops() {
+  try {
+    const cfg = JSON.parse(readFileSync(join(process.cwd(), 'judges.config.json'), 'utf8'));
+    const drops = cfg.council_drops;
+    const all = [
+      ...drops.nakamojo.map(d => ({ text: d, name: 'NAKAMOJO', sigil: '⬡' })),
+      ...drops.walletorius.map(d => ({ text: d, name: 'WALLETORIUS', sigil: '◈' })),
+      ...drops.countershaw.map(d => ({ text: d, name: 'COUNTERSHAW', sigil: '◉' })),
+      ...drops.prof_tg00dman.map(d => ({ text: d, name: 'PROF.TG00DMAN', sigil: '⬢' })),
+      ...drops.dj_pepai.map(d => ({ text: d, name: 'DJ PEPAI', sigil: '◎' })),
+    ];
+    // Pick 4 deterministic-by-minute so they feel fresh on reload without being random server/client
+    const seed = Math.floor(Date.now() / 60000);
+    const picked = [];
+    const used = new Set();
+    for (let i = 0; i < 4; i++) {
+      let idx = (seed * 7 + i * 13) % all.length;
+      let tries = 0;
+      while (used.has(idx) && tries < all.length) { idx = (idx + 1) % all.length; tries++; }
+      used.add(idx);
+      picked.push(all[idx]);
+    }
+    return picked;
+  } catch { return []; }
 }
 
 function getFeedTokens() {
@@ -69,6 +97,7 @@ function cardLabel(series, cardNumber) {
 
 export default function FeedPage() {
   const tokens = getFeedTokens();
+  const drops = getCouncilDrops();
 
   return (
     <>
@@ -76,7 +105,7 @@ export default function FeedPage() {
       <main className={styles.main}>
 
         <header className={styles.header}>
-          <div className={styles.eyebrow}>SCIENTIST PANEL · ALL VERDICTS</div>
+          <div className={styles.eyebrow}>PEPE COUNCIL · ALL VERDICTS</div>
           <h1 className={styles.title}>VERDICT F<span>E</span>ED</h1>
           <p className={styles.subtitle}>
             Every submission judged. Every score recorded.
@@ -90,6 +119,22 @@ export default function FeedPage() {
             <span>{tokens.filter(t => !t.is_demo).length} total verdicts</span>
           </div>
         </header>
+
+        {/* ── Council Signal drops ── */}
+        {drops.length > 0 && (
+          <div className={styles.councilDrops}>
+            <div className={styles.councilDropsLabel}>⬡ COUNCIL SIGNAL</div>
+            <div className={styles.councilDropsGrid}>
+              {drops.map((d, i) => (
+                <div key={i} className={styles.councilDrop}>
+                  <span className={styles.councilDropSigil}>{d.sigil}</span>
+                  <span className={styles.councilDropText}>&ldquo;{d.text}&rdquo;</span>
+                  <span className={styles.councilDropName}>{d.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {tokens.length === 0 && (
           <div className={styles.emptyState}>

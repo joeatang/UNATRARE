@@ -164,33 +164,73 @@ export default function TermsPage() {
 
         {/* ── What gets checked ── */}
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>WHAT THE JUDGES CHECK</h2>
+          <h2 className={styles.sectionTitle}>WHAT THE COUNCIL CHECKS</h2>
+
+          <div className={styles.prose}>
+            <p>
+              Before the council ever looks at your art, five hard rules apply.
+              Violate any one of these and the submission is rejected immediately — no review, no score.
+            </p>
+          </div>
+
+          <div className={styles.rubricGrid} style={{marginBottom: '24px'}}>
+            <div className={styles.rubricItem} style={{borderColor: 'var(--red)', background: 'rgba(192,57,43,0.04)'}}>
+              <div className={styles.rubricName} style={{color: 'var(--red)'}}>Must Have Pepe</div>
+              <div className={styles.rubricDesc}>Pepe the Frog must be present, referenced, or clearly implied. This is a Pepe directory.</div>
+            </div>
+            <div className={styles.rubricItem} style={{borderColor: 'var(--red)', background: 'rgba(192,57,43,0.04)'}}>
+              <div className={styles.rubricName} style={{color: 'var(--red)'}}>No NSFW</div>
+              <div className={styles.rubricDesc}>No sexual, graphic, or hateful content. Keep it light — Pepe has enough bad press already.</div>
+            </div>
+            <div className={styles.rubricItem} style={{borderColor: 'var(--red)', background: 'rgba(192,57,43,0.04)'}}>
+              <div className={styles.rubricName} style={{color: 'var(--red)'}}>No Shilling</div>
+              <div className={styles.rubricDesc}>No embedded URLs, QR codes, phone numbers, or promotional text within the image. The art is the card.</div>
+            </div>
+            <div className={styles.rubricItem} style={{borderColor: 'var(--red)', background: 'rgba(192,57,43,0.04)'}}>
+              <div className={styles.rubricName} style={{color: 'var(--red)'}}>No Plagiarism</div>
+              <div className={styles.rubricDesc}>Your art must be original. Direct copies of existing Rare Pepe cards are auto-rejected.</div>
+            </div>
+          </div>
+
+          <div className={styles.prose} style={{marginBottom: '20px'}}>
+            <p>
+              Pass the hard rules and the full council evaluates. Five members. Five lenses.
+              They are not looking for perfection — they are looking for the real thing.
+            </p>
+          </div>
+
           <div className={styles.rubricGrid}>
             <div className={styles.rubricItem}>
-              <div className={styles.rubricName}>Originality</div>
-              <div className={styles.rubricDesc}>Is this genuinely novel? Or a copy of a copy?</div>
+              <div className={styles.rubricName}>Inevitability</div>
+              <div className={styles.rubricDesc}>Does it feel discovered, not manufactured? Could it have existed in 2016, or does it feel timeless?</div>
+            </div>
+            <div className={styles.rubricItem}>
+              <div className={styles.rubricName}>Memetic Density</div>
+              <div className={styles.rubricDesc}>The screenshot test. Can it spread without explanation? Does it hit before anyone says a word?</div>
+            </div>
+            <div className={styles.rubricItem}>
+              <div className={styles.rubricName}>Cultural Continuity</div>
+              <div className={styles.rubricDesc}>Does it belong in the Rare Pepe lineage? Does the artist understand where this comes from?</div>
+            </div>
+            <div className={styles.rubricItem}>
+              <div className={styles.rubricName}>Archival Value</div>
+              <div className={styles.rubricDesc}>Does it have a point of view? Will this card matter in 5 years? Is it a document or decoration?</div>
             </div>
             <div className={styles.rubricItem}>
               <div className={styles.rubricName}>Craft</div>
-              <div className={styles.rubricDesc}>Technical execution. Resolution, color, composition.</div>
-            </div>
-            <div className={styles.rubricItem}>
-              <div className={styles.rubricName}>Spirit</div>
-              <div className={styles.rubricDesc}>Does it carry the energy of Bitcoin-native culture?</div>
-            </div>
-            <div className={styles.rubricItem}>
-              <div className={styles.rubricName}>Presentation</div>
-              <div className={styles.rubricDesc}>Does it work as a trading card? Scale, borders, format.</div>
+              <div className={styles.rubricDesc}>Intentional execution. Rough but deliberate beats polished but empty. It must display as a card.</div>
             </div>
           </div>
+
           <div className={styles.prose}>
             <p>
-              Five scientists score each category 1–10. Average ≥ 25 = certified.
-              Below 25 = rejected. No appeals. No exceptions.
+              Each council member brings a different lens. A piece that scores high on spirit and lineage
+              can overcome rough craft. A technically perfect but soulless submission will not pass.
+              Genuine effort with a clear point of view is the bar.
             </p>
             <p>
-              Verdicts are final and permanent. Every judgment is recorded publicly
-              on the UNATRARE feed with full reasoning from each judge.
+              Every verdict is permanent and public. Full reasoning from each council member
+              is recorded on the <a href="/feed" style={{color: 'var(--amber)'}}>verdict feed</a>.
             </p>
           </div>
         </section>

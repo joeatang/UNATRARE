@@ -60,6 +60,81 @@
   padding: 80px 0;
 }
 
+/* ── Council Signal drops ── */
+.councilDrops {
+  margin: 0 0 32px;
+  border: 1px solid var(--border-dim);
+  background: rgba(255, 180, 0, 0.03);
+}
+
+.councilDropsLabel {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: var(--amber);
+  padding: 10px 16px 8px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.councilDropsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+}
+
+.councilDrop {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-right: 1px solid var(--border-dim);
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.councilDrop:nth-child(2n) {
+  border-right: none;
+}
+
+.councilDrop:nth-last-child(-n+2) {
+  border-bottom: none;
+}
+
+.councilDropSigil {
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1;
+}
+
+.councilDropText {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+  font-style: italic;
+}
+
+.councilDropName {
+  font-family: var(--font-card);
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+}
+
+@media (max-width: 600px) {
+  .councilDropsGrid {
+    grid-template-columns: 1fr;
+  }
+  .councilDrop {
+    border-right: none;
+  }
+  .councilDrop:nth-last-child(-n+2) {
+    border-bottom: 1px solid var(--border-dim);
+  }
+  .councilDrop:last-child {
+    border-bottom: none;
+  }
+}
+
 .emptyGlyph {
   font-family: var(--font-display);
   font-size: 80px;
