@@ -288,9 +288,9 @@ function Step2({ data, onNext, onBack }) {
   function handleFile(e) {
     const f = e.target.files?.[0];
     if (!f) return;
-    const allowed = ['image/png','image/jpeg','image/gif','image/webp'];
+    const allowed = ['image/png','image/jpeg','image/gif','image/webp','image/svg+xml','text/html'];
     if (!allowed.includes(f.type)) {
-      setErrMsg('File must be PNG, JPG, GIF, or WebP');
+      setErrMsg('File must be PNG, JPG, GIF, WebP, SVG, or HTML');
       return;
     }
     if (f.size > 10 * 1024 * 1024) {
@@ -337,7 +337,7 @@ function Step2({ data, onNext, onBack }) {
       <h2 className={styles.stepTitle}>UPL<span>O</span>AD ART</h2>
       <p className={styles.stepDesc}>
         Upload the art for <strong>{data.tokenName}</strong>.<br />
-        PNG, JPG, GIF, or WebP. Max 10 MB.<br />
+        PNG, JPG, GIF, WebP, SVG, or HTML. Max 10 MB.<br />
         Recommended: 400×560px (trading card ratio) or square.
       </p>
 
@@ -356,7 +356,7 @@ function Step2({ data, onNext, onBack }) {
               {file ? file.name : 'click to select file'}
             </span>
           </div>
-          <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/gif,image/webp"
+          <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,text/html"
             style={{display:'none'}} onChange={handleFile} />
 
           {errMsg && <div className={styles.inputError}>{errMsg}</div>}

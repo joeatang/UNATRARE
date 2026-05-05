@@ -7,12 +7,20 @@ import { storeArt } from '../../../lib/tracBridge.js';
 
 // Uploads are stored in /public/uploads/ — served by Next.js as /uploads/FILENAME
 // This directory persists on the server across restarts.
-// Max size: 10 MB. Allowed: PNG, JPG, GIF, WebP.
+// Max size: 10 MB. Allowed: PNG, JPG, GIF, WebP, SVG, HTML.
 
 // process.cwd() is always the Next.js project root in both dev and production
 const UPLOAD_DIR = path.resolve(process.cwd(), 'public', 'uploads');
 
-const ALLOWED_MIME = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
+const ALLOWED_MIME = new Set([
+  'image/png', 'image/jpeg', 'image/gif', 'image/webp',
+  'image/svg+xml', 'text/html',
+]);
+// Extension map for MIME types that need explicit mapping
+const MIME_EXT = {
+  'image/svg+xml': 'svg',
+  'text/html': 'html',
+};
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
 
 export async function POST(request) {
@@ -42,7 +50,7 @@ export async function POST(request) {
   if (!ALLOWED_MIME.has(file.type)) {
     return NextResponse.json({
       ok: false,
-      error: 'File must be PNG, JPG, GIF, or WebP',
+      error: 'File must be PNG, JPG, GIF, WebP, SVG, or HTML',
     }, { status: 422 });
   }
 
@@ -56,7 +64,7 @@ export async function POST(request) {
 
   const buf      = Buffer.from(bytes);
   const hash     = createHash('sha256').update(buf).digest('hex');
-  const ext      = file.type.split('/')[1].replace('jpeg', 'jpg');
+  const ext      = MIME_EXT[file.type] || file.type.split('/')[1].replace('jpeg', 'jpg');
   const filename = `${normalized}.${ext}`;
 
   try {
