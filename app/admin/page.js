@@ -699,6 +699,8 @@ export default function AdminPage() {
   const [judgeAllLoading, setJudgeAllLoading] = useState(false);
   const [earlyAccess, setEarlyAccess] = useState(false);
   const [eaToggling, setEaToggling] = useState(false);
+  const [genDropsLoading, setGenDropsLoading] = useState(false);
+  const [genDropsStatus, setGenDropsStatus] = useState(null);
 
   // Try to restore session token from sessionStorage
   useEffect(() => {
@@ -775,6 +777,27 @@ export default function AdminPage() {
     }
   }
 
+  async function handleGenerateDrops() {
+    setGenDropsLoading(true);
+    setGenDropsStatus(null);
+    try {
+      const res = await fetch('/api/admin/generate-drops', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setGenDropsStatus(`⬡ ${data.total_drops} drops generated (${data.judges_generated}/5 judges)`);
+      } else {
+        setGenDropsStatus(`error: ${data.error}`);
+      }
+    } catch (err) {
+      setGenDropsStatus(`error: ${err.message}`);
+    } finally {
+      setGenDropsLoading(false);
+    }
+  }
+
   async function toggleEarlyAccess() {
     setEaToggling(true);
     const newVal = earlyAccess ? '0' : '1';
@@ -805,6 +828,19 @@ export default function AdminPage() {
       <header className={styles.header}>
         <div className={styles.headerLogo}>UNATR<span>A</span>RE <span className={styles.headerSub}>ADMIN</span></div>
         <div className={styles.headerActions}>
+          {genDropsStatus && (
+            <span style={{ fontSize: '10px', letterSpacing: '1px', color: genDropsStatus.startsWith('error') ? 'var(--red)' : 'var(--green-hot)', fontFamily: 'var(--font-card)' }}>
+              {genDropsStatus}
+            </span>
+          )}
+          <button
+            className={styles.judgeAllBtn}
+            onClick={handleGenerateDrops}
+            disabled={genDropsLoading}
+            title="Generate LLM council drops for the feed"
+          >
+            {genDropsLoading ? 'generating...' : '⬡ gen drops'}
+          </button>
           <button
             className={styles.judgeAllBtn}
             onClick={toggleEarlyAccess}

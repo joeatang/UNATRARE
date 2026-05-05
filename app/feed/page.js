@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Nav from '../components/Nav';
 import styles from './feed.module.css';
 import { getDb } from '../../lib/db.js';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
 export const metadata = {
@@ -34,25 +34,44 @@ function scoreBar(score, max = 69) {
 
 function getCouncilDrops(preview = false) {
   try {
+    // Try generated drops first (if fresh, < 24 hours old)
+    const genPath = join(process.cwd(), 'data', 'generated_drops.json');
+    let generatedDrops = null;
+    if (existsSync(genPath)) {
+      try {
+        const gen = JSON.parse(readFileSync(genPath, 'utf8'));
+        const age = Date.now() - (gen.generated_at || 0);
+        if (age < 24 * 60 * 60 * 1000 && gen.drops) {
+          generatedDrops = gen.drops; // { judge_id: [drop1, drop2, ...] }
+        }
+      } catch { /* fall through to static */ }
+    }
+
     const cfg = JSON.parse(readFileSync(join(process.cwd(), 'judges.config.json'), 'utf8'));
     const drops = cfg.council_drops;
-    // preview=1 — one from each judge so you can see all voices
-    if (preview) {
-      return [
-        { text: drops.nakamojo[0],    name: 'NAKAMOJO',      sigil: '⬡' },
-        { text: drops.walletorius[0], name: 'WALLETORIUS',   sigil: '◈' },
-        { text: drops.countershaw[0], name: 'COUNTERSHAW',   sigil: '◉' },
-        { text: drops.prof_tg00dman[0], name: 'PROF.TG00DMAN', sigil: '⬢' },
-        { text: drops.dj_pepai[0],    name: 'DJ PEPAI',      sigil: '◎' },
-      ];
-    }
-    const all = [
-      ...drops.nakamojo.map(d => ({ text: d, name: 'NAKAMOJO', sigil: '⬡' })),
-      ...drops.walletorius.map(d => ({ text: d, name: 'WALLETORIUS', sigil: '◈' })),
-      ...drops.countershaw.map(d => ({ text: d, name: 'COUNTERSHAW', sigil: '◉' })),
-      ...drops.prof_tg00dman.map(d => ({ text: d, name: 'PROF.TG00DMAN', sigil: '⬢' })),
-      ...drops.dj_pepai.map(d => ({ text: d, name: 'DJ PEPAI', sigil: '◎' })),
+
+    // Merge: prefer generated drops, fall back to static per judge
+    const JUDGE_MAP = [
+      { genKey: 'prof_naka_c',    cfgKey: 'nakamojo',     name: 'NAKAMOJO',      sigil: '⬡' },
+      { genKey: 'prof_j_looney',  cfgKey: 'walletorius',  name: 'WALLETORIUS',   sigil: '◈' },
+      { genKey: 'dank_shawn',     cfgKey: 'countershaw',  name: 'COUNTERSHAW',   sigil: '◉' },
+      { genKey: 'dr_m_catalogus', cfgKey: 'prof_tg00dman', name: 'PROF.TG00DMAN', sigil: '⬢' },
+      { genKey: 'dj_pepai',       cfgKey: 'dj_pepai',     name: 'DJ PEPAI',      sigil: '◎' },
     ];
+
+    if (preview) {
+      return JUDGE_MAP.map(j => {
+        const genArr = generatedDrops?.[j.genKey];
+        const text = (genArr && genArr[0]) ? genArr[0] : drops[j.cfgKey]?.[0];
+        return { text, name: j.name, sigil: j.sigil };
+      }).filter(d => d.text);
+    }
+
+    const all = JUDGE_MAP.flatMap(j => {
+      const genArr = generatedDrops?.[j.genKey];
+      const source = (genArr && genArr.length) ? genArr : (drops[j.cfgKey] || []);
+      return source.map(d => ({ text: d, name: j.name, sigil: j.sigil }));
+    });
     // Rotate 3x/day (every 8 hours)
     const seed = Math.floor(Date.now() / (8 * 60 * 60 * 1000));
     const picked = [];
