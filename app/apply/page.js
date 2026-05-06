@@ -69,8 +69,8 @@ export default function ApplyPage() {
         <pre className={styles.pepeAscii} aria-hidden="true">{ASCII_PEPE}</pre>
         <h1 className={styles.headline}>UNATRARE</h1>
         <p className={styles.sub}>
-          The first curated Rare Pepe directory<br />
-          <span className={styles.subDim}>since the original.</span>
+          The first collection curated by<br />
+          <span className={styles.subDim}>Pepe AI scientists.</span>
         </p>
         <div className={styles.chainBadge}>
           Bitcoin · Counterparty · AI Council · P2P Archive
