@@ -19,7 +19,7 @@
 
 .pepeAscii {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
+  font-size: 13px;
   line-height: 1.15;
   color: #2d6e2d;
   display: inline-block;
@@ -54,7 +54,7 @@
 
 .chainBadge {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: #3d9e3d;
   border: 1px solid #1c3a1c;
@@ -92,7 +92,7 @@
 
 .pitchTitle {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 3px;
   color: #C9A84C;
   display: block;
@@ -131,7 +131,7 @@
 
 .formSub {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
+  font-size: 14px;
   color: #555;
   margin-bottom: 28px;
   line-height: 1.6;
@@ -152,7 +152,7 @@
   flex: 1;
   padding: 12px 14px;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 2px;
   text-align: center;
   cursor: pointer;
@@ -226,7 +226,7 @@
 
 .errorMsg {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
+  font-size: 14px;
   color: #c0392b;
   padding: 4px 0;
 }
@@ -237,7 +237,7 @@
   border: none;
   padding: 17px;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 5px;
   cursor: pointer;
   width: 100%;
@@ -308,7 +308,7 @@
 
 .successBody {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 13px;
+  font-size: 14px;
   color: #777;
   line-height: 1.8;
 }
@@ -330,7 +330,7 @@
 
 .footerText {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
+  font-size: 13px;
   color: #2a2a2a;
   letter-spacing: 2px;
   text-transform: uppercase;

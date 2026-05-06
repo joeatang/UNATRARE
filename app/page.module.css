@@ -13,7 +13,7 @@
 
 .eyebrow {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 6px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -33,14 +33,14 @@
 
 .heroSub {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   letter-spacing: 3px;
 }
 
 .heroExplainer {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-dim);
   line-height: 1.75;
   max-width: 560px;
@@ -72,7 +72,7 @@
 
 .statLabel {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -93,7 +93,7 @@
 
 .sectionLabel {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 5px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -165,7 +165,7 @@
   padding: 6px 8px;
   border-top: 1px solid var(--border-dim);
   font-family: var(--font-card);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: var(--amber);
   text-align: center;
@@ -179,7 +179,7 @@
 
 .emptyMempool {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   letter-spacing: 2px;
   padding: 32px 0;
@@ -224,7 +224,7 @@
   padding: 12px 0;
   border-bottom: 1px solid var(--border-dim);
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 1px;
   color: var(--text-dim);
 }
@@ -250,7 +250,7 @@
 .activityAction.certified { color: var(--green); }
 .activityAction.rejected  { color: var(--red); }
 
-.activityTime { color: #333; font-size: 10px; }
+.activityTime { color: #333; font-size: 13px; }
 
 /* ─── Feed strip ─────────────────────────────────────────── */
 .feedStrip {
@@ -269,14 +269,14 @@
 
 .feedStripLabel {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--text-dim);
 }
 
 .feedStripAll {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--amber);
   text-decoration: none;
@@ -327,7 +327,7 @@
 
 .feedTickerStatus {
   font-family: var(--font-card);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: var(--text-dim);
 }
@@ -350,7 +350,7 @@
 
 .ctaSub {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-dim);
   margin-bottom: 28px;
   line-height: 1.8;
@@ -359,7 +359,7 @@
 .ctaButton {
   display: inline-block;
   font-family: var(--font-card);
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 4px;
   text-transform: uppercase;
   color: var(--bg);
@@ -396,14 +396,14 @@
 
 .holderTitle {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 4px;
   color: var(--amber);
 }
 
 .holderSub {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   max-width: 480px;
   line-height: 1.6;
@@ -412,7 +412,7 @@
 .holderBtn {
   display: inline-block;
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--amber);
   border: 1px solid var(--amber);
@@ -438,7 +438,7 @@
 
 .artistSubhead {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   letter-spacing: 1px;
   margin-bottom: 32px;
@@ -485,7 +485,7 @@
 /* Mobile — ≤600px */
 @media (max-width: 600px) {
   .heroTitle { font-size: 28px; letter-spacing: 2px; }
-  .heroSub   { font-size: 9px;  letter-spacing: 2px; }
+  .heroSub   { font-size: 12px;  letter-spacing: 2px; }
 
   .hero,
   .mempoolSection,
@@ -503,11 +503,11 @@
   .statValue { font-size: 28px; }
 
   .ctaTitle  { font-size: 22px; letter-spacing: 2px; }
-  .ctaSub    { font-size: 11px; }
-  .ctaButton { padding: 12px 24px; font-size: 10px; }
+  .ctaSub    { font-size: 13px; }
+  .ctaButton { padding: 12px 24px; font-size: 13px; }
 
-  .activityToken { min-width: 90px; font-size: 10px; }
-  .activityItem  { font-size: 10px; gap: 10px; }
+  .activityToken { min-width: 90px; font-size: 13px; }
+  .activityItem  { font-size: 13px; gap: 10px; }
 
   /* Stack holder strip vertically */
   .holderStrip {
@@ -539,5 +539,5 @@
 
   .heroTitle { font-size: 72px; letter-spacing: 6px; }
   .ctaTitle  { font-size: 56px; }
-  .artistSubhead { font-size: 13px; }
+  .artistSubhead { font-size: 14px; }
 }

@@ -13,7 +13,7 @@
 
 .eyebrow {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 5px;
   color: var(--green);
   margin-bottom: 12px;
@@ -34,7 +34,7 @@
 
 .subtitle {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-dim);
   line-height: 1.9;
 }
@@ -48,7 +48,7 @@
 
 .sectionLabel {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 5px;
   color: var(--text-dim);
   margin-bottom: 20px;
@@ -86,7 +86,7 @@
 
 .proposalType {
   font-family: var(--font-card);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 3px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -96,7 +96,7 @@
 
 .proposalStatus {
   font-family: var(--font-card);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 3px;
   padding: 2px 8px;
   border: 1px solid;
@@ -123,7 +123,7 @@
 
 .proposalExpand {
   font-family: var(--font-card);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: var(--text-dim);
   margin-top: 10px;
@@ -133,7 +133,7 @@
 /* ─── Vote bar ───────────────────────────────────────────── */
 .voteBarEmpty {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
 }
 
@@ -165,7 +165,7 @@
   justify-content: space-between;
   margin-top: 4px;
   font-family: var(--font-card);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 1px;
 }
 
@@ -181,7 +181,7 @@
 
 .proposalDesc {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-dim);
   line-height: 1.9;
   padding: 20px 0 16px;
@@ -190,7 +190,7 @@
 
 .proposalResult {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 14px;
   color: var(--amber-hot);
   border-left: 2px solid var(--amber);
   padding: 8px 12px;
@@ -199,7 +199,7 @@
 
 .resultLabel {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 3px;
 }
 
@@ -216,7 +216,7 @@
   padding: 6px 12px;
   border-bottom: 1px solid var(--border-dim);
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .voteRow:last-child { border-bottom: none; }
@@ -225,7 +225,7 @@
 
 .voteChoice {
   font-family: var(--font-card);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 2px;
 }
 
@@ -236,7 +236,7 @@
 .voteMore {
   padding: 6px 12px;
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   text-align: center;
 }
@@ -250,7 +250,7 @@
 
 .voteFormLabel {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 4px;
   color: var(--amber);
   margin-bottom: 6px;
@@ -258,7 +258,7 @@
 
 .voteFormNote {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   margin-bottom: 16px;
 }
@@ -269,7 +269,7 @@
   padding: 10px 12px;
   margin-bottom: 14px;
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 14px;
   background: var(--bg);
   border: 1px solid var(--border);
   color: var(--text);
@@ -290,7 +290,7 @@
   flex: 1;
   padding: 8px;
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 3px;
   border: 1px solid var(--border);
   background: var(--bg);
@@ -307,7 +307,7 @@
   width: 100%;
   padding: 12px;
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 4px;
   border: 1px solid var(--green);
   background: var(--bg);
@@ -328,7 +328,7 @@
 
 .voteMsg {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--green);
   margin-top: 10px;
 }
@@ -353,7 +353,7 @@
   margin: 80px auto;
   padding: 0 32px;
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-dim);
 }
 
@@ -375,7 +375,7 @@
 
 .emptyText {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-dim);
   line-height: 1.9;
 }

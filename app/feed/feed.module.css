@@ -13,7 +13,7 @@
 
 .eyebrow {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 4px;
   color: var(--text-dim);
   margin-bottom: 10px;
@@ -34,7 +34,7 @@
 
 .subtitle {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-dim);
   line-height: 1.7;
   margin-bottom: 16px;
@@ -44,7 +44,7 @@
   display: flex;
   gap: 0;
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 2px;
   color: var(--amber);
 }
@@ -91,7 +91,7 @@
 
 .signalPostName {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 3px;
   color: var(--amber);
 }
@@ -99,13 +99,13 @@
 .signalPostTime {
   margin-left: auto;
   font-family: var(--font-body);
-  font-size: 10px;
+  font-size: 13px;
   color: var(--border);
 }
 
 .signalPostText {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.65;
   color: var(--text-dim);
   font-style: italic;
@@ -122,7 +122,7 @@
 
 .councilDropsLabel {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 4px;
   color: var(--amber);
   padding: 10px 16px 8px;
@@ -155,7 +155,7 @@
 
 .councilDropText {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.5;
   color: var(--text);
   font-style: italic;
@@ -163,7 +163,7 @@
 
 .councilDropName {
   font-family: var(--font-card);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 3px;
   color: var(--text-dim);
 }
@@ -186,7 +186,7 @@
 
 .emptyText {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 4px;
   color: var(--text-dim);
   margin-bottom: 6px;
@@ -194,7 +194,7 @@
 
 .emptySubtext {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--border);
 }
 
@@ -290,7 +290,7 @@
 
 .verdictBadge {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 3px;
   padding: 3px 8px;
   border: 1px solid;
@@ -325,20 +325,20 @@
 
 .cardLabel {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 2px;
   color: var(--amber);
 }
 
 .artistHandle {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
 }
 
 .verdictDate {
   font-family: var(--font-body);
-  font-size: 10px;
+  font-size: 13px;
   color: var(--border);
   margin-top: 2px;
 }
@@ -362,7 +362,7 @@
 
 .scoreLabel {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: var(--text-dim);
   margin-bottom: 6px;
@@ -412,14 +412,14 @@
 
 .judgeName {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 2px;
   color: var(--amber);
 }
 
 .judgeRole {
   font-family: var(--font-body);
-  font-size: 9px;
+  font-size: 12px;
   color: var(--text-dim);
   letter-spacing: 0.5px;
 }
@@ -447,7 +447,7 @@
 
 .judgeCatLabel {
   font-family: var(--font-card);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 1px;
   color: var(--text-dim);
 }
@@ -460,7 +460,7 @@
 
 .judgeReason {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   line-height: 1.6;
   font-style: italic;
@@ -471,14 +471,14 @@
   padding: 12px 20px;
   border-top: 1px solid var(--border-dim);
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   line-height: 1.6;
 }
 
 .rejectionLabel {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 3px;
   color: var(--red);
   margin-right: 10px;
@@ -496,7 +496,7 @@
 
 .ctaButton {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 3px;
   background: var(--amber);
   color: var(--bg);
@@ -515,7 +515,7 @@
 
 .ctaSecondary {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--amber);
   border: 1px solid var(--border);

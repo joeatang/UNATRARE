@@ -47,7 +47,7 @@
 
 .cardHeaderText {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 3px;
   color: var(--amber);
   text-transform: uppercase;
@@ -55,7 +55,7 @@
 
 .cardHeaderDot {
   color: var(--text-dim);
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .cardArt {
@@ -93,7 +93,7 @@
 
 .cardTitle {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 2px;
   color: var(--text);
   text-transform: uppercase;
@@ -106,14 +106,14 @@
   display: flex;
   justify-content: space-between;
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1px;
   color: var(--text-dim);
 }
 
 .cardCertified {
   font-family: var(--font-card);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 4px;
   color: var(--green);
   text-align: right;
@@ -129,20 +129,20 @@
 
 .cardSupply {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1px;
   color: var(--text-dim);
 }
 
 .cardRarityDot {
   color: var(--border);
-  font-size: 10px;
+  font-size: 13px;
 }
 
 /* ─── Info panel ─────────────────────────────────────────── */
 .infoEyebrow {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 5px;
   color: var(--green);
   margin-bottom: 10px;
@@ -159,7 +159,7 @@
 
 .description {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.9;
   color: var(--text-dim);
   margin-bottom: 32px;
@@ -192,7 +192,7 @@
 
 .metaKey {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 3px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -202,14 +202,14 @@
 
 .metaVal {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 1px;
   color: var(--text);
 }
 
 .addressTrunc {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
 }
 
@@ -224,7 +224,7 @@
 .actionBtn {
   display: block;
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--bg);
@@ -240,7 +240,7 @@
 .actionBtnSecondary {
   display: block;
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--text-dim);
@@ -261,7 +261,7 @@
 
 .backLink {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--text-dim);
   text-decoration: none;
@@ -278,7 +278,7 @@
 
 .statusLabel {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 5px;
   color: var(--amber);
   margin-bottom: 16px;
@@ -294,7 +294,7 @@
 
 .statusReason {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-dim);
   line-height: 1.8;
   border-left: 2px solid var(--red);
@@ -334,7 +334,7 @@
 
 .councilStampText {
   font-family: var(--font-card);
-  font-size: 6px;
+  font-size: 13px;
   letter-spacing: 1.5px;
   color: rgba(0, 255, 135, 0.85);
   text-align: center;
@@ -359,7 +359,7 @@
 
 .councilBadgeText {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2.5px;
   color: rgba(0, 255, 135, 0.8);
   text-transform: uppercase;

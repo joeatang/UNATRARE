@@ -128,10 +128,10 @@ export default function HomePage() {
       <Nav />
       <main className={styles.page}>
 
-        {/* ── PEPE MEMPOOL — compact hero row ── */}
+        {/* ── PEPEMPOOL — compact hero row ── */}
         <section className={styles.hero}>
           <div className={styles.eyebrow}>· bitcoin · counterparty · ordinals ·</div>
-          <h1 className={styles.heroTitle}>PEPE MEMP<span>O</span>OL</h1>
+          <h1 className={styles.heroTitle}>PEPEMPO<span>O</span>L</h1>
           <div className={styles.heroSub}>real-time submission activity · unatrare curated directory</div>
           <p className={styles.heroExplainer}>
             A curated directory of Pepe art on Bitcoin. Submit your card — 6 judges with distinct personalities certify or reject it. Every verdict is permanent on-chain. Browse the feed to see what the council is saying.

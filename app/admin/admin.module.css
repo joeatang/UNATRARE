@@ -27,7 +27,7 @@
 
 .gateLabel {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 5px;
   color: var(--text-dim);
   text-align: center;
@@ -42,7 +42,7 @@
 
 .gateInput {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 2px;
   background: var(--bg);
   border: 1px solid var(--border);
@@ -55,14 +55,14 @@
 
 .gateErr {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--red);
   letter-spacing: 1px;
 }
 
 .gateBtn {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 3px;
   background: var(--amber);
   color: var(--bg);
@@ -106,7 +106,7 @@
 
 .headerSub {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 4px;
   color: var(--text-dim);
   margin-left: 8px;
@@ -120,7 +120,7 @@
 
 .judgeAllBtn {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 2px;
   background: var(--amber);
   color: var(--bg);
@@ -133,7 +133,7 @@
 
 .refreshBtn, .logoutBtn {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 2px;
   background: transparent;
   color: var(--text-dim);
@@ -172,7 +172,7 @@
 
 .statLabel {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 3px;
   color: var(--text-dim);
 }
@@ -188,7 +188,7 @@
 
 .tab {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 2px;
   color: var(--text-dim);
   background: transparent;
@@ -210,7 +210,7 @@
 .tabBadge {
   background: var(--amber);
   color: var(--bg);
-  font-size: 9px;
+  font-size: 12px;
   padding: 1px 5px;
   min-width: 18px;
   text-align: center;
@@ -228,7 +228,7 @@
 
 .loading, .empty {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--text-dim);
   padding: 48px 0;
@@ -288,20 +288,20 @@
 
 .rowMeta {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
 }
 
 .rowScore {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 1px;
   color: var(--amber);
   margin-top: 3px;
 }
 
 .rowToggle {
-  font-size: 10px;
+  font-size: 13px;
   color: var(--text-dim);
   flex-shrink: 0;
 }
@@ -342,7 +342,7 @@
 
 .detailKey {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: var(--text-dim);
   min-width: 80px;
@@ -351,7 +351,7 @@
 
 .detailVal {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text);
   line-height: 1.5;
   word-break: break-all;
@@ -359,7 +359,7 @@
 
 .detailLink {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--amber);
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -375,7 +375,7 @@
 
 .noteInput {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 14px;
   background: var(--bg);
   border: 1px solid var(--border-dim);
   color: var(--text);
@@ -394,7 +394,7 @@
 
 .actionBtn {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 2px;
   border: 1px solid;
   padding: 8px 16px;
@@ -441,7 +441,7 @@
 .purgeBtn {
   color: #555;
   border-color: #333;
-  font-size: 10px;
+  font-size: 13px;
   opacity: 0.6;
 }
 .purgeBtn:hover:not(:disabled) {

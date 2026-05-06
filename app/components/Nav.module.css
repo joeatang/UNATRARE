@@ -43,7 +43,7 @@
 
 .nav-links a {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -64,7 +64,7 @@
 
 .nav-submit {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--bg);
   background: var(--amber);
@@ -128,7 +128,7 @@
   display: block;
   padding: 14px 24px;
   font-family: var(--font-card);
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 3px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -167,5 +167,5 @@
 @media (min-width: 1600px) {
   .nav { padding: 0 64px; }
   .nav-links { gap: 48px; }
-  .nav-links a { font-size: 12px; }
+  .nav-links a { font-size: 14px; }
 }

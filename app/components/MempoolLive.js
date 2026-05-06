@@ -117,7 +117,7 @@ export default function MempoolLive({ initialStats, initialRecent, initialPendin
                     }}>?</span>
                   </div>
                   <div style={{
-                    fontFamily:'var(--font-card)', fontSize:'6px',
+                    fontFamily:'var(--font-card)', fontSize:'11px',
                     letterSpacing:'2px', color:'rgba(139,115,85,0.4)',
                     textAlign:'center', textTransform:'uppercase',
                   }}>

@@ -33,7 +33,7 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   background: var(--bg);
   position: relative;
@@ -53,7 +53,7 @@
 
 .stepLabel {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -80,7 +80,7 @@
 
 .stepEyebrow {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 4px;
   color: var(--green);
   text-transform: uppercase;
@@ -100,7 +100,7 @@
 
 .stepDesc {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-dim);
   line-height: 1.9;
   margin-bottom: 32px;
@@ -123,7 +123,7 @@
 
 .inputLabel {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -149,7 +149,7 @@
 
 .inputError {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--red);
   letter-spacing: 0.5px;
   min-height: 18px;
@@ -157,7 +157,7 @@
 
 .inputHint {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   letter-spacing: 0.5px;
 }
@@ -175,7 +175,7 @@
 
 .urlBoxLabel {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 4px;
   color: var(--green);
   text-transform: uppercase;
@@ -191,13 +191,13 @@
 
 .urlBoxMeta {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
 }
 
 .copyBtn {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 3px;
   background: var(--green);
   color: var(--bg);
@@ -225,7 +225,7 @@
 
 .warningTitle {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--amber);
   text-transform: uppercase;
@@ -233,7 +233,7 @@
 
 .warningText {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-dim);
   line-height: 1.8;
 }
@@ -243,7 +243,7 @@
 /* ─── Next button ────────────────────────────────────── */
 .nextBtn {
   font-family: var(--font-card);
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 4px;
   background: var(--amber);
   color: var(--bg);
@@ -264,7 +264,7 @@
 
 .backBtn {
   font-family: var(--font-card);
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 4px;
   background: transparent;
   color: var(--text-dim);
@@ -295,9 +295,9 @@
   }
 
   .stepTitle { font-size: 28px; }
-  .stepDesc  { font-size: 11px; }
+  .stepDesc  { font-size: 13px; }
 
-  .urlBoxValue { font-size: 13px; word-break: break-all; }
+  .urlBoxValue { font-size: 14px; word-break: break-all; }
 
   .nextBtn { width: 100%; padding: 14px 16px; }
   .tokenInput { font-size: 14px; }

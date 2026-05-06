@@ -20,7 +20,7 @@
 
 .eyebrow {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 5px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -39,7 +39,7 @@
 
 .totalCount {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 2px;
   color: var(--text-dim);
   margin-top: 10px;
@@ -59,7 +59,7 @@
 
 .filterLabel {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 3px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -68,7 +68,7 @@
 
 .filterBtn {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2px;
   text-transform: uppercase;
   padding: 6px 14px;
@@ -140,7 +140,7 @@
 
 .cardName {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1px;
   color: var(--text);
   white-space: nowrap;
@@ -151,7 +151,7 @@
 
 .cardMeta {
   font-family: var(--font-card);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 1px;
   color: var(--text-dim);
   margin-top: 2px;
@@ -220,7 +220,7 @@
 
 .emptyText {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-dim);
   line-height: 1.8;
   margin-bottom: 28px;
@@ -229,7 +229,7 @@
 .emptyBtn {
   display: inline-block;
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 4px;
   text-transform: uppercase;
   color: var(--bg);
@@ -255,5 +255,5 @@
 @media (max-width: 480px) {
   .title { font-size: 28px; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
-  .filterBtn { padding: 5px 10px; font-size: 8px; }
+  .filterBtn { padding: 5px 10px; font-size: 12px; }
 }

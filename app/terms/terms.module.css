@@ -13,7 +13,7 @@
 
 .eyebrow {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 4px;
   color: var(--text-dim);
   margin-bottom: 12px;
@@ -46,7 +46,7 @@
 
 .sectionTitle {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 5px;
   color: var(--amber);
   margin-bottom: 24px;
@@ -63,7 +63,7 @@
 
 .prose p {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.8;
   color: var(--text);
 }
@@ -84,7 +84,7 @@
 
 .formulaLabel {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 3px;
   color: var(--text-dim);
   margin-bottom: 12px;
@@ -101,7 +101,7 @@
 
 .formulaNote {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
 }
 
@@ -133,14 +133,14 @@
 
 .splitWho {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 2px;
   color: var(--text);
 }
 
 .splitNote {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   line-height: 1.5;
 }
@@ -155,7 +155,7 @@
 
 .exampleLabel {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 3px;
   color: var(--text-dim);
   margin-bottom: 10px;
@@ -170,7 +170,7 @@
 
 .exampleGrid span {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 2px;
   color: var(--amber);
 }
@@ -197,7 +197,7 @@
 
 .feeCurrency {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--text-dim);
 }
@@ -236,7 +236,7 @@
 
 .rubricName {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--amber);
   margin-bottom: 6px;
@@ -245,7 +245,7 @@
 
 .rubricDesc {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   line-height: 1.6;
 }
@@ -261,7 +261,7 @@
 
 .ctaButton {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 3px;
   background: var(--amber);
   color: var(--bg);
@@ -280,7 +280,7 @@
 
 .ctaSecondary {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 3px;
   background: transparent;
   color: var(--amber);
