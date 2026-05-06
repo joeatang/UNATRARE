@@ -1,7 +1,30 @@
 import { NextResponse } from 'next/server';
+import { readFileSync, writeFileSync } from 'fs';
+import path from 'path';
 import { getDb } from '../../../../lib/db';
 import { verifyAdminToken } from '../auth/route';
 import { judgeToken } from '../../../../lib/judge';
+
+// Auto-update exemplar calibration list when a human overrides the AI verdict.
+// Graceful — any failure here never blocks the actual admin action.
+function appendExemplar(type, tokenName, note) {
+  try {
+    const cfgPath = path.join(process.cwd(), 'judges.config.json');
+    const cfg = JSON.parse(readFileSync(cfgPath, 'utf8'));
+    const list = cfg.exemplar_cards[type];
+    if (!list.some(e => e.startsWith(tokenName + ' '))) {
+      const reason = note
+        ? note.replace(/^Admin (note|rejection): ?/i, '').trim()
+        : type === 'approved'
+          ? 'human council override — genuine Pepe energy confirmed'
+          : 'human council override — failed human review';
+      list.push(`${tokenName} (${reason})`);
+      writeFileSync(cfgPath, JSON.stringify(cfg, null, 2) + '\n', 'utf8');
+    }
+  } catch (e) {
+    console.warn('[exemplar] failed to update judges.config.json:', e.message);
+  }
+}
 
 export async function POST(request) {
   if (!verifyAdminToken(request)) {
@@ -159,6 +182,11 @@ export async function POST(request) {
          WHERE token_name=?`
       ).run(series, card_number, note ? `Admin note: ${note}` : '', supply, name);
 
+      // If the AI had previously rejected this, it's a human override — feed it back as an exemplar
+      if (token.status === 'rejected') {
+        appendExemplar('approved', name, note);
+      }
+
       return NextResponse.json({ ok: true, action: 'approved', series, card_number, supply, payUrl: `https://unatrare.wtf/pay/${name}` });
     }
 
@@ -172,6 +200,11 @@ export async function POST(request) {
          SET status='rejected', judged_at=unixepoch(), rejection_reason=?
          WHERE token_name=?`
       ).run(reason, name);
+
+      // If the AI had previously approved this, it's a human override — feed it back as a rejected exemplar
+      if (token.status === 'approved') {
+        appendExemplar('rejected', name, note);
+      }
 
       return NextResponse.json({ ok: true, action: 'rejected' });
     }
