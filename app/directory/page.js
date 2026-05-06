@@ -113,7 +113,7 @@ export default function DirectoryPage({ searchParams }) {
           <div className={styles.empty}>
             <div className={styles.emptyTitle}>NO CARDS YET</div>
             <div className={styles.emptyText}>
-              the scientist panel has not yet certified any submissions.<br />
+              the council has not yet certified any submissions.<br />
               the directory opens when the first card is approved.
             </div>
             <Link href="/submit" className={styles.emptyBtn}>

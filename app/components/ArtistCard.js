@@ -99,7 +99,7 @@ export default function ArtistCard({ token }) {
       <div className={styles.textBox}>
         <div className={styles.abilityLine}>
           <span className={styles.abilityKeyword}>CERTIFIED</span>
-          {' '}by the pepai scientist panel.
+          {' '}by the Pepe Council.
         </div>
         <div className={styles.abilityLine} style={{marginTop:4}}>
           Token <span className={styles.abilityKeyword}>{seriesLbl}</span> · Card{' '}

@@ -150,7 +150,7 @@ export async function POST(request) {
       ok: true,
       tokenName: normalized,
       status: 'pending',
-      message: 'Submission received. The scientist panel will review your art.',
+      message: 'Submission received. The Pepe Council will review your art.',
     });
   } catch (err) {
     console.error('Submit error:', err);

@@ -276,7 +276,7 @@ export default function PayPage({ params }) {
             </div>
             <div style={{fontSize:'10px', letterSpacing:'2px', color:'var(--text-dim)',
               lineHeight:2, maxWidth:400, margin:'0 auto'}}>
-              {tokenName} did not pass the UNATRARE scientist panel.
+              {tokenName} did not pass the UNATRARE Pepe Council.
             </div>
             {tokenData?.rejectionReason && (
               <div style={{marginTop:16, padding:'12px', border:'1px solid var(--border)',

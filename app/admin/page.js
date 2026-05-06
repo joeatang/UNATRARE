@@ -410,7 +410,7 @@ function TokenRow({ token, authToken, onAction }) {
           '✦  UNATRARE — CERTIFIED DANK  ✦',
           '',
           `${token.token_name} has been evaluated by the`,
-          'UNATRARE pepai scientist panel and certified DANK.',
+          'UNATRARE Pepe Council and certified DANK.',
           '',
           'Your art has earned a place in the directory.',
           '',
@@ -1101,7 +1101,7 @@ export default function AdminPage() {
       });
       const data = await res.json();
       if (data.ok) {
-        setGenDropsStatus(`⬡ ${data.total_drops} drops generated (${data.judges_generated}/5 judges)`);
+        setGenDropsStatus(`⬡ ${data.total_drops} drops generated (${data.judges_generated}/8 judges)`);
       } else {
         setGenDropsStatus(`error: ${data.error}`);
       }
