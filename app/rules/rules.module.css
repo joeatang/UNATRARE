@@ -258,15 +258,7 @@ tr .td:first-child {
   align-self: center;
 }
 
-/* Responsive council grid */
-@media (max-width: 600px) {
-  .councilGrid {
-    grid-template-columns: 1fr;
-  }
-  .councilCard:last-child:nth-child(odd) {
-    grid-column: auto;
-  }
-}
+/* ─── Responsive ────────────────────────────────────────── */
 
 /* ─── Rubric ─────────────────────────────────────────────── */
 .rubricBlock {
@@ -324,8 +316,101 @@ tr .td:first-child {
   gap: 16px;
 }
 
-@media (max-width: 600px) {
-  .outcomeBlock { grid-template-columns: 1fr; }
+@media (max-width: 640px) {
+  /* Inner padding */
+  .inner {
+    padding: 40px 16px 60px;
+  }
+
+  /* Header */
+  .title {
+    font-size: 36px;
+    letter-spacing: 2px;
+  }
+
+  /* Section layout — collapse the number column on very small screens */
+  .section {
+    grid-template-columns: 28px 1fr;
+    gap: 12px;
+  }
+
+  .sectionTitle {
+    font-size: 24px;
+    letter-spacing: 2px;
+  }
+
+  /* Tables — stack rows instead of two columns */
+  .table,
+  .table tbody,
+  .table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .table tr {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-dim);
+  }
+
+  .table tr:last-child {
+    border-bottom: none;
+  }
+
+  .td {
+    display: block;
+    padding: 2px 0;
+    border-bottom: none;
+  }
+
+  /* First cell becomes a label */
+  tr .td:first-child {
+    width: auto;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    opacity: 0.7;
+    white-space: normal;
+    margin-bottom: 2px;
+  }
+
+  /* Council grid — single column */
+  .councilGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .councilCard:last-child:nth-child(odd) {
+    grid-column: auto;
+  }
+
+  /* Judge rows — stack */
+  .judgeRow {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  /* Rubric rows — wrap */
+  .rubricRow {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .rubricCat {
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* Outcome block — single column */
+  .outcomeBlock {
+    grid-template-columns: 1fr;
+  }
+
+  /* CTA button full width */
+  .ctaBtn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
 }
 
 .outcomeApproved {
