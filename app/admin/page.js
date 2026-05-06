@@ -63,6 +63,7 @@ function TokenRow({ token, authToken, onAction }) {
   const [announceText, setAnnounceText] = useState(null); // set after drop art
   const [announceCopied, setAnnounceCopied] = useState(false);
   const [dirHidden, setDirHidden] = useState(!!token.directory_hidden);
+  const [stamped, setStamped] = useState(!!token.council_certified);
 
   async function act(action) {
     setLoading(action);
@@ -83,6 +84,10 @@ function TokenRow({ token, authToken, onAction }) {
         setDirHidden(true);
       } else if (action === 'show_in_directory') {
         setDirHidden(false);
+      } else if (action === 'certify_stamp') {
+        setStamped(true);
+      } else if (action === 'decertify_stamp') {
+        setStamped(false);
       } else if (action === 'approve' || action === 'genesis') {
         setApprovalResult(json); // show branded message before dismissing
       } else if (action === 'reveal') {
@@ -374,6 +379,22 @@ function TokenRow({ token, authToken, onAction }) {
                   ? '...'
                   : dirHidden ? '◎ show dir' : '◯ hide dir'}
               </button>
+              {token.status === 'approved' && (
+                <button
+                  className={styles.actionBtn}
+                  onClick={() => act(stamped ? 'decertify_stamp' : 'certify_stamp')}
+                  disabled={!!loading}
+                  title={stamped ? 'Revoke council stamp of approval' : 'Grant council stamp of approval'}
+                  style={{
+                    border: stamped ? '1px solid var(--green)' : '1px solid var(--border-dim)',
+                    color: stamped ? 'var(--green)' : 'var(--text-dim)',
+                  }}
+                >
+                  {loading === 'certify_stamp' || loading === 'decertify_stamp'
+                    ? '...'
+                    : stamped ? '⬟ stamped' : '⬟ stamp'}
+                </button>
+              )}
             </div>
           </div>
         </div>

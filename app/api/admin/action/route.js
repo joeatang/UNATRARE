@@ -44,7 +44,8 @@ export async function POST(request) {
 
   const name = tokenName.toUpperCase().trim();
   const actions = ['approve', 'reject', 'judge', 'rejudge', 'genesis', 'purge', 'reveal',
-                   'hide_from_directory', 'show_in_directory'];
+                   'hide_from_directory', 'show_in_directory',
+                   'certify_stamp', 'decertify_stamp'];
   if (!actions.includes(action)) {
     return NextResponse.json({ error: 'invalid action' }, { status: 400 });
   }
@@ -54,6 +55,19 @@ export async function POST(request) {
     const token = db.prepare('SELECT * FROM tokens WHERE token_name = ?').get(name);
     if (!token) {
       return NextResponse.json({ error: 'token not found' }, { status: 404 });
+    }
+
+    if (action === 'certify_stamp') {
+      if (token.status !== 'approved') {
+        return NextResponse.json({ error: 'token must be approved before stamping' }, { status: 400 });
+      }
+      db.prepare('UPDATE tokens SET council_certified=1 WHERE token_name=?').run(name);
+      return NextResponse.json({ ok: true, action: 'certify_stamp', council_certified: 1 });
+    }
+
+    if (action === 'decertify_stamp') {
+      db.prepare('UPDATE tokens SET council_certified=0 WHERE token_name=?').run(name);
+      return NextResponse.json({ ok: true, action: 'decertify_stamp', council_certified: 0 });
     }
 
     if (action === 'hide_from_directory') {
@@ -111,7 +125,7 @@ export async function POST(request) {
       db.prepare(
         `UPDATE tokens
          SET status='approved', judged_at=unixepoch(), series=?, card_number=?,
-             rejection_reason=?, supply=?
+             rejection_reason=?, supply=?, council_certified=1
          WHERE token_name=?`
       ).run(genesisSeriesNum, card_number, note ? `Genesis: ${note}` : `Genesis Series ${genesisSeriesNum} — founding collection`, supply, name);
 
