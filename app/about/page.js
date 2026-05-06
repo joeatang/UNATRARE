@@ -37,8 +37,12 @@ export default function AboutPage() {
               We are a curated directory. Eight council members evaluate every submission against a
               rubric derived from the standards of Rare Pepe, STAMP, and XCP communities.
               Cards that pass are listed. Cards that don't are not.
-            </p>
-          </div>
+            </p>            <p>
+              There is a community of artists who have built on Bitcoin since 2014.
+              And there is a community holding DMT-NAT — the first non-arbitrary token,
+              minted with every Bitcoin block. These worlds rarely intersect.
+              UNATRARE is where they do.
+            </p>          </div>
         </section>
 
         <section className={styles.section}>
@@ -131,6 +135,23 @@ export default function AboutPage() {
             </p>
             <p>
               Card number and series are assigned at the moment of approval and are permanent.
+            </p>
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>THE DROPS</h2>
+          <div className={styles.prose}>
+            <p>
+              Certified cards are eligible for UNATRARE drops — curated distributions
+              priced in DMT-NAT, open exclusively to UNATPEPE holders.
+            </p>
+            <p>
+              Artists keep their Counterparty dispenser running as normal. The drop is a
+              separate channel: a collector pool that can’t find them anywhere else,
+              paying in the first Bitcoin-produced digital commodity.
+              UNATPEPE holders get access to certified work from artists who have been
+              building on Bitcoin since before most of crypto existed.
             </p>
           </div>
         </section>

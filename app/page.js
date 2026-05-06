@@ -130,11 +130,11 @@ export default function HomePage() {
 
         {/* ── PEPEMPOOL — compact hero row ── */}
         <section className={styles.hero}>
-          <div className={styles.eyebrow}>· bitcoin · counterparty · ordinals ·</div>
+          <div className={styles.eyebrow}>· bitcoin · counterparty · dmt-nat ·</div>
           <h1 className={styles.heroTitle}>PEPEMPO<span>O</span>L</h1>
           <div className={styles.heroSub}>real-time submission activity · unatrare curated directory</div>
           <p className={styles.heroExplainer}>
-            A curated directory of Pepe art on Bitcoin. Submit your card — 8 judges with distinct personalities evaluate it. Pass the hard rules, get in the directory. Score high enough, earn the council stamp. Every verdict is permanent on-chain.
+            A curated directory of Pepe art on Bitcoin. Counterparty culture and the DMT-NAT community — two worlds that don&apos;t usually meet. Submit your card — 8 judges evaluate it against the rubric. Pass the hard rules, get in the directory. Score high enough, earn the council stamp. Every verdict is permanent on-chain.
           </p>
         </section>
 
@@ -307,7 +307,7 @@ export default function HomePage() {
         <div className={styles.holderStrip}>
           <div className={styles.holderLeft}>
             <div className={styles.holderTitle}>✦ UNATPEPE HOLDER?</div>
-            <div className={styles.holderSub}>Register your address to unlock early access windows and a discount on every drop.</div>
+            <div className={styles.holderSub}>Holding UNATPEPE is the key to UNATRARE drops — certified Counterparty art, priced in DMT-NAT, open to you before anyone else.</div>
           </div>
           <Link href="/register" className={styles.holderBtn}>register now →</Link>
         </div>
