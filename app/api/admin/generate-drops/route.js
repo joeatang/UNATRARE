@@ -104,12 +104,14 @@ export async function POST(req) {
 
     // Judge display meta for history entries
     const JUDGE_META = {
-      prof_naka_c:    { name: 'NAKAMOJO',      sigil: '⬡' },
-      prof_j_looney:  { name: 'RARELOONEY',    sigil: '◈' },
-      dank_shawn:     { name: 'DANKSHAWN',      sigil: '◉' },
-      dr_m_catalogus: { name: 'M.CATALOGUS',   sigil: '⬢' },
-      theo_goodman:   { name: 'PROF.TG00DMAN', sigil: '◆' },
-      dj_pepai:       { name: 'DJ PEPAI',       sigil: '◎' },
+      prof_naka_c:    { name: 'NAKAMOJO',       sigil: '⬡' },
+      prof_j_looney:  { name: 'RARELOONEY',     sigil: '◈' },
+      dank_shawn:     { name: 'DANKSHAWN',       sigil: '◉' },
+      dr_m_catalogus: { name: 'M.CATALOGUS',    sigil: '⬢' },
+      theo_goodman:   { name: 'PROF.TG00DMAN',  sigil: '◆' },
+      dj_pepai:       { name: 'DJ PEPAI',        sigil: '◎' },
+      chiguiripepe:   { name: 'CHIGUIRIPEPE',    sigil: '⬟' },
+      j_frog:         { name: 'J.FROG',          sigil: '◧' },
     };
 
     // Rotate prompt style so consecutive runs feel different
@@ -126,7 +128,12 @@ export async function POST(req) {
     const now = Math.floor(Date.now() / 1000);
     const styleIdx = Math.floor(now / 3600) % promptStyles.length; // rotates every hour
 
-    for (const judge of judges) {
+    // Sequential with delay — Groq free tier rate-limits when 6 calls fire simultaneously
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    for (let i = 0; i < judges.length; i++) {
+      const judge = judges[i];
+      if (i > 0) await sleep(1800); // 1.8s between calls stays well under 30 RPM limit
       try {
         const systemPrompt = `${config.system_prompt_header}\n\n${judge.personality_prompt}`;
         const userPrompt = promptStyles[styleIdx];
