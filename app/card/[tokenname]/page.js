@@ -60,17 +60,48 @@ export default async function CardPage({ params }) {
 
   if (!token) notFound();
 
-  // Non-approved cards get a minimal status page
+  // Non-approved cards get a status page — pending gets mystery pack style, rejected gets reason
   if (token.status !== 'approved') {
     return (
       <>
         <Nav />
         <main className={styles.page}>
           <div className={styles.statusPage}>
-            <div className={styles.statusLabel}>{token.status === 'pending' ? 'PENDING JUDGMENT' : 'REJECTED'}</div>
-            <div className={styles.statusToken}>{token.token_name}</div>
-            {token.status === 'rejected' && token.rejection_reason && (
-              <div className={styles.statusReason}>{token.rejection_reason}</div>
+            {token.status === 'pending' ? (
+              <>
+                <div style={{
+                  width:180, margin:'0 auto 24px',
+                  border:'1px solid var(--amber)',
+                  background:'var(--surface)',
+                }}>
+                  <div style={{
+                    height:24, background:'var(--bg)', borderBottom:'1px solid var(--amber)',
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    fontFamily:'var(--font-card)', fontSize:'8px', letterSpacing:'3px', color:'var(--amber)',
+                  }}>
+                    UNATRARE · PENDING
+                  </div>
+                  <div style={{
+                    aspectRatio:'5/7', display:'flex', flexDirection:'column',
+                    alignItems:'center', justifyContent:'center', gap:10,
+                    background:'repeating-linear-gradient(45deg,#1a1a1a 0px,#1a1a1a 4px,#111 4px,#111 8px)',
+                  }}>
+                    <span style={{fontSize:'52px', lineHeight:1}}>🐸</span>
+                    <span style={{fontFamily:'var(--font-card)', fontSize:'10px', letterSpacing:'3px', color:'var(--amber)', textAlign:'center'}}>MYSTERY PACK</span>
+                    <span style={{fontFamily:'var(--font-card)', fontSize:'8px', letterSpacing:'2px', color:'var(--text-dim)', textAlign:'center'}}>awaiting council judgment</span>
+                  </div>
+                </div>
+                <div className={styles.statusLabel}>PENDING JUDGMENT</div>
+                <div className={styles.statusToken}>{token.token_name}</div>
+              </>
+            ) : (
+              <>
+                <div className={styles.statusLabel}>REJECTED</div>
+                <div className={styles.statusToken}>{token.token_name}</div>
+                {token.rejection_reason && (
+                  <div className={styles.statusReason}>{token.rejection_reason}</div>
+                )}
+              </>
             )}
             <Link href="/directory" className={styles.backLink}>← directory</Link>
           </div>
@@ -128,7 +159,7 @@ export default async function CardPage({ params }) {
                 <span className={styles.cardHeaderDot}>·</span>
                 <span className={styles.cardHeaderText}>#{String(token.card_number).padStart(3,'0')}</span>
               </div>
-              <div className={styles.cardArt}>
+              <div className={`${styles.cardArt} ${styles.cardArtWrap}`}>
                 {token.revealed_at && artDisplayUrl ? (
                   <img
                     src={artDisplayUrl}
@@ -147,6 +178,12 @@ export default async function CardPage({ params }) {
                   </div>
                 ) : (
                   <div className={styles.artPlaceholder} />
+                )}
+                {token.council_certified === 1 && (
+                  <div className={styles.councilStamp} title="Certified by the UNATRARE Pepe Council">
+                    <span className={styles.councilStampFrog}>🐸</span>
+                    <span className={styles.councilStampText}>PEPE{'\n'}COUNCIL</span>
+                  </div>
                 )}
               </div>
               <div className={styles.cardFooter}>
@@ -173,6 +210,13 @@ export default async function CardPage({ params }) {
 
             <div className={styles.infoEyebrow}>· certified dank ·</div>
             <h1 className={styles.infoTitle}>{token.display_title || token.token_name}</h1>
+
+            {token.council_certified === 1 && (
+              <div className={styles.councilBadge}>
+                <span className={styles.councilBadgeFrog}>🐸</span>
+                <span className={styles.councilBadgeText}>Certified by the Pepe Council</span>
+              </div>
+            )}
 
             {token.description && (
               <div
