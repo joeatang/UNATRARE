@@ -17,6 +17,7 @@ const JUDGES = [
     role: 'The Origin Signal · Tie-Breaker',
     focus: 'Inevitability — does this feel discovered or manufactured?',
     origin: 'Series I Card #1 — the Nakamoto Card. The first signal. His word ends the deliberation.',
+    inspiredBy: 'the RAREPEPE Series I Card #1 (the Nakamoto Card)',
     accent: true,
   },
   {
@@ -27,6 +28,7 @@ const JUDGES = [
     role: 'The Infrastructure Mind',
     focus: 'Craft and technical integration — does it render clean as a trading card?',
     origin: 'Joe Looney — creator of RarePepeWallet. Built the marketplace infrastructure that made Rare Pepes tradeable. The engineer who quietly made culture possible.',
+    inspiredBy: 'Joe Looney',
     accent: false,
   },
   {
@@ -37,6 +39,7 @@ const JUDGES = [
     role: 'The Cultural Bridge',
     focus: 'Lineage and cultural continuity — does this respect the timeline?',
     origin: 'Shawn Leary — deep in Counterparty and early crypto-native culture. Knows connections others miss. Cultural intuition over technical precision.',
+    inspiredBy: 'Shawn Leary',
     accent: false,
   },
   {
@@ -47,6 +50,7 @@ const JUDGES = [
     role: 'The Anonymous Archivist',
     focus: 'Archival value — will it matter in 5+ years? Does it earn shelf space?',
     origin: 'Mike the Anonymous — catalogued all 1,774 Rare Pepe cards, every block, every supply number, every creator. Did it anonymously. The work was always more important than the name.',
+    inspiredBy: 'Mike the Anonymous',
     accent: false,
   },
   {
@@ -57,6 +61,7 @@ const JUDGES = [
     role: 'The Bitcoin Comedian',
     focus: 'Memetic density — the screenshot test. Does it spread without explanation?',
     origin: 'Theo Goodman — self-described intersection of shitposting and fine art. Bitcoin comedian and cultural explainer since 2013. Made crypto culture legible to outsiders while staying genuinely dank to insiders.',
+    inspiredBy: 'Theo Goodman',
     accent: false,
   },
   {
@@ -67,6 +72,7 @@ const JUDGES = [
     role: 'The Culture Engine · Wild Card',
     focus: 'Dankness — does it hit before anyone says a word?',
     origin: 'DJPEPE — Rare Pepe card, Bitcoin Block 434,102, October 13 2016. Stole Yer Girl. Most prolific Rare Pepe creator. Defined what dank actually feels like.',
+    inspiredBy: 'the DJPEPE Rare Pepe card (Block 434,102)',
     accent: true,
   },
   {
@@ -77,6 +83,7 @@ const JUDGES = [
     role: 'The Infrastructure Frog',
     focus: 'Craft and on-chain integrity — is the execution clean? Will it survive in wallets for decades?',
     origin: 'J-Dog — built XChain (the Counterparty block explorer) and Freewallet. Made on-chain data legible and Rare Pepes holdable before most people knew there was a chain worth exploring.',
+    inspiredBy: 'J-Dog (XChain / Freewallet)',
     accent: false,
   },
   {
@@ -87,6 +94,7 @@ const JUDGES = [
     role: 'The Venezuelan Ghost · Memorial Seat',
     focus: 'Inevitability and archival value — did this have to exist? Will it survive?',
     origin: 'John Villar — Venezuelan crypto engineer, Bitcoin since 2011. Co-founder of Pepecash. Authored CIP-10 (multi-party asset sends). Built RarePepeParty. GitHub: chiguireitor — the capybara, Venezuela\'s beloved giant rodent. He understood what Bitcoin meant for people under economic collapse before the language existed for it. Passed March 2021. His blocks are permanent. His seat is permanent.',
+    inspiredBy: 'John Villar (chiguireitor)',
     accent: true,
     memorial: true,
   },
@@ -153,6 +161,10 @@ export default function CouncilPage() {
                   )}
                   {judge.origin}
                 </div>
+
+                <div className={styles.inspiredBy}>
+                  inspired by {judge.inspiredBy}
+                </div>
               </div>
             ))}
           </div>
@@ -160,9 +172,13 @@ export default function CouncilPage() {
           {/* ── Footer note ── */}
           <div className={styles.footer}>
             <p>
-              These judges are personas derived from real figures in Counterparty history.
-              Their scoring logic, vocabulary, and critical lens are modeled on their actual
-              documented work, writing, and contributions to the ecosystem.
+              These are fictional AI personas inspired by real figures in Counterparty history.
+              Their scoring logic, vocabulary, and critical lens are modeled on their documented
+              work and contributions to the ecosystem.
+            </p>
+            <p style={{fontStyle:'italic', color:'var(--muted)' }}>
+              These personas are not affiliated with, endorsed by, or representative of the
+              individuals named. The real people inspired them — that&apos;s it.
             </p>
             <p>
               The council is permanent. Its composition may expand. It will not shrink.

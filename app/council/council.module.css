@@ -180,6 +180,16 @@
   font-weight: 600;
 }
 
+/* ── Inspired by ── */
+.inspiredBy {
+  font-size: 0.72rem;
+  color: var(--muted);
+  opacity: 0.55;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  letter-spacing: 0.03em;
+}
+
 /* ── Footer ── */
 .footer {
   margin-top: 64px;
