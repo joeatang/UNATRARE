@@ -297,7 +297,12 @@ function Step2({ data, onNext, onBack }) {
       setErrMsg('File must be under 10 MB');
       return;
     }
-    setErrMsg('');
+    // Soft warning — not a block
+    if (f.size > 1 * 1024 * 1024) {
+      setErrMsg(`⚠️ Large file (${(f.size/1024/1024).toFixed(1)} MB) — images over 1 MB load slowly in wallets. Consider compressing before uploading.`);
+    } else {
+      setErrMsg('');
+    }
     setFile(f);
     setPreview(URL.createObjectURL(f));
   }
@@ -338,7 +343,8 @@ function Step2({ data, onNext, onBack }) {
       <p className={styles.stepDesc}>
         Upload the art for <strong>{data.tokenName}</strong>.<br />
         PNG, JPG, GIF, WebP, SVG, or HTML. Max 10 MB.<br />
-        Recommended: 400×560px (trading card ratio) or square.
+        Recommended: 400×560px (trading card ratio) or square.<br />
+        <span style={{color:'var(--amber)'}}>Keep under 1 MB for fast wallet loading.</span> Animated GIFs over 2 MB will load slowly.
       </p>
 
       {/* Two-column when preview exists */}
@@ -359,7 +365,11 @@ function Step2({ data, onNext, onBack }) {
           <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,text/html"
             style={{display:'none'}} onChange={handleFile} />
 
-          {errMsg && <div className={styles.inputError}>{errMsg}</div>}
+          {errMsg && (
+            <div className={styles.inputError} style={errMsg.startsWith('⚠️') ? {color:'var(--amber)'} : undefined}>
+              {errMsg}
+            </div>
+          )}
 
           <div style={{display:'flex', gap:12, flexWrap:'wrap', marginTop: file ? 0 : 8}}>
             <button className={styles.backBtn} onClick={onBack}>← back</button>
