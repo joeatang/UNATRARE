@@ -70,7 +70,7 @@ export default function ApplyPage() {
         <h1 className={styles.headline}>UNATRARE</h1>
         <p className={styles.sub}>
           The first collection curated by<br />
-          <span className={styles.subDim}>Pepe AI scientists.</span>
+          <span className={styles.subDim}>PepAI scientists.</span>
         </p>
         <div className={styles.chainBadge}>
           Bitcoin · Counterparty · AI Council · P2P Archive
