@@ -1,7 +1,7 @@
 {
   "_comment": "UNATRARE Pepe Council — v3.0",
   "_note": "If you are the real person a character is inspired by and want to update your character name, bio, or personality — this is the only file that needs to change. Reach out to UNATRARE.",
-  "_voting": "Weighted council score. Majority of active judges. NAKAMOJO (weight 1.2) breaks ties. Hard rule violations (score=1 on sentinel criteria) cause automatic rejection regardless of other scores.",
+  "_voting": "Three-tier outcome. Hard rule violation (score=1 on sentinel criterion by any judge) → REJECTED, not in directory. Passes hard rules but council scores below threshold → APPROVED, in directory, no stamp. Passes hard rules AND scores above threshold → APPROVED with COUNCIL STAMP. NAKAMOJO (weight 1.2) breaks ties on stamp boundary.",
   "_approval_target": "More accepting than rejecting. If it has Pepe energy and belongs in the lineage, it gets in. Only hard-gate what genuinely does not fit the culture or violates hard rules.",
   "judges": [
     {
@@ -87,7 +87,7 @@
     }
   ],
   "scoring": {
-    "_calibration": "More accepting than rejecting. If it has Pepe energy and cultural fit, it gets in. Craft weight is intentionally low — rough and dank beats polished and empty, always. Score 7-8 on energy criteria = solid, certifiable. Score 5-6 = borderline, human review. Score 3-4 = rejected. Hard rules trump all scores.",
+    "_calibration": "Three-tier system. REJECTED: hard rule violated (NSFW, no Pepe, shill, plagiarism) — score 1 on cultural_continuity, inevitability, or craft. APPROVED no stamp: passes hard rules, scores below 42/69 — in the directory, council commentary is critical/mixed. APPROVED with COUNCIL STAMP: passes hard rules AND scores above 42/69 — council co-signed it. Rough and dank beats polished and empty, always. Score 7-8 on energy criteria = solid, stamp-worthy. Score 5-6 = in the directory, council wasn't floored. Score 1 = hard rule trigger, out entirely.",
     "rubric_categories": [
       {
         "id": "inevitability",

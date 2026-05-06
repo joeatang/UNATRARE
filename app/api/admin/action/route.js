@@ -73,24 +73,10 @@ export async function POST(request) {
     }
 
     if (action === 'rejudge') {
-      // Force re-score; also update verdict if score now passes/fails threshold
+      // judgeToken force mode now handles full DB update (status + council_certified)
       const result = await judgeToken(name, { force: true });
-      const config = result?.config ?? {};
-      const threshold = config?.scoring?.approval_threshold ?? 0;
-      const score = result?.score ?? 0;
-      if (score > 0) {
-        const newStatus = score >= threshold ? 'approved' : 'rejected';
-        // council_certified is permanent — only ever set to 1, never cleared back to 0
-        if (newStatus === 'approved') {
-          db.prepare(
-            "UPDATE tokens SET status=?, judge_score=?, judged_at=unixepoch(), council_certified=1 WHERE token_name=?"
-          ).run(newStatus, score, name);
-        } else {
-          db.prepare(
-            "UPDATE tokens SET status=?, judge_score=?, judged_at=unixepoch() WHERE token_name=?"
-          ).run(newStatus, score, name);
-        }
-        result.verdict_updated = newStatus;
+      if (result?.status) {
+        result.verdict_updated = result.status;
       }
       return NextResponse.json({ ok: true, result });
     }
