@@ -13,7 +13,7 @@ export async function POST(request) {
     return NextResponse.json({ error: 'invalid JSON' }, { status: 400 });
   }
 
-  const { tokenName, action, note } = body;
+  const { tokenName, action, note, series: seriesOverride } = body;
 
   if (!tokenName || typeof tokenName !== 'string') {
     return NextResponse.json({ error: 'tokenName required' }, { status: 400 });
@@ -57,19 +57,35 @@ export async function POST(request) {
       const score = result?.score ?? 0;
       if (score > 0) {
         const newStatus = score >= threshold ? 'approved' : 'rejected';
-        db.prepare(
-          "UPDATE tokens SET status=?, judge_score=?, judged_at=unixepoch() WHERE token_name=?"
-        ).run(newStatus, score, name);
+        // council_certified is permanent — only ever set to 1, never cleared back to 0
+        if (newStatus === 'approved') {
+          db.prepare(
+            "UPDATE tokens SET status=?, judge_score=?, judged_at=unixepoch(), council_certified=1 WHERE token_name=?"
+          ).run(newStatus, score, name);
+        } else {
+          db.prepare(
+            "UPDATE tokens SET status=?, judge_score=?, judged_at=unixepoch() WHERE token_name=?"
+          ).run(newStatus, score, name);
+        }
         result.verdict_updated = newStatus;
       }
       return NextResponse.json({ ok: true, result });
     }
 
     if (action === 'genesis') {
-      // Series 0 — founding collection, admin-certified, no AI judge required
+      // Admin-certified founding card — defaults to Series 0 but respects seriesOverride
+      let genesisSeriesNum = 0;
+      if (seriesOverride !== undefined && seriesOverride !== null && seriesOverride !== '') {
+        const parsed = parseInt(seriesOverride, 10);
+        if (isNaN(parsed) || parsed < 0) {
+          return NextResponse.json({ error: 'invalid series number' }, { status: 400 });
+        }
+        genesisSeriesNum = parsed;
+      }
+
       const last = db.prepare(
-        'SELECT MAX(card_number) as mx FROM tokens WHERE series=0'
-      ).get();
+        'SELECT MAX(card_number) as mx FROM tokens WHERE series=?'
+      ).get(genesisSeriesNum);
       const card_number = (last?.mx ?? 0) + 1;
 
       let supply = token.supply || 0;
@@ -85,26 +101,35 @@ export async function POST(request) {
 
       db.prepare(
         `UPDATE tokens
-         SET status='approved', judged_at=unixepoch(), series=0, card_number=?,
+         SET status='approved', judged_at=unixepoch(), series=?, card_number=?,
              rejection_reason=?, supply=?
          WHERE token_name=?`
-      ).run(card_number, note ? `Genesis: ${note}` : 'Genesis Series 0 — founding collection', supply, name);
+      ).run(genesisSeriesNum, card_number, note ? `Genesis: ${note}` : `Genesis Series ${genesisSeriesNum} — founding collection`, supply, name);
 
-      return NextResponse.json({ ok: true, action: 'genesis', series: 0, card_number, supply });
+      return NextResponse.json({ ok: true, action: 'genesis', series: genesisSeriesNum, card_number, supply });
     }
 
     if (action === 'approve') {
       // Assign card number + series if not already set
       let { series, card_number } = token;
       if (!card_number) {
-        // Find current series (fills at 300 then increments)
-        const seriesRow = db.prepare(
-          `SELECT series, COUNT(*) as n FROM tokens WHERE status='approved'
-           GROUP BY series ORDER BY series DESC LIMIT 1`
-        ).get();
-        const seriesNum = (!seriesRow || seriesRow.n >= 300)
-          ? (seriesRow ? seriesRow.series + 1 : 1)
-          : seriesRow.series;
+        // Use admin-specified series if provided, otherwise auto-assign
+        let seriesNum;
+        if (seriesOverride !== undefined && seriesOverride !== null && seriesOverride !== '') {
+          seriesNum = parseInt(seriesOverride, 10);
+          if (isNaN(seriesNum) || seriesNum < 0) {
+            return NextResponse.json({ error: 'invalid series number' }, { status: 400 });
+          }
+        } else {
+          // Find current series (fills at 300 then increments)
+          const seriesRow = db.prepare(
+            `SELECT series, COUNT(*) as n FROM tokens WHERE status='approved'
+             GROUP BY series ORDER BY series DESC LIMIT 1`
+          ).get();
+          seriesNum = (!seriesRow || seriesRow.n >= 300)
+            ? (seriesRow ? seriesRow.series + 1 : 1)
+            : seriesRow.series;
+        }
         const last = db.prepare(
           'SELECT MAX(card_number) as mx FROM tokens WHERE status=? AND series=?'
         ).get('approved', seriesNum);

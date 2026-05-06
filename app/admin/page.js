@@ -55,6 +55,7 @@ function LoginGate({ onAuth }) {
 function TokenRow({ token, authToken, onAction }) {
   const [loading, setLoading] = useState(null); // 'approve' | 'reject' | 'judge' | 'genesis' | 'purge' | 'reveal' | null
   const [note, setNote] = useState('');
+  const [targetSeries, setTargetSeries] = useState('');
   const [expanded, setExpanded] = useState(false);
   const [approvalResult, setApprovalResult] = useState(null); // set after approve/genesis
   const [msgCopied, setMsgCopied] = useState(false);
@@ -65,13 +66,15 @@ function TokenRow({ token, authToken, onAction }) {
 
   async function act(action) {
     setLoading(action);
+    const body = { tokenName: token.token_name, action, note };
+    if ((action === 'approve' || action === 'genesis') && targetSeries !== '') body.series = targetSeries;
     const res = await fetch('/api/admin/action', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${authToken}`,
       },
-      body: JSON.stringify({ tokenName: token.token_name, action, note }),
+      body: JSON.stringify(body),
     });
     const json = await res.json();
     setLoading(null);
@@ -115,11 +118,28 @@ function TokenRow({ token, authToken, onAction }) {
   return (
     <div className={`${styles.row} ${expanded ? styles.rowExpanded : ''}`}>
       <div className={styles.rowMain} onClick={() => setExpanded(v => !v)}>
-        <div className={styles.rowArt}>
+        <div className={styles.rowArt} style={{position:'relative'}}>
           {token.art_url ? (
             <img src={token.art_url} alt={token.token_name} className={styles.rowThumb} />
           ) : (
             <div className={styles.rowThumbEmpty} />
+          )}
+          {(token.status === 'pending' || token.status === 'rejected') && (
+            <div style={{
+              position:'absolute', inset:0, display:'flex', flexDirection:'column',
+              alignItems:'center', justifyContent:'center',
+              background: token.art_url ? 'rgba(0,0,0,0.55)' : 'transparent',
+              gap:1,
+            }}>
+              <span style={{fontSize:'18px', lineHeight:1, filter:'drop-shadow(0 0 3px #000)'}}>🐸</span>
+              <span style={{
+                fontFamily:'var(--font-card)', fontSize:'5px', letterSpacing:'1px',
+                color: token.status === 'pending' ? 'var(--amber)' : 'var(--red)',
+                textTransform:'uppercase',
+              }}>
+                {token.status === 'pending' ? 'pending' : 'rejected'}
+              </span>
+            </div>
           )}
         </div>
         <div className={styles.rowInfo}>
@@ -140,7 +160,16 @@ function TokenRow({ token, authToken, onAction }) {
             </div>
           )}
         </div>
-        <div className={styles.rowToggle}>{approvalResult ? '✉' : expanded ? '▲' : '▼'}</div>
+        <div style={{display:'flex', alignItems:'center', gap:8}}>
+          {token.status === 'approved' && !token.revealed_at && !approvalResult && (
+            <span style={{
+              fontFamily:'var(--font-card)', fontSize:'8px', letterSpacing:'2px',
+              color:'var(--amber)', border:'1px solid var(--amber)',
+              padding:'2px 6px', whiteSpace:'nowrap',
+            }}>⬡ DROP NEEDED</span>
+          )}
+          <div className={styles.rowToggle}>{approvalResult ? '✉' : expanded ? '▲' : '▼'}</div>
+        </div>
       </div>
 
       {expanded && !approvalResult && (
@@ -246,6 +275,28 @@ function TokenRow({ token, authToken, onAction }) {
               placeholder="admin note (optional — shown in rejection feedback)"
               rows={2}
             />
+            <div style={{display:'flex', alignItems:'center', gap:8, marginBottom:8}}>
+              <span style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px', color:'var(--text-dim)', whiteSpace:'nowrap'}}>
+                SERIES OVERRIDE
+              </span>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={targetSeries}
+                onChange={e => setTargetSeries(e.target.value)}
+                placeholder="auto"
+                style={{
+                  width:80, padding:'5px 8px',
+                  background:'var(--bg)', border:'1px solid var(--border)',
+                  color:'var(--text)', fontFamily:'var(--font-card)', fontSize:'11px',
+                  letterSpacing:'2px',
+                }}
+              />
+              <span style={{fontFamily:'var(--font-body)', fontSize:'11px', color:'var(--text-dim)'}}>
+                (blank = auto-assign)
+              </span>
+            </div>
             <div className={styles.actionBtns}>
               <button
                 className={`${styles.actionBtn} ${styles.approveBtn}`}
@@ -272,7 +323,7 @@ function TokenRow({ token, authToken, onAction }) {
                 className={`${styles.actionBtn} ${styles.genesisBtn}`}
                 onClick={() => act('genesis')}
                 disabled={!!loading}
-                title="Certify as SERIES 0 — founding collection, no pepai judgment"
+                title={`Admin-certify as founding card (Series ${targetSeries !== '' ? targetSeries : '0'} default) — no pepai judgment required`}
               >
                 {loading === 'genesis' ? 'certifying...' : '★ genesis'}
               </button>
@@ -1113,6 +1164,41 @@ export default function AdminPage() {
 
       <StatsBar stats={stats} />
 
+      {/* ── NEEDS DROP alert — prominent, impossible to miss ── */}
+      {stats.unrevealed > 0 && (
+        <div
+          onClick={() => setTab('approved')}
+          style={{
+            margin: '0 0 0 0', padding: '14px 20px',
+            background: 'rgba(255, 136, 0, 0.12)',
+            border: '2px solid var(--amber)',
+            borderLeft: 'none', borderRight: 'none',
+            display: 'flex', alignItems: 'center', gap: 12,
+            cursor: 'pointer',
+          }}
+        >
+          <span style={{ fontSize: '20px', lineHeight: 1 }}>⬡</span>
+          <div style={{ flex: 1 }}>
+            <div style={{
+              fontFamily: 'var(--font-card)', fontSize: '11px',
+              letterSpacing: '3px', color: 'var(--amber)',
+            }}>
+              {stats.unrevealed} TOKEN{stats.unrevealed > 1 ? 'S' : ''} CERTIFIED BUT NOT DROPPED
+            </div>
+            <div style={{
+              fontFamily: 'var(--font-body)', fontSize: '11px',
+              color: 'var(--text-dim)', marginTop: 2,
+            }}>
+              Wallets are showing &ldquo;pending&rdquo; for these — go to Certified tab and click ⬡ drop art
+            </div>
+          </div>
+          <span style={{
+            fontFamily: 'var(--font-card)', fontSize: '10px',
+            letterSpacing: '2px', color: 'var(--amber)',
+          }}>view →</span>
+        </div>
+      )}
+
       <div className={styles.tabs}>
         {TABS.map(t => (
           <button
@@ -1126,6 +1212,9 @@ export default function AdminPage() {
             )}
             {t.key === 'borderline' && stats.borderline > 0 && (
               <span className={styles.tabBadge} data-urgent="true">{stats.borderline}</span>
+            )}
+            {t.key === 'approved' && stats.unrevealed > 0 && (
+              <span className={styles.tabBadge} data-urgent="true" title="Certified but not dropped">{stats.unrevealed} ⬡</span>
             )}
           </button>
         ))}

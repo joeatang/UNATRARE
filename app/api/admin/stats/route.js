@@ -19,13 +19,19 @@ export async function GET(request) {
        WHERE status = 'pending' AND judge_score IS NOT NULL`
     ).get();
 
-    const result = { pending: 0, approved: 0, rejected: 0, borderline: 0 };
+    const unrevealed = db.prepare(
+      `SELECT COUNT(*) as n FROM tokens
+       WHERE status = 'approved' AND revealed_at IS NULL`
+    ).get();
+
+    const result = { pending: 0, approved: 0, rejected: 0, borderline: 0, unrevealed: 0 };
     for (const row of counts) {
       if (row.status === 'pending')  result.pending  = row.n;
       if (row.status === 'approved') result.approved = row.n;
       if (row.status === 'rejected') result.rejected = row.n;
     }
     result.borderline = borderline?.n ?? 0;
+    result.unrevealed = unrevealed?.n ?? 0;
 
     return NextResponse.json(result);
   } catch (err) {
