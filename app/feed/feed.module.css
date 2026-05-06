@@ -560,4 +560,30 @@
     width: 48px;
     height: 67px;
   }
+
+  /* ── Mobile density + swipe-native feel ── */
+  .main { padding: 52px 14px 80px; }
+  .header { margin-bottom: 28px; padding-bottom: 20px; }
+
+  /* Tighter internal padding on each verdict unit */
+  .verdictHeader { padding: 14px; }
+  .judgeCard { padding: 10px 14px; gap: 6px; }
+  .rejectionNote { padding: 10px 14px; }
+
+  /* Prevent headerStats from overflowing on narrow viewports */
+  .headerStats { flex-wrap: wrap; gap: 4px; }
+
+  /* Stack CTA buttons full-width — feels deliberate and native */
+  .bottomCta {
+    flex-direction: column;
+    padding-top: 28px;
+    margin-top: 28px;
+    gap: 8px;
+  }
+  .ctaButton,
+  .ctaSecondary {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
 }

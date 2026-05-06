@@ -126,7 +126,7 @@
 
 .drawerLinks a {
   display: block;
-  padding: 14px 24px;
+  padding: 16px 24px; /* 44px+ touch target: 16+14(text)+16 */
   font-family: var(--font-card);
   font-size: 14px;
   letter-spacing: 3px;

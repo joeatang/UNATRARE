@@ -20,6 +20,9 @@
     gap: 40px;
     padding: 32px 16px;
   }
+  /* Remove sticky on mobile — single column, sticky card blocks info scroll */
+  .cardSide { position: static; }
+  .statusPage { margin: 36px auto; padding: 0 16px; }
 }
 
 /* ─── Card frame ─────────────────────────────────────────── */

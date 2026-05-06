@@ -517,6 +517,22 @@
     gap: 16px;
   }
   .holderBtn { width: 100%; text-align: center; }
+
+  /* ── Mobile density: hide verbose secondary text, limit list length ── */
+  .heroExplainer { display: none; }
+  .eyebrow { letter-spacing: 3px; }
+  .stats { justify-content: space-around; }
+
+  /* Center and slightly compact the 3 mystery pending cards */
+  .pendingRow { justify-content: center; gap: 12px; }
+  .pendingCard { width: 100px; height: 140px; }
+  .pendingArt  { height: 108px; }
+
+  /* Bigger touch target per activity row */
+  .activityItem { padding: 14px 0; }
+
+  /* Cap live activity feed at 6 rows on mobile — rest is noise */
+  .activityItem:nth-child(n+7) { display: none; }
 }
 
 /* Tiny mobile — ≤380px (iPhone SE) */
