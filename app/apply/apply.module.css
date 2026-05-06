@@ -1,0 +1,364 @@
+.wrap {
+  min-height: 100vh;
+  background: #080808;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 72px 24px 48px;
+  max-width: 680px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ── Hero ──────────────────────────────────────────────── */
+.hero {
+  text-align: center;
+  width: 100%;
+  margin-bottom: 56px;
+}
+
+.pepeAscii {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  line-height: 1.15;
+  color: #2d6e2d;
+  display: inline-block;
+  text-align: left;
+  margin-bottom: 28px;
+  letter-spacing: 0;
+  user-select: none;
+}
+
+.headline {
+  font-family: 'VT323', monospace;
+  font-size: clamp(80px, 20vw, 128px);
+  color: #C9A84C;
+  letter-spacing: 10px;
+  line-height: 1;
+  margin-bottom: 4px;
+  text-shadow: 0 0 40px rgba(201, 168, 76, 0.35), 0 0 80px rgba(201, 168, 76, 0.1);
+}
+
+.sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 15px;
+  color: #999;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.subDim {
+  color: #444;
+}
+
+.chainBadge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: #3d9e3d;
+  border: 1px solid #1c3a1c;
+  padding: 5px 14px;
+  display: inline-block;
+  text-transform: uppercase;
+}
+
+/* ── Pitch ─────────────────────────────────────────────── */
+.pitch {
+  width: 100%;
+  border: 1px solid #1a1a1a;
+  margin-bottom: 48px;
+}
+
+.pitchItem {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 16px;
+  padding: 28px 24px;
+  border-bottom: 1px solid #141414;
+}
+
+.pitchItem:last-child {
+  border-bottom: none;
+}
+
+.pitchNum {
+  font-family: 'VT323', monospace;
+  font-size: 36px;
+  color: #8B7355;
+  line-height: 1;
+  padding-top: 1px;
+}
+
+.pitchTitle {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: #C9A84C;
+  display: block;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.pitchBody {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  color: #777;
+  line-height: 1.75;
+}
+
+/* ── Form section ──────────────────────────────────────── */
+.formSection {
+  width: 100%;
+  border: 1px solid #222;
+  padding: 36px 32px 32px;
+  background: #090909;
+  margin-bottom: 32px;
+}
+
+.formHeadline {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 17px;
+  color: #d4d4d4;
+  margin-bottom: 8px;
+  line-height: 1.4;
+  letter-spacing: 0.5px;
+}
+
+.accent {
+  color: #C9A84C;
+}
+
+.formSub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: #555;
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Platform radio toggle */
+.platformRow {
+  display: flex;
+}
+
+.platformLabel {
+  flex: 1;
+  padding: 12px 14px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid #222;
+  color: #444;
+  transition: all 0.1s ease;
+  user-select: none;
+  text-transform: uppercase;
+}
+
+.platformLabel + .platformLabel {
+  border-left: none;
+}
+
+.platformActive {
+  border-color: #C9A84C !important;
+  color: #C9A84C;
+  background: rgba(201, 168, 76, 0.04);
+}
+
+.radioHidden {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Handle input */
+.handleRow {
+  display: flex;
+  align-items: center;
+  border: 1px solid #222;
+  background: #0c0c0c;
+  transition: border-color 0.15s;
+}
+
+.handleRow:focus-within {
+  border-color: #C9A84C;
+}
+
+.atSymbol {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 20px;
+  color: #C9A84C;
+  padding: 0 14px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.handleInput {
+  flex: 1;
+  background: transparent;
+  border: none !important;
+  padding: 15px 12px 15px 0;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 15px;
+  color: #d4d4d4;
+  letter-spacing: 1px;
+  width: 100%;
+}
+
+.handleInput::placeholder {
+  color: #2a2a2a;
+}
+
+.handleInput:focus {
+  outline: none;
+  border: none;
+}
+
+.errorMsg {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: #c0392b;
+  padding: 4px 0;
+}
+
+.submitBtn {
+  background: #C9A84C;
+  color: #080808;
+  border: none;
+  padding: 17px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 5px;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.1s, opacity 0.1s;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #e8c55a;
+}
+
+.submitBtn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Follow row */
+.followRow {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.followLink {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  color: #555;
+  text-decoration: none;
+  border-bottom: 1px solid #222;
+  padding-bottom: 2px;
+  transition: color 0.1s, border-color 0.1s;
+}
+
+.followLink:hover {
+  color: #C9A84C;
+  border-color: #C9A84C;
+}
+
+.followDivider {
+  color: #2a2a2a;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ── Success state ─────────────────────────────────────── */
+.successBox {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.successSigil {
+  font-size: 52px;
+  color: #5abf5a;
+  margin-bottom: 16px;
+  display: block;
+  line-height: 1;
+}
+
+.successTitle {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 18px;
+  color: #5abf5a;
+  margin-bottom: 14px;
+  letter-spacing: 2px;
+}
+
+.successBody {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: #777;
+  line-height: 1.8;
+}
+
+.successBody a {
+  color: #C9A84C;
+  text-decoration: none;
+  border-bottom: 1px solid #8B7355;
+}
+
+.successBody a:hover {
+  color: #e8c55a;
+}
+
+/* ── Footer ────────────────────────────────────────────── */
+.footer {
+  padding-top: 16px;
+}
+
+.footerText {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: #2a2a2a;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ── Mobile ────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .wrap {
+    padding: 48px 16px 40px;
+  }
+
+  .formSection {
+    padding: 28px 20px 24px;
+  }
+
+  .pitchItem {
+    grid-template-columns: 40px 1fr;
+    gap: 12px;
+    padding: 22px 16px;
+  }
+
+  .followRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .followDivider {
+    display: none;
+  }
+}
