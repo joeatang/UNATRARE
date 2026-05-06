@@ -1,0 +1,268 @@
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 80px 24px 120px;
+}
+
+/* ── Header ── */
+.header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 40px;
+  margin-bottom: 56px;
+}
+
+.eyebrow {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 64px;
+  letter-spacing: 8px;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.title span {
+  color: var(--green);
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  max-width: 540px;
+}
+
+/* ── How it works ── */
+.section {
+  margin-bottom: 56px;
+}
+
+.sectionTitle {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 5px;
+  color: var(--amber);
+  margin-bottom: 24px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.step {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.stepNum {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--green);
+  padding-top: 2px;
+  min-width: 28px;
+}
+
+.stepBody {
+  flex: 1;
+  padding-bottom: 28px;
+}
+
+.stepHead {
+  font-family: var(--font-card);
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: var(--text);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.stepText {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+
+.stepLine {
+  width: 1px;
+  height: 20px;
+  background: var(--border-dim);
+  margin-left: 13px;
+}
+
+/* ── Pricing ── */
+.pricingGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.pricingCell {
+  background: var(--bg);
+  padding: 18px 16px;
+  text-align: center;
+}
+
+.pricingLabel {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.pricingValue {
+  font-family: var(--font-card);
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+
+.pricingValue em {
+  color: var(--green);
+  font-style: normal;
+}
+
+.pricingNote {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+/* ── Empty state ── */
+.empty {
+  border: 1px solid var(--border);
+  padding: 60px 32px;
+  text-align: center;
+  margin-bottom: 56px;
+}
+
+.emptyGlyph {
+  font-size: 2rem;
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+.emptyTitle {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 5px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.emptyText {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.8;
+  max-width: 400px;
+  margin: 0 auto 28px;
+}
+
+/* ── Eligibility box ── */
+.eligibilityBox {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--amber);
+  padding: 20px 24px;
+  margin-bottom: 56px;
+  background: rgba(255, 180, 0, 0.03);
+}
+
+.eligibilityTitle {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--amber);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.eligibilityText {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+
+.eligibilityText a {
+  color: var(--amber);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── CTA ── */
+.cta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+}
+
+.ctaBtn {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  padding: 12px 24px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.ctaBtn:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.ctaBtn[data-primary="true"] {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.ctaBtn[data-primary="true"]:hover {
+  background: rgba(0, 255, 100, 0.05);
+}
+
+/* ── NAT reference ── */
+.natRef {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+  opacity: 0.55;
+  margin-top: 12px;
+  line-height: 1.7;
+}
+
+.natRef a {
+  color: var(--text-dim);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .title { font-size: 40px; letter-spacing: 4px; }
+  .pricingGrid { grid-template-columns: 1fr; }
+}
