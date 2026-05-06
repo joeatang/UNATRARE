@@ -1,0 +1,223 @@
+.page {
+  min-height: 100vh;
+  padding-top: 80px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 60px 24px 80px;
+}
+
+/* ── Header ── */
+.header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-size: clamp(2.6rem, 6vw, 4rem);
+  letter-spacing: 0.08em;
+  font-weight: 900;
+  margin: 0 0 20px;
+  text-transform: uppercase;
+}
+
+.title span {
+  color: var(--green);
+}
+
+.subtitle {
+  font-size: 0.97rem;
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+/* ── Scoring note ── */
+.scoringNote {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--green);
+  padding: 18px 22px;
+  margin-bottom: 52px;
+  background: rgba(var(--green-rgb, 0,255,0), 0.025);
+}
+
+.scoringLabel {
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--green);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.scoringText {
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* ── Grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+/* ── Card ── */
+.card {
+  border: 1px solid var(--border);
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: border-color 0.15s;
+}
+
+.card:hover {
+  border-color: var(--text);
+}
+
+.cardAccent {
+  border-left: 3px solid var(--green);
+}
+
+.cardMemorial {
+  border-left: 3px solid #c084fc;
+}
+
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.sigil {
+  font-size: 1.8rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.nameBlock {
+  flex: 1;
+}
+
+.name {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.role {
+  font-size: 0.77rem;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.weightBadge {
+  font-size: 0.7rem;
+  border: 1px solid var(--green);
+  color: var(--green);
+  padding: 2px 6px;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+/* ── Focus ── */
+.focus {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.015);
+}
+
+.focusLabel {
+  font-size: 0.63rem;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.focusText {
+  font-size: 0.83rem;
+  line-height: 1.5;
+}
+
+/* ── Origin ── */
+.origin {
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.6;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+  flex: 1;
+}
+
+.memorialTag {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  color: #c084fc;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+/* ── Footer ── */
+.footer {
+  margin-top: 64px;
+  border-top: 1px solid var(--border);
+  padding-top: 40px;
+  max-width: 640px;
+}
+
+.footer p {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.footerLinks {
+  display: flex;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.footerLink {
+  font-size: 0.82rem;
+  color: var(--green);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+}
+
+.footerLink:hover {
+  text-decoration: underline;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .inner {
+    padding: 40px 16px 60px;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

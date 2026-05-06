@@ -6,7 +6,7 @@ import styles from './apply.module.css';
 const PITCH_ITEMS = [
   {
     title: 'THE CO-SIGN.',
-    body: 'Your art is evaluated by a council of 6 judges — NAKAMOJO, RARELOONEY, DANKSHAWN, M.CATALOGUS, PROF.TG00DMAN, and DJ PEPAI. They score on inevitability, memetic density, craft, cultural continuity, and archival value. Pass the council, get certified.',
+    body: 'Your art is evaluated by a council of 8 judges — NAKAMOJO, RARELOONEY, DANKSHAWN, M.CATALOGUS, PROF.TG00DMAN, DJ PEPAI, J.FROG, and CHIGUIRIPEPE. They score on inevitability, memetic density, craft, cultural continuity, and archival value. Pass the council\'s hard rules, get in the directory. Score above 42/69, get the council stamp.',
   },
   {
     title: 'THE RECORD.',

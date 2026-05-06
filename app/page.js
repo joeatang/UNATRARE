@@ -16,8 +16,8 @@ const JUDGE_META = {
   prof_j_looney:  { name: 'RARELOONEY',      role: 'The Infrastructure Mind',  sigil: '◈' },
   dank_shawn:     { name: 'DANKSHAWN',       role: 'The Cultural Bridge',      sigil: '◉' },
   theo_goodman:   { name: 'PROF.TG00DMAN',   role: 'The Bitcoin Comedian',     sigil: '◆' },
-  dj_pepai:       { name: 'DJ PEPAI',        role: 'The Culture Engine',       sigil: '◎' },
-};
+  dj_pepai:       { name: 'DJ PEPAI',        role: 'The Culture Engine',       sigil: '◎' },  chiguiripepe:   { name: 'CHIGUIRIPEPE',    role: 'The Venezuelan Ghost',     sigil: '⬟' },
+  j_frog:         { name: 'J.FROG',          role: 'The Infrastructure Frog',  sigil: '▧' },};
 
 function getJudgeMeta(id) {
   return JUDGE_META[id] || { name: id.toUpperCase(), role: 'Judge', sigil: '○' };
@@ -134,7 +134,7 @@ export default function HomePage() {
           <h1 className={styles.heroTitle}>PEPEMPO<span>O</span>L</h1>
           <div className={styles.heroSub}>real-time submission activity · unatrare curated directory</div>
           <p className={styles.heroExplainer}>
-            A curated directory of Pepe art on Bitcoin. Submit your card — 6 judges with distinct personalities certify or reject it. Every verdict is permanent on-chain. Browse the feed to see what the council is saying.
+            A curated directory of Pepe art on Bitcoin. Submit your card — 8 judges with distinct personalities evaluate it. Pass the hard rules, get in the directory. Score high enough, earn the council stamp. Every verdict is permanent on-chain.
           </p>
         </section>
 
@@ -294,7 +294,7 @@ export default function HomePage() {
           <div className={styles.ctaSub}>
             get your submission URL first.<br />
             then create your counterparty token.<br />
-            then submit to the pepai scientist panel.
+            then submit to the pepe council.
           </div>
           <Link href="/submit" className={styles.ctaButton}>open pepe wizard →</Link>
           <div style={{ marginTop: 16 }}>

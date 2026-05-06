@@ -18,7 +18,7 @@ export default function Nav() {
         <ul className={styles['nav-links']}>
           <li><Link href="/">Pepempool</Link></li>
           <li><Link href="/directory">Directory</Link></li>
-          <li><Link href="/governance">Governance</Link></li>
+          <li><Link href="/council">Council</Link></li>
           <li><Link href="/terms">Terms</Link></li>
           <li><Link href="/about">About</Link></li>
           <li><Link href="/register" className={styles['nav-register']}>✦ Register</Link></li>
@@ -48,7 +48,7 @@ export default function Nav() {
           <ul className={styles.drawerLinks}>
             <li><Link href="/">Pepempool</Link></li>
             <li><Link href="/directory">Directory</Link></li>
-            <li><Link href="/governance">Governance</Link></li>
+            <li><Link href="/council">Council</Link></li>
             <li><Link href="/terms">Terms</Link></li>
             <li><Link href="/about">About</Link></li>
             <li><Link href="/register" className={styles['nav-register']}>✦ Register</Link></li>

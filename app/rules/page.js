@@ -18,30 +18,51 @@ const JUDGES = [
   },
   {
     num: 'II',
-    id: 'PROF.TG00DMAN',
-    title: 'The Archivist',
-    role: 'Years documenting Bitcoin and crypto culture. Not just what something is, but what it is doing and whether it earns shelf space in the permanent record. Dry wit. No mercy for filler.',
+    id: 'RARELOONEY',
+    title: 'The Infrastructure Mind',
+    role: 'Built the wallets. Built the explorer. Judges from the architecture side — does this integrate clean? Does it render correctly as a trading card?',
     accent: false,
   },
   {
     num: 'III',
-    id: 'WALLETORIUS',
-    title: 'The Infrastructure Mind',
-    role: 'Built the wallet. Built the marketplace. Judges from the architecture side — does this integrate clean? Does it display correctly as a trading card? Format is not a cage; it is a launchpad.',
-    accent: false,
-  },
-  {
-    num: 'IV',
-    id: 'COUNTERSHAW',
+    id: 'DANKSHAWN',
     title: 'The Cultural Bridge',
     role: 'Deep in Counterparty since before NFTs had a name. Knows the lineage the way a musician knows their influences. The central question: does this respect the timeline?',
     accent: false,
   },
   {
+    num: 'IV',
+    id: 'M.CATALOGUS',
+    title: 'The Anonymous Archivist',
+    role: 'Not just what something is, but what it is doing and whether it earns shelf space in the permanent record. Evaluates archival value above all else. No mercy for filler.',
+    accent: false,
+  },
+  {
     num: 'V',
+    id: 'PROF.TG00DMAN',
+    title: 'The Bitcoin Comedian',
+    role: 'Years documenting Bitcoin and crypto culture. Grading on narrative, timing, and whether this moment matters beyond the moment. History does not remember everything.',
+    accent: false,
+  },
+  {
+    num: 'VI',
     id: 'DJ PEPAI',
     title: 'Dankness Calibration · Wild Card',
     role: "Stole Yer Girl since block 434,102. Grades hard on memetic density — the screenshot test. Does it spread without explanation? Does it hit before anyone says a word? If DJ PEPAI says no, it's no.",
+    accent: true,
+  },
+  {
+    num: 'VII',
+    id: 'J.FROG',
+    title: 'The Infrastructure Frog',
+    role: 'Built the Counterparty block explorer and Freewallet. Judges on craft and archival value — is the execution clean? Will it survive in wallets and archives for decades?',
+    accent: false,
+  },
+  {
+    num: 'VIII',
+    id: 'CHIGUIRIPEPE',
+    title: 'The Venezuelan Ghost · Memorial Seat',
+    role: 'Co-founded Pepecash. Authored CIP-10. Built infrastructure that made Rare Pepe possible. Evaluates hardest on inevitability and archival value. His seat is permanent.',
     accent: true,
   },
 ];
@@ -117,7 +138,7 @@ export default function RulesPage() {
             <div className={styles.sectionNum}>03</div>
             <div className={styles.sectionBody}>
               <h2 className={styles.sectionTitle}>THE PEPE COUNCIL</h2>
-              <p className={styles.sectionNote}>Five council members. Majority rules (3 of 5). All ties broken by PROF NAKA C.</p>
+              <p className={styles.sectionNote}>Eight council members. Weighted scoring. NAKAMOJO holds tie-break authority. CHIGUIRIPEPE holds a permanent memorial seat.</p>
 
               <div className={styles.councilGrid}>
                 {JUDGES.map(j => (
@@ -150,26 +171,45 @@ export default function RulesPage() {
             <div className={styles.sectionNum}>04</div>
             <div className={styles.sectionBody}>
               <h2 className={styles.sectionTitle}>AFTER JUDGMENT</h2>
+              <p className={styles.sectionNote}>Three possible outcomes. The distinction matters.</p>
 
               <div className={styles.outcomeBlock}>
-                <div className={styles.outcomeApproved}>
-                  <div className={styles.outcomeLabel}>CERTIFIED ✓</div>
+                <div className={styles.outcomeApproved} style={{borderLeft:'3px solid var(--green)'}}>
+                  <div className={styles.outcomeLabel}>CERTIFIED + COUNCIL STAMP ★</div>
                   <ul className={styles.outcomeList}>
-                    <li>Full CIP-25 v2.0.0 metadata published</li>
-                    <li>Art visible in compatible wallets, explorers, markets</li>
-                    <li>Card appears in directory with Series + Card Number</li>
+                    <li>Passed hard rules AND scored above threshold (42/69)</li>
+                    <li>Council co-signed it — the stamp means something</li>
+                    <li>Full CIP-25 metadata published, art live in wallets</li>
+                    <li>Card in directory with Series + Card Number + stamp badge</li>
                     <li>You may now distribute your tokens</li>
                   </ul>
                 </div>
-                <div className={styles.outcomeRejected}>
-                  <div className={styles.outcomeLabel}>REJECTED ✗</div>
+                <div className={styles.outcomeApproved} style={{borderLeft:'3px solid var(--amber)', marginTop:12}}>
+                  <div className={styles.outcomeLabel} style={{color:'var(--amber)'}}>IN DIRECTORY — NO STAMP</div>
                   <ul className={styles.outcomeList}>
-                    <li>Written feedback from the scientist panel</li>
-                    <li>Art was never revealed publicly</li>
-                    <li>One resubmit allowed after addressing feedback</li>
-                    <li>Submission fee 50% refunded on first rejection</li>
+                    <li>Passed hard rules but scored below threshold</li>
+                    <li>Art is public, metadata is live, wallets see it</li>
+                    <li>Card in directory — council commentary shown as-is</li>
+                    <li>No council stamp — the council wasn&apos;t floored, but let it in</li>
+                    <li>You may now distribute your tokens</li>
                   </ul>
                 </div>
+                <div className={styles.outcomeRejected} style={{marginTop:12}}>
+                  <div className={styles.outcomeLabel}>REJECTED ✗</div>
+                  <ul className={styles.outcomeList}>
+                    <li>Hard rule violated: NSFW, no Pepe, shill content, or plagiarism</li>
+                    <li>Not in the directory — this is the only path to full exclusion</li>
+                    <li>Art was never revealed publicly</li>
+                    <li>Written reason from the council</li>
+                    <li>One resubmit allowed after addressing the specific violation</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className={styles.infoNote} style={{marginTop:16}}>
+                The stamp requires passing the hard rules AND earning genuine scores. Being in the
+                directory without a stamp is not a failure — it means the council saw it, let it in,
+                and had opinions. Rejection is reserved for work that has no business being here.
               </div>
             </div>
           </section>

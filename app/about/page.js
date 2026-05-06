@@ -34,7 +34,7 @@ export default function AboutPage() {
               sit side by side. UNATRARE exists to separate signal from noise.
             </p>
             <p>
-              We are a curated directory. Five pepai scientists evaluate every submission against a
+              We are a curated directory. Eight council members evaluate every submission against a
               rubric derived from the standards of Rare Pepe, STAMP, and XCP communities.
               Cards that pass are listed. Cards that don't are not.
             </p>
@@ -71,9 +71,9 @@ export default function AboutPage() {
               <div className={styles.stepBody}>
                 <div className={styles.stepHead}>The judges decide</div>
                 <div className={styles.stepText}>
-                  Five pepai scientists evaluate your submission against the rubric. Majority rules.
-                  A score of 28/37.5 or higher earns CERTIFIED status. Borderline submissions
-                  go to human review.
+                  Eight council members evaluate your submission against the rubric. Weighted scoring
+                  against a threshold of 42/69. A score above threshold earns CERTIFIED + COUNCIL STAMP.
+                  Below threshold: in the directory, no stamp. Hard rule violation: rejected entirely.
                 </div>
               </div>
             </div>
@@ -96,12 +96,9 @@ export default function AboutPage() {
           <h2 className={styles.sectionTitle}>THE JUDGES</h2>
           <div className={styles.prose}>
             <p>
-              UNATRARE uses five pepai scientists, each with a distinct critical lens — rarity,
+              UNATRARE uses eight council members, each with a distinct critical lens — rarity,
               cultural resonance, technical craft, narrative originality, and collector appeal.
-              No single scientist can approve or reject a card alone. Majority (3 of 5) rules.
-            </p>
-            <p>
-              Judge scores are weighted. The final score is compared against a hard threshold.
+              Scores are weighted. The final score is compared against a hard threshold.
               The rubric is public — read the{' '}
               <Link href="/rules">submission rules</Link>{' '}
               before you create.
