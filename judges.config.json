@@ -183,8 +183,23 @@
     ]
   },
   "exemplar_cards": {
-    "_note": "Populate with 5-10 approved tokens and 5 rejected tokens for calibration. Included in every judge prompt.",
-    "approved": [],
-    "rejected": []
+    "_note": "Calibration reference injected into every judge prompt. Approved = cultural gold standard from the Rare Pepe directory and UNATRARE-certified cards. Rejected = documented failures with scores or clear violation types.",
+    "approved": [
+      "RAREPEPE (Series 1 Card 1 — the Nakamoto Card, origin of the entire directory, the most inevitable thing ever minted)",
+      "PEPECASH (Series 1 Card 2 — the currency of the ecosystem, foundational, endures without needing explanation)",
+      "HAIRPEPE (Series 1 Card 3 — the first pure art card, clean craft, timeless without trying)",
+      "GOXPEPE (Mt.Gox collapse encoded as Pepe — crypto tragedy immortalized, perfect cultural continuity)",
+      "PEPEWARHOL (Warhol remix — high craft, iconic cultural collision, deeply memetic, belongs in a museum and a blockchain simultaneously)",
+      "LORDKEK (committed mythology, maximum Pepe cultural energy, stands entirely alone)",
+      "RAREUNATPEPE (UNATRARE Series 1 Card 1, council score 57.6/69 — strong inevitability, genuine crypto-native craft)",
+      "SOFTPWAR (UNATRARE certified, contemporary crypto-native art, council score 50.0/69)"
+    ],
+    "rejected": [
+      "GIFTGOATS (UNATRARE rejected — goat art, zero connection to Pepe lineage or crypto culture, score 32.2/69)",
+      "UNATDEMO (UNATRARE rejected — generic crypto art, no memetic energy, no cultural continuity, score 26.4/69)",
+      "any submission with embedded URLs, QR codes, watermarks, or promotional shill text baked into the image",
+      "any submission that is a screenshotted tweet, price chart, or token ticker with no original art — not a card, a receipt",
+      "any submission featuring Pepe as a hollow costume worn by unrelated content with no understanding of the mythology or lineage"
+    ]
   }
 }
