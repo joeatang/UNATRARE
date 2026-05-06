@@ -7,7 +7,8 @@ import { storeArt } from '../../../lib/tracBridge.js';
 
 // Uploads are stored in /public/uploads/ — served by Next.js as /uploads/FILENAME
 // This directory persists on the server across restarts.
-// Max size: 10 MB. Allowed: PNG, JPG, GIF, WebP, SVG, HTML.
+// Max size: 1.5 MB. Allowed: PNG, JPG, GIF, WebP, SVG, HTML.
+// Target: 200–500 KB for fast wallet loading. GIFs should be optimised before upload.
 
 // process.cwd() is always the Next.js project root in both dev and production
 const UPLOAD_DIR = path.resolve(process.cwd(), 'public', 'uploads');
@@ -21,7 +22,7 @@ const MIME_EXT = {
   'image/svg+xml': 'svg',
   'text/html': 'html',
 };
-const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+const MAX_BYTES = 1.5 * 1024 * 1024; // 1.5 MB — wallet-friendly ceiling
 
 export async function POST(request) {
   let formData;
@@ -58,7 +59,7 @@ export async function POST(request) {
   if (bytes.byteLength > MAX_BYTES) {
     return NextResponse.json({
       ok: false,
-      error: `File too large (${(bytes.byteLength / 1024 / 1024).toFixed(1)} MB). Max is 10 MB.`,
+      error: `File too large (${(bytes.byteLength / 1024 / 1024).toFixed(1)} MB). Max is 1.5 MB — optimise your file before uploading.`,
     }, { status: 422 });
   }
 
