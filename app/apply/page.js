@@ -176,11 +176,14 @@ export default function ApplyPage() {
             </div>
         ) : (
           <>
-            <h2 className={styles.formHeadline}>
+              <h2 className={styles.formHeadline}>
                 Submit your <span className={styles.accent}>handle.</span>
               </h2>
               <p className={styles.formSub}>
                 Drop it below. We&apos;ll reach out directly with submission details.
+              </p>
+
+              <form className={styles.form} onSubmit={handleSubmit} noValidate>
                 {/* Platform toggle */}
                 <div className={styles.platformRow}>
                   <label className={`${styles.platformLabel} ${platform === 'x' ? styles.platformActive : ''}`}>
