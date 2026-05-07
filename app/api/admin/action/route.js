@@ -107,7 +107,7 @@ export async function POST(request) {
       }
 
       const last = db.prepare(
-        'SELECT MAX(card_number) as mx FROM tokens WHERE series=?'
+        "SELECT MAX(card_number) as mx FROM tokens WHERE series=? AND status='approved'"
       ).get(genesisSeriesNum);
       const card_number = (last?.mx ?? 0) + 1;
 
