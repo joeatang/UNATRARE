@@ -122,16 +122,17 @@ export default function DropsPage() {
             </div>
           </div>
           <p className={styles.pricingNote}>
-            Artists set their own NAT price. UNATRARE adds a 15% facilitation fee on top &mdash;
-            paid by the buyer, not taken from the artist. The artist receives exactly what they asked for.
+            Artists set their price in USD. At drop announcement, the equivalent NAT amount
+            is calculated at the current market rate and fixed for the claim window.
+            UNATRARE adds a 15% facilitation fee on top &mdash; paid by the buyer, not taken from the artist.
+            The artist receives exactly what they asked for.
           </p>
           <p className={styles.natRef}>
             New to DMT-NAT?{' '}
             <a href="https://natgmi.com" target="_blank" rel="noopener noreferrer">natgmi.com</a>
             {' '}&mdash; the first non-arbitrary token, minted with every Bitcoin block.
-            NAT is a TAP Protocol token &mdash; use{' '}
-            <a href="https://tracsystems.io/tap-wallet/" target="_blank" rel="noopener noreferrer">TAP Wallet</a>
-            {' '}to hold and send it.
+            Need to set up your wallets?{' '}
+            <a href="/wallets">Get started in 5 minutes &rarr;</a>
           </p>
         </section>
 

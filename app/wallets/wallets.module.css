@@ -1,0 +1,337 @@
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 80px 24px 120px;
+}
+
+/* ── Header ── */
+.header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 40px;
+  margin-bottom: 48px;
+}
+
+.eyebrow {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 64px;
+  letter-spacing: 8px;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.title span {
+  color: var(--green);
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  max-width: 520px;
+}
+
+/* ── Path selector ── */
+.pathSelector {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-bottom: 48px;
+}
+
+.pathBtn {
+  background: var(--bg);
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 20px 16px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.pathBtn:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.pathBtnActive {
+  background: rgba(0, 255, 100, 0.04);
+  border-bottom-color: var(--green);
+}
+
+.pathBtnLetter {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--green);
+}
+
+.pathBtnLabel {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text);
+  text-transform: uppercase;
+}
+
+.pathBtnSub {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* ── Path content ── */
+.pathContent {
+  animation: fadeIn 0.18s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.pathIntro {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.8;
+  margin-bottom: 36px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.pathIntro strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ── Steps ── */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.step {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.stepNum {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--green);
+  padding-top: 2px;
+  min-width: 36px;
+}
+
+.stepBody {
+  flex: 1;
+  padding-bottom: 0;
+}
+
+.stepHead {
+  font-family: var(--font-card);
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: var(--text);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.stepText {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+
+.stepText a {
+  color: var(--amber);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.stepLine {
+  width: 1px;
+  height: 28px;
+  background: var(--border-dim);
+  margin-left: 17px;
+}
+
+/* ── Install button ── */
+.installBtn {
+  display: inline-block;
+  margin-top: 14px;
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  padding: 10px 20px;
+  border: 1px solid var(--green);
+  color: var(--green);
+  text-decoration: none;
+  text-transform: uppercase;
+  background: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.installBtn:hover {
+  background: rgba(0, 255, 100, 0.06);
+}
+
+.installRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+/* ── Market links ── */
+.marketGrid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.marketLink {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 3px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.marketLink:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+/* ── Path note ── */
+.pathNote {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  margin-top: 32px;
+  margin-bottom: 28px;
+  padding: 16px 20px;
+  border-left: 2px solid var(--border);
+  opacity: 0.75;
+}
+
+.pathNote a {
+  color: var(--amber);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── CTA ── */
+.cta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ctaBtn {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  padding: 12px 24px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.ctaBtn:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.ctaBtn[data-primary="true"] {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.ctaBtn[data-primary="true"]:hover {
+  background: rgba(0, 255, 100, 0.05);
+}
+
+/* ── Verify bar ── */
+.verifyBar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 64px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-dim);
+}
+
+.verifyLabel {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  opacity: 0.45;
+  white-space: nowrap;
+}
+
+.verifyLinks {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.verifyLinks a {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.15s;
+}
+
+.verifyLinks a:hover {
+  color: var(--text);
+}
+
+.verifyLinks a span {
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0;
+  opacity: 0.45;
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .title { font-size: 40px; letter-spacing: 4px; }
+  .pathSelector { grid-template-columns: 1fr; }
+  .installRow { flex-direction: column; }
+  .verifyBar { flex-direction: column; align-items: flex-start; gap: 12px; }
+}
