@@ -28,10 +28,10 @@ export default function DropsPage() {
           <p className={styles.eligibilityText}>
             Holding UNATPEPE is the key. Not a guarantee of a card &mdash; a guarantee of access.
             Each drop has a fixed supply. UNATPEPE holders get the claim window before anyone else.
-            Verify your holdings at{' '}
-            <a href="https://xchain.io" target="_blank" rel="noopener noreferrer">xchain.io</a>
-            {' '}or{' '}
-            <a href="https://tap3.link" target="_blank" rel="noopener noreferrer">tap3.link</a>.
+            UNATPEPE is a TAP Protocol token &mdash; check your balance in{' '}
+            <a href="https://tracsystems.io/tap-wallet/" target="_blank" rel="noopener noreferrer">TAP Wallet</a>
+            {' '}or at{' '}
+            <a href="https://www.tapalytics.xyz/token/unatpepe" target="_blank" rel="noopener noreferrer">Tapalytics</a>.
           </p>
         </div>
 
@@ -81,8 +81,8 @@ export default function DropsPage() {
               <div className={styles.stepBody}>
                 <div className={styles.stepHead}>UNATPEPE holders claim</div>
                 <div className={styles.stepText}>
-                  Holders verify eligibility at xchain.io, send the NAT amount to the drop
-                  address, then submit their txid and Counterparty receiving address.
+                  Holders verify their UNATPEPE balance in TAP Wallet, send the NAT amount
+                  to the drop address, then submit their txid and Counterparty receiving address.
                   One card per wallet. First come, first served within the window.
                 </div>
               </div>
@@ -129,10 +129,9 @@ export default function DropsPage() {
             New to DMT-NAT?{' '}
             <a href="https://natgmi.com" target="_blank" rel="noopener noreferrer">natgmi.com</a>
             {' '}&mdash; the first non-arbitrary token, minted with every Bitcoin block.
-            Need a wallet to hold NAT?{' '}
-            <a href="https://unisat.io" target="_blank" rel="noopener noreferrer">Unisat</a>
-            {' '}or{' '}
-            <a href="https://leather.io" target="_blank" rel="noopener noreferrer">Leather</a>.
+            NAT is a TAP Protocol token &mdash; use{' '}
+            <a href="https://tracsystems.io/tap-wallet/" target="_blank" rel="noopener noreferrer">TAP Wallet</a>
+            {' '}to hold and send it.
           </p>
         </section>
 
@@ -168,11 +167,9 @@ export default function DropsPage() {
               <div className={styles.stepBody}>
                 <div className={styles.stepText}>
                   Minimum allocation: 10 cards per drop. Recommended: 25&ndash;100.
-                  You need a Bitcoin wallet that can receive NAT &mdash;{' '}
-                  <a href="https://unisat.io" target="_blank" rel="noopener noreferrer" style={{color:'var(--amber)'}}>Unisat</a>
-                  {' '}or{' '}
-                  <a href="https://leather.io" target="_blank" rel="noopener noreferrer" style={{color:'var(--amber)'}}>Leather</a>
-                  {' '}work.
+                  You need a TAP Protocol wallet to receive NAT &mdash;{' '}
+                  <a href="https://tracsystems.io/tap-wallet/" target="_blank" rel="noopener noreferrer" style={{color:'var(--amber)'}}>TAP Wallet</a>
+                  {' '}(iOS, Android, Chrome extension).
                 </div>
               </div>
             </div>
