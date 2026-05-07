@@ -35,13 +35,37 @@ export default function DropsPage() {
           </p>
         </div>
 
-        {/* ── No active drops ── */}
-        <div className={styles.empty}>
-          <div className={styles.emptyGlyph}>◎</div>
-          <div className={styles.emptyTitle}>NO ACTIVE DROPS</div>
-          <p className={styles.emptyText}>
-            The first drop is being coordinated. Only Pepe Council&ndash;certified
-            cards are eligible. Follow announcements for the opening window.
+        {/* ── Drop 001 — incoming ── */}
+        <div className={styles.dropIncoming}>
+          <div className={styles.dropIncomingEyebrow}>DROP 001 · SERIES 0</div>
+          <div className={styles.dropIncomingTitle}>SOFTPWAR</div>
+          <div className={styles.dropIncomingArtist}>JNA</div>
+          <p className={styles.dropIncomingDesc}>
+            The network stays honest because it pays to, not because it has to.
+            Pepe Projection is the purest form of honesty.
+          </p>
+          <div className={styles.dropIncomingMeta}>
+            <div className={styles.dropMetaCell}>
+              <div className={styles.dropMetaLabel}>STATUS</div>
+              <div className={styles.dropMetaValue}>REVEALING SOON</div>
+            </div>
+            <div className={styles.dropMetaCell}>
+              <div className={styles.dropMetaLabel}>SERIES</div>
+              <div className={styles.dropMetaValue}>0 · GENESIS</div>
+            </div>
+            <div className={styles.dropMetaCell}>
+              <div className={styles.dropMetaLabel}>PRICE</div>
+              <div className={styles.dropMetaValue}>$36.92 in NAT</div>
+            </div>
+            <div className={styles.dropMetaCell}>
+              <div className={styles.dropMetaLabel}>ACCESS</div>
+              <div className={styles.dropMetaValue}>UNATPEPE HOLDERS</div>
+            </div>
+          </div>
+          <p className={styles.dropIncomingNote}>
+            Drop details and NAT rate will be published before the window opens.
+            Set up your wallets now so you&apos;re ready.{' '}
+            <Link href="/wallets">Get started &rarr;</Link>
           </p>
         </div>
 
