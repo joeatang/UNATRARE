@@ -55,7 +55,7 @@ export default function DropsPage() {
             </div>
             <div className={styles.dropMetaCell}>
               <div className={styles.dropMetaLabel}>PRICE</div>
-              <div className={styles.dropMetaValue}>USD $36.91 → NAT</div>
+              <div className={styles.dropMetaValue}>~295.3M NAT<br /><span style={{fontSize:'11px',opacity:0.55}}>USD $36.91</span></div>
             </div>
             <div className={styles.dropMetaCell}>
               <div className={styles.dropMetaLabel}>ACCESS</div>
@@ -149,6 +149,7 @@ export default function DropsPage() {
           <p className={styles.pricingNote}>
             Artists set their price in USD. At drop announcement, the equivalent NAT amount
             is calculated at the current market rate and fixed for the claim window.
+            DROP 001 is priced at USD $36.91 &mdash; approximately 295.3M NAT at current rates ($125/billion NAT).
             UNATRARE adds a 15% facilitation fee on top &mdash; paid by the buyer, not taken from the artist.
             The artist receives exactly what they asked for.
           </p>
