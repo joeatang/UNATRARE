@@ -154,10 +154,13 @@ export default function DropsPage() {
             The artist receives exactly what they asked for.
           </p>
           <p className={styles.natRef}>
+            NAT as payment isn&apos;t a compromise &mdash; it&apos;s the statement.
+            CP enforces the supply cap. NAT is the key to the door.
+            UNATRARE is where both exist at once.{' '}
             New to DMT-NAT?{' '}
             <a href="https://natgmi.com" target="_blank" rel="noopener noreferrer">natgmi.com</a>
             {' '}&mdash; the first non-arbitrary token, minted with every Bitcoin block.
-            Need to set up your wallets?{' '}
+            Need wallets?{' '}
             <a href="/wallets">Get started in 5 minutes &rarr;</a>
           </p>
         </section>

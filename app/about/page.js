@@ -25,24 +25,27 @@ export default function AboutPage() {
           <h2 className={styles.sectionTitle}>THE PREMISE</h2>
           <div className={styles.prose}>
             <p>
-              Counterparty has existed since 2014. It lives on Bitcoin. Tokens issued here are
-              permanent — no rugpulls, no contract upgrades, no chain migration. When you issue
-              a token on Counterparty, it exists as long as Bitcoin exists.
+              Rare Pepes declared it in 2016. Fake Rares declared it with a smirk.
+              UNATRARE declares it with NAT — and the door is open to anyone Bitcoin brought here,
+              regardless of which protocol they came through first.
             </p>
             <p>
-              But there is no quality signal. Anyone can issue anything. The rare and the worthless
-              sit side by side. UNATRARE exists to separate signal from noise.
+              The art is Counterparty. The currency is NAT. The Council is the filter.
+              UNATRARE is the only place all three exist at once.
             </p>
             <p>
-              We are a curated directory. Eight council members evaluate every submission against a
-              rubric derived from the standards of Rare Pepe, STAMP, and XCP communities.
-              Cards that pass are listed. Cards that don't are not.
-            </p>            <p>
-              There is a community of artists who have built on Bitcoin since 2014.
-              And there is a community holding DMT-NAT — the first non-arbitrary token,
-              minted with every Bitcoin block. These worlds rarely intersect.
-              UNATRARE is where they do.
-            </p>          </div>
+              Counterparty has existed since 2014. Tokens issued here are permanent —
+              the supply cap enforced by Bitcoin consensus, not the artist&apos;s word.
+              Nobody mints more. Not the artist, not UNATRARE, not anyone.
+              When you issue a token on Counterparty, it exists as long as Bitcoin exists.
+            </p>
+            <p>
+              Every rare directory before this required you to already be in the room.
+              UNATRARE is the first built for the people who found Bitcoin
+              a completely different way — and still ended up at Pepe.
+              That&apos;s not a coincidence. That&apos;s the road.
+            </p>
+          </div>
         </section>
 
         <section className={styles.section}>
@@ -143,15 +146,17 @@ export default function AboutPage() {
           <h2 className={styles.sectionTitle}>THE DROPS</h2>
           <div className={styles.prose}>
             <p>
-              Certified cards are eligible for UNATRARE drops — curated distributions
-              priced in DMT-NAT, open exclusively to UNATPEPE holders.
+              Certified cards are eligible for UNATRARE drops — council-curated distributions
+              priced in DMT-NAT, open to UNATPEPE holders.
             </p>
             <p>
-              Artists keep their Counterparty dispenser running as normal. The drop is a
-              separate channel: a collector pool that can’t find them anywhere else,
-              paying in the first Bitcoin-produced digital commodity.
-              UNATPEPE holders get access to certified work from artists who have been
-              building on Bitcoin since before most of crypto existed.
+              NAT as payment isn&apos;t a bridge mechanic. It&apos;s the statement.
+              You&apos;re saying to a Bitcoin-native audience that found this space through DMT:
+              <em> this is yours too.</em> Not by changing the art. By changing who gets access to it.
+            </p>
+            <p>
+              Artists keep 100% of their ask. The third chair at the table —
+              the one nobody knew was missing — is now open.
             </p>
           </div>
         </section>

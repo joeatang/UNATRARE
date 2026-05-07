@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Nav from '../components/Nav';
 import styles from './apply.module.css';
 
 // ── Artist journey — visual only, glyphs + one word ──────
@@ -68,15 +67,14 @@ export default function ApplyPage() {
 
   return (
     <>
-      <Nav />
       <main className={styles.wrap}>
 
         {/* ── Hero ── */}
         <section className={styles.hero}>
           <pre className={styles.pepeAscii} aria-hidden="true">{ASCII_PEPE}</pre>
           <h1 className={styles.headline}>UNATRARE</h1>
-          <p className={styles.sub}>Make something rare.<br />
-            <span className={styles.subDim}>The Council decides if it stays.</span>
+          <p className={styles.sub}>The art is Counterparty. The currency is NAT.<br />
+            <span className={styles.subDim}>The Council is the filter. Make something rare.</span>
           </p>
         </section>
 
@@ -105,10 +103,11 @@ export default function ApplyPage() {
           <div className={styles.truth}>
             <span className={styles.truthGlyph}>◉</span>
             <div>
-              <strong className={styles.truthTitle}>The co-sign matters.</strong>
+              <strong className={styles.truthTitle}>Every rare before this required you to already be in the room.</strong>
               <p className={styles.truthBody}>
-                Eight judges who built and collected Rare Pepe score your work.
-                Pass, and your name is in the directory — same chain as the original 1,774.
+                UNATRARE is the first directory built for people who found Bitcoin
+                a completely different way — and still ended up at Pepe.
+                That&apos;s not a coincidence. That&apos;s the road.
               </p>
             </div>
           </div>
@@ -116,10 +115,10 @@ export default function ApplyPage() {
           <div className={styles.truth}>
             <span className={styles.truthGlyph}>⬡</span>
             <div>
-              <strong className={styles.truthTitle}>It doesn&apos;t go away.</strong>
+              <strong className={styles.truthTitle}>The supply cap is enforced by Bitcoin. Not a promise.</strong>
               <p className={styles.truthBody}>
-                Certified cards are Counterparty tokens on Bitcoin.
-                Not a platform. Not a profile. A permanent on-chain record.
+                When a CP token is issued, nobody mints more — not the artist, not UNATRARE,
+                nobody. A Bitcoin transaction that cannot be reversed. Ever.
               </p>
             </div>
           </div>
@@ -127,10 +126,11 @@ export default function ApplyPage() {
           <div className={styles.truth}>
             <span className={styles.truthGlyph}>◈</span>
             <div>
-              <strong className={styles.truthTitle}>You get paid.</strong>
+              <strong className={styles.truthTitle}>The art is Counterparty. The currency is NAT. You get paid in full.</strong>
               <p className={styles.truthBody}>
-                Your certified card gets distributed to UNATPEPE holders in a drop.
-                You receive your full ask in NAT. Artists keep 100%.
+                NAT as payment isn&apos;t a compromise — it&apos;s the statement.
+                Your certified card reaches a Bitcoin-native audience that didn&apos;t
+                know XChain existed yesterday. 100% of your ask. No cuts.
               </p>
             </div>
           </div>
@@ -213,7 +213,7 @@ export default function ApplyPage() {
         </section>
 
         <footer className={styles.footer}>
-          <span className={styles.footerText}>unatrare.wtf · Bitcoin · Counterparty</span>
+          <span className={styles.footerText}>unatrare.wtf · Counterparty · NAT · Bitcoin</span>
         </footer>
 
       </main>

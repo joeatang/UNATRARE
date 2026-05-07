@@ -134,7 +134,10 @@ export default function HomePage() {
           <h1 className={styles.heroTitle}>PEPEMPO<span>O</span>L</h1>
           <div className={styles.heroSub}>real-time submission activity · unatrare curated directory</div>
           <p className={styles.heroExplainer}>
-            A curated directory of Pepe art on Bitcoin. Counterparty culture and the DMT-NAT community — two worlds that don&apos;t usually meet. Submit your card — 8 judges evaluate it against the rubric. Pass the hard rules, get in the directory. Score high enough, earn the council stamp. Every verdict is permanent on-chain.
+            The art is Counterparty. The currency is NAT. The Council is the filter.
+            Every rare before this required you to already be in the room.
+            UNATRARE is the first directory built for the people who found Bitcoin
+            a completely different way — and still ended up at Pepe.
           </p>
         </section>
 
