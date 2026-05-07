@@ -75,7 +75,7 @@
   grid-template-columns: 52px 1fr;
   gap: 16px;
   padding: 28px 24px;
-  border-bottom: 1px solid #141414;
+  border-bottom: 1px solid var(--border-dim);
 }
 
 .pitchItem:last-child {
@@ -83,56 +83,57 @@
 }
 
 .pitchNum {
-  font-family: 'VT323', monospace;
+  font-family: var(--font-display);
   font-size: 36px;
-  color: #8B7355;
+  color: var(--amber);
   line-height: 1;
   padding-top: 1px;
 }
 
 .pitchTitle {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 14px;
-  letter-spacing: 3px;
-  color: #C9A84C;
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--amber-hot);
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   text-transform: uppercase;
 }
 
 .pitchBody {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-body);
   font-size: 12.5px;
-  color: #777;
+  color: var(--text-dim);
   line-height: 1.75;
 }
 
-/* ── Form section ──────────────────────────────────────── */
+/* ── Form section ── */
 .formSection {
   width: 100%;
-  border: 1px solid #222;
+  border: 1px solid var(--border);
   padding: 36px 32px 32px;
-  background: #090909;
+  background: var(--surface);
   margin-bottom: 32px;
 }
 
 .formHeadline {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 17px;
-  color: #d4d4d4;
+  font-family: var(--font-card);
+  font-size: 16px;
+  color: var(--text);
   margin-bottom: 8px;
   line-height: 1.4;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .accent {
-  color: #C9A84C;
+  color: var(--amber-hot);
 }
 
 .formSub {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 14px;
-  color: #555;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
   margin-bottom: 28px;
   line-height: 1.6;
 }
@@ -151,13 +152,13 @@
 .platformLabel {
   flex: 1;
   padding: 12px 14px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 13px;
+  font-family: var(--font-card);
+  font-size: 12px;
   letter-spacing: 2px;
   text-align: center;
   cursor: pointer;
-  border: 1px solid #222;
-  color: #444;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
   transition: all 0.1s ease;
   user-select: none;
   text-transform: uppercase;
@@ -168,8 +169,8 @@
 }
 
 .platformActive {
-  border-color: #C9A84C !important;
-  color: #C9A84C;
+  border-color: var(--amber-hot) !important;
+  color: var(--amber-hot);
   background: rgba(201, 168, 76, 0.04);
 }
 
@@ -185,19 +186,19 @@
 .handleRow {
   display: flex;
   align-items: center;
-  border: 1px solid #222;
-  background: #0c0c0c;
+  border: 1px solid var(--border);
+  background: var(--bg);
   transition: border-color 0.15s;
 }
 
 .handleRow:focus-within {
-  border-color: #C9A84C;
+  border-color: var(--amber-hot);
 }
 
 .atSymbol {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: var(--font-card);
   font-size: 20px;
-  color: #C9A84C;
+  color: var(--amber-hot);
   padding: 0 14px;
   line-height: 1;
   flex-shrink: 0;
@@ -208,15 +209,15 @@
   background: transparent;
   border: none !important;
   padding: 15px 12px 15px 0;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 15px;
-  color: #d4d4d4;
+  font-family: var(--font-card);
+  font-size: 14px;
+  color: var(--text);
   letter-spacing: 1px;
   width: 100%;
 }
 
 .handleInput::placeholder {
-  color: #2a2a2a;
+  color: var(--border);
 }
 
 .handleInput:focus {
@@ -225,19 +226,19 @@
 }
 
 .errorMsg {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 14px;
-  color: #c0392b;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--red);
   padding: 4px 0;
 }
 
 .submitBtn {
-  background: #C9A84C;
-  color: #080808;
+  background: var(--amber-hot);
+  color: var(--bg);
   border: none;
   padding: 17px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 14px;
+  font-family: var(--font-card);
+  font-size: 13px;
   letter-spacing: 5px;
   cursor: pointer;
   width: 100%;
@@ -265,26 +266,26 @@
 }
 
 .followLink {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-body);
   font-size: 11.5px;
-  color: #555;
+  color: var(--text-dim);
   text-decoration: none;
-  border-bottom: 1px solid #222;
+  border-bottom: 1px solid var(--border);
   padding-bottom: 2px;
   transition: color 0.1s, border-color 0.1s;
 }
 
 .followLink:hover {
-  color: #C9A84C;
-  border-color: #C9A84C;
+  color: var(--amber-hot);
+  border-color: var(--amber-hot);
 }
 
 .followDivider {
-  color: #2a2a2a;
-  font-family: 'IBM Plex Mono', monospace;
+  color: var(--border);
+  font-family: var(--font-body);
 }
 
-/* ── Success state ─────────────────────────────────────── */
+/* ── Success state ── */
 .successBox {
   text-align: center;
   padding: 16px 0;
@@ -292,54 +293,55 @@
 
 .successSigil {
   font-size: 52px;
-  color: #5abf5a;
+  color: var(--green-hot);
   margin-bottom: 16px;
   display: block;
   line-height: 1;
 }
 
 .successTitle {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 18px;
-  color: #5abf5a;
+  font-family: var(--font-card);
+  font-size: 15px;
+  color: var(--green-hot);
   margin-bottom: 14px;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
 }
 
 .successBody {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 14px;
-  color: #777;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
   line-height: 1.8;
 }
 
 .successBody a {
-  color: #C9A84C;
+  color: var(--amber-hot);
   text-decoration: none;
-  border-bottom: 1px solid #8B7355;
+  border-bottom: 1px solid var(--amber);
 }
 
 .successBody a:hover {
   color: #e8c55a;
 }
 
-/* ── Footer ────────────────────────────────────────────── */
+/* ── Footer ── */
 .footer {
   padding-top: 16px;
 }
 
 .footerText {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 13px;
-  color: #2a2a2a;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--border);
   letter-spacing: 2px;
   text-transform: uppercase;
 }
 
-/* ── Mobile ────────────────────────────────────────────── */
-@media (max-width: 480px) {
+/* ── Mobile ── */
+@media (max-width: 600px) {
   .wrap {
-    padding: 48px 16px 40px;
+    padding: 32px 16px 48px;
   }
 
   .formSection {
@@ -358,7 +360,30 @@
     gap: 8px;
   }
 
-  .followDivider {
-    display: none;
+  .followDivider { display: none; }
+
+  .flowSection {
+    padding: 20px 14px 16px;
   }
+
+  .flowRowLabel {
+    width: 38px;
+    font-size: 8px;
+  }
+
+  .fNode {
+    min-width: 54px;
+    padding: 6px 6px 5px;
+  }
+
+  .fLabel {
+    font-size: 6.5px;
+    letter-spacing: 0.5px;
+  }
+}
+
+@media (max-width: 400px) {
+  .fNode { min-width: 46px; }
+  .fGlyph { font-size: 13px; }
+  .fLabel { font-size: 6px; letter-spacing: 0; }
 }
