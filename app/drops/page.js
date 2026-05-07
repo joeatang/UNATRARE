@@ -55,7 +55,7 @@ export default function DropsPage() {
             </div>
             <div className={styles.dropMetaCell}>
               <div className={styles.dropMetaLabel}>PRICE</div>
-              <div className={styles.dropMetaValue}>$36.92 in NAT</div>
+              <div className={styles.dropMetaValue}>USD $36.91 → NAT</div>
             </div>
             <div className={styles.dropMetaCell}>
               <div className={styles.dropMetaLabel}>ACCESS</div>
@@ -119,8 +119,9 @@ export default function DropsPage() {
                 <div className={styles.stepHead}>Cards distributed, NAT sent to artist</div>
                 <div className={styles.stepText}>
                   After verifying each claim on-chain, UNATRARE sends the Counterparty token
-                  to the holder&apos;s address. The artist receives their NAT cut. Any unclaimed
-                  supply is returned to the artist on-chain. Window closes.
+                  to the holder&apos;s address. The artist receives 100% of their ask in NAT.
+                  UNATRARE collects a 15% facilitation fee on top, paid by the buyer.
+                  Any unclaimed supply is returned to the artist on-chain. Window closes.
                 </div>
               </div>
             </div>
