@@ -4,15 +4,15 @@
   --bg:          #080808;
   --surface:     #0f0f0f;
   --border-dim:  #1a1a1a;
-  --border:      #2a2a2a;
-  --amber:       #8B7355;
+  --border:      #303030;
+  --amber:       #a89060;
   --amber-hot:   #C9A84C;
   --green:       #3d9e3d;
   --green-hot:   #5abf5a;
   --orange:      #F7931A;
   --red:         #c0392b;
   --text:        #d4d4d4;
-  --text-dim:    #666666;
+  --text-dim:    #888888;
   --font-display: 'VT323', monospace;
   --font-card:    'Share Tech Mono', monospace;
   --font-body:    'IBM Plex Mono', monospace;

@@ -16,12 +16,10 @@ export default function Nav() {
 
         {/* Desktop links */}
         <ul className={styles['nav-links']}>
-          <li><Link href="/">Pepempool</Link></li>
           <li><Link href="/directory">Directory</Link></li>
           <li><Link href="/drops">Drops</Link></li>
           <li><Link href="/wallets">Wallets</Link></li>
           <li><Link href="/council">Council</Link></li>
-          <li><Link href="/terms">Terms</Link></li>
           <li><Link href="/about">About</Link></li>
           <li><Link href="/register" className={styles['nav-register']}>✦ Register</Link></li>
         </ul>
@@ -48,12 +46,10 @@ export default function Nav() {
       {open && (
         <div className={styles.drawer} onClick={() => setOpen(false)}>
           <ul className={styles.drawerLinks}>
-            <li><Link href="/">Pepempool</Link></li>
             <li><Link href="/directory">Directory</Link></li>
             <li><Link href="/drops">Drops</Link></li>
             <li><Link href="/wallets">Wallets</Link></li>
             <li><Link href="/council">Council</Link></li>
-            <li><Link href="/terms">Terms</Link></li>
             <li><Link href="/about">About</Link></li>
             <li><Link href="/register" className={styles['nav-register']}>✦ Register</Link></li>
             <li><Link href="/submit" className={styles.drawerSubmit}>Open Pepe Wizard →</Link></li>
