@@ -103,12 +103,12 @@ export default function ApplyPage() {
           <div className={styles.truth}>
             <span className={styles.truthGlyph}>◉</span>
             <div>
-              <strong className={styles.truthTitle}>The Council doesn&apos;t know you. That&apos;s the point.</strong>
+              <strong className={styles.truthTitle}>The Council scores it. Most pass.</strong>
               <p className={styles.truthBody}>
-                8 AI judges built from the actual DNA of this space — RARELOONEY built RarePepeWallet.
-                M.CATALOGUS catalogued all 1,774. J.FROG built XChain. DJ PEPAI dropped block 434,102.
-                They score the art. 28 out of 37.5 to pass. Full breakdown published.
-                No favors. No friends list. If you pass, you passed on the merits.
+                8 AI judges — each a named persona inspired by the people who actually built this space.
+                RARELOONEY, M.CATALOGUS, J.FROG, DJ PEPAI, NAKAMOJO and three more with the same roots.
+                They see the art and score it out of 69. Full breakdown published.
+                Keep it SFW and the certification is yours. The score is the record, not the gate.
               </p>
             </div>
           </div>
@@ -158,6 +158,9 @@ export default function ApplyPage() {
             </div>
           ) : (
             <>
+              <p className={styles.formCta}>
+                Got something worth putting on-chain? This is where it goes.
+              </p>
               <h2 className={styles.formHeadline}>
                 Drop your <span className={styles.accent}>handle.</span>
               </h2>
