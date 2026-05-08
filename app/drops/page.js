@@ -208,7 +208,10 @@ export default function DropsPage() {
 
         {/* ── CTA ── */}
         <div className={styles.cta}>
-          <Link href="/submit" className={styles.ctaBtn} data-primary="true">
+          <Link href="/claim" className={styles.ctaBtn} data-primary="true">
+            claim a drop →
+          </Link>
+          <Link href="/submit" className={styles.ctaBtn}>
             submit your art →
           </Link>
           <Link href="/council" className={styles.ctaBtn}>

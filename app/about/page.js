@@ -162,6 +162,7 @@ export default function AboutPage() {
         </section>
 
         <div className={styles.cta}>
+          <Link href="/apply" className={styles.ctaBtn}>apply as an artist →</Link>
           <Link href="/rules" className={styles.ctaBtn}>read the rules →</Link>
           <Link href="/submit" className={styles.ctaBtn} data-primary="true">submit your card →</Link>
         </div>

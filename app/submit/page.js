@@ -740,13 +740,20 @@ function Step5({ data }) {
         <div className={styles.urlBoxMeta}>returns pending until verdict · art hidden until approved</div>
       </div>
 
-      <div style={{marginTop:24}}>
+      <div style={{marginTop:24, display:'flex', gap:12, flexWrap:'wrap', justifyContent:'center'}}>
         <Link href="/" style={{
           fontFamily:'var(--font-card)', fontSize:'11px', letterSpacing:'3px',
           color:'var(--text-dim)', textDecoration:'none',
           border:'1px solid var(--border)', padding:'10px 20px',
         }}>
           ← back to pepempool
+        </Link>
+        <Link href={`/status?token=${encodeURIComponent(data.tokenName)}`} style={{
+          fontFamily:'var(--font-card)', fontSize:'11px', letterSpacing:'3px',
+          color:'var(--amber)', textDecoration:'none',
+          border:'1px solid var(--amber)', padding:'10px 20px',
+        }}>
+          check status →
         </Link>
       </div>
     </div>
