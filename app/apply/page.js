@@ -103,12 +103,12 @@ export default function ApplyPage() {
           <div className={styles.truth}>
             <span className={styles.truthGlyph}>◉</span>
             <div>
-              <strong className={styles.truthTitle}>The Council scores it. Most pass.</strong>
+              <strong className={styles.truthTitle}>The Council scores it.</strong>
               <p className={styles.truthBody}>
-                8 AI judges — each a named persona inspired by the people who actually built this space.
-                RARELOONEY, M.CATALOGUS, J.FROG, DJ PEPAI, NAKAMOJO and three more with the same roots.
-                They see the art and score it out of 69. Full breakdown published.
-                Keep it SFW and the certification is yours. The score is the record, not the gate.
+                8 AI judges. Each a named persona inspired by the people who built this space.
+                They see the art. Score it out of 69. Full breakdown published.
+                The certification is the record — permanent, public, attached to your token.
+                That&apos;s the point.
               </p>
             </div>
           </div>
