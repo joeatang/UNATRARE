@@ -103,11 +103,12 @@ export default function ApplyPage() {
           <div className={styles.truth}>
             <span className={styles.truthGlyph}>◉</span>
             <div>
-              <strong className={styles.truthTitle}>Every rare before this required you to already be in the room.</strong>
+              <strong className={styles.truthTitle}>The Council doesn&apos;t know you. That&apos;s the point.</strong>
               <p className={styles.truthBody}>
-                UNATRARE is the first directory built for people who found Bitcoin
-                a completely different way — and still ended up at Pepe.
-                That&apos;s not a coincidence. That&apos;s the road.
+                8 AI judges built from the actual DNA of this space — RARELOONEY built RarePepeWallet.
+                M.CATALOGUS catalogued all 1,774. J.FROG built XChain. DJ PEPAI dropped block 434,102.
+                They score the art. 28 out of 37.5 to pass. Full breakdown published.
+                No favors. No friends list. If you pass, you passed on the merits.
               </p>
             </div>
           </div>
@@ -115,10 +116,13 @@ export default function ApplyPage() {
           <div className={styles.truth}>
             <span className={styles.truthGlyph}>⬡</span>
             <div>
-              <strong className={styles.truthTitle}>The supply cap is enforced by Bitcoin. Not a promise.</strong>
+              <strong className={styles.truthTitle}>Two permanent records get created.</strong>
               <p className={styles.truthBody}>
-                When a CP token is issued, nobody mints more — not the artist, not UNATRARE,
-                nobody. A Bitcoin transaction that cannot be reversed. Ever.
+                Your art is written to a Hyperdrive — P2P, Holepunch stack, every node is another copy.
+                Same infrastructure as TAP. A JSON metadata record is also generated at{' '}
+                <code>unatrare.wtf/c/YOURTOKEN.json</code> — wallet-readable, CIP-25 v2, travels with the token.
+                Bitcoin enforces the supply. The archive preserves the work.
+                That combination doesn&apos;t exist anywhere else in CP right now.
               </p>
             </div>
           </div>
@@ -126,11 +130,12 @@ export default function ApplyPage() {
           <div className={styles.truth}>
             <span className={styles.truthGlyph}>◈</span>
             <div>
-              <strong className={styles.truthTitle}>The art is Counterparty. The currency is NAT. You get paid in full.</strong>
+              <strong className={styles.truthTitle}>A new room of buyers that already get it.</strong>
               <p className={styles.truthBody}>
-                NAT as payment isn&apos;t a compromise — it&apos;s the statement.
-                Your certified card reaches a Bitcoin-native audience that didn&apos;t
-                know XChain existed yesterday. 100% of your ask. No cuts.
+                DMT-NAT holders found Bitcoin through TAP inscription. Different door, same table.
+                They believe in supply-capped, on-chain art — they just couldn&apos;t reach CP-native work
+                without a bridge. UNATRARE is the bridge.
+                Your CP token. Settled in NAT. 100% of your ask.
               </p>
             </div>
           </div>
