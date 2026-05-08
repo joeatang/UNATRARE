@@ -116,13 +116,13 @@ export default function ApplyPage() {
           <div className={styles.truth}>
             <span className={styles.truthGlyph}>⬡</span>
             <div>
-              <strong className={styles.truthTitle}>Two permanent records get created.</strong>
+              <strong className={styles.truthTitle}>Pepe Node. Your art in a P2P archive.</strong>
               <p className={styles.truthBody}>
-                Your art is written to a Hyperdrive — P2P, Holepunch stack, every node is another copy.
-                Same infrastructure as TAP. A JSON metadata record is also generated at{' '}
-                <code>unatrare.wtf/c/YOURTOKEN.json</code> — wallet-readable, CIP-25 v2, travels with the token.
-                Bitcoin enforces the supply. The archive preserves the work.
-                That combination doesn&apos;t exist anywhere else in CP right now.
+                Certified art is written to a Hyperdrive — Holepunch stack, same infrastructure as TAP.
+                Every node that joins is another copy. No server to pull the plug.
+                A JSON metadata record is generated at{' '}
+                <code>unatrare.wtf/c/YOURTOKEN.json</code> — wallet-readable, CIP-25 v2, travels with the token forever.
+                Bitcoin enforces the supply. The node network preserves the art.
               </p>
             </div>
           </div>
@@ -159,7 +159,7 @@ export default function ApplyPage() {
           ) : (
             <>
               <p className={styles.formCta}>
-                Got something worth putting on-chain? This is where it goes.
+                Your art is already on-chain. The question is whether you want to reach a room that couldn&apos;t find you before.
               </p>
               <h2 className={styles.formHeadline}>
                 Drop your <span className={styles.accent}>handle.</span>
