@@ -374,8 +374,11 @@
 @media (max-width: 480px) {
   .wrap { padding: 24px 16px 48px; }
   .formSection { padding: 24px 18px 20px; }
-  .pepeAscii { font-size: 15px; }
+  /* Reduce ASCII art — at 15px Share Tech Mono it overflows ~360px screens */
+  .pepeAscii { font-size: clamp(7px, 2.4vw, 11px); overflow-x: hidden; max-width: 100%; }
   .flowGlyph { font-size: 22px; }
+  /* Flow labels can clip on very narrow — let them wrap softly */
+  .flowLabel { white-space: normal; font-size: 9px; letter-spacing: 1px; }
   .followRow { flex-direction: column; align-items: flex-start; gap: 8px; }
   .followDivider { display: none; }
 }

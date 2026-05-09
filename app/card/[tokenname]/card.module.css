@@ -23,6 +23,9 @@
   /* Remove sticky on mobile — single column, sticky card blocks info scroll */
   .cardSide { position: static; }
   .statusPage { margin: 36px auto; padding: 0 16px; }
+  /* Scale display title fluidly — long display_title values overflow at 48px on narrow screens */
+  .infoTitle { font-size: clamp(28px, 7vw, 48px); }
+  .statusToken { font-size: clamp(28px, 7vw, 48px); }
 }
 
 /* ─── Card frame ─────────────────────────────────────────── */

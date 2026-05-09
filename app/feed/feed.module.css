@@ -587,3 +587,11 @@
     box-sizing: border-box;
   }
 }
+
+/* ── Small mobile (iPhone SE, 380px) ── */
+@media (max-width: 380px) {
+  .title { font-size: 32px; letter-spacing: 2px; }
+  .main { padding: 52px 12px 64px; }
+  .signalPostText { padding-left: 16px; }
+  .tokenLink { font-size: 18px; letter-spacing: 2px; }
+}
