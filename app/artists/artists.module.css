@@ -1,0 +1,260 @@
+/* ═══════════════════════════════════════════════════════════════
+   ARTIST ARCHIVE INDEX — /artists
+   Underground cultural index. NOT social media.
+   ═══════════════════════════════════════════════════════════════ */
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 80px 24px 100px;
+}
+
+/* ── Header ── */
+.header {
+  margin-bottom: 48px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 32px;
+}
+
+.eyebrow {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 64px;
+  letter-spacing: 4px;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.title span { color: var(--amber); }
+
+.sub {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+/* ── Archive entry grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* ── Each archive entry card ── */
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  position: relative;
+}
+
+.entry:hover {
+  border-color: var(--amber);
+  border-left-color: var(--amber);
+  background: #0c0c0c;
+}
+
+/* ── Entry header row ── */
+.entryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.entryNum {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--amber);
+  text-transform: uppercase;
+}
+
+.entryFiled {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+}
+
+/* ── Entry body: thumb + info ── */
+.entryBody {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.entryThumb {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  background: var(--bg);
+  border: 1px solid var(--border-dim);
+  overflow: hidden;
+}
+
+.thumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  filter: contrast(1.05);
+}
+
+.thumbBlank {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--border);
+  background: repeating-linear-gradient(
+    45deg, #0d0d0d 0, #0d0d0d 3px, #0a0a0a 3px, #0a0a0a 7px
+  );
+}
+
+.entryInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.entryAlias {
+  font-family: var(--font-card);
+  font-size: 16px;
+  letter-spacing: 2px;
+  color: var(--text);
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.entryBio {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.entryBioEmpty {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--border);
+  text-transform: uppercase;
+  font-style: normal;
+}
+
+/* ── Entry footer: count + series + arrow ── */
+.entryFoot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--border-dim);
+  padding-top: 12px;
+}
+
+.cardCount {
+  font-family: var(--font-card);
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.seriesList {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.seriesBadge {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--amber);
+  border: 1px solid var(--amber);
+  padding: 1px 5px;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.entryArrow {
+  font-family: var(--font-card);
+  font-size: 18px;
+  color: var(--text-dim);
+  transition: color 0.15s ease, transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.entry:hover .entryArrow {
+  color: var(--amber);
+  transform: translateX(4px);
+}
+
+/* ── Empty state ── */
+.empty {
+  text-align: center;
+  padding: 80px 0;
+}
+
+.emptyTitle {
+  font-family: var(--font-display);
+  font-size: 32px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+}
+
+.emptyText {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text-dim);
+  margin-bottom: 24px;
+  line-height: 1.7;
+}
+
+.emptyBtn {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--amber);
+  border: 1px solid var(--amber);
+  padding: 10px 24px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.emptyBtn:hover { background: rgba(200, 168, 76, 0.08); }
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  .title { font-size: 44px; }
+  .grid  { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 1100px) {
+  .grid { grid-template-columns: repeat(3, 1fr); }
+}

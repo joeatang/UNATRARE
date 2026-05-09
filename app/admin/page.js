@@ -1003,6 +1003,178 @@ function ClaimsPanel({ authToken }) {
   );
 }
 
+// ── Artist profile panel ────────────────────────────────────────
+function ArtistProfilePanel({ authToken }) {
+  const [open, setOpen] = useState(false);
+  const [address, setAddress] = useState('');
+  const [fetching, setFetching] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [savedIndex, setSavedIndex] = useState(null);
+  const [msg, setMsg] = useState(null);
+  const [form, setForm] = useState({
+    alias: '',
+    anonymous: false,
+    pfp_url: '',
+    bio: '',
+    website: '',
+    twitter_handle: '',
+    past_projects: '',
+    cp_collections: '',
+  });
+
+  function setField(key, val) {
+    setForm(f => ({ ...f, [key]: val }));
+  }
+
+  async function handleLookup(e) {
+    e.preventDefault();
+    if (!address.trim()) return;
+    setFetching(true);
+    setMsg(null);
+    setSavedIndex(null);
+    try {
+      const res = await fetch(`/api/admin/artists?address=${encodeURIComponent(address.trim())}`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const json = await res.json();
+      if (!res.ok) { setMsg({ err: true, text: json.error || 'Lookup failed' }); return; }
+      const p = json.profile || {};
+      setForm({
+        alias: p.alias || '',
+        anonymous: !!p.anonymous,
+        pfp_url: p.pfp_url || '',
+        bio: p.bio || '',
+        website: p.website || '',
+        twitter_handle: p.twitter_handle || '',
+        past_projects: p.past_projects || '',
+        cp_collections: p.cp_collections && p.cp_collections !== '[]'
+          ? (typeof p.cp_collections === 'string' ? p.cp_collections : JSON.stringify(p.cp_collections, null, 2))
+          : '',
+      });
+      if (p.archive_index != null) setSavedIndex(p.archive_index);
+      setMsg({ err: false, text: p.alias ? `Loaded: ${p.alias}` : (json.handle_fallback ? `No profile yet — handle: @${json.handle_fallback}` : 'No profile yet') });
+    } finally {
+      setFetching(false);
+    }
+  }
+
+  async function handleSave(e) {
+    e.preventDefault();
+    setSaving(true);
+    setMsg(null);
+    try {
+      let cp = form.cp_collections.trim();
+      if (cp) {
+        try { JSON.parse(cp); } catch (_) {
+          // try to coerce newline-delimited list into JSON array
+          cp = JSON.stringify(cp.split('\n').map(s => s.trim()).filter(Boolean));
+        }
+      }
+      const body = {
+        btc_address: address.trim(),
+        alias: form.alias || null,
+        anonymous: form.anonymous ? 1 : 0,
+        pfp_url: form.pfp_url || null,
+        bio: form.bio || null,
+        website: form.website || null,
+        twitter_handle: form.twitter_handle || null,
+        past_projects: form.past_projects || null,
+        cp_collections: cp || '[]',
+      };
+      const res = await fetch('/api/admin/artists', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json();
+      if (!res.ok) { setMsg({ err: true, text: json.error || 'Save failed' }); return; }
+      setSavedIndex(json.archive_index);
+      setMsg({ err: false, text: `Saved — Archive Entry #${String(json.archive_index).padStart(3,'0')}` });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const panelStyle = { border: '1px solid var(--border)', borderRadius: 4, marginBottom: 24, overflow: 'hidden' };
+  const headerStyle = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', cursor: 'pointer', userSelect: 'none', background: 'var(--surface)' };
+  const bodyStyle = { padding: '16px', borderTop: '1px solid var(--border-dim)' };
+  const inputStyle = { width: '100%', background: '#111', border: '1px solid var(--border)', color: 'var(--text)', padding: '7px 10px', fontSize: 14, borderRadius: 3, boxSizing: 'border-box', fontFamily: 'var(--font-body)', marginBottom: 10 };
+  const labelStyle = { display: 'block', fontSize: 12, color: 'var(--text-dim)', marginBottom: 4, letterSpacing: '0.05em', textTransform: 'uppercase' };
+  const btnStyle = { background: 'var(--amber)', color: '#080808', border: 'none', padding: '8px 18px', fontSize: 13, fontFamily: 'var(--font-card)', letterSpacing: '0.08em', cursor: 'pointer', borderRadius: 3 };
+
+  return (
+    <div style={panelStyle}>
+      <div style={headerStyle} onClick={() => setOpen(o => !o)}>
+        <span style={{ fontFamily: 'var(--font-card)', fontSize: 13, letterSpacing: '0.1em' }}>ARTIST PROFILES</span>
+        <span style={{ fontSize: 12, color: 'var(--text-dim)' }}>{open ? '▲' : '▼'}</span>
+      </div>
+      {open && (
+        <div style={bodyStyle}>
+          <form onSubmit={handleLookup} style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+            <input
+              style={{ ...inputStyle, marginBottom: 0, flex: 1 }}
+              placeholder="BTC address"
+              value={address}
+              onChange={e => setAddress(e.target.value)}
+            />
+            <button type="submit" style={{ ...btnStyle, whiteSpace: 'nowrap' }} disabled={fetching}>
+              {fetching ? 'Loading…' : 'Load'}
+            </button>
+          </form>
+
+          {msg && (
+            <p style={{ fontSize: 13, color: msg.err ? '#e05555' : '#5a9', marginBottom: 12 }}>{msg.text}</p>
+          )}
+
+          {savedIndex != null && address && (
+            <p style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 12 }}>
+              Archive Entry{' '}
+              <strong style={{ color: 'var(--amber)' }}>#{String(savedIndex).padStart(3,'0')}</strong>
+              {' — '}
+              <a href={`/artist/${address.trim()}`} target="_blank" rel="noreferrer"
+                style={{ color: 'var(--amber)', textDecoration: 'none' }}>
+                /artist/{address.trim().slice(0,8)}…{address.trim().slice(-6)} ↗
+              </a>
+            </p>
+          )}
+
+          <form onSubmit={handleSave}>
+            <label style={labelStyle}>Alias</label>
+            <input style={inputStyle} value={form.alias} onChange={e => setField('alias', e.target.value)} placeholder="Display name / alias" />
+
+            <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', textTransform: 'none', letterSpacing: 0 }}>
+              <input type="checkbox" checked={form.anonymous} onChange={e => setField('anonymous', e.target.checked)} />
+              <span style={{ fontSize: 13, color: 'var(--text-dim)' }}>Anonymous (hide identity)</span>
+            </label>
+
+            <label style={{ ...labelStyle, marginTop: 10 }}>PFP URL</label>
+            <input style={inputStyle} value={form.pfp_url} onChange={e => setField('pfp_url', e.target.value)} placeholder="https://…" />
+
+            <label style={labelStyle}>Bio / Statement</label>
+            <textarea style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }} value={form.bio} onChange={e => setField('bio', e.target.value)} placeholder="Short artist statement…" />
+
+            <label style={labelStyle}>Website</label>
+            <input style={inputStyle} value={form.website} onChange={e => setField('website', e.target.value)} placeholder="https://…" />
+
+            <label style={labelStyle}>X / Twitter handle</label>
+            <input style={inputStyle} value={form.twitter_handle} onChange={e => setField('twitter_handle', e.target.value)} placeholder="username (without @)" />
+
+            <label style={labelStyle}>Past projects (one per line)</label>
+            <textarea style={{ ...inputStyle, minHeight: 72, resize: 'vertical' }} value={form.past_projects} onChange={e => setField('past_projects', e.target.value)} placeholder="Project name — year&#10;…" />
+
+            <label style={labelStyle}>CP Collections (JSON array or one per line)</label>
+            <textarea style={{ ...inputStyle, minHeight: 72, resize: 'vertical', fontFamily: 'monospace', fontSize: 13 }} value={form.cp_collections} onChange={e => setField('cp_collections', e.target.value)} placeholder={'["COLLECTIONNAME"]\nor one name per line'} />
+
+            <button type="submit" style={btnStyle} disabled={saving || !address.trim()}>
+              {saving ? 'Saving…' : 'Save Profile'}
+            </button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main admin dashboard ───────────────────────────────────────
 export default function AdminPage() {
   const [authToken, setAuthToken] = useState(null);
@@ -1259,6 +1431,7 @@ export default function AdminPage() {
       <DemoPanel authToken={authToken} />
       <S0CodesPanel authToken={authToken} />
       <ClaimsPanel authToken={authToken} />
+      <ArtistProfilePanel authToken={authToken} />
     </div>
   );
 }

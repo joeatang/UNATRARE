@@ -190,7 +190,15 @@ export default async function CardPage({ params }) {
                 <div className={styles.cardTitle}>{token.display_title || token.token_name}</div>
                 <div className={styles.cardSubline}>
                   <span>{token.token_name}</span>
-                  {token.artist_handle && <span>by @{token.artist_handle}</span>}
+                  {token.artist_handle && token.artist_address && (
+                    <Link href={`/artist/${token.artist_address}`} className={styles.cardArtistLink}
+                      onClick={e => e.stopPropagation()}>
+                      by @{token.artist_handle}
+                    </Link>
+                  )}
+                  {token.artist_handle && !token.artist_address && (
+                    <span>by @{token.artist_handle}</span>
+                  )}
                 </div>
                 {token.supply > 0 ? (
                   <div className={styles.cardRarity}>
@@ -241,12 +249,17 @@ export default async function CardPage({ params }) {
               {token.artist_address && (
                 <div className={styles.metaRow}>
                   <span className={styles.metaKey}>Artist</span>
-                  <span className={styles.metaVal} title={token.artist_address}>
+                  <Link
+                    href={`/artist/${token.artist_address}`}
+                    className={`${styles.metaVal} ${styles.metaArtistLink}`}
+                    title={token.artist_address}
+                  >
                     {token.artist_handle ? `@${token.artist_handle} ` : ''}
                     <span className={styles.addressTrunc}>
                       {token.artist_address.slice(0,8)}…{token.artist_address.slice(-6)}
                     </span>
-                  </span>
+                    <span className={styles.metaArtistArrow}>↗</span>
+                  </Link>
                 </div>
               )}
               {token.ord_inscription && (

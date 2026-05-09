@@ -241,3 +241,284 @@
     letter-spacing: 4px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ARCHIVE ENTRY ENHANCEMENTS — profile, bio, links, drops
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Back link ── */
+.backLink {
+  display: inline-block;
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-decoration: none;
+  margin-bottom: 40px;
+  text-transform: uppercase;
+  transition: color 0.15s;
+}
+.backLink:hover { color: var(--amber); }
+
+/* ── Archive entry stamp ── */
+.archiveStamp {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--amber);
+  border: 1px solid var(--amber);
+  display: inline-block;
+  padding: 3px 10px;
+  margin-bottom: 20px;
+  opacity: 0.8;
+  text-transform: uppercase;
+}
+
+/* ── Identity row: pfp + info side by side ── */
+.identityRow {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.pfp {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  image-rendering: pixelated;
+}
+
+.identityInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Series classification ── */
+.seriesRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.seriesLabel {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.seriesBadge {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--amber);
+  border: 1px solid var(--amber);
+  padding: 2px 8px;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+/* ── Generic section ── */
+.section {
+  margin-bottom: 48px;
+}
+
+.sectionLabel {
+  font-family: var(--font-card);
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border-dim);
+  padding-bottom: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sectionCount {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--amber);
+  border: 1px solid var(--border);
+  padding: 1px 8px;
+}
+
+/* ── Artist statement / bio ── */
+.bioText {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text-dim);
+  line-height: 1.75;
+  max-width: 640px;
+  border-left: 2px solid var(--border);
+  padding-left: 20px;
+}
+
+/* ── External links ── */
+.linksList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.extLink {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.extLink:hover {
+  border-color: var(--amber);
+  background: #0c0c0c;
+}
+
+.extLinkType {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+.extLinkUrl {
+  font-family: var(--font-card);
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: var(--text);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.extLinkDesc {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  flex: 1;
+}
+
+.extLinkArrow {
+  font-family: var(--font-card);
+  font-size: 16px;
+  color: var(--text-dim);
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.extLink:hover .extLinkArrow { color: var(--amber); }
+
+/* ── Previous work list ── */
+.projectsList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.projectItem {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text-dim);
+  line-height: 1.5;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.projectDot {
+  color: var(--amber);
+  flex-shrink: 0;
+}
+
+/* ── UNATRARE drops list ── */
+.dropsList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dropRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s;
+}
+
+.dropRow:hover { border-color: var(--amber); }
+
+.dropMeta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dropName {
+  font-family: var(--font-card);
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: var(--text);
+  text-transform: uppercase;
+}
+
+.dropTitle {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.dropStatus {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.dropStatus[data-status='active']       { color: var(--green);    border-color: var(--green); }
+.dropStatus[data-status='upcoming']     { color: var(--amber);    border-color: var(--amber); opacity: 0.7; }
+.dropStatus[data-status='closed']       { color: var(--text-dim); }
+.dropStatus[data-status='distributed']  { color: var(--text-dim); }
+
+.dropSupply {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.dropArrow {
+  font-family: var(--font-card);
+  font-size: 16px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.dropRow:hover .dropArrow { color: var(--amber); }
