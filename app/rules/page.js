@@ -96,7 +96,20 @@ export default function RulesPage() {
             </div>
           </div>
 
-          {/* ── Part 1 ── */}
+          {/* ── 4-step overview ── */}
+          <section className={styles.section}>
+            <div className={styles.sectionNum}>00</div>
+            <div className={styles.sectionBody}>
+              <h2 className={styles.sectionTitle}>THE PROCESS</h2>
+              <p className={styles.sectionNote}>Four steps. The order is not optional.</p>
+              <div className={styles.infoNote} style={{lineHeight:2}}>
+                <strong>01</strong> &mdash; Get your metadata URL from <Link href="/submit" className={styles.inlineLink}>/submit</Link>. This is your token&apos;s permanent record address.<br />
+                <strong>02</strong> &mdash; Issue your Counterparty token with that URL in the Description field. Locked, non-divisible, supply 1&ndash;21,000.<br />
+                <strong>03</strong> &mdash; Return to <Link href="/submit" className={styles.inlineLink}>/submit</Link>, upload your art, sign with the issuing address, pay the fee.<br />
+                <strong>04</strong> &mdash; The Pepe Council evaluates. Certified cards go live in the directory and in wallets automatically.
+              </div>
+            </div>
+          </section>
           <section className={styles.section}>
             <div className={styles.sectionNum}>01</div>
             <div className={styles.sectionBody}>
@@ -210,6 +223,13 @@ export default function RulesPage() {
                 The stamp requires passing the hard rules AND earning genuine scores. Being in the
                 directory without a stamp is not a failure — it means the council saw it, let it in,
                 and had opinions. Rejection is reserved for work that has no business being here.
+              </div>
+
+              <div className={styles.infoNote} style={{marginTop:24, borderColor:'var(--border)'}}>
+                <strong>Metadata:</strong> Every approved token gets a permanent record at{' '}
+                <code>unatrare.wtf/c/YOURTOKEN.json</code> — CIP-25 v2, wallet-readable.
+                Before approval it returns <code>{'{"status":"pending"}'}</code>. After approval, full art + series data. Wallets pick it up automatically.<br /><br />
+                <strong>Series structure:</strong> Cards are assigned a Series and Card Number at approval. Each Series holds 300 cards — Series I fills first, then Series II, mirroring original Rare Pepe structure. These are permanent.
               </div>
             </div>
           </section>
