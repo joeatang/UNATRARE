@@ -306,8 +306,8 @@ export default function ClaimChamberPage() {
               <div className={styles.claimTypeLabel}>SUPPORT CLAIM</div>
               <div className={styles.claimTypePrice}>$3 / $6 / $9</div>
               <p className={styles.claimTypeDesc}>
-                Low cost, high culture. Priced in DMT-NAT — the non-arbitrary token.
-                100% goes to the artist. Platform adds 15% on top, paid by the buyer.
+                Low cost, high culture. Payment goes directly to the artist.
+                Platform adds a 15% curation fee on top, paid by the buyer.
                 You decide how much you want to put in.
               </p>
             </div>
@@ -350,9 +350,9 @@ export default function ClaimChamberPage() {
               <div className={styles.stepBody}>
                 <div className={styles.stepHead}>Send, wait, receive</div>
                 <div className={styles.stepText}>
-                  For support claims: send NAT to the drop address and submit your txid.
-                  After the window closes, verified claims receive the Counterparty
-                  token directly. Artist receives 100% of ask in NAT.
+                  For support claims: payment goes directly to the artist via the
+                  method they specify. After the window closes, verified claims
+                  receive the Counterparty token directly to your CP wallet.
                 </div>
               </div>
             </div>
