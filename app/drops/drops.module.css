@@ -357,3 +357,439 @@
   .dropIncomingMeta { grid-template-columns: 1fr 1fr; }
   .dropIncomingTitle { font-size: 28px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   CLAIM CHAMBER additions
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Eligibility verify widget ── */
+.verifyBox {
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--amber);
+  padding: 28px 28px 24px;
+  margin-bottom: 56px;
+  background: rgba(168, 144, 96, 0.02);
+}
+
+.verifyTitle {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 5px;
+  color: var(--amber);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.verifyDesc {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.verifyForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.verifyInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 1px;
+  outline: none;
+  margin-bottom: 8px;
+}
+
+.verifyInput:focus {
+  border-color: var(--amber);
+}
+
+.verifyBtn {
+  align-self: flex-start;
+  padding: 12px 24px;
+  border: 1px solid var(--amber);
+  background: transparent;
+  color: var(--amber);
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 3px;
+  cursor: pointer;
+  text-transform: lowercase;
+  transition: background 0.15s;
+}
+
+.verifyBtn:hover:not(:disabled) {
+  background: rgba(168, 144, 96, 0.08);
+}
+
+.verifyBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.verifyErr {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #cc4444;
+  margin-bottom: 10px;
+}
+
+.verifyResult {
+  border: 1px solid var(--border);
+  padding: 16px 18px;
+  margin-top: 12px;
+}
+
+.verifyResult[data-eligible="true"] {
+  border-color: var(--green);
+  background: rgba(61, 158, 61, 0.04);
+}
+
+.verifyResult[data-eligible="false"] {
+  border-color: #cc4444;
+  background: rgba(204, 68, 68, 0.04);
+}
+
+.verifyResultRow {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.verifyResultRow:last-of-type {
+  border-bottom: none;
+}
+
+.verifyResultLabel {
+  color: var(--text-dim);
+}
+
+.verifyResultVal {
+  color: var(--text);
+}
+
+.verifyResultVal[data-ok="true"] {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.verifyResultVal[data-ok="false"] {
+  color: #cc4444;
+  font-weight: 700;
+}
+
+.verifyResultNote {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.verifyResultNote a {
+  color: var(--amber);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.verifyReset {
+  display: block;
+  background: none;
+  border: none;
+  padding: 12px 0 0;
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  cursor: pointer;
+  text-transform: lowercase;
+}
+
+.verifyReset:hover {
+  color: var(--amber);
+}
+
+/* ── Drop cards (Claim Chamber) ── */
+.dropCard {
+  border: 1px solid var(--border);
+  padding: 28px 28px 24px;
+  margin-bottom: 24px;
+}
+
+.dropCardActive {
+  border-top: 2px solid var(--green);
+  background: rgba(61, 158, 61, 0.015);
+}
+
+.dropCardEyebrow {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.claimTypeBadge {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+.claimTypeBadge[data-type="cultural"] {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.claimTypeBadge[data-type="support"] {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.dropCardTitle {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 5vw, 40px);
+  letter-spacing: 6px;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.dropCardArtist {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+}
+
+.dropCardDesc {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  max-width: 500px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── Status values on meta cells ── */
+.dropMetaValue[data-status="active"] {
+  color: var(--green);
+}
+
+.dropMetaValue[data-status="upcoming"] {
+  color: var(--amber);
+}
+
+.dropMetaValue[data-status="closed"],
+.dropMetaValue[data-status="distributed"] {
+  color: var(--text-dim);
+}
+
+/* ── Support tier pills inside drop cards ── */
+.tierRow {
+  display: flex;
+  gap: 1px;
+  margin-bottom: 20px;
+}
+
+.tierPill {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 12px 8px;
+  text-align: center;
+}
+
+.tierUsd {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 24px;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+
+.tierNat {
+  display: block;
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin-top: 3px;
+}
+
+/* ── Countdown timer block ── */
+.timerBlock {
+  border: 1px solid var(--border);
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.timerLabel {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.timerDisplay {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 6vw, 44px);
+  letter-spacing: 4px;
+  color: var(--amber);
+  line-height: 1;
+}
+
+/* ── "Enter the chamber" CTA on drop card ── */
+.chamberBtn {
+  display: inline-block;
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  padding: 12px 28px;
+  border: 1px solid var(--green);
+  color: var(--green);
+  text-decoration: none;
+  text-transform: lowercase;
+  transition: background 0.15s;
+}
+
+.chamberBtn:hover {
+  background: rgba(61, 158, 61, 0.08);
+}
+
+.upcomingNote {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+.upcomingNote a {
+  color: var(--amber);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── Claim type explainer grid ── */
+.claimTypeGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  margin-bottom: 16px;
+}
+
+.claimTypeCard {
+  background: var(--bg);
+  padding: 24px 20px;
+}
+
+.claimTypeLabel {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--amber);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.claimTypePrice {
+  font-family: var(--font-display);
+  font-size: 32px;
+  letter-spacing: 3px;
+  color: var(--text);
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.claimTypeDesc {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+.claimNote {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  opacity: 0.5;
+  line-height: 1.8;
+  text-transform: uppercase;
+}
+
+/* ── Archive row ── */
+.dropArchiveCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+
+.dropArchiveTitle {
+  color: var(--text-dim);
+  flex: 1;
+}
+
+.dropArchiveArtist {
+  color: var(--text-dim);
+  opacity: 0.5;
+  font-size: 10px;
+}
+
+.dropArchiveStatus {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+}
+
+.dropArchiveStatus[data-status="distributed"] {
+  color: var(--green);
+}
+
+/* ── Mobile additions ── */
+@media (max-width: 640px) {
+  .claimTypeGrid { grid-template-columns: 1fr; }
+  .tierRow { flex-direction: column; }
+  .timerDisplay { font-size: 28px; }
+  .dropCardTitle { font-size: 28px; letter-spacing: 4px; }
+}
