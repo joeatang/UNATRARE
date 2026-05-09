@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Nav from '../components/Nav';
 import styles from './profile.module.css';
@@ -11,7 +11,7 @@ const STEPS = {
   done:   'done',
 };
 
-export default function ProfilePage() {
+function ProfilePageInner() {
   const searchParams = useSearchParams();
   const [step, setStep]       = useState(STEPS.lookup);
   const [address, setAddress] = useState('');
@@ -341,5 +341,13 @@ export default function ProfilePage() {
 
       </main>
     </>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={null}>
+      <ProfilePageInner />
+    </Suspense>
   );
 }
