@@ -10,7 +10,7 @@
 
 .infoTitle {
   font-family: var(--font-card);
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 3px;
   color: var(--amber);
   text-transform: uppercase;
@@ -19,7 +19,7 @@
 
 .infoText {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-dim);
   line-height: 1.7;
 }
@@ -52,7 +52,7 @@
 
 .confirmKey {
   font-family: var(--font-card);
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 2px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -63,7 +63,7 @@
 
 .confirmVal {
   font-family: var(--font-card);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text);
   letter-spacing: 1px;
   flex: 1;
@@ -73,5 +73,5 @@
 @media (max-width: 600px) {
   .confirmRow { flex-direction: column; gap: 4px; }
   .confirmKey { min-width: unset; }
-  .confirmVal { font-size: 13px; word-break: break-all; }
+  .confirmVal { font-size: 15px; word-break: break-all; }
 }

@@ -18,7 +18,7 @@
 
 .eyebrow {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 5px;
   color: var(--text-dim);
   margin-bottom: 12px;
@@ -37,7 +37,7 @@
 
 .subtitle {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-dim);
   line-height: 1.8;
 }
@@ -52,7 +52,7 @@
 
 .lookupLabel {
   font-family: var(--font-card);
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 4px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -67,7 +67,7 @@
 .lookupInput {
   flex: 1;
   font-family: var(--font-card);
-  font-size: 14px;
+  font-size: 16px;
   letter-spacing: 1px;
   color: var(--text);
   background: var(--bg);
@@ -82,7 +82,7 @@
 
 .lookupBtn {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--bg);
@@ -99,14 +99,14 @@
 
 .lookupError {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--red);
   margin-top: 8px;
 }
 
 .lookupHint {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-dim);
   margin-top: 8px;
   opacity: 0.6;
@@ -122,7 +122,7 @@
 
 .resultsCount {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 3px;
   color: var(--amber);
   text-transform: uppercase;
@@ -130,7 +130,7 @@
 
 .resultsAddr {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 2px;
   color: var(--text-dim);
 }
@@ -191,7 +191,7 @@
 
 .submitted {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-dim);
 }
 
@@ -205,7 +205,7 @@
 
 .statusBadge {
   font-family: var(--font-card);
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 3px;
   text-transform: uppercase;
   border: 1px solid;
@@ -223,7 +223,7 @@
 
 .scoreMax {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-dim);
 }
 
@@ -254,7 +254,7 @@
 
 .payLabel {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--green);
   line-height: 1.6;
   flex: 1;
@@ -263,7 +263,7 @@
 
 .payBtn {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--bg);
@@ -286,7 +286,7 @@
 
 .rejectionLabel {
   font-family: var(--font-card);
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 3px;
   color: var(--red);
   text-transform: uppercase;
@@ -296,7 +296,7 @@
 
 .rejectionText {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-dim);
   line-height: 1.7;
 }
@@ -307,7 +307,7 @@
   border-top: 1px solid var(--border-dim);
   margin-top: 12px;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-dim);
   line-height: 1.6;
 }
@@ -317,7 +317,7 @@
   display: block;
   width: 100%;
   font-family: var(--font-card);
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--text-dim);
@@ -341,7 +341,7 @@
 
 .breakdownTitle {
   font-family: var(--font-card);
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 4px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -365,14 +365,14 @@
 }
 
 .judgeVerdict {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
   width: 16px;
 }
 
 .judgeName {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 2px;
   color: var(--amber);
 }
@@ -399,7 +399,7 @@
 
 .emptyTitle {
   font-family: var(--font-card);
-  font-size: 14px;
+  font-size: 16px;
   letter-spacing: 4px;
   color: var(--text);
   text-transform: uppercase;
@@ -408,14 +408,14 @@
 
 .emptyDesc {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-dim);
   margin-bottom: 24px;
 }
 
 .emptyBtn {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--bg);

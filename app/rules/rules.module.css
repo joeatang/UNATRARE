@@ -18,7 +18,7 @@
 
 .eyebrow {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 5px;
   color: var(--text-dim);
   margin-bottom: 12px;
@@ -37,7 +37,7 @@
 
 .subtitle {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-dim);
   line-height: 1.8;
 }
@@ -52,7 +52,7 @@
 
 .criticalLabel {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 4px;
   color: var(--amber);
   text-transform: uppercase;
@@ -61,7 +61,7 @@
 
 .criticalText {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-dim);
   line-height: 1.9;
 }
@@ -108,7 +108,7 @@
 
 .sectionNote {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-dim);
   margin-bottom: 20px;
   line-height: 1.6;
@@ -123,7 +123,7 @@
 
 .td {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-dim);
   padding: 10px 14px;
   border-bottom: 1px solid var(--border-dim);
@@ -136,7 +136,7 @@ tr:last-child .td { border-bottom: none; }
 tr .td:first-child {
   font-family: var(--font-card);
   color: var(--text);
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 1px;
   white-space: nowrap;
   width: 240px;
@@ -199,7 +199,7 @@ tr .td:first-child {
 
 .councilName {
   font-family: var(--font-card);
-  font-size: 14px;
+  font-size: 16px;
   letter-spacing: 3px;
   color: var(--text);
   margin-bottom: 4px;
@@ -208,7 +208,7 @@ tr .td:first-child {
 
 .councilTitle {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 2px;
   color: var(--amber);
   text-transform: uppercase;
@@ -218,7 +218,7 @@ tr .td:first-child {
 
 .councilBio {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-dim);
   line-height: 1.75;
 }
@@ -244,7 +244,7 @@ tr .td:first-child {
 
 .judgeName {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 2px;
   color: var(--amber);
   align-self: center;
@@ -252,7 +252,7 @@ tr .td:first-child {
 
 .judgeRole {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-dim);
   line-height: 1.6;
   align-self: center;
@@ -268,7 +268,7 @@ tr .td:first-child {
 
 .rubricTitle {
   font-family: var(--font-card);
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 4px;
   color: var(--text-dim);
   padding: 10px 16px;
@@ -288,7 +288,7 @@ tr .td:first-child {
 
 .rubricCat {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 2px;
   color: var(--text);
   min-width: 120px;
@@ -296,13 +296,13 @@ tr .td:first-child {
 
 .rubricDesc {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-dim);
 }
 
 .infoNote {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-dim);
   padding-left: 16px;
   border-left: 2px solid var(--border);
@@ -365,7 +365,7 @@ tr .td:first-child {
   /* First cell becomes a label */
   tr .td:first-child {
     width: auto;
-    font-size: 11px;
+    font-size: 15px;
     letter-spacing: 2px;
     color: var(--text-dim);
     opacity: 0.7;
@@ -425,7 +425,7 @@ tr .td:first-child {
 
 .outcomeLabel {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 3px;
   margin-bottom: 12px;
 }
@@ -444,7 +444,7 @@ tr .td:first-child {
 
 .outcomeList li {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-dim);
   padding-left: 14px;
   position: relative;
@@ -467,7 +467,7 @@ tr .td:first-child {
 .ctaBtn {
   display: inline-block;
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 4px;
   text-transform: uppercase;
   color: var(--bg);

@@ -13,6 +13,8 @@
   --red:         #c0392b;
   --text:        #d4d4d4;
   --text-dim:    #888888;
+  --muted:       var(--text-dim);
+  --green-rgb:   61, 158, 61;
   --font-display: 'VT323', monospace;
   --font-card:    'Share Tech Mono', monospace;
   --font-body:    'IBM Plex Mono', monospace;
@@ -20,7 +22,7 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { font-size: 16px; }
+html { font-size: 17px; }
 
 body {
   background: var(--bg);

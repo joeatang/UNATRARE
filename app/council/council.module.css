@@ -18,7 +18,7 @@
 }
 
 .eyebrow {
-  font-size: 0.72rem;
+  font-size: 0.92rem;
   letter-spacing: 0.18em;
   color: var(--muted);
   text-transform: uppercase;
@@ -38,7 +38,7 @@
 }
 
 .subtitle {
-  font-size: 0.97rem;
+  font-size: 1.08rem;
   color: var(--muted);
   line-height: 1.7;
   max-width: 620px;
@@ -55,7 +55,7 @@
 }
 
 .scoringLabel {
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   letter-spacing: 0.14em;
   color: var(--green);
   margin-bottom: 8px;
@@ -63,7 +63,7 @@
 }
 
 .scoringText {
-  font-size: 0.88rem;
+  font-size: 0.98rem;
   color: var(--muted);
   line-height: 1.7;
 }
@@ -122,13 +122,13 @@
 }
 
 .role {
-  font-size: 0.77rem;
+  font-size: 0.98rem;
   color: var(--muted);
   margin-top: 3px;
 }
 
 .weightBadge {
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   border: 1px solid var(--green);
   color: var(--green);
   padding: 2px 6px;
@@ -148,7 +148,7 @@
 }
 
 .focusLabel {
-  font-size: 0.63rem;
+  font-size: 0.75rem;
   letter-spacing: 0.14em;
   color: var(--muted);
   text-transform: uppercase;
@@ -156,13 +156,13 @@
 }
 
 .focusText {
-  font-size: 0.83rem;
+  font-size: 0.94rem;
   line-height: 1.5;
 }
 
 /* ── Origin ── */
 .origin {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: var(--muted);
   line-height: 1.6;
   border-top: 1px solid var(--border);
@@ -172,7 +172,7 @@
 
 .memorialTag {
   display: block;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   letter-spacing: 0.12em;
   color: #c084fc;
   text-transform: uppercase;
@@ -182,7 +182,7 @@
 
 /* ── Inspired by ── */
 .inspiredBy {
-  font-size: 0.72rem;
+  font-size: 0.92rem;
   color: var(--muted);
   opacity: 0.55;
   border-top: 1px solid var(--border);
@@ -199,7 +199,7 @@
 }
 
 .footer p {
-  font-size: 0.85rem;
+  font-size: 0.96rem;
   color: var(--muted);
   line-height: 1.7;
   margin-bottom: 12px;
@@ -212,7 +212,7 @@
 }
 
 .footerLink {
-  font-size: 0.82rem;
+  font-size: 0.92rem;
   color: var(--green);
   text-decoration: none;
   letter-spacing: 0.05em;

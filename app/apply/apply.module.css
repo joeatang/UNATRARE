@@ -21,7 +21,7 @@
 
 .pepeAscii {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 15px;
   line-height: 1.15;
   color: #2a5a2a;
   display: inline-block;
@@ -43,7 +43,7 @@
 
 .sub {
   font-family: var(--font-card);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text);
   line-height: 1.7;
   letter-spacing: 1px;
@@ -92,7 +92,7 @@
 
 .flowLabel {
   font-family: var(--font-card);
-  font-size: 9px;
+  font-size: 15px;
   letter-spacing: 2.5px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -150,7 +150,7 @@
 
 .truthTitle {
   font-family: var(--font-card);
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 2px;
   color: var(--text);
   display: block;
@@ -177,7 +177,7 @@
 
 .formCta {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 15px;
   color: var(--text-dim);
   margin-bottom: 14px;
   letter-spacing: 0.5px;
@@ -207,7 +207,7 @@
   flex: 1;
   padding: 11px 14px;
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 15px;
   letter-spacing: 2px;
   text-align: center;
   cursor: pointer;
@@ -259,7 +259,7 @@
   border: none !important;
   padding: 14px 12px 14px 0;
   font-family: var(--font-card);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text);
   letter-spacing: 1px;
   width: 100%;
@@ -270,7 +270,7 @@
 
 .errorMsg {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 15px;
   color: var(--red);
   padding: 4px 0;
 }
@@ -281,7 +281,7 @@
   border: none;
   padding: 16px;
   font-family: var(--font-card);
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 5px;
   cursor: pointer;
   width: 100%;
@@ -302,7 +302,7 @@
 
 .followLink {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 15px;
   color: var(--text-dim);
   text-decoration: none;
   border-bottom: 1px solid var(--border);
@@ -330,7 +330,7 @@
 
 .successTitle {
   font-family: var(--font-card);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--green-hot);
   margin-bottom: 12px;
   letter-spacing: 3px;
@@ -339,7 +339,7 @@
 
 .successBody {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-dim);
   line-height: 1.8;
 }
@@ -356,7 +356,7 @@
 
 .footerText {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 15px;
   color: var(--border);
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -366,7 +366,7 @@
 @media (max-width: 480px) {
   .wrap { padding: 24px 16px 48px; }
   .formSection { padding: 24px 18px 20px; }
-  .pepeAscii { font-size: 10px; }
+  .pepeAscii { font-size: 15px; }
   .flowGlyph { font-size: 22px; }
   .followRow { flex-direction: column; align-items: flex-start; gap: 8px; }
   .followDivider { display: none; }

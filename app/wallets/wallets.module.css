@@ -13,7 +13,7 @@
 
 .eyebrow {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 4px;
   color: var(--text-dim);
   margin-bottom: 12px;
@@ -34,7 +34,7 @@
 
 .subtitle {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-dim);
   line-height: 1.7;
   max-width: 520px;
@@ -74,14 +74,14 @@
 
 .pathBtnLetter {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 15px;
   letter-spacing: 3px;
   color: var(--green);
 }
 
 .pathBtnLabel {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 15px;
   letter-spacing: 2px;
   color: var(--text);
   text-transform: uppercase;
@@ -89,7 +89,7 @@
 
 .pathBtnSub {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 15px;
   color: var(--text-dim);
 }
 
@@ -105,7 +105,7 @@
 
 .pathIntro {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-dim);
   line-height: 1.8;
   margin-bottom: 36px;
@@ -133,7 +133,7 @@
 
 .stepNum {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 15px;
   letter-spacing: 3px;
   color: var(--green);
   padding-top: 2px;
@@ -147,7 +147,7 @@
 
 .stepHead {
   font-family: var(--font-card);
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 3px;
   color: var(--text);
   margin-bottom: 6px;
@@ -156,7 +156,7 @@
 
 .stepText {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-dim);
   line-height: 1.8;
 }
@@ -179,7 +179,7 @@
   display: inline-block;
   margin-top: 14px;
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 15px;
   letter-spacing: 3px;
   padding: 10px 20px;
   border: 1px solid var(--green);
@@ -212,7 +212,7 @@
 
 .marketLink {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 15px;
   letter-spacing: 3px;
   padding: 8px 16px;
   border: 1px solid var(--border);
@@ -230,7 +230,7 @@
 /* ── Path note ── */
 .pathNote {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 15px;
   color: var(--text-dim);
   line-height: 1.7;
   margin-top: 32px;
@@ -255,7 +255,7 @@
 
 .ctaBtn {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 15px;
   letter-spacing: 3px;
   padding: 12px 24px;
   border: 1px solid var(--border);
@@ -292,7 +292,7 @@
 
 .verifyLabel {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 15px;
   letter-spacing: 4px;
   color: var(--text-dim);
   opacity: 0.45;
@@ -307,7 +307,7 @@
 
 .verifyLinks a {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 15px;
   letter-spacing: 2px;
   color: var(--text-dim);
   text-decoration: none;
@@ -323,7 +323,7 @@
 
 .verifyLinks a span {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 15px;
   letter-spacing: 0;
   opacity: 0.45;
 }
