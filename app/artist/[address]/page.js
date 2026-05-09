@@ -184,6 +184,17 @@ export default async function ArtistPage({ params }) {
           )}
         </header>
 
+        {!profile && tokens.length > 0 && (
+          <section className={styles.section}>
+            <div className={styles.claimBanner}>
+              <div className={styles.claimText}>This your work? Set up your artist profile.</div>
+              <Link href={`/profile?address=${encodeURIComponent(address)}`} className={styles.claimBtn}>
+                CLAIM PROFILE →
+              </Link>
+            </div>
+          </section>
+        )}
+
         {profile?.bio && (
           <section className={styles.section}>
             <div className={styles.sectionLabel}>ARTIST STATEMENT</div>

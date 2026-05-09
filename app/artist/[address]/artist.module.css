@@ -559,3 +559,40 @@
 }
 
 .dropRow:hover .dropArrow { color: var(--amber); }
+
+/* ── Claim profile banner ── */
+.claimBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px dashed var(--border-dim);
+  border-left: 2px solid var(--amber);
+  padding: 14px 20px;
+  background: rgba(168, 144, 96, 0.04);
+  flex-wrap: wrap;
+}
+
+.claimText {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.claimBtn {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--amber);
+  border: 1px solid var(--amber);
+  padding: 8px 16px;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.claimBtn:hover {
+  background: var(--amber);
+  color: var(--bg);
+}

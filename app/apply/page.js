@@ -155,6 +155,10 @@ export default function ApplyPage() {
                 <a href="https://t.me/unatpepe" target="_blank" rel="noopener noreferrer">@unatpepe on Telegram</a>.
                 <br />We&apos;ll reach out directly.
               </p>
+              <p className={styles.successBody} style={{ marginTop: '16px', borderTop: '1px solid var(--border-dim)', paddingTop: '16px' }}>
+                Already submitted art?{' '}
+                <a href="/profile">Set up your artist profile →</a>
+              </p>
             </div>
           ) : (
             <>
