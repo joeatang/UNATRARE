@@ -160,7 +160,7 @@
   font-family: var(--font-card);
   font-size: 11px;
   letter-spacing: 2px;
-  color: var(--border);
+  color: var(--text-dim);
   text-transform: uppercase;
   font-style: normal;
 }
@@ -251,8 +251,18 @@
 
 /* ── Responsive ── */
 @media (max-width: 700px) {
-  .title { font-size: 44px; }
-  .grid  { grid-template-columns: 1fr; }
+  .title { font-size: 44px; letter-spacing: 5px; }
+  .grid  { grid-template-columns: 1fr; gap: 6px; }
+  .page  { padding: 52px 14px 80px; }
+  .header { padding-bottom: 20px; margin-bottom: 28px; }
+  .entry { padding: 14px 14px; }
+  .entryHeader { margin-bottom: 10px; }
+  .entryBody { gap: 12px; }
+}
+
+@media (max-width: 380px) {
+  .title { font-size: 32px; letter-spacing: 2px; }
+  .entryAlias { font-size: 17px; }
 }
 
 @media (min-width: 1100px) {

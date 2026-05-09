@@ -100,7 +100,7 @@
   margin-left: auto;
   font-family: var(--font-body);
   font-size: 15px;
-  color: var(--border);
+  color: var(--text-dim);
 }
 
 .signalPostText {
@@ -195,14 +195,14 @@
 .emptySubtext {
   font-family: var(--font-body);
   font-size: 15px;
-  color: var(--border);
+  color: var(--text-dim);
 }
 
 /* ── Feed list ── */
 .feed {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
 }
 
 /* ── Verdict card ── */
@@ -213,7 +213,7 @@
 }
 
 .verdict + .verdict {
-  border-top: none;
+  border-top: 1px solid var(--border);
 }
 
 /* ── Verdict header row ── */
@@ -339,7 +339,7 @@
 .verdictDate {
   font-family: var(--font-body);
   font-size: 15px;
-  color: var(--border);
+  color: var(--text-dim);
   margin-top: 2px;
 }
 
@@ -405,7 +405,7 @@
 
 .judgeSigil {
   font-size: 18px;
-  color: var(--border);
+  color: var(--text-dim);
   flex-shrink: 0;
   line-height: 1.2;
 }
@@ -539,13 +539,22 @@
 
   .verdictHeader {
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
+  }
+
+  .verdictLeft {
+    gap: 14px;
   }
 
   .scoreBlock {
     flex-direction: row;
     align-items: center;
     gap: 12px;
+    padding-top: 0;
+    padding-left: 2px;
+    border-top: 1px solid var(--border-dim);
+    padding-top: 12px;
+    width: 100%;
   }
 
   .scoreNum {
@@ -566,9 +575,15 @@
   .header { margin-bottom: 28px; padding-bottom: 20px; }
 
   /* Tighter internal padding on each verdict unit */
-  .verdictHeader { padding: 14px; }
-  .judgeCard { padding: 10px 14px; gap: 6px; }
-  .rejectionNote { padding: 10px 14px; }
+  .verdictHeader { padding: 16px; }
+  .judgeCard { padding: 12px 14px; gap: 8px; }
+  .rejectionNote { padding: 10px 16px; }
+
+  /* More space between judge reason text */
+  .judgeReason { font-size: 14px; }
+
+  /* Category scores — slightly more room */
+  .judgeCats { gap: 10px; }
 
   /* Prevent headerStats from overflowing on narrow viewports */
   .headerStats { flex-wrap: wrap; gap: 4px; }

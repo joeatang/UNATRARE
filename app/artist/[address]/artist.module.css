@@ -220,7 +220,7 @@
 /* ── Mobile ── */
 @media (max-width: 600px) {
   .main {
-    padding: 60px 16px 60px;
+    padding: 52px 14px 60px;
   }
 
   .handle {
@@ -234,12 +234,49 @@
 
   .statsRow {
     gap: 16px;
+    flex-wrap: wrap;
   }
 
   .emptyTitle {
     font-size: 24px;
     letter-spacing: 4px;
   }
+
+  /* Archive enhancements — mobile */
+  .identityRow {
+    gap: 14px;
+  }
+
+  .pfp {
+    width: 56px;
+    height: 56px;
+  }
+
+  .archiveStamp {
+    font-size: 10px;
+    letter-spacing: 2px;
+  }
+
+  .bioText {
+    font-size: 15px;
+  }
+
+  .dropsList {
+    gap: 8px;
+  }
+
+  .dropRow {
+    padding: 10px 12px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
+}
+
+@media (max-width: 380px) {
+  .main { padding: 52px 12px 60px; }
+  .grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ═══════════════════════════════════════════════════════════════

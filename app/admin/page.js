@@ -150,8 +150,11 @@ function TokenRow({ token, authToken, onAction }) {
         <div className={styles.rowInfo}>
           <div className={styles.rowName}>{token.token_name}</div>
           <div className={styles.rowMeta}>
-            {token.artist_address?.slice(0, 14)}… · {submittedAt}
+            {token.artist_address?.slice(0, 14)}…
             {token.payment_currency && ` · paid ${token.payment_currency}`}
+          </div>
+          <div className={styles.rowDate}>
+            {submittedAt}
           </div>
           {token.judge_score !== undefined && token.judge_score !== null && (
             <div className={styles.rowScore}>
