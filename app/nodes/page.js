@@ -126,7 +126,7 @@ export default function NodesPage() {
         <h2 className={styles.joinTitle}>RUN A NODE</h2>
         <p className={styles.joinDesc}>
           Community nodes seed the UNATRARE art archive over Hyperswarm P2P.
-          Genesis nodes (first 100) earn 2× UNAT rewards once the token launches.
+          Early nodes are recorded on-chain as genesis participants and will be eligible for rewards.
         </p>
         <div className={styles.codeBlock}>
           <span className={styles.codeComment}># Install Pear runtime (one-time)</span>
