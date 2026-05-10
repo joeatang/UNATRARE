@@ -10,8 +10,8 @@
  */
 
 import { NextResponse } from 'next/server';
+import WebSocket from 'ws';
 
-// Uses Node.js 22 native WebSocket global — no import needed
 const SC_BRIDGE_URL   = process.env.SC_BRIDGE_URL   || 'ws://127.0.0.1:49222';
 const SC_BRIDGE_TOKEN = process.env.SC_BRIDGE_TOKEN || '';
 const TIMEOUT_MS      = 10_000;
