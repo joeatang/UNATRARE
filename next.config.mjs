@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // ws uses Node.js native modules — must not be bundled by webpack
+  serverExternalPackages: ['ws'],
+
   // Rewrite /c/TOKENNAME.json → /c/TOKENNAME so Next.js routing works cleanly
   // Artists put https://unatrare.wtf/c/TOKENNAME.json in their token description.
   // The .json extension is required by CIP-25 spec for wallets to recognise it.
