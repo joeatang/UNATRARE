@@ -46,7 +46,7 @@ function scQuery(commands) {
       let msg;
       try { msg = JSON.parse(raw.toString()); } catch (_) { return; }
 
-      if (msg.id === 0 && msg.type === 'auth_ok') {
+      if (msg.type === 'auth_ok') {
         authed = true;
         // Send all CLI commands sequentially with numeric IDs
         commands.forEach((cmd, i) => {
