@@ -1,0 +1,240 @@
+.page {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 6rem;
+}
+
+.back {
+  margin-bottom: 2rem;
+}
+
+.backLink {
+  font-family: monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.backLink:hover {
+  color: var(--amber);
+}
+
+.header {
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.title {
+  font-family: var(--font-mono, monospace);
+  font-size: clamp(1rem, 3.5vw, 1.4rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--amber);
+  margin: 0 0 0.6rem;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  font-size: 0.87rem;
+  color: var(--text-dim);
+  margin: 0;
+  max-width: 560px;
+  line-height: 1.65;
+}
+
+/* ── Section ─────────────────────────────────────────────────────── */
+.section {
+  margin-bottom: 3rem;
+}
+
+.sectionTitle {
+  font-family: monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: 0 0 1.1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.step {
+  font-family: monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin: 1.5rem 0 0.6rem;
+}
+
+.body {
+  font-size: 0.87rem;
+  color: var(--text-dim);
+  line-height: 1.7;
+  margin: 0 0 0.85rem;
+  max-width: 620px;
+}
+
+.amber {
+  color: var(--amber);
+}
+
+/* ── Code block ──────────────────────────────────────────────────── */
+.codeBlock {
+  background: #050505;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0.5rem 0 1rem;
+  overflow-x: auto;
+}
+
+.comment {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: #3a3a3a;
+  margin-top: 0.5rem;
+}
+
+.comment:first-child {
+  margin-top: 0;
+}
+
+.line {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--text);
+  white-space: pre;
+}
+
+.code {
+  font-family: monospace;
+  font-size: 0.82rem;
+  color: var(--amber);
+  background: #111;
+  padding: 0.1rem 0.35rem;
+  border-radius: 2px;
+}
+
+/* ── Notes ───────────────────────────────────────────────────────── */
+.note {
+  font-size: 0.82rem;
+  color: #c47f00;
+  line-height: 1.6;
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
+  border-left: 2px solid #c47f00;
+  background: rgba(196, 127, 0, 0.05);
+  max-width: 620px;
+}
+
+.good {
+  font-size: 0.82rem;
+  color: #4caf50;
+  line-height: 1.6;
+  margin: 0.35rem 0;
+  max-width: 620px;
+}
+
+/* ── Table ───────────────────────────────────────────────────────── */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  font-family: monospace;
+}
+
+.td1 {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 0.65rem 0.9rem;
+  width: 150px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.td2 {
+  font-size: 0.78rem;
+  color: var(--text);
+  padding: 0.65rem 0.9rem;
+  line-height: 1.75;
+  border-bottom: 1px solid var(--border);
+}
+
+.table tr:last-child .td1,
+.table tr:last-child .td2 {
+  border-bottom: none;
+}
+
+.yes {
+  color: #4caf50;
+}
+
+.no {
+  color: #c0392b;
+}
+
+/* ── FAQ ─────────────────────────────────────────────────────────── */
+.faq {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.faqItem {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.faqItem:last-child {
+  border-bottom: none;
+}
+
+.faqQ {
+  font-family: monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--amber);
+  margin: 0 0 0.35rem;
+}
+
+.faqA {
+  font-size: 0.83rem;
+  color: var(--text-dim);
+  line-height: 1.65;
+  margin: 0;
+  max-width: 580px;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+.footer {
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+  margin-top: 1rem;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .td1 {
+    display: none;
+  }
+  .codeBlock {
+    font-size: 0.7rem;
+  }
+}

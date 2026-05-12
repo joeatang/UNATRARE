@@ -182,27 +182,55 @@ export default function NodesPage() {
 
       {/* ── Join section ─────────────────────────────────────────── */}
       <div className={styles.joinSection} id="join">
-        <h2 className={styles.joinTitle}>RUN A NODE</h2>
+        <h2 className={styles.joinTitle}>RUN A DEEP NODE</h2>
         <p className={styles.joinDesc}>
-          Community nodes seed the UNATRARE art archive over Hyperswarm P2P.
-          Early nodes are recorded on-chain as genesis participants and will be eligible for rewards.
+          Deep Nodes seed the UNATRARE art archive over the TRAC Hyperswarm P2P network.
+          The first 100 nodes earn permanent <strong>GENESIS</strong> status — an on-chain record
+          of founding participation, with 2× reward weight when the NAT reward system launches.
         </p>
-        <div className={styles.codeBlock}>
-          <span className={styles.codeComment}># Install Pear runtime (one-time)</span>
+
+        <div className={styles.reqGrid}>
+          <div className={styles.reqRow}>
+            <span className={styles.reqLabel}>OPERATING SYSTEM</span>
+            <span className={styles.reqVal}>Ubuntu 20.04+ &nbsp;✓&nbsp; &nbsp;macOS 12+ &nbsp;✓&nbsp; &nbsp;Windows &nbsp;✗</span>
+          </div>
+          <div className={styles.reqRow}>
+            <span className={styles.reqLabel}>RAM</span>
+            <span className={styles.reqVal}>1 GB minimum &nbsp;·&nbsp; 2 GB recommended</span>
+          </div>
+          <div className={styles.reqRow}>
+            <span className={styles.reqLabel}>STORAGE</span>
+            <span className={styles.reqVal}>10 GB free minimum &nbsp;·&nbsp; 50 GB recommended</span>
+          </div>
+          <div className={styles.reqRow}>
+            <span className={styles.reqLabel}>INTERNET</span>
+            <span className={styles.reqVal}>Always-on broadband &nbsp;·&nbsp; laptop sleep = missed heartbeats</span>
+          </div>
+          <div className={styles.reqRow}>
+            <span className={styles.reqLabel}>COST (cloud)</span>
+            <span className={styles.reqVal}>$6–12/mo VPS &nbsp;·&nbsp; home device = ~$1–3/mo electricity</span>
+          </div>
+          <div className={styles.reqRow}>
+            <span className={styles.reqLabel}>macOS MINIMUM</span>
+            <span className={styles.reqVal}>macOS 12 Monterey &nbsp;·&nbsp; Catalina / Big Sur will NOT work</span>
+          </div>
+        </div>
+
+        <a className={styles.guideBtn} href="/nodes/guide">
+          FULL SETUP GUIDE →
+        </a>
+
+        <div className={styles.codeBlock} style={{marginTop: '1.5rem'}}>
+          <span className={styles.codeComment}># Quick start (Linux / macOS)</span>
           <span className={styles.codeLine}>npm install -g pear</span>
-          <span className={styles.codeComment}># Clone and start the node</span>
-          <span className={styles.codeLine}>git clone https://github.com/joeatang/unatrare-intercom node</span>
-          <span className={styles.codeLine}>cd node &amp;&amp; npm install</span>
-          <span className={styles.codeLine}>pear run . \</span>
-          <span className={styles.codeLine}>&nbsp;&nbsp;--peer-store-name unatrare-node \</span>
+          <span className={styles.codeLine}>git clone https://github.com/joeatang/unatrare-intercom node &amp;&amp; cd node &amp;&amp; npm install</span>
+          <span className={styles.codeLine}>pear run . --peer-store-name unatrare-node \</span>
           <span className={styles.codeLine}>&nbsp;&nbsp;--subnet-bootstrap 38a1b001756148f3f96f8cff7bd38d2924669f5c1880b4f779512d6449cfff56 \</span>
           <span className={styles.codeLine}>&nbsp;&nbsp;--btc-address YOUR_BITCOIN_ADDRESS</span>
         </div>
         <p className={styles.joinNote}>
-          Requires Node.js v22+. Questions?{' '}
-          <a className={styles.joinLink} href="https://discord.gg/trac" target="_blank" rel="noopener noreferrer">
-            TRAC Discord
-          </a>
+          Requires Node.js v22+. &nbsp;
+          <a className={styles.joinLink} href="/nodes/guide">Full guide with Linux VPS + Raspberry Pi instructions →</a>
         </p>
       </div>
     </main>
