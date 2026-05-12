@@ -191,8 +191,7 @@ export default async function CardPage({ params }) {
                 <div className={styles.cardSubline}>
                   <span>{token.token_name}</span>
                   {token.artist_handle && token.artist_address && (
-                    <Link href={`/artist/${token.artist_address}`} className={styles.cardArtistLink}
-                      onClick={e => e.stopPropagation()}>
+                    <Link href={`/artist/${token.artist_address}`} className={styles.cardArtistLink}>
                       by @{token.artist_handle}
                     </Link>
                   )}
