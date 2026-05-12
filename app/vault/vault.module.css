@@ -1,0 +1,267 @@
+/* ── Page ────────────────────────────────────────────────────────── */
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 3rem 1.25rem 5rem;
+}
+
+/* ── Header ──────────────────────────────────────────────────────── */
+.header {
+  margin-bottom: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.title {
+  font-family: var(--font-mono, monospace);
+  font-size: clamp(1.1rem, 4vw, 1.6rem);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--amber);
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  font-size: 0.83rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  max-width: 520px;
+  margin: 0;
+}
+
+.uploadBtn {
+  display: inline-block;
+  align-self: flex-start;
+  font-family: monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #0a0a0a;
+  background: var(--amber);
+  padding: 0.5rem 1.1rem;
+  border-radius: 3px;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: opacity 0.15s;
+  margin-top: 0.25rem;
+}
+
+.uploadBtn:hover { opacity: 0.85; }
+
+/* ── Promo / price banners ────────────────────────────────────────── */
+.promoBanner {
+  font-family: monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: #0a0a0a;
+  background: var(--amber);
+  padding: 0.5rem 1rem;
+  border-radius: 3px;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+}
+
+.priceBanner {
+  font-family: monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  background: #111;
+  border: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  border-radius: 3px;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+}
+
+/* ── Meta ─────────────────────────────────────────────────────────── */
+.meta {
+  font-family: monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+/* ── Grid ────────────────────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* ── Card ────────────────────────────────────────────────────────── */
+.card {
+  background: #0c0c0c;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.15s;
+}
+
+.card:hover { border-color: rgba(245, 166, 35, 0.4); }
+
+.imgWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background: #050505;
+  overflow: hidden;
+}
+
+.img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.promoBadge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-family: monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  color: #0a0a0a;
+  background: var(--amber);
+  padding: 0.15rem 0.4rem;
+  border-radius: 2px;
+  text-transform: uppercase;
+}
+
+.cardBody {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+}
+
+.tokenName {
+  font-family: monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.assetName {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.uploaded {
+  font-family: monospace;
+  font-size: 0.6rem;
+  color: #444;
+  margin-bottom: 0.5rem;
+}
+
+.copyBtn {
+  font-family: monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--amber);
+  background: transparent;
+  border: 1px solid rgba(245, 166, 35, 0.3);
+  border-radius: 3px;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: auto;
+}
+
+.copyBtn:hover { background: rgba(245, 166, 35, 0.08); }
+
+/* ── Pagination ──────────────────────────────────────────────────── */
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.pgBtn {
+  font-family: monospace;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.pgBtn:hover:not(:disabled) { color: var(--amber); border-color: var(--amber); }
+.pgBtn:disabled { opacity: 0.3; cursor: default; }
+
+.pgInfo {
+  font-family: monospace;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+/* ── Loader / empty ──────────────────────────────────────────────── */
+.loader, .empty {
+  font-family: monospace;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  padding: 2rem 0;
+}
+
+.emptyLink {
+  color: var(--amber);
+  text-decoration: none;
+}
+
+.emptyLink:hover { text-decoration: underline; }
+
+/* ── Info section ─────────────────────────────────────────────────── */
+.infoSection {
+  border-top: 1px solid var(--border);
+  padding-top: 2rem;
+  margin-top: 0.5rem;
+}
+
+.infoTitle {
+  font-family: monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--amber);
+  text-transform: uppercase;
+  margin: 0 0 0.85rem;
+}
+
+.infoList {
+  font-size: 0.83rem;
+  color: var(--text-dim);
+  line-height: 1.7;
+  padding-left: 1.25rem;
+  margin: 0 0 0.85rem;
+  max-width: 540px;
+}
+
+.infoNote {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.infoLink {
+  color: var(--amber);
+  text-decoration: none;
+}
+
+.infoLink:hover { text-decoration: underline; }

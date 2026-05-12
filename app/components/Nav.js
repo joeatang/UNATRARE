@@ -21,6 +21,7 @@ export default function Nav() {
           <li><Link href="/drops">Drops</Link></li>
           <li><Link href="/wallets">Wallets</Link></li>
           <li><Link href="/nodes">Nodes</Link></li>
+          <li><Link href="/vault">Vault</Link></li>
           <li><Link href="/council">Council</Link></li>
           <li><Link href="/about">About</Link></li>
           <li><Link href="/register" className={styles['nav-register']}>✦ Register</Link></li>
@@ -53,6 +54,7 @@ export default function Nav() {
             <li><Link href="/drops">Drops</Link></li>
             <li><Link href="/wallets">Wallets</Link></li>
             <li><Link href="/nodes">Nodes</Link></li>
+            <li><Link href="/vault">Vault</Link></li>
             <li><Link href="/council">Council</Link></li>
             <li><Link href="/about">About</Link></li>
             <li><Link href="/register" className={styles['nav-register']}>✦ Register</Link></li>

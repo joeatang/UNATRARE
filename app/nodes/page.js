@@ -76,10 +76,13 @@ function truncPubkey(pk) {
 }
 
 export default function NodesPage() {
-  const [data,    setData]    = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState(null);
+  const [data,       setData]       = useState(null);
+  const [loading,    setLoading]    = useState(true);
+  const [error,      setError]      = useState(null);
   const [splashDone, setSplashDone] = useState(false);
+  const [editPubkey, setEditPubkey] = useState('');
+  const [editForm,   setEditForm]   = useState({ pubkey: '', xcp_address: '', tap_address: '', btc_address: '' });
+  const [editStatus, setEditStatus] = useState('');
 
   useEffect(() => {
     if (!splashDone) return;
@@ -97,6 +100,27 @@ export default function NodesPage() {
     const iv = setInterval(load, 30_000);
     return () => { mounted = false; clearInterval(iv); };
   }, [splashDone]);
+
+  async function handleAddressUpdate(e) {
+    e.preventDefault();
+    setEditStatus('saving…');
+    try {
+      const res  = await fetch('/api/nodes/update-addresses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm),
+      });
+      const json = await res.json();
+      if (json.ok) {
+        setEditStatus('✓ saved');
+        setTimeout(() => { setEditPubkey(''); setEditStatus(''); }, 1500);
+      } else {
+        setEditStatus(json.error || 'error');
+      }
+    } catch {
+      setEditStatus('network error');
+    }
+  }
 
   if (!splashDone) {
     return <AsciiSplash onDone={() => setSplashDone(true)} />;
@@ -169,6 +193,22 @@ export default function NodesPage() {
                     <span className={styles.label}>LAST SEEN</span>
                     <span className={styles.val}>{timeAgo(node.last_heartbeat)}</span>
                   </div>
+                  {(node.xcp_address || node.btc_address) && (
+                    <div className={styles.row}>
+                      <span className={styles.label}>XCP</span>
+                      <span className={styles.val} title={node.xcp_address}>{node.xcp_address ? truncPubkey(node.xcp_address) : '—'}</span>
+                    </div>
+                  )}
+                  <button
+                    className={styles.editAddrBtn}
+                    onClick={() => {
+                      setEditPubkey(node.pubkey);
+                      setEditForm({ pubkey: node.pubkey, xcp_address: node.xcp_address || '', tap_address: node.tap_address || '', btc_address: node.btc_address || '' });
+                      setEditStatus('');
+                    }}
+                  >
+                    update addresses
+                  </button>
                 </div>
               ))}
             </div>
@@ -178,6 +218,53 @@ export default function NodesPage() {
             Updated {timeAgo(data.updatedAt)} · auto-refreshes every 30s
           </div>
         </>
+      )}
+
+      {/* ── Address update modal ────────────────────────────────── */}
+      {editPubkey && (
+        <div className={styles.modalOverlay} onClick={() => setEditPubkey('')}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <h3 className={styles.modalTitle}>UPDATE NODE ADDRESSES</h3>
+            <p className={styles.modalSub}>Node: <code>{truncPubkey(editPubkey)}</code></p>
+            <form onSubmit={handleAddressUpdate} className={styles.modalForm}>
+              <label className={styles.modalLabel}>
+                XCP / Counterparty Address
+                <input
+                  className={styles.modalInput}
+                  value={editForm.xcp_address}
+                  onChange={e => setEditForm(f => ({ ...f, xcp_address: e.target.value.trim() }))}
+                  placeholder="1A1zP1eP5QGefi2…"
+                  maxLength={100}
+                />
+              </label>
+              <label className={styles.modalLabel}>
+                TAP / Bitcoin Address
+                <input
+                  className={styles.modalInput}
+                  value={editForm.tap_address}
+                  onChange={e => setEditForm(f => ({ ...f, tap_address: e.target.value.trim() }))}
+                  placeholder="bc1q…"
+                  maxLength={100}
+                />
+              </label>
+              <label className={styles.modalLabel}>
+                BTC Address (registration identity)
+                <input
+                  className={styles.modalInput}
+                  value={editForm.btc_address}
+                  onChange={e => setEditForm(f => ({ ...f, btc_address: e.target.value.trim() }))}
+                  placeholder="bc1q… or 1…"
+                  maxLength={100}
+                />
+              </label>
+              <div className={styles.modalRow}>
+                <button type="submit" className={styles.modalSave}>SAVE</button>
+                <button type="button" className={styles.modalCancel} onClick={() => setEditPubkey('')}>cancel</button>
+                {editStatus && <span className={styles.modalStatus}>{editStatus}</span>}
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {/* ── Join section ─────────────────────────────────────────── */}

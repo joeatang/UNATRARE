@@ -333,6 +333,150 @@
   opacity: 0.85;
 }
 
+/* ── Edit address button (card) ──────────────────────────────────── */
+.editAddrBtn {
+  margin-top: 0.6rem;
+  font-family: monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.25rem 0.55rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  width: 100%;
+}
+
+.editAddrBtn:hover {
+  color: var(--amber);
+  border-color: var(--amber);
+}
+
+/* ── Modal overlay ────────────────────────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal {
+  background: #0e0e0e;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.75rem 1.5rem;
+  width: 100%;
+  max-width: 440px;
+  position: relative;
+}
+
+.modalTitle {
+  font-family: monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--amber);
+  text-transform: uppercase;
+  margin: 0 0 0.3rem;
+}
+
+.modalSub {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin: 0 0 1.25rem;
+}
+
+.modalSub code {
+  color: var(--text);
+  font-size: 0.72rem;
+}
+
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.modalLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-family: monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.modalInput {
+  font-family: monospace;
+  font-size: 0.78rem;
+  color: var(--text);
+  background: #050505;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.5rem 0.7rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.modalInput:focus {
+  border-color: var(--amber);
+}
+
+.modalRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.modalSave {
+  font-family: monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #0a0a0a;
+  background: var(--amber);
+  border: none;
+  border-radius: 3px;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: opacity 0.15s;
+}
+
+.modalSave:hover { opacity: 0.85; }
+
+.modalCancel {
+  font-family: monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.modalCancel:hover { color: var(--text); }
+
+.modalStatus {
+  font-family: monospace;
+  font-size: 0.7rem;
+  color: var(--amber);
+  letter-spacing: 0.06em;
+}
+
 /* ── Responsive ──────────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .summary {
