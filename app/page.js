@@ -148,6 +148,7 @@ export default function HomePage() {
         />
 
         {/* ── Unified Timeline: Verdicts + Council Signal drops ── */}
+        <div className={styles.feedBlock}>
         <div className={feedStyles.header} style={{ marginTop: 48 }}>
           <div className={feedStyles.eyebrow}>PEPE COUNCIL · LIVE FEED</div>
           <h2 className={feedStyles.title}>THE F<span>E</span>ED</h2>
@@ -290,6 +291,7 @@ export default function HomePage() {
             );
           })}
         </div>
+        </div>{/* end feedBlock */}
 
         {/* ── CTA ── */}
         <div className={styles.ctaStrip}>
