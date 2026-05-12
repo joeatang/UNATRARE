@@ -1,7 +1,60 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import styles from './nodes.module.css';
+
+const SPLASH_LINES = [
+  '                    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░',
+  '                    ░                                                              ░',
+  '                    ░   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   ░',
+  '                    ░   ░                                                      ░   ░',
+  '                    ░   ░        ░░░░░  ░░░░░  ░░░░░  ░░░░░  ░░░░░            ░   ░',
+  '                    ░   ░        ░   ░  ░      ░      ░        ░              ░   ░',
+  '                    ░   ░        ░░░░░  ░░░░   ░░░░   ░░░░░    ░              ░   ░',
+  '                    ░   ░        ░      ░      ░      ░        ░              ░   ░',
+  '                    ░   ░        ░      ░░░░░  ░░░░░  ░░░░░    ░              ░   ░',
+  '                    ░   ░                                                      ░   ░',
+  '                    ░   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   ░',
+  '                    ░                                                              ░',
+  '                    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░',
+  '',
+  '          ██████╗ ███████╗███████╗██████╗     ███╗   ██╗ ██████╗ ██████╗ ███████╗',
+  '          ██╔══██╗██╔════╝██╔════╝██╔══██╗    ████╗  ██║██╔═══██╗██╔══██╗██╔════╝',
+  '          ██║  ██║█████╗  █████╗  ██████╔╝    ██╔██╗ ██║██║   ██║██║  ██║█████╗  ',
+  '          ██║  ██║██╔══╝  ██╔══╝  ██╔═══╝     ██║╚██╗██║██║   ██║██║  ██║██╔══╝  ',
+  '          ██████╔╝███████╗███████╗██║          ██║ ╚████║╚██████╔╝██████╔╝███████╗',
+  '          ╚═════╝ ╚══════╝╚══════╝╚═╝          ╚═╝  ╚═══╝ ╚═════╝ ╚═════╝╚══════╝',
+  '',
+  '             > UNATRARE NETWORK — HYPERSWARM P2P ART ARCHIVE NODES',
+  '             > TRAC SUBNET: unatrare-art-archive-v1',
+  '             > GENESIS NODE WINDOW: OPEN',
+  '             > IT IS RARE. IT IS UNAT. IT IS ON BITCOIN. FEELS GOOD MAN.',
+  '',
+  '             [ LOADING NODE REGISTRY... ]',
+];
+
+function AsciiSplash({ onDone }) {
+  const [visibleLines, setVisibleLines] = useState(0);
+
+  useEffect(() => {
+    if (visibleLines >= SPLASH_LINES.length) {
+      const t = setTimeout(onDone, 600);
+      return () => clearTimeout(t);
+    }
+    const delay = visibleLines < 13 ? 18 : visibleLines < 20 ? 35 : 60;
+    const t = setTimeout(() => setVisibleLines(v => v + 1), delay);
+    return () => clearTimeout(t);
+  }, [visibleLines, onDone]);
+
+  return (
+    <div className={styles.splash}>
+      <pre className={styles.splashPre}>
+        {SPLASH_LINES.slice(0, visibleLines).join('\n')}
+        {visibleLines < SPLASH_LINES.length && <span className={styles.cursor}>▌</span>}
+      </pre>
+    </div>
+  );
+}
 
 function timeAgo(ms) {
   if (!ms) return 'never';
@@ -26,8 +79,10 @@ export default function NodesPage() {
   const [data,    setData]    = useState(null);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState(null);
+  const [splashDone, setSplashDone] = useState(false);
 
   useEffect(() => {
+    if (!splashDone) return;
     let mounted = true;
     async function load() {
       try {
@@ -41,7 +96,11 @@ export default function NodesPage() {
     load();
     const iv = setInterval(load, 30_000);
     return () => { mounted = false; clearInterval(iv); };
-  }, []);
+  }, [splashDone]);
+
+  if (!splashDone) {
+    return <AsciiSplash onDone={() => setSplashDone(true)} />;
+  }
 
   return (
     <main className={styles.page}>

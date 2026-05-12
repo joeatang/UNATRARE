@@ -1,3 +1,30 @@
+/* ── ASCII Splash ─────────────────────────────────────────────────── */
+.splash {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg, #0a0a0a);
+  padding: 2rem 1rem;
+}
+
+.splashPre {
+  font-family: var(--font-mono, monospace);
+  font-size: clamp(0.38rem, 1.1vw, 0.72rem);
+  line-height: 1.35;
+  color: var(--amber, #f5a623);
+  white-space: pre;
+  overflow: hidden;
+  margin: 0;
+  text-shadow: 0 0 8px rgba(245, 166, 35, 0.4);
+}
+
+.cursor {
+  color: var(--amber, #f5a623);
+  animation: blink 0.7s step-end infinite;
+}
+
+/* ── Page ──────────────────────────────────────────────────────────── */
 .page {
   max-width: 900px;
   margin: 0 auto;
