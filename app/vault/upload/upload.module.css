@@ -3,6 +3,7 @@
   max-width: 640px;
   margin: 0 auto;
   padding: 2.5rem 1.25rem 5rem;
+  padding-top: calc(48px + 2rem);
 }
 
 /* ── Nav ──────────────────────────────────────────────────────────── */
@@ -18,7 +19,7 @@
   transition: color 0.15s;
 }
 
-.back:hover { color: var(--amber); }
+.back:hover { color: var(--green); }
 
 /* ── Heading ─────────────────────────────────────────────────────── */
 .title {
@@ -26,7 +27,7 @@
   font-size: clamp(1rem, 4vw, 1.4rem);
   font-weight: 700;
   letter-spacing: 0.15em;
-  color: var(--amber);
+  color: var(--green);
   margin: 0 0 0.5rem;
   text-transform: uppercase;
 }
@@ -44,7 +45,7 @@
   font-size: 0.7rem;
   letter-spacing: 0.08em;
   color: #0a0a0a;
-  background: var(--amber);
+  background: var(--green);
   padding: 0.45rem 1rem;
   border-radius: 3px;
   margin-bottom: 1.5rem;
@@ -164,7 +165,7 @@
 .input:focus,
 .textarea:focus,
 .select:focus {
-  border-color: var(--amber);
+  border-color: var(--green);
 }
 
 /* ── Fee section ─────────────────────────────────────────────────── */
@@ -210,7 +211,7 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #0a0a0a;
-  background: var(--amber);
+  background: var(--green);
   border: none;
   border-radius: 4px;
   padding: 0.7rem 1.5rem;
@@ -235,7 +236,7 @@
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.14em;
-  color: var(--amber);
+  color: var(--green);
   text-transform: uppercase;
   margin-bottom: 1.25rem;
 }
@@ -287,7 +288,7 @@
   font-size: 0.6rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--amber);
+  color: var(--green);
   background: transparent;
   border: 1px solid rgba(245, 166, 35, 0.35);
   border-radius: 3px;
@@ -313,4 +314,4 @@
   transition: color 0.15s;
 }
 
-.resetBtn:hover { color: var(--amber); border-color: var(--amber); }
+.resetBtn:hover { color: var(--green); border-color: var(--green); }

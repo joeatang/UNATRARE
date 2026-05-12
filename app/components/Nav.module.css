@@ -14,14 +14,14 @@
   backdrop-filter: blur(4px);
 }
 
-/* Amber top edge */
+/* Green top edge */
 .nav::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 1px;
-  background: var(--amber);
-  opacity: 0.5;
+  background: var(--green);
+  opacity: 0.6;
 }
 
 .nav-logo {
@@ -32,7 +32,7 @@
   text-decoration: none;
   line-height: 1;
 }
-.nav-logo span { color: var(--amber); }
+.nav-logo span { color: var(--green); }
 
 /* Desktop nav links */
 .nav-links {
@@ -50,9 +50,9 @@
   text-decoration: none;
   transition: color 0.15s;
 }
-.nav-links a:hover { color: var(--amber); }
+.nav-links a:hover { color: var(--green); }
 
-.nav-register { color: var(--amber) !important; opacity: 0.8; }
+.nav-register { color: var(--green) !important; opacity: 0.9; }
 .nav-register:hover { opacity: 1 !important; }
 
 /* Right side wrapper */
@@ -67,7 +67,7 @@
   font-size: 15px;
   letter-spacing: 3px;
   color: var(--bg);
-  background: var(--amber);
+  background: var(--green);
   border: none;
   padding: 7px 18px;
   text-transform: uppercase;
@@ -75,7 +75,7 @@
   transition: background 0.15s;
   white-space: nowrap;
 }
-.nav-submit:hover { background: var(--amber-hot); color: var(--bg); }
+.nav-submit:hover { background: var(--green-hot); color: var(--bg); }
 
 /* Hamburger — hidden on desktop */
 .hamburger {
@@ -101,9 +101,9 @@
   transform-origin: center;
 }
 
-.barTop  { transform: translateY(6px) rotate(45deg); background: var(--amber); }
+.barTop  { transform: translateY(6px) rotate(45deg); background: var(--green); }
 .barMid  { opacity: 0; }
-.barBot  { transform: translateY(-6px) rotate(-45deg); background: var(--amber); }
+.barBot  { transform: translateY(-6px) rotate(-45deg); background: var(--green); }
 
 /* Mobile drawer */
 .drawer {
@@ -135,17 +135,17 @@
   text-decoration: none;
   transition: color 0.15s, background 0.15s;
 }
-.drawerLinks a:hover { color: var(--amber); background: rgba(139,115,85,0.06); }
+.drawerLinks a:hover { color: var(--green); background: rgba(180, 255, 111, 0.06); }
 
 .drawerSubmit {
   color: var(--bg) !important;
-  background: var(--amber) !important;
+  background: var(--green) !important;
   margin: 12px 24px 0 !important;
   padding: 12px 20px !important;
   display: block !important;
   text-align: center;
 }
-.drawerSubmit:hover { background: var(--amber-hot) !important; }
+.drawerSubmit:hover { background: var(--green-hot) !important; }
 
 /* Responsive */
 @media (max-width: 768px) {

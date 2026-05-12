@@ -5,16 +5,16 @@
   --surface:     #0f0f0f;
   --border-dim:  #1a1a1a;
   --border:      #303030;
-  --amber:       #a89060;
+  --amber:       #a89060;   /* semantic gold — awaiting/pending/Bitcoin */
   --amber-hot:   #C9A84C;
-  --green:       #3d9e3d;
-  --green-hot:   #5abf5a;
+  --green:       #b4ff6f;   /* bright lime — certified stat, links, buttons */
+  --green-hot:   #ccff80;   /* hover lime */
   --orange:      #F7931A;
   --red:         #c0392b;
-  --text:        #d4d4d4;
-  --text-dim:    #888888;
+  --text:        #5abf5a;   /* PEPE EMERALD — primary body + headline text */
+  --text-dim:    #5a9a5a;   /* muted green — secondary labels */
   --muted:       var(--text-dim);
-  --green-rgb:   61, 158, 61;
+  --green-rgb:   180, 255, 111;
   --font-display: 'VT323', monospace;
   --font-card:    'Share Tech Mono', monospace;
   --font-body:    'IBM Plex Mono', monospace;
@@ -32,8 +32,8 @@ body {
   min-height: 100vh;
 }
 
-a { color: var(--amber); text-decoration: none; }
-a:hover { color: var(--amber-hot); }
+a { color: var(--green); text-decoration: none; }
+a:hover { color: var(--green-hot); }
 
 button {
   cursor: pointer;
@@ -52,7 +52,7 @@ input, textarea {
 }
 
 input:focus, textarea:focus {
-  border-color: var(--amber);
+  border-color: var(--green);
 }
 
 /* Scanline overlay — applied to .scanlines wrapper */

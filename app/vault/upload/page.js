@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Nav from '../../components/Nav';
 import styles from './upload.module.css';
 
 const BASE = process.env.NEXT_PUBLIC_BASE_URL || '';
@@ -88,7 +89,9 @@ export default function VaultUploadPage() {
   const promoSlotsLeft = promo ? promo.max - promo.count : null;
 
   return (
-    <main className={styles.page}>
+    <>
+      <Nav />
+      <main className={styles.page}>
       <div className={styles.nav}>
         <Link href="/vault" className={styles.back}>← PEPE VAULT</Link>
       </div>
@@ -271,5 +274,6 @@ export default function VaultUploadPage() {
         </form>
       )}
     </main>
+    </>
   );
 }

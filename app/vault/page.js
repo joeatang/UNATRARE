@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import Nav from '../components/Nav';
 import styles from './vault.module.css';
 
 const BASE = process.env.NEXT_PUBLIC_BASE_URL || '';
@@ -72,7 +72,9 @@ export default function VaultPage() {
   }, [page]);
 
   return (
-    <main className={styles.page}>
+    <>
+      <Nav />
+      <main className={styles.page}>
       <div className={styles.header}>
         <h1 className={styles.title}>PEPE VAULT</h1>
         <p className={styles.subtitle}>
@@ -142,5 +144,6 @@ export default function VaultPage() {
         </p>
       </div>
     </main>
+    </>
   );
 }

@@ -29,7 +29,7 @@
 }
 
 .title span {
-  color: var(--amber-hot);
+  color: var(--green);
 }
 
 .subtitle {
@@ -46,7 +46,7 @@
   font-family: var(--font-card);
   font-size: 15px;
   letter-spacing: 2px;
-  color: var(--amber);
+  color: var(--text);
 }
 
 .statDivider {

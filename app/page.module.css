@@ -29,7 +29,7 @@
   margin-bottom: 8px;
 }
 
-.heroTitle span { color: var(--amber); }
+.heroTitle span { color: var(--green); }
 
 .heroSub {
   font-family: var(--font-card);
@@ -134,7 +134,7 @@
   position: absolute;
   left: 0; right: 0;
   height: 2px;
-  background: rgba(139,115,85,0.4);
+  background: rgba(180, 255, 111, 0.3);
   top: 0;
   animation: scandown 3s ease-in-out infinite;
 }
@@ -167,7 +167,7 @@
   font-family: var(--font-card);
   font-size: 15px;
   letter-spacing: 2px;
-  color: var(--amber);
+  color: var(--green);
   text-align: center;
   animation: blink 2s step-end infinite;
 }
@@ -202,7 +202,7 @@
 
 .certifiedRow::-webkit-scrollbar { height: 2px; }
 .certifiedRow::-webkit-scrollbar-track { background: var(--border-dim); }
-.certifiedRow::-webkit-scrollbar-thumb { background: var(--amber); }
+.certifiedRow::-webkit-scrollbar-thumb { background: var(--green); }
 
 /* ─── Activity Feed ──────────────────────────────────────── */
 .activitySection {
@@ -278,13 +278,13 @@
   font-family: var(--font-card);
   font-size: 15px;
   letter-spacing: 3px;
-  color: var(--amber);
+  color: var(--green);
   text-decoration: none;
   transition: color 0.15s;
 }
 
 .feedStripAll:hover {
-  color: var(--amber-hot);
+  color: var(--green-hot);
 }
 
 .feedTicker {
@@ -363,7 +363,7 @@
   letter-spacing: 4px;
   text-transform: uppercase;
   color: var(--bg);
-  background: var(--amber);
+  background: var(--green);
   border: none;
   padding: 14px 40px;
   text-decoration: none;
@@ -371,7 +371,7 @@
 }
 
 .ctaButton:hover {
-  background: var(--amber-hot);
+  background: var(--green-hot);
   color: var(--bg);
 }
 
@@ -383,8 +383,8 @@
   gap: 24px;
   padding: 28px 32px;
   background: var(--bg);
-  border-top: 1px solid rgba(139,115,85,0.2);
-  border-bottom: 1px solid rgba(139,115,85,0.2);
+  border-top: 1px solid rgba(90, 191, 90, 0.2);
+  border-bottom: 1px solid rgba(90, 191, 90, 0.2);
   max-width: 100%;
 }
 
@@ -398,7 +398,7 @@
   font-family: var(--font-card);
   font-size: 16px;
   letter-spacing: 4px;
-  color: var(--amber);
+  color: var(--green);
 }
 
 .holderSub {
@@ -414,8 +414,8 @@
   font-family: var(--font-card);
   font-size: 15px;
   letter-spacing: 3px;
-  color: var(--amber);
-  border: 1px solid var(--amber);
+  color: var(--green);
+  border: 1px solid var(--green);
   padding: 10px 24px;
   text-decoration: none;
   white-space: nowrap;
@@ -424,7 +424,7 @@
 }
 
 .holderBtn:hover {
-  background: var(--amber);
+  background: var(--green);
   color: var(--bg);
 }
 
@@ -456,7 +456,7 @@
 
 .artistRow::-webkit-scrollbar { height: 2px; }
 .artistRow::-webkit-scrollbar-track { background: var(--border-dim); }
-.artistRow::-webkit-scrollbar-thumb { background: var(--amber); }
+.artistRow::-webkit-scrollbar-thumb { background: var(--green); }
 
 /* ─── Responsive ─────────────────────────────────────────── */
 
@@ -493,8 +493,8 @@
   .activitySection,
   .artistsSection,
   .ctaStrip {
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-left: 20px;
+    padding-right: 20px;
     padding-top: 28px;
     padding-bottom: 28px;
   }
@@ -539,6 +539,8 @@
 @media (max-width: 380px) {
   .heroTitle { font-size: 22px; }
   .ctaTitle  { font-size: 18px; }
+  .eyebrow   { letter-spacing: 2px; font-size: 13px; }
+  .heroSub   { letter-spacing: 1px; }
 }
 
 /* Wide / TV — ≥1600px */

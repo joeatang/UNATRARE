@@ -3,6 +3,7 @@
   max-width: 960px;
   margin: 0 auto;
   padding: 3rem 1.25rem 5rem;
+  padding-top: calc(48px + 2.5rem);
 }
 
 /* ── Header ──────────────────────────────────────────────────────── */
@@ -18,7 +19,7 @@
   font-size: clamp(1.1rem, 4vw, 1.6rem);
   font-weight: 700;
   letter-spacing: 0.15em;
-  color: var(--amber);
+  color: var(--green);
   margin: 0;
   text-transform: uppercase;
 }
@@ -39,7 +40,7 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   color: #0a0a0a;
-  background: var(--amber);
+  background: var(--green);
   padding: 0.5rem 1.1rem;
   border-radius: 3px;
   text-decoration: none;
@@ -56,7 +57,7 @@
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   color: #0a0a0a;
-  background: var(--amber);
+  background: var(--green);
   padding: 0.5rem 1rem;
   border-radius: 3px;
   margin-bottom: 1.5rem;
@@ -131,7 +132,7 @@
   font-size: 0.55rem;
   letter-spacing: 0.08em;
   color: #0a0a0a;
-  background: var(--amber);
+  background: var(--green);
   padding: 0.15rem 0.4rem;
   border-radius: 2px;
   text-transform: uppercase;
@@ -171,7 +172,7 @@
   font-size: 0.6rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--amber);
+  color: var(--green);
   background: transparent;
   border: 1px solid rgba(245, 166, 35, 0.3);
   border-radius: 3px;
@@ -203,7 +204,7 @@
   transition: color 0.15s;
 }
 
-.pgBtn:hover:not(:disabled) { color: var(--amber); border-color: var(--amber); }
+.pgBtn:hover:not(:disabled) { color: var(--green); border-color: var(--green); }
 .pgBtn:disabled { opacity: 0.3; cursor: default; }
 
 .pgInfo {
@@ -221,7 +222,7 @@
 }
 
 .emptyLink {
-  color: var(--amber);
+  color: var(--green);
   text-decoration: none;
 }
 
@@ -239,7 +240,7 @@
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.14em;
-  color: var(--amber);
+  color: var(--green);
   text-transform: uppercase;
   margin: 0 0 0.85rem;
 }
@@ -260,7 +261,7 @@
 }
 
 .infoLink {
-  color: var(--amber);
+  color: var(--green);
   text-decoration: none;
 }
 

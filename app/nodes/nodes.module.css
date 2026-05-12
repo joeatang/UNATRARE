@@ -41,7 +41,7 @@
   font-size: clamp(1rem, 3.5vw, 1.4rem);
   font-weight: 700;
   letter-spacing: 0.12em;
-  color: var(--amber);
+  color: var(--green);
   margin: 0 0 0.5rem;
   text-transform: uppercase;
 }
@@ -66,7 +66,7 @@
 }
 
 .blink {
-  color: var(--amber);
+  color: var(--green);
   animation: blink 1s step-end infinite;
 }
 
@@ -100,7 +100,7 @@
   font-family: monospace;
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--amber);
+  color: var(--green);
   line-height: 1;
 }
 
@@ -139,8 +139,8 @@
   font-size: 0.55rem;
   letter-spacing: 0.12em;
   font-weight: 700;
-  color: var(--amber-hot);
-  border: 1px solid var(--amber-hot);
+  color: var(--green-hot);
+  border: 1px solid var(--green-hot);
   padding: 0.15rem 0.35rem;
   border-radius: 2px;
   text-transform: uppercase;
@@ -149,7 +149,7 @@
 .pubkey {
   font-family: monospace;
   font-size: 0.9rem;
-  color: var(--amber);
+  color: var(--green);
   letter-spacing: 0.04em;
   margin-bottom: 0.25rem;
 }
@@ -186,7 +186,7 @@
 }
 
 .emptyLink {
-  color: var(--amber);
+  color: var(--green);
   text-decoration: none;
 }
 
@@ -215,7 +215,7 @@
   font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.14em;
-  color: var(--amber);
+  color: var(--green);
   text-transform: uppercase;
   margin: 0 0 0.75rem;
 }
@@ -265,7 +265,7 @@
 }
 
 .joinLink {
-  color: var(--amber);
+  color: var(--green);
   text-decoration: none;
 }
 
@@ -321,7 +321,7 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   color: #0a0a0a;
-  background: var(--amber);
+  background: var(--green);
   padding: 0.55rem 1.1rem;
   border-radius: 3px;
   text-decoration: none;
@@ -351,8 +351,8 @@
 }
 
 .editAddrBtn:hover {
-  color: var(--amber);
-  border-color: var(--amber);
+  color: var(--green);
+  border-color: var(--green);
 }
 
 /* ── Modal overlay ────────────────────────────────────────────────── */
@@ -382,7 +382,7 @@
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.14em;
-  color: var(--amber);
+  color: var(--green);
   text-transform: uppercase;
   margin: 0 0 0.3rem;
 }
@@ -428,7 +428,7 @@
 }
 
 .modalInput:focus {
-  border-color: var(--amber);
+  border-color: var(--green);
 }
 
 .modalRow {
@@ -444,7 +444,7 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   color: #0a0a0a;
-  background: var(--amber);
+  background: var(--green);
   border: none;
   border-radius: 3px;
   padding: 0.45rem 1rem;
@@ -473,7 +473,7 @@
 .modalStatus {
   font-family: monospace;
   font-size: 0.7rem;
-  color: var(--amber);
+  color: var(--green);
   letter-spacing: 0.06em;
 }
 
