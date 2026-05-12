@@ -134,8 +134,10 @@ export default function NodesPage() {
           <span className={styles.codeComment}># Clone and start the node</span>
           <span className={styles.codeLine}>git clone https://github.com/joeatang/unatrare-intercom node</span>
           <span className={styles.codeLine}>cd node &amp;&amp; npm install</span>
-          <span className={styles.codeLine}>pear run . --peer-store-name unatrare-node \</span>
-          <span className={styles.codeLine}>&nbsp;&nbsp;--subnet-channel unatrare-art-archive-v1</span>
+          <span className={styles.codeLine}>pear run . \</span>
+          <span className={styles.codeLine}>&nbsp;&nbsp;--peer-store-name unatrare-node \</span>
+          <span className={styles.codeLine}>&nbsp;&nbsp;--subnet-bootstrap 38a1b001756148f3f96f8cff7bd38d2924669f5c1880b4f779512d6449cfff56 \</span>
+          <span className={styles.codeLine}>&nbsp;&nbsp;--btc-address YOUR_BITCOIN_ADDRESS</span>
         </div>
         <p className={styles.joinNote}>
           Requires Node.js v22+. Questions?{' '}
