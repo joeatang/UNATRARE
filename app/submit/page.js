@@ -342,9 +342,9 @@ function Step2({ data, onNext, onBack }) {
       <h2 className={styles.stepTitle}>UPL<span>O</span>AD ART</h2>
       <p className={styles.stepDesc}>
         Upload the art for <strong>{data.tokenName}</strong>.<br />
-        PNG, JPG, GIF, WebP, SVG, or HTML. Max 10 MB.<br />
+        PNG, JPG, GIF, WebP, SVG, or HTML. Max 3 MB.<br />
         Recommended: 400×560px (trading card ratio) or square.<br />
-        <span style={{color:'var(--amber)'}}>Keep under 1 MB for fast wallet loading.</span> Animated GIFs over 2 MB will load slowly.
+        A wallet-optimised thumbnail is generated automatically — full art displays in UNATRARE and wallets that support it.
       </p>
 
       {/* Two-column when preview exists */}
