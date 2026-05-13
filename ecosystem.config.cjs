@@ -52,15 +52,26 @@ module.exports = {
       // To disable: pm2 delete unatrare-peer
       name: 'unatrare-peer',
       script: 'pear',
-      args: 'run . --peer-store-name unatrare-admin --msb-store-name unatrare-admin-msb --subnet-channel unatrare-v1',
+      args: [
+        'run', '.',
+        '--peer-store-name',  'unatrare-admin',
+        '--msb-store-name',   'unatrare-admin-msb',
+        '--subnet-channel',   'unatrare-art-archive-v1',
+        '--sc-bridge',        '1',
+        '--sc-bridge-port',   '49222',
+        '--sc-bridge-cli',    '1',
+        '--xcp-address',      '15w1CFYpLHWGAinTFCSy9i327FHoj5t9re',
+        '--btc-address',      '15w1CFYpLHWGAinTFCSy9i327FHoj5t9re',
+      ],
       cwd: '/var/www/unatrare/intercom',
-      interpreter: 'none',  // pear is the interpreter
+      interpreter: 'none',
       env: {
-        // SC_BRIDGE_TOKEN must match the value in Next.js .env.local
+        PATH: '/root/.config/pear/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+        NODE_ENV: 'production',
         SC_BRIDGE_TOKEN: process.env.SC_BRIDGE_TOKEN || '',
       },
-      restart_delay: 10000,  // wait 10s before restart (Pear needs time to init)
-      max_restarts: 5,
+      restart_delay: 15000,
+      max_restarts: 10,
       watch: false,
       autorestart: true,
     },
