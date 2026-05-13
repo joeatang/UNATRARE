@@ -156,10 +156,16 @@ export default function NodesPage() {
               <span className={styles.summaryLabel}>NODES</span>
             </div>
             <div className={styles.summaryItem}>
-              <span className={styles.summaryVal}>
-                {data.nodes.filter(n => n.is_genesis).length}
-              </span>
-              <span className={styles.summaryLabel}>GENESIS</span>
+              <span className={styles.summaryVal}>{data.genesis_slots?.confirmed ?? data.nodes.filter(n => n.is_genesis && !n.genesis_provisional).length}</span>
+              <span className={styles.summaryLabel}>GENESIS CONFIRMED</span>
+            </div>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryVal}>{data.genesis_slots?.provisional ?? data.nodes.filter(n => n.genesis_provisional).length}</span>
+              <span className={styles.summaryLabel}>GENESIS PENDING</span>
+            </div>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryVal}>{data.genesis_slots?.available ?? '—'}</span>
+              <span className={styles.summaryLabel}>SLOTS OPEN</span>
             </div>
             <div className={styles.summaryItem}>
               <span className={styles.summaryVal}>
@@ -177,9 +183,21 @@ export default function NodesPage() {
           ) : (
             <div className={styles.grid}>
               {data.nodes.map((node) => (
-                <div key={node.pubkey} className={styles.card}>
-                  {node.is_genesis && (
+                <div key={node.pubkey} className={`${styles.card}${node.is_genesis ? ' ' + styles.genesisCard : node.genesis_provisional ? ' ' + styles.provisionalCard : ''}`}>
+                  {node.is_genesis && !node.genesis_provisional && (
                     <span className={styles.genesisBadge}>GENESIS</span>
+                  )}
+                  {node.genesis_provisional && (
+                    <span className={styles.provisionalBadge}>
+                      GENESIS PENDING
+                      {node.genesis_provisional_at ? (
+                        (() => {
+                          const daysIn  = Math.floor((Date.now() - node.genesis_provisional_at) / 86400000);
+                          const daysLeft = Math.max(0, 7 - daysIn);
+                          return daysLeft > 0 ? <span className={styles.daysLeft}> · {daysLeft}d left</span> : null;
+                        })()
+                      ) : null}
+                    </span>
                   )}
                   <div className={styles.pubkey} title={node.pubkey}>
                     {truncPubkey(node.pubkey)}
@@ -275,8 +293,11 @@ export default function NodesPage() {
         <h2 className={styles.joinTitle}>RUN A DEEP NODE</h2>
         <p className={styles.joinDesc}>
           Deep Nodes seed the UNATRARE art archive over the TRAC Hyperswarm P2P network.
-          The first 100 nodes earn permanent <strong>GENESIS</strong> status — an on-chain record
-          of founding participation, with 2× reward weight when the NAT reward system launches.
+          The first 100 unique XCP addresses to register and maintain 7 days of continuous uptime
+          earn permanent <strong>GENESIS</strong> status — an on-chain record of founding participation,
+          with 2× reward weight when the NAT reward system launches.
+          Registering reserves your provisional slot immediately; the slot is <strong>confirmed</strong>
+          after your node stays live for 7 days straight.
         </p>
 
         <div className={styles.reqGrid}>
@@ -316,7 +337,8 @@ export default function NodesPage() {
           <span className={styles.codeLine}>git clone https://github.com/joeatang/unatrare-intercom node &amp;&amp; cd node &amp;&amp; npm install</span>
           <span className={styles.codeLine}>pear run . --peer-store-name unatrare-node \</span>
           <span className={styles.codeLine}>&nbsp;&nbsp;--subnet-bootstrap 38a1b001756148f3f96f8cff7bd38d2924669f5c1880b4f779512d6449cfff56 \</span>
-          <span className={styles.codeLine}>&nbsp;&nbsp;--btc-address YOUR_BITCOIN_ADDRESS</span>
+          <span className={styles.codeLine}>&nbsp;&nbsp;--btc-address YOUR_BITCOIN_ADDRESS \</span>
+          <span className={styles.codeLine}>&nbsp;&nbsp;--xcp-address YOUR_XCP_ADDRESS</span>
         </div>
         <p className={styles.joinNote}>
           Requires Node.js v22+. &nbsp;
