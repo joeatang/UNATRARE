@@ -5,7 +5,7 @@
  * During promo period: free. After promo: requires fee payment.
  *
  * FormData fields:
- *   file         — image file (PNG, JPG, GIF, WebP) max 3MB
+ *   file         — image file (PNG, JPG, GIF, WebP) max 10MB
  *   token_name   — Counterparty token name e.g. RAREPEPE
  *   asset_name   — display name e.g. "Rare Pepe"
  *   description  — short description (max 300 chars)
@@ -26,7 +26,7 @@ import { getDb } from '../../../../lib/db';
 import { storeArt } from '../../../../lib/tracBridge.js';
 
 const UPLOAD_DIR = path.resolve(process.cwd(), 'public', 'uploads', 'vault');
-const MAX_BYTES  = 3 * 1024 * 1024; // 3MB hard cap
+const MAX_BYTES  = 10 * 1024 * 1024; // 10MB hard cap
 
 const THUMBABLE_MIME = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
 
@@ -94,7 +94,7 @@ export async function POST(req) {
   if (bytes.byteLength > MAX_BYTES) {
     return NextResponse.json({
       ok: false,
-      error: `File too large (${(bytes.byteLength / 1024 / 1024).toFixed(1)} MB). Max is 3 MB.`,
+      error: `File too large (${(bytes.byteLength / 1024 / 1024).toFixed(1)} MB). Max is 10 MB.`,
     }, { status: 422 });
   }
 

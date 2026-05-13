@@ -3,6 +3,9 @@ const nextConfig = {
   // ws uses Node.js native addons — must not be bundled by webpack (Next.js 14.2 syntax)
   experimental: {
     serverComponentsExternalPackages: ['ws'],
+    serverActions: {
+      bodySizeLimit: '11mb',
+    },
   },
 
   // Rewrite /c/TOKENNAME.json → /c/TOKENNAME so Next.js routing works cleanly
