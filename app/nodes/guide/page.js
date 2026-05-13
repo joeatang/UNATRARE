@@ -1,6 +1,6 @@
 import styles from './guide.module.css';
 import Link from 'next/link';
-import Nav from '../components/Nav';
+import Nav from '../../components/Nav';
 
 export const metadata = {
   title: 'Deep Node Setup Guide — UNATRARE',
