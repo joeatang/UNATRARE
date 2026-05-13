@@ -267,13 +267,30 @@ export default function DropClaimPage() {
 
         {/* ── Drop header ── */}
         <div style={S.eyebrow}>
-          DROP {String(drop.id).padStart(3, '0')} · SERIES {drop.series}
+          DROP {String(drop.id).padStart(3, '0')} · SERIES {drop.series}{drop.card_number ? ` · CARD ${drop.card_number}` : ''} · PHASE {drop.phase ?? 1}
           {drop.claim_type === 'cultural'
             ? '  ·  CULTURAL CLAIM · FREE'
             : `  ·  SUPPORT CLAIM · $${tiers.join('/$')}`}
         </div>
         <h1 style={S.title}>{drop.title}</h1>
         <div style={S.artist}>by {drop.artist_handle}</div>
+
+        {/* ── Bonus notice ── */}
+        {drop.bonus_token && drop.bonus_remaining > 0 && (
+          <div style={{
+            border: '1px solid var(--green)',
+            borderLeft: '3px solid var(--green)',
+            background: 'rgba(61,158,61,0.04)',
+            padding: '12px 18px',
+            marginBottom: 28,
+            fontFamily: 'var(--font-card)',
+            fontSize: '10px',
+            letterSpacing: '2px',
+            color: 'var(--green)',
+          }}>
+            ◈ BONUS — Every purchase includes 1 free {drop.bonus_token} · {drop.bonus_remaining} remaining
+          </div>
+        )}
 
         {/* ── Timer ── */}
         {isActive && drop.window_closes_at && (
@@ -304,10 +321,13 @@ export default function DropClaimPage() {
           <>
             {/* ─── STEP 1: VERIFY ─── */}
             <div style={S.stepLabel}>STEP 01 · VERIFY</div>
-            <div style={S.stepTitle}>YOUR UNATPEPE HOLDINGS</div>
+            <div style={S.stepTitle}>
+              {drop.requires_unatpepe ? 'YOUR UNATPEPE HOLDINGS' : 'YOUR BITCOIN ADDRESS'}
+            </div>
             <p style={S.stepDesc}>
-              Enter your TAP Wallet address. UNATPEPE must be in this wallet.
-              Your Bitcoin address — same one shown in TAP Wallet.
+              {drop.requires_unatpepe
+                ? 'Phase 1 is for UNATPEPE holders only. Enter your Bitcoin address — UNATPEPE must be held here.'
+                : 'Enter your Bitcoin (TAP Wallet) address to check eligibility and continue to claim.'}
             </p>
 
             {step === 'verify' && (
@@ -512,12 +532,20 @@ export default function DropClaimPage() {
                         <span>RECEIVING</span>
                         <span style={S.rowVal}>{cpAddress.slice(0, 8)}…{cpAddress.slice(-6)}</span>
                       </div>
-                      <div style={{ ...S.row, borderBottom: 'none' }}>
+                      <div style={{ ...S.row, borderBottom: claimResult?.bonus_token ? '1px solid var(--border)' : 'none' }}>
                         <span>DROP</span>
                         <span style={S.rowVal}>{drop.token_name}</span>
                       </div>
+                      {claimResult?.bonus_token && (
+                        <div style={{ ...S.row, borderBottom: 'none', color: 'var(--green)' }}>
+                          <span>BONUS</span>
+                          <span style={{ ...S.rowVal, color: 'var(--green)' }}>
+                            ◈ 1 × {claimResult.bonus_token} · INCLUDED FREE
+                          </span>
+                        </div>
+                      )}
                       <p style={{ ...S.statusDesc, marginTop: 14, fontSize: '12px' }}>
-                        No further action needed. Your card will be sent to your receiving
+                        No further action needed. Your card{claimResult?.bonus_token ? ` + ${claimResult.bonus_token}` : ''} will be sent to your receiving
                         address after the window closes.{' '}
                         <Link href="/drops" style={{ color: 'var(--amber)' }}>← back to chamber</Link>
                       </p>

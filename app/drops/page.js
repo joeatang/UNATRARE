@@ -46,7 +46,7 @@ function DropCard({ drop }) {
   return (
     <div className={`${styles.dropCard} ${isActive ? styles.dropCardActive : ''}`}>
       <div className={styles.dropCardEyebrow}>
-        <span>DROP {String(drop.id).padStart(3, '0')} · SERIES {drop.series}</span>
+        <span>DROP {String(drop.id).padStart(3, '0')} · SERIES {drop.series}{drop.card_number ? ` · CARD ${drop.card_number}` : ''} · PHASE {drop.phase ?? 1}</span>
         {drop.claim_type === 'cultural' && (
           <span className={styles.claimTypeBadge} data-type="cultural">CULTURAL · FREE</span>
         )}
@@ -83,13 +83,21 @@ function DropCard({ drop }) {
         </div>
         <div className={styles.dropMetaCell}>
           <div className={styles.dropMetaLabel}>ACCESS</div>
-          <div className={styles.dropMetaValue}>UNATPEPE ONLY</div>
+          <div className={styles.dropMetaValue}>
+            {drop.requires_unatpepe ? 'UNATPEPE ONLY' : 'PUBLIC'}
+          </div>
         </div>
         <div className={styles.dropMetaCell}>
           <div className={styles.dropMetaLabel}>CLAIMS</div>
           <div className={styles.dropMetaValue}>{drop.claims_count ?? 0}</div>
         </div>
       </div>
+
+      {drop.bonus_token && drop.bonus_remaining > 0 && (
+        <div className={styles.bonusBadge}>
+          ◈ Every purchase includes 1 free {drop.bonus_token} · {drop.bonus_remaining} remaining
+        </div>
+      )}
 
       {isActive && drop.claim_type === 'support' && (
         <div className={styles.tierRow}>

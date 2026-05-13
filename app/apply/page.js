@@ -108,7 +108,7 @@ export default function ApplyPage() {
                 8 AI judges. Each a named persona inspired by the people who built this space.
                 They see the art. Score it out of 69. Full breakdown published.
                 The certification is the record — permanent, public, attached to your token.
-                That&apos;s the point.
+                SOFTPWAR was the first. RAREUNATPEPE followed. The directory is live.
               </p>
             </div>
           </div>
@@ -116,12 +116,13 @@ export default function ApplyPage() {
           <div className={styles.truth}>
             <span className={styles.truthGlyph}>⬡</span>
             <div>
-              <strong className={styles.truthTitle}>Pepe Node. Your art in a P2P archive.</strong>
+              <strong className={styles.truthTitle}>Pepe Node. Your art in a live P2P archive.</strong>
               <p className={styles.truthBody}>
                 Certified art is written to a Hyperdrive — Holepunch stack, same infrastructure as TAP.
-                Every node that joins is another copy. No server to pull the plug.
-                A JSON metadata record is generated at{' '}
-                <code>unatrare.wtf/c/YOURTOKEN.json</code> — wallet-readable, CIP-25 v2, travels with the token forever.
+                The node network is running. Genesis nodes (100 slots, first nodes get 2× weight) earn
+                a share of platform revenue for keeping the archive alive.
+                A CIP-25 v2 metadata record is generated at{' '}
+                <code>unatrare.wtf/c/YOURTOKEN</code> — wallet-readable, travels with the token forever.
                 Bitcoin enforces the supply. The node network preserves the art.
               </p>
             </div>
@@ -135,7 +136,8 @@ export default function ApplyPage() {
                 DMT-NAT holders found Bitcoin through TAP inscription. Different door, same table.
                 They believe in supply-capped, on-chain art — they just couldn&apos;t reach CP-native work
                 without a bridge. UNATRARE is the bridge.
-                Your CP token. Settled in NAT. 100% of your ask.
+                Every certified piece enters the drops rotation: UNATPEPE holders get first allocation,
+                then public. Your CP token. Your ask. 100% to you.
               </p>
             </div>
           </div>
@@ -225,7 +227,7 @@ export default function ApplyPage() {
         </section>
 
         <footer className={styles.footer}>
-          <span className={styles.footerText}>unatrare.wtf · Counterparty · NAT · Bitcoin</span>
+          <span className={styles.footerText}>unatrare.wtf · Counterparty · TAP · NAT · Bitcoin</span>
         </footer>
 
       </main>

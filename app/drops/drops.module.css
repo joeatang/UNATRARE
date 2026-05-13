@@ -568,6 +568,18 @@
   color: var(--amber);
 }
 
+.bonusBadge {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--green);
+  border: 1px solid var(--green);
+  border-left: 3px solid var(--green);
+  padding: 8px 12px;
+  margin-bottom: 16px;
+  background: rgba(61, 158, 61, 0.04);
+}
+
 .dropCardTitle {
   font-family: var(--font-display);
   font-size: clamp(28px, 5vw, 40px);
