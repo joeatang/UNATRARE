@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Nav from '../components/Nav';
 import styles from './vault.module.css';
 
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || '';
+const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://unatrare.wtf';
 
 function timeAgo(ms) {
   if (!ms) return '—';

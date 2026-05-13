@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import Nav from '../components/Nav';
 import styles from './nodes.module.css';
 
 const SPLASH_LINES = [
@@ -127,7 +128,9 @@ export default function NodesPage() {
   }
 
   return (
-    <main className={styles.page}>
+    <>
+      <Nav />
+      <main className={styles.page}>
       <div className={styles.header}>
         <h1 className={styles.title}>UNATRARE NETWORK NODES</h1>
         <p className={styles.subtitle}>
@@ -321,5 +324,6 @@ export default function NodesPage() {
         </p>
       </div>
     </main>
+    </>
   );
 }

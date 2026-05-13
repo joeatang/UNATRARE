@@ -268,7 +268,7 @@ function Step2({ data }) {
         {result?.alreadyRegistered ? 'Updated' : 'Registered'}
       </div>
       <h2 className={styles.stepTitle}>
-        {hasPerks ? 'PERK<span>S</span> ON' : 'REGIST<span>E</span>RED'}
+        {hasPerks ? <>PERK<span>S</span> ON</> : <>REGIST<span>E</span>RED</>}
       </h2>
 
       {/* Status card */}

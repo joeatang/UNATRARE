@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Nav from '../../components/Nav';
 import styles from './upload.module.css';
 
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || '';
+const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://unatrare.wtf';
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
 
 export default function VaultUploadPage() {
@@ -147,6 +147,11 @@ export default function VaultUploadPage() {
           <button className={styles.resetBtn} onClick={() => { setStatus(''); setResult(null); setFile(null); setPreview(null); setForm({ token_name:'',asset_name:'',description:'',owner_xcp:'',owner_btc:'',fee_tx:'',fee_currency:'PEPECASH'}); }}>
             Upload another
           </button>
+          <Link href="/vault" style={{ display:'block', textAlign:'center', marginTop:12,
+            fontFamily:'var(--font-card)', fontSize:'11px', letterSpacing:'3px',
+            color:'var(--text-dim)', textDecoration:'none' }}>
+            ← back to vault gallery
+          </Link>
         </div>
       ) : (
         <form className={styles.form} onSubmit={handleSubmit}>
@@ -187,7 +192,7 @@ export default function VaultUploadPage() {
                 maxLength={22}
                 required
               />
-              <span className={styles.hint}>All-caps, letters + numbers, 3–20 chars</span>
+              <span className={styles.hint}>Counterparty token name — 4–12 uppercase letters, or A + 10 digits (e.g. RAREPEPE, A12345678901)</span>
             </label>
 
             <label className={styles.field}>

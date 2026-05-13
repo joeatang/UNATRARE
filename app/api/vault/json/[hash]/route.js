@@ -32,7 +32,7 @@ export async function GET(req, { params }) {
     }
 
     // Counterparty Enhanced Asset Info format
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://assets.unatrare.wtf';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://unatrare.wtf';
     const json = {
       asset:       asset.token_name,
       description: asset.description || asset.asset_name,

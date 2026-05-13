@@ -1,5 +1,6 @@
 import styles from './guide.module.css';
 import Link from 'next/link';
+import Nav from '../components/Nav';
 
 export const metadata = {
   title: 'Deep Node Setup Guide — UNATRARE',
@@ -39,7 +40,9 @@ function Good({ children }) {
 
 export default function NodeGuidePage() {
   return (
-    <main className={styles.page}>
+    <>
+      <Nav />
+      <main className={styles.page}>
       <div className={styles.back}>
         <Link href="/nodes" className={styles.backLink}>← BACK TO NODE REGISTRY</Link>
       </div>
@@ -315,5 +318,6 @@ export default function NodeGuidePage() {
         <Link href="/nodes" className={styles.backLink}>← VIEW NODE REGISTRY</Link>
       </div>
     </main>
+    </>
   );
 }

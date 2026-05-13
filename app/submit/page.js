@@ -573,6 +573,25 @@ function Step4({ data, onNext, onBack }) {
         <div className={styles.urlBoxValue} style={{fontSize:12, letterSpacing:1}}>{challenge}</div>
       </div>
 
+      <div style={{marginBottom:20, padding:'12px 16px', border:'1px solid var(--border-dim)', background:'rgba(90,191,90,0.04)'}}>
+        <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'3px', color:'var(--text)', marginBottom:6}}>
+          ⚡ HOW TO SIGN IN FREEWALLET
+        </div>
+        <div style={{fontFamily:'var(--font-body)', fontSize:'12px', color:'var(--text-dim)', lineHeight:1.6}}>
+          Menu → Advanced → Sign Message<br />
+          Paste the message above → Sign → Copy the result
+        </div>
+      </div>
+      <div style={{marginBottom:20, padding:'12px 16px', border:'1px solid var(--border-dim)', background:'rgba(90,191,90,0.04)'}}>
+        <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'3px', color:'var(--text)', marginBottom:6}}>
+          ⚡ HOW TO SIGN IN ELECTRUM
+        </div>
+        <div style={{fontFamily:'var(--font-body)', fontSize:'12px', color:'var(--text-dim)', lineHeight:1.6}}>
+          Tools → Sign / Verify Message<br />
+          Enter your address → paste the message → Sign
+        </div>
+      </div>
+
       <div className={styles.inputGroup}>
         <label className={styles.inputLabel} htmlFor="sig">Your Signature</label>
         <textarea
