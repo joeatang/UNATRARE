@@ -59,6 +59,7 @@ module.exports = {
         '--subnet-channel',   'unatrare-art-archive-v1',
         '--sc-bridge',        '1',
         '--sc-bridge-port',   '49222',
+        '--sc-bridge-token',  '3f113ec0131dfff2e0bcb73146ee8339b43279b224118ede854b2899704fdc33',
         '--sc-bridge-cli',    '1',
         '--xcp-address',      '15w1CFYpLHWGAinTFCSy9i327FHoj5t9re',
         '--btc-address',      '15w1CFYpLHWGAinTFCSy9i327FHoj5t9re',
