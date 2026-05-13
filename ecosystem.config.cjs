@@ -68,7 +68,7 @@ module.exports = {
       env: {
         PATH: '/root/.config/pear/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
         NODE_ENV: 'production',
-        SC_BRIDGE_TOKEN: process.env.SC_BRIDGE_TOKEN || '',
+        SC_BRIDGE_TOKEN: process.env.SC_BRIDGE_TOKEN || '3f113ec0131dfff2e0bcb73146ee8339b43279b224118ede854b2899704fdc33',
       },
       restart_delay: 15000,
       max_restarts: 10,
