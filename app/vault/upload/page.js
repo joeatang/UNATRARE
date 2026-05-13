@@ -36,9 +36,9 @@ export default function VaultUploadPage() {
       setResult({ error: 'Only PNG, JPG, GIF, WebP allowed.' });
       return;
     }
-    if (f.size > 1_048_576) {
+    if (f.size > 3_145_728) {
       setStatus('error');
-      setResult({ error: `File too large (${(f.size / 1024 / 1024).toFixed(1)} MB). Max 1 MB.` });
+      setResult({ error: `File too large (${(f.size / 1024 / 1024).toFixed(1)} MB). Max 3 MB.` });
       return;
     }
     setFile(f);
@@ -168,7 +168,7 @@ export default function VaultUploadPage() {
               <>
                 <div className={styles.dropIcon}>⬆</div>
                 <div className={styles.dropText}>drop art here or click to browse</div>
-                <div className={styles.dropHint}>PNG · JPG · GIF · WebP · max 1 MB</div>
+                <div className={styles.dropHint}>PNG · JPG · GIF · WebP · max 3 MB</div>
               </>
             )}
             <input

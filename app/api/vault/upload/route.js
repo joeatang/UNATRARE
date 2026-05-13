@@ -5,7 +5,7 @@
  * During promo period: free. After promo: requires fee payment.
  *
  * FormData fields:
- *   file         — image file (PNG, JPG, GIF, WebP) max 1MB
+ *   file         — image file (PNG, JPG, GIF, WebP) max 3MB
  *   token_name   — Counterparty token name e.g. RAREPEPE
  *   asset_name   — display name e.g. "Rare Pepe"
  *   description  — short description (max 300 chars)
@@ -21,11 +21,14 @@ import { NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'path';
+import sharp from 'sharp';
 import { getDb } from '../../../../lib/db';
 import { storeArt } from '../../../../lib/tracBridge.js';
 
 const UPLOAD_DIR = path.resolve(process.cwd(), 'public', 'uploads', 'vault');
-const MAX_BYTES  = 1 * 1024 * 1024; // 1MB hard cap
+const MAX_BYTES  = 3 * 1024 * 1024; // 3MB hard cap
+
+const THUMBABLE_MIME = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
 
 const ALLOWED_MIME = new Set([
   'image/png', 'image/jpeg', 'image/gif', 'image/webp',
@@ -91,7 +94,7 @@ export async function POST(req) {
   if (bytes.byteLength > MAX_BYTES) {
     return NextResponse.json({
       ok: false,
-      error: `File too large (${(bytes.byteLength / 1024 / 1024).toFixed(1)} MB). Max is 1 MB.`,
+      error: `File too large (${(bytes.byteLength / 1024 / 1024).toFixed(1)} MB). Max is 3 MB.`,
     }, { status: 422 });
   }
 
@@ -127,6 +130,21 @@ export async function POST(req) {
     await mkdir(UPLOAD_DIR, { recursive: true });
     await writeFile(path.join(UPLOAD_DIR, filename), buf);
 
+    // Generate 48x48 icon thumbnail for wallet display
+    let icon_url = null;
+    if (THUMBABLE_MIME.has(file.type)) {
+      try {
+        const iconBuf = await sharp(buf, { pages: 1 })
+          .resize(48, 48, { fit: 'cover', position: 'centre' })
+          .png()
+          .toBuffer();
+        await writeFile(path.join(UPLOAD_DIR, `${hash}_icon.png`), iconBuf);
+        icon_url = `/uploads/vault/${hash}_icon.png`;
+      } catch (iconErr) {
+        console.error('[vault/upload] icon gen failed:', iconErr?.message);
+      }
+    }
+
     // Store in Hyperdrive for P2P replication
     storeArt(hash, buf.toString('base64'), file.type).catch(() => {});
 
@@ -143,7 +161,7 @@ export async function POST(req) {
     );
 
     console.log(`[vault/upload] ${token_name} ${hash.slice(0, 8)}... promo=${promo.promo}`);
-    return NextResponse.json({ ok: true, hash, art_url, json_url, is_promo: promo.promo });
+    return NextResponse.json({ ok: true, hash, art_url, icon_url, json_url, is_promo: promo.promo });
 
   } catch (err) {
     console.error('[vault/upload]', err?.message ?? err);

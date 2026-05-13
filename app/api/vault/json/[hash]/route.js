@@ -33,10 +33,14 @@ export async function GET(req, { params }) {
 
     // Counterparty Enhanced Asset Info format
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://unatrare.wtf';
+    const ext = asset.art_mime.split('/')[1].replace('jpeg', 'jpg');
+    const art_url  = `${baseUrl}/uploads/vault/${hash}.${ext}`;
+    const icon_url = `${baseUrl}/uploads/vault/${hash}_icon.png`;
     const json = {
       asset:       asset.token_name,
       description: asset.description || asset.asset_name,
-      image:       `${baseUrl}/uploads/vault/${hash}.${asset.art_mime.split('/')[1].replace('jpeg','jpg')}`,
+      image:       icon_url,
+      image_large: art_url,
       name:        asset.asset_name  || asset.token_name,
       website:     'https://unatrare.wtf',
       pgpsig:      '',
