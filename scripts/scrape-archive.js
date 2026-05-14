@@ -9,19 +9,25 @@
  * Usage (from the app/ directory):
  *   node scripts/scrape-archive.js
  *   node scripts/scrape-archive.js --collection rarepepe
+ *   node scripts/scrape-archive.js --source pepewtf
  *   node scripts/scrape-archive.js --batch-size 10
  *   node scripts/scrape-archive.js --discover-only
  *   node scripts/scrape-archive.js --file /path/to/names.txt
  *
  * Flags:
  *   --collection    Collection id (default: rarepepe)
+ *   --source        Data source: 'pepewtf' uses pepe.wtf API (bypasses dead XCP API)
+ *                   Default: xcp (requires api.counterparty.io to be up)
  *   --batch-size    Assets per scrape batch (default: 20)
  *   --discover-only Just import names, don't download images
+ *   --retry-failed  Also retry previously-failed assets (default: skip them)
+ *   --api <url>     Override XCP API base URL (default: https://api.counterparty.io/v2)
  *   --file <path>   Load asset names from a text file (one per line)
  *                   instead of auto-discovering via the XCP API
  *
  * Fully resumable — already-fetched assets are skipped automatically.
  * Ctrl+C at any time; next run picks up where it left off.
+ * Use --retry-failed on the next run to retry any that failed.
  */
 
 'use strict';
@@ -44,10 +50,13 @@ function arg(flag, def) {
 }
 function flag(f) { return process.argv.includes(f); }
 
-const COLLECTION    = arg('--collection', 'rarepepe');
-const BATCH_SIZE    = Math.min(parseInt(arg('--batch-size', '20'), 10) || 20, 100);
-const DISCOVER_ONLY = flag('--discover-only');
-const ASSET_FILE    = arg('--file', null);
+const COLLECTION     = arg('--collection', 'rarepepe');
+const BATCH_SIZE     = Math.min(parseInt(arg('--batch-size', '20'), 10) || 20, 100);
+const DISCOVER_ONLY  = flag('--discover-only');
+const RETRY_FAILED   = flag('--retry-failed');
+const ASSET_FILE     = arg('--file', null);
+const SOURCE         = arg('--source', null);   // 'pepewtf' to use pepe.wtf API
+const XCP_API_OVERRIDE = arg('--api', null);
 
 // ── Collection definitions ───────────────────────────────────────
 const COLLECTIONS = {
@@ -116,7 +125,7 @@ function openDb() {
 }
 
 // ── HTTP ─────────────────────────────────────────────────────────
-const XCP_API     = 'https://api.counterparty.io/v2';
+const XCP_API     = XCP_API_OVERRIDE || 'https://api.counterparty.io/v2';
 const AR_GATEWAYS = ['https://arweave.net', 'https://gateway.irys.xyz'];
 const IP_GATEWAYS = ['https://cloudflare-ipfs.com/ipfs', 'https://ipfs.io/ipfs'];
 
@@ -154,6 +163,20 @@ function detectUrlType(raw) {
 
 const IMG_RE = /\.(png|gif|webp|jpg|jpeg|svg|mp4|mp3|wav)(\?|$)/i;
 function looksLikeImage(url) { return IMG_RE.test(url); }
+
+// ── Asset discovery via pepe.wtf API ────────────────────────────
+const PEPEWTF_API = 'https://pepe.wtf/api/assets';
+
+async function discoverViaPepeWtf() {
+  info(`Fetching asset list from pepe.wtf API…`);
+  const res = await safeFetch(PEPEWTF_API, 30000);
+  if (!res.ok) throw new Error(`pepe.wtf API error: ${res.status}`);
+  const all = await res.json();
+  if (!Array.isArray(all)) throw new Error('pepe.wtf API returned non-array response');
+  const rp = all.filter(a => a.collectionName === 'Rare Pepes');
+  tick(`Found ${clr.bold(rp.length)} Rare Pepe assets on pepe.wtf`);
+  return rp;
+}
 
 // ── Asset discovery via XCP API ──────────────────────────────────
 async function discoverViaXcp(keywords) {
@@ -274,7 +297,7 @@ async function downloadImage(imageUrl) {
 }
 
 // ── Scrape one asset ─────────────────────────────────────────────
-const DELAY_MS = 250;  // polite delay between XCP API calls
+const DELAY_MS = 250;  // polite delay between API calls
 
 async function scrapeOne(db, assetName, collection) {
   const markFailed = (err) => {
@@ -294,27 +317,40 @@ async function scrapeOne(db, assetName, collection) {
   };
 
   try {
-    // 1. Fetch XCP metadata
-    const xcpRes = await safeFetch(`${XCP_API}/assets/${assetName}`, 15000);
-    if (xcpRes.status === 404) { markSkipped('not found on XCP'); return 'skip'; }
-    if (!xcpRes.ok) { markFailed(`XCP API ${xcpRes.status}`); return false; }
+    // Check if image URL is already known (e.g. from pepe.wtf import)
+    const existing = db.prepare(
+      'SELECT image_url_original, artist_address FROM archived_tokens WHERE asset_name = ?'
+    ).get(assetName);
+    let imageUrl      = existing?.image_url_original || null;
+    let xcpIssuer     = existing?.artist_address    || null;
+    let enhancedInfo  = null;
+    let sourceUrl     = null;
 
-    const xcpBody = await xcpRes.json();
-    const xcp     = xcpBody?.result ?? xcpBody;
-    const descUrl = xcp?.description ?? null;
+    if (!imageUrl) {
+      // 1. Fetch XCP metadata (only when image URL not pre-populated)
+      const xcpRes = await safeFetch(`${XCP_API}/assets/${assetName}`, 15000);
+      if (xcpRes.status === 404) { markSkipped('not found on XCP'); return 'skip'; }
+      if (!xcpRes.ok) { markFailed(`XCP API ${xcpRes.status}`); return false; }
 
-    if (!descUrl || descUrl.trim() === '') {
-      markSkipped('no description/metadata URL');
-      return 'skip';
+      const xcpBody = await xcpRes.json();
+      const xcp     = xcpBody?.result ?? xcpBody;
+      xcpIssuer     = xcp?.issuer ?? null;
+      const descUrl = xcp?.description ?? null;
+      sourceUrl     = `${XCP_API}/assets/${assetName}`;
+
+      if (!descUrl || descUrl.trim() === '') {
+        markSkipped('no description/metadata URL');
+        return 'skip';
+      }
+
+      // 2. Fetch Enhanced Asset Info
+      enhancedInfo = await fetchEnhancedInfo(descUrl);
+      if (!enhancedInfo) { markFailed('could not fetch enhanced asset info'); return false; }
+
+      // 3. Extract image URL
+      imageUrl = enhancedInfo.image || enhancedInfo.image_large || (typeof enhancedInfo === 'string' ? enhancedInfo : null);
+      if (!imageUrl) { markFailed('no image field in metadata'); return false; }
     }
-
-    // 2. Fetch Enhanced Asset Info
-    const info = await fetchEnhancedInfo(descUrl);
-    if (!info) { markFailed('could not fetch enhanced asset info'); return false; }
-
-    // 3. Extract image URL
-    const imageUrl = info.image || info.image_large || (typeof info === 'string' ? info : null);
-    if (!imageUrl) { markFailed('no image field in metadata'); return false; }
 
     // 4. Download image
     const { buffer, hash, mimeType, fileSize, ext } = await downloadImage(imageUrl);
@@ -336,9 +372,9 @@ async function scrapeOne(db, assetName, collection) {
     // 7. Update DB
     db.prepare(`
       UPDATE archived_tokens SET
-        display_title      = ?,
-        description        = ?,
-        artist_address     = ?,
+        display_title      = COALESCE(display_title, ?),
+        description        = COALESCE(description, ?),
+        artist_address     = COALESCE(artist_address, ?),
         image_url_original = ?,
         image_url_type     = ?,
         arweave_txid       = ?,
@@ -346,16 +382,16 @@ async function scrapeOne(db, assetName, collection) {
         art_hash           = ?,
         art_mime           = ?,
         file_size          = ?,
-        metadata_json      = ?,
+        metadata_json      = COALESCE(metadata_json, ?),
         fetch_status       = 'fetched',
         fetch_error        = NULL,
         scraped_at         = ?,
-        source_cp_url      = ?
+        source_cp_url      = COALESCE(source_cp_url, ?)
       WHERE asset_name = ?
     `).run(
-      info.name         ?? assetName,
-      info.description  ?? null,
-      xcp?.issuer       ?? null,
+      enhancedInfo?.name        ?? assetName,
+      enhancedInfo?.description ?? null,
+      xcpIssuer,
       imageUrl,
       urlType,
       arweaveTxid,
@@ -363,9 +399,9 @@ async function scrapeOne(db, assetName, collection) {
       hash,
       mimeType,
       fileSize,
-      JSON.stringify(info),
+      enhancedInfo ? JSON.stringify(enhancedInfo) : null,
       Math.floor(Date.now() / 1000),
-      `${XCP_API}/assets/${assetName}`,
+      sourceUrl,
       assetName,
     );
 
@@ -407,20 +443,73 @@ async function main() {
 
   const db = openDb();
 
-  // ── STEP 1: Build asset name list ──────────────────────────────
-  let toImport = [];
+  // ── STEP 1: Discover + import asset list ──────────────────────
+  log(`  ${clr.cyan('[1/3]')} Discovering + importing assets…`);
+  log('');
 
-  if (ASSET_FILE) {
+  if (SOURCE === 'pepewtf') {
+    // ── pepe.wtf mode: fetch full metadata in one shot ──────────
+    const pepeAssets = await discoverViaPepeWtf();
+    log('');
+
+    const insertFullStmt = db.prepare(`
+      INSERT OR IGNORE INTO archived_tokens
+        (asset_name, collection, series_number, card_number, display_title,
+         artist_address, image_url_original, image_url_type, fetch_status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'http', 'pending')
+    `);
+    // For rows that already exist but have no image URL, fill it in
+    const updateUrlStmt = db.prepare(`
+      UPDATE archived_tokens
+      SET image_url_original = ?,
+          image_url_type     = 'http',
+          series_number      = COALESCE(series_number, ?),
+          card_number        = COALESCE(card_number, ?)
+      WHERE asset_name = ? AND image_url_original IS NULL
+    `);
+
+    let inserted = 0, updated = 0;
+    for (const a of pepeAssets) {
+      const r = insertFullStmt.run(
+        a.name, COLLECTION,
+        a.serie  ?? null,
+        a.card   ?? null,
+        a.title  || a.name,
+        a.issuer || null,
+        a.mediaUrl || null,
+      );
+      if (r.changes) {
+        inserted++;
+      } else {
+        // Row already existed — ensure image URL is set
+        const u = updateUrlStmt.run(a.mediaUrl || null, a.serie ?? null, a.card ?? null, a.name);
+        updated += u.changes;
+      }
+    }
+    tick(`${clr.bold(inserted)} new assets queued  ${clr.dim(`(${updated} existing rows updated with image URL)`)}`);
+    info(`Source: pepe.wtf S3 direct image URLs — no Counterparty API needed`);
+
+  } else if (ASSET_FILE) {
     if (!fs.existsSync(ASSET_FILE)) {
       log(clr.red(`  File not found: ${ASSET_FILE}`));
       process.exit(1);
     }
     const raw = fs.readFileSync(ASSET_FILE, 'utf8');
-    toImport = raw.split(/[\n,;]+/).map(s => s.trim().toUpperCase()).filter(Boolean);
-    tick(`Loaded ${clr.bold(toImport.length)} asset names from file`);
+    const names = raw.split(/[\n,;]+/).map(s => s.trim().toUpperCase()).filter(Boolean);
+    tick(`Loaded ${clr.bold(names.length)} asset names from file`);
+
+    const insertStmt = db.prepare(
+      `INSERT OR IGNORE INTO archived_tokens (asset_name, collection, fetch_status) VALUES (?, ?, 'pending')`
+    );
+    let inserted = 0;
+    for (const name of names) {
+      const r = insertStmt.run(name, COLLECTION);
+      inserted += r.changes;
+    }
+    tick(`${clr.bold(inserted)} new assets queued  ${clr.dim(`(${names.length - inserted} already existed)`)}`);
+
   } else {
-    log(`  ${clr.cyan('[1/3]')} Discovering assets via XCP API…`);
-    log('');
+    // ── XCP API mode (default) ──────────────────────────────────
     const discovered = await discoverViaXcp(cfg.searchKeywords);
     log('');
     tick(`Discovered ${clr.bold(discovered.length)} assets`);
@@ -431,24 +520,20 @@ async function main() {
       if (!seen.has(ex)) { discovered.push(ex); seen.add(ex); }
     }
     info(`Added ${cfg.knownExceptions.length} known exceptions`);
-    toImport = discovered;
+
+    const insertStmt = db.prepare(
+      `INSERT OR IGNORE INTO archived_tokens (asset_name, collection, fetch_status) VALUES (?, ?, 'pending')`
+    );
+    let inserted = 0;
+    for (const name of discovered) {
+      if (!name) continue;
+      const r = insertStmt.run(name, COLLECTION);
+      inserted += r.changes;
+    }
+    tick(`${clr.bold(inserted)} new assets queued  ${clr.dim(`(${discovered.length - inserted} already existed)`)}`);
   }
 
-  // ── STEP 2: Import into DB ─────────────────────────────────────
   log('');
-  log(`  ${clr.cyan('[2/3]')} Importing into archive DB…`);
-
-  const insertStmt = db.prepare(
-    `INSERT OR IGNORE INTO archived_tokens (asset_name, collection, fetch_status) VALUES (?, ?, 'pending')`
-  );
-  let inserted = 0;
-  for (const name of toImport) {
-    if (!name) continue;
-    const r = insertStmt.run(name, COLLECTION);
-    inserted += r.changes;
-  }
-  tick(`${clr.bold(inserted)} new assets queued  ${clr.dim(`(${toImport.length - inserted} already existed)`)}`);
-
   const afterImport = getStats(db, COLLECTION);
   info(`Total in DB: ${afterImport.total} | pending: ${clr.yellow(afterImport.pending)} | fetched: ${clr.green(afterImport.fetched)} | failed: ${clr.red(afterImport.failed)}`);
 
@@ -459,8 +544,9 @@ async function main() {
   }
 
   // ── STEP 3: Scrape loop ────────────────────────────────────────
+  const sourceLabel = SOURCE === 'pepewtf' ? 'pepe.wtf S3' : 'XCP API';
   log('');
-  log(`  ${clr.cyan('[3/3]')} Scraping images + metadata…`);
+  log(`  ${clr.cyan('[2/3]')} Scraping images + metadata…  ${clr.dim(`(source: ${sourceLabel})`)}`);
   log(clr.dim('  Each dot = one card  (green=ok  red=failed)'));
   log(clr.dim('  Ctrl+C at any time — progress is saved. Run again to resume.'));
   log('');
@@ -468,10 +554,13 @@ async function main() {
   let batchNum = 0;
   let sessionOk = 0, sessionFail = 0, sessionSkip = 0;
 
+  // Status filter: by default only process 'pending'. Use --retry-failed to also retry 'failed'.
+  const statusFilter = RETRY_FAILED ? `IN ('pending', 'failed')` : `= 'pending'`;
+
   while (true) {
     const batch = db.prepare(`
       SELECT asset_name FROM archived_tokens
-      WHERE collection = ? AND fetch_status IN ('pending', 'failed')
+      WHERE collection = ? AND fetch_status ${statusFilter}
       ORDER BY id ASC
       LIMIT ?
     `).all(COLLECTION, BATCH_SIZE);
