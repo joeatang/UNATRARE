@@ -3,8 +3,9 @@ import { verifyAdminToken } from '../auth/route';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { getDb } from '../../../../lib/db.js';
+
 // ── Call Groq (text only, no image) ──────────────────────────────
-async function callGroqText(systemPrompt, userPrompt) {
+async function callGroqText(systemPrompt, userPrompt, maxTokens = 300) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) throw new Error('GROQ_API_KEY not set');
 
@@ -16,8 +17,8 @@ async function callGroqText(systemPrompt, userPrompt) {
     },
     body: JSON.stringify({
       model: 'llama-3.3-70b-versatile',
-      max_tokens: 400,
-      temperature: 0.85,
+      max_tokens: maxTokens,
+      temperature: 0.9,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
@@ -36,11 +37,10 @@ async function callGroqText(systemPrompt, userPrompt) {
 
 // ── Parse drops from LLM response ────────────────────────────────
 function parseDrops(text) {
-  // Expect newline-separated lines, optionally numbered or bulleted
   return text
     .split('\n')
     .map(l => l.replace(/^[\s\-\*\d\.\)]+/, '').replace(/^["']|["']$/g, '').trim())
-    .filter(l => l.length > 10 && l.length < 160);
+    .filter(l => l.length > 10 && l.length < 220);
 }
 
 // ── Build context summary from recent verdicts ────────────────────
@@ -89,6 +89,110 @@ function getRecentContext() {
   }
 }
 
+// ── Pick other judge names for cross-judge callout prompts ────────
+function otherJudgeNames(currentId, allJudges, meta) {
+  return allJudges
+    .filter(j => j.id !== currentId)
+    .map(j => meta[j.id]?.name || j.display_name)
+    .join(', ');
+}
+
+// ── Topic buckets — wide pool, randomized per judge per run ───────
+// Each entry: { topic, instruction, count } (count = how many posts to request)
+function buildTopicPool(context, allJudgeNames) {
+  return [
+    // ── React to verdicts (grounded in actual context) ────────────
+    {
+      topic: 'verdict-reaction',
+      instruction: `Here is what's been happening on UNATRARE:\n\n${context}\n\nReact to something specific in the context above — a token name, a score, a rejection reason, or the queue count. Pick one thing and say something real about it. Stay completely in character. Don't narrate — just speak.`,
+      count: 2,
+    },
+    {
+      topic: 'score-commentary',
+      instruction: `Here is the current state of the UNATRARE council:\n\n${context}\n\nComment on the scoring. What does it mean when a card barely makes it vs. clears the bar easily? What does a 60+ score feel like vs. a 38? Speak from your role on the panel. 2 posts, no numbering.`,
+      count: 2,
+    },
+    // ── Culture & philosophy ──────────────────────────────────────
+    {
+      topic: 'dankness-philosophy',
+      instruction: `Speak about dankness. Not as a joke — as a real quality. What actually makes something dank? What makes something try to be dank and fail? What is the difference between a card that earns its place on Bitcoin versus one that just exists? 2 posts, no numbering, stay in character.`,
+      count: 2,
+    },
+    {
+      topic: 'rare-pepe-history',
+      instruction: `Riff on the legacy of Rare Pepe. What does it mean to carry that lineage into 2026? What did the original directory get right? What has been lost? What has survived? 2 posts, raw character voice, no intro.`,
+      count: 2,
+    },
+    {
+      topic: 'bitcoin-as-canvas',
+      instruction: `Drop your thoughts on Bitcoin as a permanent canvas for art. Not the price — the permanence. What does it mean to put something on a ledger that cannot be changed? How does that change what's worth submitting? 2 posts, in character, no numbering.`,
+      count: 2,
+    },
+    {
+      topic: 'what-pepe-means',
+      instruction: `What does pepe mean to you — not the meme, but the symbol? Why has it persisted? Why does it keep showing up in the most serious places? Say something genuine about it in your character voice. 2 posts, no framing, just speak.`,
+      count: 2,
+    },
+    // ── Speaking to artists / community ──────────────────────────
+    {
+      topic: 'advice-to-artists',
+      instruction: `Address the artists submitting to UNATRARE. What do you want them to know? What do most submissions get wrong? What are you actually looking for? Speak directly to them in your character voice. 2 posts, no intro.`,
+      count: 2,
+    },
+    {
+      topic: 'what-gets-rejected',
+      instruction: `Talk about what gets rejected and why. Not a specific card — the patterns. What is the most common reason something doesn't make it? What is the most avoidable mistake? Speak as someone who has seen a lot of submissions. 2 posts, in character.`,
+      count: 2,
+    },
+    // ── Cross-judge / council dynamics ───────────────────────────
+    {
+      topic: 'council-dynamics',
+      instruction: `Drop something about how the council works — the dynamic between scientists who see things differently. You don't have to name names, but you can reference that others on the panel weigh things differently than you do. What's your take on that tension? 2 posts, in character.`,
+      count: 2,
+    },
+    {
+      topic: 'judge-callout',
+      instruction: `The other scientists on the council include: ${allJudgeNames}. Reference one of them by name — agree with their approach, push back on it, or just acknowledge their angle. Stay in character. 1 post, no intro.`,
+      count: 1,
+    },
+    // ── State of the directory ────────────────────────────────────
+    {
+      topic: 'directory-lore',
+      instruction: `Here is the current state of the UNATRARE council:\n\n${context}\n\nSay something about the directory itself — what it is, what it's becoming, what it means that these cards exist on Bitcoin permanently. No hype, no sales pitch. Just your honest read on where this is heading. 2 posts, in character.`,
+      count: 2,
+    },
+    {
+      topic: 'counterparty-context',
+      instruction: `Talk about Counterparty — the protocol that makes this possible. Most people don't know what it is. How do you explain what it means to issue a token on Bitcoin? What does Counterparty represent in the larger story of crypto art? 2 posts, in character.`,
+      count: 2,
+    },
+    // ── Looser / voice-forward ────────────────────────────────────
+    {
+      topic: 'council-ambient',
+      instruction: `Just speak. Whatever your character would say right now — in this moment, in this council chamber, watching art come in and get judged. No specific prompt, no required topic. 2 posts, pure character, no intro.`,
+      count: 2,
+    },
+    {
+      topic: 'on-imitation',
+      instruction: `Talk about imitation versus inspiration in art. What is the difference between a card that is clearly influenced by something and one that is just copying it? How do you tell? 2 posts, in character.`,
+      count: 2,
+    },
+  ];
+}
+
+// ── Per-judge config: how many posts, how terse ───────────────────
+const JUDGE_OUTPUT_CONFIG = {
+  prof_naka_c:    { count: 1, maxTokens: 80,  note: 'You speak in 1 short, final statement only. No explanation. Maximum 20 words.' },
+  dr_m_catalogus: { count: 2, maxTokens: 280, note: 'Be precise and direct. No fluff.' },
+  prof_j_looney:  { count: 2, maxTokens: 280, note: 'Be sharp and market-minded.' },
+  dank_shawn:     { count: 2, maxTokens: 280, note: 'Be casual and community-grounded.' },
+  rare_srilla:    { count: 2, maxTokens: 280, note: 'Be gut-instinct and decisive.' },
+  theo_goodman:   { count: 2, maxTokens: 280, note: 'Be sharp and Bitcoin-minded.' },
+  dj_pepai:       { count: 2, maxTokens: 280, note: 'Be culturally aware and energetic.' },
+  chiguiripepe:   { count: 2, maxTokens: 280, note: 'Be cryptic and poetic.' },
+  j_frog:         { count: 2, maxTokens: 280, note: 'Be technical and builder-focused.' },
+};
+
 export async function POST(req) {
   if (!verifyAdminToken(req)) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
@@ -99,7 +203,7 @@ export async function POST(req) {
     const config   = JSON.parse(readFileSync(cfgPath, 'utf8'));
     const context  = getRecentContext();
 
-    const judges = config.judges;
+    const allJudges = config.judges;
     const generated = {};
 
     // Judge display meta for history entries
@@ -112,40 +216,63 @@ export async function POST(req) {
       dj_pepai:       { name: 'DJ PEPAI',        sigil: '◎' },
       chiguiripepe:   { name: 'CHIGUIRIPEPE',    sigil: '⬟' },
       j_frog:         { name: 'J.FROG',          sigil: '◧' },
+      rare_srilla:    { name: 'RARE SRILLA',     sigil: '◇' },
     };
 
-    // Rotate prompt style so consecutive runs feel different
-    const promptStyles = [
-      `Here is what's been happening on UNATRARE:\n\n${context}\n\nReact to this activity in your character voice. Pick 1-2 specific things from the context to respond to — a specific card name, a score, a rejection reason, the queue count, whatever catches your eye. Be organic. You might be hyped, skeptical, philosophical, memetic, or cryptic depending on your personality. 3 posts, one per line, NO numbering, NO intro. Pure voice. 1-3 sentences each.`,
+    // ── Randomly pick 1-3 judges to post this run (rotation) ─────
+    // Weight: PROF NAKA C fires ~25% of runs (rarer = more impactful)
+    //         Others fire ~50% chance each
+    const NAKA_ID = 'prof_naka_c';
+    const nakaJudge = allJudges.find(j => j.id === NAKA_ID);
+    const otherJudges = allJudges.filter(j => j.id !== NAKA_ID);
 
-      `Here is the current state of the UNATRARE council:\n\n${context}\n\nDrop your thoughts. You can comment on art quality, the culture, what Rare Pepe means in 2026, Bitcoin's role as a canvas, the specific tokens in the list, or whatever your character would fixate on. Keep it short, punchy, memetic. 3 posts, one per line, no numbering. Raw character voice only.`,
+    // Shuffle other judges
+    const shuffled = [...otherJudges].sort(() => Math.random() - 0.5);
 
-      `UNATRARE council activity:\n\n${context}\n\nSay something. You can react to a specific token, riff on pepe culture, talk about what makes art dank or mid, compare something to classic RAREPEPE series cards, speak to artists submitting, or just drop lore. 3 posts, one per line, no numbering. Stay completely in character.`,
+    // Pick 1-2 from others (sometimes 0 if array is short)
+    const pickCount = Math.random() < 0.3 ? 1 : 2;
+    const selectedJudges = shuffled.slice(0, Math.min(pickCount, shuffled.length));
 
-      `Council feed update:\n\n${context}\n\nDrop 3 feed posts in your voice. At least one should reference something specific from the context above (a token name, score, or count). The others can be broader — culture, art standards, Bitcoin permanence, what separates real from fake dank. No numbering, no intro. Pure character.`,
-    ];
+    // PROF NAKA C joins ~25% of runs
+    if (nakaJudge && Math.random() < 0.25) {
+      selectedJudges.push(nakaJudge);
+    }
 
-    const now = Math.floor(Date.now() / 1000);
-    const styleIdx = Math.floor(now / 3600) % promptStyles.length; // rotates every hour
+    if (!selectedJudges.length && allJudges.length) {
+      selectedJudges.push(allJudges[0]);
+    }
 
-    // Sequential with delay — Groq free tier rate-limits when 6 calls fire simultaneously
+    // ── Build topic pool and assign each judge a random topic ─────
+    const allJudgeNamesStr = allJudges
+      .map(j => JUDGE_META[j.id]?.name || j.display_name)
+      .join(', ');
+    const topicPool = buildTopicPool(context, allJudgeNamesStr);
+
+    // Sequential with delay — stay within Groq free tier rate limits
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-    for (let i = 0; i < judges.length; i++) {
-      const judge = judges[i];
-      if (i > 0) await sleep(1800); // 1.8s between calls stays well under 30 RPM limit
-      try {
-        const systemPrompt = `${config.system_prompt_header}\n\n${judge.personality_prompt}`;
-        const userPrompt = promptStyles[styleIdx];
+    for (let i = 0; i < selectedJudges.length; i++) {
+      const judge = selectedJudges[i];
+      if (i > 0) await sleep(1800);
 
-        const raw = await callGroqText(systemPrompt, userPrompt);
+      try {
+        const outputCfg = JUDGE_OUTPUT_CONFIG[judge.id] || { count: 2, maxTokens: 280, note: '' };
+
+        // Each judge gets a randomly chosen topic this run
+        const topic = topicPool[Math.floor(Math.random() * topicPool.length)];
+        const postCount = judge.id === NAKA_ID ? 1 : topic.count;
+        const countWord = postCount === 1 ? '1 post' : `${postCount} posts`;
+
+        const systemPrompt = `${config.system_prompt_header}\n\n${judge.personality_prompt}${outputCfg.note ? `\n\nFORMAT NOTE: ${outputCfg.note}` : ''}`;
+        const userPrompt = `${topic.instruction}\n\nOutput exactly ${countWord}, one per line, no numbering, no intro, no sign-off. Pure character voice only.`;
+
+        const raw = await callGroqText(systemPrompt, userPrompt, outputCfg.maxTokens);
         const drops = parseDrops(raw);
         if (drops.length >= 1) {
-          generated[judge.id] = drops.slice(0, 3);
+          generated[judge.id] = drops.slice(0, postCount);
         }
       } catch (err) {
         console.warn(`[generate-drops] Failed for ${judge.id}:`, err.message);
-        // skip this judge — don't fail the whole batch
       }
     }
 

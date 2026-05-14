@@ -1,0 +1,549 @@
+/* ── Archive pages ───────────────────────────────────────────── */
+
+/* Shared layout */
+.page {
+  padding-top: 48px;
+  min-height: 100vh;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding-left: 32px;
+  padding-right: 32px;
+  padding-bottom: 80px;
+}
+
+/* ── Landing page header ──────────────────────────────────────── */
+.header {
+  padding: 64px 0 48px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.eyebrow {
+  font-family: var(--font-card);
+  font-size: 15px;
+  letter-spacing: 6px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 56px;
+  color: var(--text);
+  letter-spacing: 4px;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.title span { color: var(--green); }
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--text-dim);
+  line-height: 1.75;
+  max-width: 600px;
+  margin-bottom: 32px;
+}
+
+/* Hero stats row */
+.heroStats {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.heroStat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.heroStatNum {
+  font-family: var(--font-display);
+  font-size: 36px;
+  color: var(--green);
+  line-height: 1;
+}
+
+.heroStatLabel {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.heroStatDivider {
+  font-family: var(--font-card);
+  color: var(--border);
+  font-size: 18px;
+}
+
+/* ── Collection cards grid ────────────────────────────────────── */
+.collectionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  padding: 48px 0 64px;
+}
+
+.collectionCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 28px;
+  border: 1px solid var(--border-dim);
+  background: var(--surface);
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.collectionCard:hover {
+  border-color: var(--border);
+  background: #111;
+}
+
+.collectionIcon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.collectionName {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 3px;
+}
+
+.collectionTagline {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* Progress bar */
+.progressWrap {
+  position: relative;
+  height: 3px;
+  background: var(--border-dim);
+  margin: 4px 0;
+}
+
+.progressFill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  transition: width 0.6s ease;
+  min-width: 3px;
+}
+
+.progressLabel {
+  display: none; /* shown inline via collectionMeta */
+}
+
+.collectionMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+}
+
+.collectionSeries {
+  color: var(--text-dim);
+}
+
+.collectionCount strong {
+  font-weight: 700;
+}
+
+.collectionCta {
+  margin-top: 8px;
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  transition: color 0.2s;
+}
+
+.collectionCard:hover .collectionCta {
+  color: var(--green);
+}
+
+/* ── Explainer section ────────────────────────────────────────── */
+.explainer {
+  border-top: 1px solid var(--border-dim);
+  padding: 56px 0;
+}
+
+.explainerTitle {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 3px;
+  color: var(--text);
+  margin-bottom: 32px;
+}
+
+.explainerTitle span { color: var(--green); }
+
+.explainerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 32px;
+}
+
+.explainerItem {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.explainerGlyph {
+  font-family: var(--font-display);
+  font-size: 40px;
+  color: var(--green);
+  line-height: 1;
+}
+
+.explainerText {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+
+.explainerText code {
+  font-family: var(--font-card);
+  font-size: 12px;
+  color: var(--green);
+  background: var(--surface);
+  padding: 2px 6px;
+  border: 1px solid var(--border-dim);
+}
+
+/* ── Collection page header ───────────────────────────────────── */
+.collHeader {
+  padding: 48px 0 32px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.backLink {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-decoration: none;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.backLink:hover { color: var(--green); }
+
+.collTitle {
+  font-family: var(--font-display);
+  font-size: 48px;
+  letter-spacing: 4px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.collStats {
+  font-family: var(--font-card);
+  font-size: 14px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+}
+
+/* ── Filters ──────────────────────────────────────────────────── */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.searchInput {
+  font-family: var(--font-card);
+  font-size: 14px;
+  letter-spacing: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 14px;
+  outline: none;
+  width: 240px;
+}
+
+.searchInput::placeholder { color: var(--text-dim); }
+.searchInput:focus { border-color: var(--green); }
+
+.seriesButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.seriesBtn {
+  font-family: var(--font-card);
+  font-size: 12px;
+  letter-spacing: 2px;
+  background: transparent;
+  border: 1px solid var(--border-dim);
+  color: var(--text-dim);
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.seriesBtn:hover { border-color: var(--border); color: var(--text); }
+.seriesBtnActive { /* set inline via style prop */ }
+
+/* ── Card grid ────────────────────────────────────────────────── */
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  padding: 32px 0;
+  transition: opacity 0.2s;
+}
+
+.cardGridLoading {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.cardTile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: default;
+}
+
+.cardImgWrap {
+  position: relative;
+  aspect-ratio: 1 / 1.4;
+  overflow: hidden;
+  border: 1px solid var(--border-dim);
+  background: var(--surface);
+}
+
+.cardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.25s;
+}
+
+.cardImgWrap:hover .cardImg {
+  transform: scale(1.04);
+}
+
+.cardImgPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 32px;
+  color: var(--text-dim);
+}
+
+/* Hover overlay */
+.cardOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.82);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  padding: 12px;
+}
+
+.cardImgWrap:hover .cardOverlay { opacity: 1; }
+
+.cardOverlayName {
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 2px;
+  color: var(--col-color, var(--green));
+  text-align: center;
+}
+
+.cardOverlayLabel {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+}
+
+.cardOverlayCip {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  padding: 4px 8px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.cardOverlayCip:hover {
+  color: var(--col-color, var(--green));
+  border-color: var(--col-color, var(--green));
+}
+
+.cardName {
+  font-family: var(--font-card);
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardSeries {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--border);
+}
+
+/* ── Pagination ───────────────────────────────────────────────── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 32px 0;
+  border-top: 1px solid var(--border-dim);
+}
+
+.pageBtn {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 3px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.pageBtn:hover:not(:disabled) { color: var(--green); border-color: var(--green); }
+.pageBtn:disabled { opacity: 0.3; cursor: default; }
+
+.pageInfo {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+}
+
+.pageTotalLabel { color: var(--border); }
+
+/* ── How to use ───────────────────────────────────────────────── */
+.howToUse {
+  border-top: 1px solid var(--border-dim);
+  padding: 48px 0;
+  max-width: 640px;
+}
+
+.howToTitle {
+  font-family: var(--font-display);
+  font-size: 24px;
+  letter-spacing: 3px;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.howToText {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.8;
+  margin-bottom: 12px;
+}
+
+.howToCode {
+  display: block;
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--green);
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
+  padding: 12px 16px;
+  margin: 12px 0 16px;
+  word-break: break-all;
+}
+
+/* ── Shared states ────────────────────────────────────────────── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 80px 0;
+  color: var(--text-dim);
+}
+
+.emptyGlyph {
+  font-family: var(--font-display);
+  font-size: 48px;
+  color: var(--border);
+}
+
+.emptyText {
+  font-family: var(--font-card);
+  font-size: 14px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+}
+
+.errorMsg {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--red);
+  padding: 16px 0;
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .page {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .title {
+    font-size: 40px;
+  }
+
+  .collTitle {
+    font-size: 36px;
+  }
+
+  .cardGrid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+  }
+
+  .collectionsGrid {
+    grid-template-columns: 1fr;
+  }
+}

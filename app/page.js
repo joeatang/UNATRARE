@@ -3,6 +3,7 @@ import Nav from './components/Nav';
 import MempoolLive from './components/MempoolLive';
 import styles from './page.module.css';
 import feedStyles from './feed/feed.module.css';
+import archiveStyles from './archive/archive.module.css';
 import { getDb } from '../lib/db';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
@@ -64,6 +65,21 @@ function getDropsHistory() {
   } catch { return []; }
 }
 
+function getArchiveSummary() {
+  try {
+    const db = getDb();
+    const row = db.prepare(
+      "SELECT COUNT(*) as n FROM archived_tokens WHERE fetch_status = 'fetched'"
+    ).get();
+    const total = row?.n ?? 0;
+    // Get most recently scraped cards for the banner preview
+    const recent = db.prepare(
+      "SELECT asset_name, collection, art_hash, art_mime FROM archived_tokens WHERE fetch_status='fetched' ORDER BY scraped_at DESC LIMIT 6"
+    ).all();
+    return { total, recent };
+  } catch { return { total: 0, recent: [] }; }
+}
+
 function getPageData() {
   try {
     const db = getDb();
@@ -115,7 +131,14 @@ function cardLabel(series, cardNumber) {
 
 export default function HomePage() {
   const { pending, approved, rejected, recent, pending3, feedTokens, drops } = getPageData();
+  const { total: archiveTotal, recent: archiveRecent } = getArchiveSummary();
   const nonDemo = feedTokens.filter(t => !t.is_demo);
+
+  function archiveArtUrl(a) {
+    if (!a?.art_hash) return null;
+    const ext = a.art_mime?.includes('gif') ? 'gif' : a.art_mime?.includes('jpg') || a.art_mime?.includes('jpeg') ? 'jpg' : 'png';
+    return `/uploads/archive/${a.collection}/${a.art_hash}.${ext}`;
+  }
 
   // Unified chronological timeline — verdicts + signal drops interleaved by timestamp
   const timeline = [
@@ -139,6 +162,44 @@ export default function HomePage() {
             UNATRARE is the first directory built for the people who found Bitcoin
             a completely different way — and still ended up at Pepe.
           </p>
+        </section>
+
+        {/* ── ARCHIVE BANNER ── */}
+        <section className={styles.archiveBanner}>
+          <div className={styles.archiveBannerInner}>
+            <div className={styles.archiveBannerLeft}>
+              <div className={styles.archiveBannerEyebrow}>· the archive ·</div>
+              <div className={styles.archiveBannerTitle}>
+                THE PERMANENT HOME FOR COUNTERPARTY ART HISTORY
+              </div>
+              <div className={styles.archiveBannerSub}>
+                Rare Pepe Series 1–38 · broken Arweave links · dead IPFS nodes ·
+                every card, hashed and served forever from Bitcoin&apos;s oldest art protocol.
+              </div>
+              <div className={styles.archiveBannerStats}>
+                {archiveTotal > 0 ? (
+                  <><span className={styles.archiveBannerCount}>{archiveTotal.toLocaleString()}</span> cards preserved</>
+                ) : (
+                  <span className={styles.archiveBannerCount}>seeding...</span>
+                )}
+              </div>
+              <Link href="/archive" className={styles.archiveBannerCta}>
+                explore the archive →
+              </Link>
+            </div>
+            {archiveRecent.length > 0 && (
+              <div className={styles.archiveBannerPreviews}>
+                {archiveRecent.slice(0, 4).map(a => {
+                  const url = archiveArtUrl(a);
+                  return url ? (
+                    <div key={a.asset_name} className={styles.archiveBannerThumb}>
+                      <img src={url} alt={a.asset_name} />
+                    </div>
+                  ) : null;
+                })}
+              </div>
+            )}
+          </div>
         </section>
 
         <MempoolLive

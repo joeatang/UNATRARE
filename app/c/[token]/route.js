@@ -28,6 +28,7 @@
 
 import { getDb } from '../../../lib/db.js';
 import { buildMetadataResponse } from '../../../lib/metadata.js';
+import { buildArchiveMetadataResponse } from '../../../lib/archiveScraper.js';
 import { validateTokenName } from '../../../lib/tokenValidator.js';
 
 // CORS headers — required for wallets fetching cross-origin
@@ -67,6 +68,34 @@ export async function GET(request, { params }) {
   try {
     const db = getDb();
     token = db.prepare('SELECT * FROM tokens WHERE token_name = ?').get(tokenName) ?? null;
+
+    // ── Archive fallback ────────────────────────────────────────────
+    // If the token isn't in the UNATRARE directory, check the archive.
+    // This allows Rare Pepe S1-38 and other trusted collections to serve
+    // working CIP-25 JSON from unatrare.wtf/c/TOKENNAME.json —
+    // even if the original Arweave/IPFS link is broken.
+    if (!token) {
+      const archived = db.prepare(
+        "SELECT * FROM archived_tokens WHERE asset_name = ? AND fetch_status = 'fetched'"
+      ).get(tokenName) ?? null;
+
+      if (archived) {
+        const archiveJson = buildArchiveMetadataResponse(archived);
+        if (archiveJson) {
+          return Response.json(archiveJson, {
+            status: 200,
+            headers: {
+              ...CORS,
+              // Archive content: 1-hour CDN cache (stable, content-addressed)
+              'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+              'Content-Type':  'application/json',
+            },
+          });
+        }
+      }
+    }
+    // ── End archive fallback ────────────────────────────────────────
+
   } catch (err) {
     // DB failure must not break the endpoint — return pending as safe fallback
     console.error('[/c endpoint] DB error:', err);

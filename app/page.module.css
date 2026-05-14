@@ -575,3 +575,119 @@
   .ctaTitle  { font-size: 56px; }
   .artistSubhead { font-size: 16px; }
 }
+
+/* ─── Archive Banner ─────────────────────────────────────── */
+.archiveBanner {
+  border-top: 1px solid var(--border-dim);
+  border-bottom: 1px solid var(--border-dim);
+  background: linear-gradient(135deg, #080808 0%, #0a110a 100%);
+}
+
+.archiveBannerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 40px 32px;
+}
+
+.archiveBannerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 520px;
+}
+
+.archiveBannerEyebrow {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 6px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.archiveBannerTitle {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 3px;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.archiveBannerSub {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+.archiveBannerStats {
+  font-family: var(--font-card);
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+.archiveBannerCount {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--green);
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.archiveBannerCta {
+  display: inline-block;
+  align-self: flex-start;
+  font-family: var(--font-card);
+  font-size: 14px;
+  letter-spacing: 3px;
+  color: var(--bg);
+  background: var(--green);
+  padding: 10px 22px;
+  text-decoration: none;
+  margin-top: 6px;
+  transition: background 0.15s;
+}
+
+.archiveBannerCta:hover {
+  background: var(--green-hot);
+  color: var(--bg);
+}
+
+/* Thumbnail strip */
+.archiveBannerPreviews {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.archiveBannerThumb {
+  width: 80px;
+  height: 112px;
+  border: 1px solid var(--border-dim);
+  overflow: hidden;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.archiveBannerThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .archiveBannerPreviews { display: none; }
+  .archiveBannerInner { padding: 28px 20px; }
+  .archiveBannerTitle { font-size: 22px; }
+}
+
+@media (max-width: 600px) {
+  .archiveBannerTitle { font-size: 18px; letter-spacing: 2px; }
+  .archiveBannerEyebrow { letter-spacing: 3px; }
+}

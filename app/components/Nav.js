@@ -17,6 +17,7 @@ export default function Nav() {
         {/* Desktop links */}
         <ul className={styles['nav-links']}>
           <li><Link href="/directory">Directory</Link></li>
+          <li><Link href="/archive">Archive</Link></li>
           <li><Link href="/artists">Artists</Link></li>
           <li><Link href="/drops">Drops</Link></li>
           <li><Link href="/wallets">Wallets</Link></li>
@@ -50,6 +51,7 @@ export default function Nav() {
         <div className={styles.drawer} onClick={() => setOpen(false)}>
           <ul className={styles.drawerLinks}>
             <li><Link href="/directory">Directory</Link></li>
+            <li><Link href="/archive">Archive</Link></li>
             <li><Link href="/artists">Artists</Link></li>
             <li><Link href="/drops">Drops</Link></li>
             <li><Link href="/wallets">Wallets</Link></li>

@@ -5,7 +5,7 @@
  * During promo period: free. After promo: requires fee payment.
  *
  * FormData fields:
- *   file         — image file (PNG, JPG, GIF, WebP) max 10MB
+ *   file         — image file (PNG, JPG, GIF, WebP) max 25MB (promo period)
  *   token_name   — Counterparty token name e.g. RAREPEPE
  *   asset_name   — display name e.g. "Rare Pepe"
  *   description  — short description (max 300 chars)
@@ -26,7 +26,9 @@ import { getDb } from '../../../../lib/db';
 import { storeArt } from '../../../../lib/tracBridge.js';
 
 const UPLOAD_DIR = path.resolve(process.cwd(), 'public', 'uploads', 'vault');
-const MAX_BYTES  = 10 * 1024 * 1024; // 10MB hard cap
+// Promo period: generous 25MB to stress-test the system.
+// Post-promo: revisit with tiered pricing (e.g. base fee ≤5MB, 2x fee ≤25MB).
+const MAX_BYTES  = 25 * 1024 * 1024; // 25MB cap during promo
 
 const THUMBABLE_MIME = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
 

@@ -1006,6 +1006,180 @@ function ClaimsPanel({ authToken }) {
   );
 }
 
+// ── Archive scraper panel ───────────────────────────────────────
+function ArchivePanel({ authToken }) {
+  const [open, setOpen] = useState(false);
+  const [collection, setCollection] = useState('rarepepe');
+  const [importText, setImportText] = useState('');
+  const [importStatus, setImportStatus] = useState('');
+  const [scrapeStatus, setScrapeStatus] = useState('');
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [scraping, setScraping] = useState(false);
+
+  async function fetchStats() {
+    setLoading(true);
+    const res = await fetch(`/api/archive/status?collection=${collection}`, {
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    const json = await res.json();
+    setLoading(false);
+    if (json.ok) setStats(json);
+  }
+
+  useEffect(() => { if (open) fetchStats(); }, [open, collection]);
+
+  async function doImport() {
+    const names = importText.split(/[\n,]+/).map(s => s.trim().toUpperCase()).filter(Boolean);
+    if (!names.length) return;
+    setImportStatus('importing...');
+    const res = await fetch('/api/archive/scrape', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ action: 'import', collection, asset_names: names }),
+    });
+    const json = await res.json();
+    if (json.ok) {
+      setImportStatus(`✓ ${json.inserted} new / ${json.total} total`);
+      setImportText('');
+      fetchStats();
+    } else {
+      setImportStatus(`✗ ${json.error}`);
+    }
+  }
+
+  async function doScrape(batchSize = 20) {
+    setScraping(true);
+    setScrapeStatus('scraping...');
+    const res = await fetch('/api/archive/scrape', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ action: 'scrape', collection, batch_size: batchSize }),
+    });
+    const json = await res.json();
+    setScraping(false);
+    if (json.ok) {
+      setScrapeStatus(`✓ ${json.succeeded}/${json.processed} ok — ${json.remaining} remaining`);
+      fetchStats();
+    } else {
+      setScrapeStatus(`✗ ${json.error}`);
+    }
+  }
+
+  async function doResetFailed() {
+    const res = await fetch('/api/archive/scrape', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ action: 'reset_failed', collection }),
+    });
+    const json = await res.json();
+    if (json.ok) {
+      setScrapeStatus(`↻ reset ${json.reset} failed → pending`);
+      fetchStats();
+    }
+  }
+
+  const btnStyle = {
+    padding: '7px 16px', border: '1px solid var(--border)', background: 'transparent',
+    color: 'var(--text-dim)', fontFamily: 'var(--font-card)', fontSize: '10px',
+    letterSpacing: '2px', cursor: 'pointer', transition: 'border-color 0.15s',
+  };
+  const btnGreen = { ...btnStyle, border: '1px solid var(--green)', color: 'var(--green)' };
+
+  return (
+    <div style={{ margin: '24px 0', border: '1px solid var(--border-dim)', background: 'rgba(0,255,136,0.02)' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%', padding: '14px 20px', display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', background: 'transparent', border: 'none',
+          cursor: 'pointer', fontFamily: 'var(--font-card)', fontSize: '10px',
+          letterSpacing: '3px', color: 'var(--green)',
+        }}
+      >
+        <span>⬡ ARCHIVE SCRAPER {stats ? `(${stats.stats?.fetched ?? 0} fetched / ${stats.stats?.total ?? 0} total)` : ''}</span>
+        <span style={{ color: 'var(--text-dim)' }}>{open ? '▲' : '▼'}</span>
+      </button>
+      {open && (
+        <div style={{ padding: '0 20px 20px' }}>
+          {/* Collection selector */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <label style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--text-dim)' }}>COLLECTION</label>
+            <select
+              value={collection}
+              onChange={e => setCollection(e.target.value)}
+              style={{ fontFamily: 'var(--font-card)', fontSize: '11px', background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', padding: '4px 8px' }}
+            >
+              <option value="rarepepe">Rare Pepe (S1–38)</option>
+            </select>
+            <button onClick={fetchStats} disabled={loading} style={btnStyle}>{loading ? '...' : '↻ refresh'}</button>
+          </div>
+
+          {/* Stats bar */}
+          {stats?.stats && (
+            <div style={{ display: 'flex', gap: 24, marginBottom: 16, fontFamily: 'var(--font-card)', fontSize: '11px', letterSpacing: '2px' }}>
+              <span style={{ color: 'var(--text-dim)' }}>PENDING <span style={{ color: 'var(--amber)' }}>{stats.stats.pending}</span></span>
+              <span style={{ color: 'var(--text-dim)' }}>FETCHED <span style={{ color: 'var(--green)' }}>{stats.stats.fetched}</span></span>
+              <span style={{ color: 'var(--text-dim)' }}>FAILED <span style={{ color: 'var(--red)' }}>{stats.stats.failed}</span></span>
+              <span style={{ color: 'var(--text-dim)' }}>SKIPPED <span style={{ color: 'var(--text)' }}>{stats.stats.skipped}</span></span>
+              <span style={{ color: 'var(--text-dim)' }}>TOTAL <span style={{ color: 'var(--text)' }}>{stats.stats.total}</span></span>
+            </div>
+          )}
+
+          {/* Progress bar */}
+          {stats?.stats && stats.stats.total > 0 && (
+            <div style={{ height: 4, background: 'var(--border-dim)', marginBottom: 20, borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ height: '100%', background: 'var(--green)', width: `${Math.round((stats.stats.fetched / stats.stats.total) * 100)}%`, transition: 'width 0.3s' }} />
+            </div>
+          )}
+
+          {/* Bulk import */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 6 }}>BULK IMPORT ASSET NAMES</div>
+            <textarea
+              value={importText}
+              onChange={e => setImportText(e.target.value)}
+              placeholder={'RAREPEPE\nSTACKRARE\nNAKAMOTOCARD\n...'}
+              style={{
+                width: '100%', height: 100, background: 'var(--surface)', color: 'var(--text)',
+                border: '1px solid var(--border)', fontFamily: 'var(--font-card)', fontSize: '11px',
+                padding: '8px', resize: 'vertical', boxSizing: 'border-box',
+              }}
+            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8 }}>
+              <button onClick={doImport} style={btnGreen}>↑ import</button>
+              {importStatus && <span style={{ fontFamily: 'var(--font-card)', fontSize: '10px', color: importStatus.startsWith('✓') ? 'var(--green)' : 'var(--red)', letterSpacing: '2px' }}>{importStatus}</span>}
+            </div>
+          </div>
+
+          {/* Scrape controls */}
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => doScrape(20)} disabled={scraping} style={btnGreen}>{scraping ? 'scraping...' : '▶ scrape batch (20)'}</button>
+            <button onClick={() => doScrape(50)} disabled={scraping} style={btnStyle}>▶ batch (50)</button>
+            <button onClick={doResetFailed} disabled={scraping} style={btnStyle}>↻ reset failed</button>
+            {scrapeStatus && <span style={{ fontFamily: 'var(--font-card)', fontSize: '10px', color: scrapeStatus.startsWith('✓') ? 'var(--green)' : scrapeStatus.startsWith('↻') ? 'var(--amber)' : 'var(--red)', letterSpacing: '2px' }}>{scrapeStatus}</span>}
+          </div>
+
+          {/* Recently scraped */}
+          {stats?.recent?.length > 0 && (
+            <div style={{ marginTop: 20 }}>
+              <div style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 8 }}>RECENTLY SCRAPED</div>
+              {stats.recent.map(a => (
+                <div key={a.asset_name} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '5px 0', borderBottom: '1px solid var(--border-dim)', fontFamily: 'var(--font-card)', fontSize: '10px' }}>
+                  <span style={{ color: 'var(--green)', width: 12 }}>✓</span>
+                  <span style={{ flex: 1, color: 'var(--text)' }}>{a.asset_name}</span>
+                  {a.image_url_type && <span style={{ color: 'var(--text-dim)', letterSpacing: '1px' }}>{a.image_url_type}</span>}
+                  <a href={`/c/${a.asset_name}.json`} target="_blank" rel="noreferrer" style={{ color: 'var(--text-dim)', fontSize: '9px' }}>json ↗</a>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Artist profile panel ────────────────────────────────────────
 function ArtistProfilePanel({ authToken }) {
   const [open, setOpen] = useState(false);
@@ -1434,6 +1608,7 @@ export default function AdminPage() {
       <DemoPanel authToken={authToken} />
       <S0CodesPanel authToken={authToken} />
       <ClaimsPanel authToken={authToken} />
+      <ArchivePanel authToken={authToken} />
       <ArtistProfilePanel authToken={authToken} />
     </div>
   );

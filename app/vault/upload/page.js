@@ -36,9 +36,9 @@ export default function VaultUploadPage() {
       setResult({ error: 'Only PNG, JPG, GIF, WebP allowed.' });
       return;
     }
-    if (f.size > 10_485_760) {
+    if (f.size > 26_214_400) {
       setStatus('error');
-      setResult({ error: `File too large (${(f.size / 1024 / 1024).toFixed(1)} MB). Max 10 MB.` });
+      setResult({ error: `File too large (${(f.size / 1024 / 1024).toFixed(1)} MB). Max 25 MB.` });
       return;
     }
     setFile(f);
