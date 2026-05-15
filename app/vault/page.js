@@ -140,13 +140,13 @@ export default function VaultPage() {
       <div className={styles.infoSection}>
         <h2 className={styles.infoTitle}>HOW IT WORKS</h2>
         <ol className={styles.infoList}>
-          <li>Upload your PNG, JPG, GIF, or WebP art (max 1 MB).</li>
-          <li>Your art is hashed (SHA-256) and stored on the UNATRARE P2P network.</li>
-          <li>Copy the JSON URL and paste it into your Counterparty token description.</li>
-          <li>Wallets like RarePepeWallet and Freewallet display your art automatically.</li>
+          <li>Upload your PNG, JPG, GIF, or WebP art.</li>
+          <li>Your art is hashed (SHA-256) and stored permanently on the UNATRARE P2P network.</li>
+          <li><strong>Vault only:</strong> paste the JSON URL into your token description — wallets display your art immediately.</li>
+          <li><strong>UNATRARE certification:</strong> use <code style={{fontFamily:'var(--font-card)',fontSize:'10px'}}>unatrare.wtf/c/YOURTOKEN.json</code> in your description instead, then click &ldquo;submit to directory&rdquo; on your vault card to go through the AI judging process.</li>
         </ol>
         <p className={styles.infoNote}>
-          Art is replicated across all Deep Nodes — the more nodes, the more permanent.{' '}
+          The vault JSON URL and the UNATRARE directory URL are different things — only the directory URL earns certification and UNATPEPE holder airdrops.{' '}
           <Link href="/nodes" className={styles.infoLink}>Run a node →</Link>
         </p>
       </div>

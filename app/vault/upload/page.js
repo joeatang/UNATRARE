@@ -126,7 +126,11 @@ export default function VaultUploadPage() {
                 >{copied === 'json' ? '✓ copied' : 'copy'}</button>
               </div>
               <p className={styles.successHint}>
-                Paste this into your Counterparty token description — wallets will display your art.
+                Wallets display art when this URL is in your token description.
+                <br />
+                <strong>Submitting to the UNATRARE directory?</strong> Use{' '}
+                <code style={{fontSize:'10px', wordBreak:'break-all'}}>https://unatrare.wtf/c/{form.token_name || 'YOURTOKEN'}.json</code>{' '}
+                in your description instead — that URL is what gets certified.
               </p>
             </div>
             <div className={styles.successRow}>
