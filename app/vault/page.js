@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Nav from '../components/Nav';
 import styles from './vault.module.css';
 
+const MIME_EXT = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp', 'image/svg+xml': 'svg' };
+
 const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://unatrare.wtf';
 
 function timeAgo(ms) {
@@ -17,7 +19,7 @@ function timeAgo(ms) {
 }
 
 function AssetCard({ asset }) {
-  const ext    = asset.art_mime?.split('/')[1]?.replace('jpeg', 'jpg') ?? 'png';
+  const ext    = MIME_EXT[asset.art_mime] ?? asset.art_mime?.split('/')[1]?.replace('jpeg', 'jpg') ?? 'png';
   const artUrl = `/uploads/vault/${asset.art_hash}.${ext}`;
   const jsonUrl = `/api/vault/json/${asset.art_hash}`;
   const [copied, setCopied] = useState(false);
@@ -27,6 +29,8 @@ function AssetCard({ asset }) {
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   }
+
+  const submitHref = `/submit?vault_hash=${asset.art_hash}&vault_mime=${encodeURIComponent(asset.art_mime || 'image/png')}`;
 
   return (
     <div className={styles.card}>
@@ -41,6 +45,9 @@ function AssetCard({ asset }) {
         <button className={styles.copyBtn} onClick={copyJson}>
           {copied ? '✓ copied' : 'copy JSON URL'}
         </button>
+        <Link href={submitHref} className={styles.submitDirBtn}>
+          submit to directory →
+        </Link>
       </div>
     </div>
   );

@@ -184,6 +184,25 @@
 
 .copyBtn:hover { background: rgba(245, 166, 35, 0.08); }
 
+.submitDirBtn {
+  display: block;
+  font-family: monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--amber, #f5a623);
+  background: transparent;
+  border: 1px solid rgba(245, 166, 35, 0.4);
+  border-radius: 3px;
+  padding: 0.3rem 0.5rem;
+  margin-top: 6px;
+  text-align: center;
+  transition: background 0.15s;
+}
+
+.submitDirBtn:hover { background: rgba(245, 166, 35, 0.08); }
+
 /* ── Pagination ──────────────────────────────────────────────────── */
 .pagination {
   display: flex;

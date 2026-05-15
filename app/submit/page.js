@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Nav from '../components/Nav';
 import styles from './submit.module.css';
@@ -284,6 +285,38 @@ function Step2({ data, onNext, onBack }) {
   const [uploading, setUploading] = useState(false);
   const [errMsg, setErrMsg] = useState('');
   const fileRef = useRef();
+
+  // ── Vault bypass: art already stored ─────────────────────────
+  if (data.vaultHash && data.vaultMime) {
+    const ext = ({ 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp', 'image/svg+xml': 'svg' })[data.vaultMime] ?? 'png';
+    const artUrl = `/uploads/vault/${data.vaultHash}.${ext}`;
+    return (
+      <div className={styles.stepBox}>
+        <div className={styles.stepEyebrow}>Step 3 of 6</div>
+        <h2 className={styles.stepTitle}>UPL<span>O</span>AD ART</h2>
+        <div style={{ border: '1px solid var(--green)', borderLeft: '3px solid var(--green)', padding: '14px 18px', marginBottom: 24, fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--green)', background: 'rgba(61,158,61,0.04)' }}>
+          ◈ ART LOADED FROM PEPE VAULT — no upload needed
+        </div>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: 24 }}>
+          <img src={artUrl} alt={data.tokenName} style={{ maxWidth: 180, maxHeight: 220, border: '1px solid var(--border)', objectFit: 'contain' }} />
+          <div style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--text-dim)', lineHeight: 2 }}>
+            <div>TOKEN: <span style={{ color: 'var(--text)' }}>{data.tokenName}</span></div>
+            <div>FORMAT: <span style={{ color: 'var(--text)' }}>{data.vaultMime}</span></div>
+            <div style={{ marginTop: 8, fontFamily: 'var(--font-body)', fontSize: '12px', letterSpacing: 0, lineHeight: 1.6 }}>
+              This art was already uploaded to the Pepe Vault.<br />
+              It will be used for your directory submission.
+            </div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <button className={styles.backBtn} onClick={onBack}>← back</button>
+          <button className={styles.nextBtn} onClick={() => onNext({ ...data, artUrl, artMime: data.vaultMime, artHash: data.vaultHash })}>
+            use this art →
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   function handleFile(e) {
     const f = e.target.files?.[0];
@@ -782,9 +815,15 @@ function Step5({ data }) {
 // ─────────────────────────────────────────────────────────────────
 //  Main wizard
 // ─────────────────────────────────────────────────────────────────
-export default function SubmitPage() {
+function SubmitWizard() {
+  const searchParams = useSearchParams();
+  const vaultHash = searchParams.get('vault_hash') || '';
+  const vaultMime = searchParams.get('vault_mime') || '';
+
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState(
+    vaultHash ? { vaultHash, vaultMime } : {}
+  );
 
   function handleNext(newData) {
     setFormData(prev => ({ ...prev, ...newData }));
@@ -834,5 +873,13 @@ export default function SubmitPage() {
 
       </main>
     </>
+  );
+}
+
+export default function SubmitPage() {
+  return (
+    <Suspense fallback={null}>
+      <SubmitWizard />
+    </Suspense>
   );
 }
