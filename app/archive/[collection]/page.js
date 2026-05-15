@@ -31,18 +31,18 @@ function artUrl(asset) {
   return `/uploads/archive/${asset.collection}/${asset.art_hash}.${ext}`;
 }
 
-function toRoman(n) {
-  const map = [[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],
-               [50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
-  return map.reduce((s,[v,r]) => { while(n>=v){s+=r;n-=v;} return s; }, '');
+function truncateAddr(addr) {
+  if (!addr || addr.length < 12) return addr;
+  return `${addr.slice(0, 7)}…${addr.slice(-5)}`;
 }
 
 function CardTile({ asset, color }) {
   const url = artUrl(asset);
   const [imgErr, setImgErr] = useState(false);
   const label = asset.series_number && asset.card_number
-    ? `S${toRoman(asset.series_number)} · C${String(asset.card_number).padStart(3,'0')}`
+    ? `S${asset.series_number} · C${String(asset.card_number).padStart(3,'0')}`
     : null;
+  const artistShort = asset.artist_address ? truncateAddr(asset.artist_address) : null;
 
   return (
     <div className={styles.cardTile} style={{ '--col-color': color }}>
@@ -61,6 +61,11 @@ function CardTile({ asset, color }) {
         <div className={styles.cardOverlay}>
           <div className={styles.cardOverlayName}>{asset.asset_name}</div>
           {label && <div className={styles.cardOverlayLabel}>{label}</div>}
+          {asset.artist_address && (
+            <div className={styles.cardOverlayArtist} title={asset.artist_address}>
+              {truncateAddr(asset.artist_address)}
+            </div>
+          )}
           <a
             className={styles.cardOverlayCip}
             href={`/c/${asset.asset_name}.json`}
@@ -74,6 +79,7 @@ function CardTile({ asset, color }) {
       </div>
       <div className={styles.cardName}>{asset.display_title || asset.asset_name}</div>
       {label && <div className={styles.cardSeries}>{label}</div>}
+      {artistShort && <div className={styles.cardArtist}>{artistShort}</div>}
     </div>
   );
 }
@@ -192,7 +198,7 @@ export default function CollectionPage({ params }) {
                 style={seriesFilter === String(s) ? { borderColor: color, color } : {}}
                 onClick={() => setSeriesFilter(String(s))}
               >
-                S{toRoman(s)}
+                S{s}
               </button>
             ))}
           </div>
