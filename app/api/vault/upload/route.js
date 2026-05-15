@@ -104,6 +104,10 @@ export async function POST(req) {
     return NextResponse.json({ ok: false, error: 'Invalid token name' }, { status: 400 });
   }
 
+  if (!owner_xcp) {
+    return NextResponse.json({ ok: false, error: 'Counterparty address is required' }, { status: 400 });
+  }
+
   const db    = getDb();
   const promo = getPromoStatus(db);
 

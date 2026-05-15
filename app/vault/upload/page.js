@@ -57,6 +57,7 @@ export default function VaultUploadPage() {
     e.preventDefault();
     if (!file) { setStatus('error'); setResult({ error: 'Please choose a file.' }); return; }
     if (!form.token_name.trim()) { setStatus('error'); setResult({ error: 'Token name is required.' }); return; }
+    if (!form.owner_xcp.trim()) { setStatus('error'); setResult({ error: 'Your Counterparty address is required.' }); return; }
 
     setStatus('uploading');
     try {
@@ -223,15 +224,16 @@ export default function VaultUploadPage() {
             </label>
 
             <label className={styles.field}>
-              <span className={styles.label}>YOUR XCP / COUNTERPARTY ADDRESS</span>
+              <span className={styles.label}>YOUR XCP / COUNTERPARTY ADDRESS *</span>
               <input
                 className={styles.input}
                 value={form.owner_xcp}
                 onChange={field('owner_xcp')}
                 placeholder="1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf…"
                 maxLength={100}
+                required
               />
-              <span className={styles.hint}>Used for airdrop eligibility tracking</span>
+              <span className={styles.hint}>Your Counterparty/Bitcoin address — shown on your vault card for provenance</span>
             </label>
 
             <label className={styles.field}>
