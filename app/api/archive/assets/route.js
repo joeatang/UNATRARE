@@ -63,7 +63,7 @@ export async function GET(request) {
     const assets = db.prepare(`
       SELECT
         asset_name, collection, series_number, card_number,
-        display_title, description, artist_address,
+        display_title, description, artist_address, artist_name,
         image_url_original, image_url_type,
         art_hash, art_mime, file_size, scraped_at
       FROM archived_tokens
