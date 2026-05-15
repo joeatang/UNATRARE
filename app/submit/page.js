@@ -9,7 +9,7 @@ import styles from './submit.module.css';
 const STEPS = [
   { num: 0, label: 'Get URL' },
   { num: 1, label: 'Verify' },
-  { num: 2, label: 'Upload Art' },
+  { num: 2, label: 'Art' },
   { num: 3, label: 'Details' },
   { num: 4, label: 'Sign' },
   { num: 5, label: 'Submit' },
@@ -45,7 +45,7 @@ const MIN_SUPPLY   = HOLDER_COUNT;
 // ─────────────────────────────────────────────────────────────────
 //  Step 0 — Get Your Metadata URL
 // ─────────────────────────────────────────────────────────────────
-function Step0({ onNext }) {
+function Step0({ onNext, isVault }) {
   const [raw, setRaw] = useState('');
   const [result, setResult] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -89,13 +89,24 @@ function Step0({ onNext }) {
     <div className={styles.stepBox}>
       <div className={styles.stepEyebrow}>Step 1 of 6</div>
       <h2 className={styles.stepTitle}>GET Y<span>O</span>UR URL</h2>
-      <p className={styles.stepDesc}>
-        <strong>Before you create your Counterparty token</strong>, you need your metadata URL.<br />
-        Enter the token name you plan to register below. Copy the URL.<br />
-        Then go to Counterparty and paste it into the <strong>description field</strong> of your token.
-        <br /><br />
-        <strong>If you create the token before getting this URL, your art will not be visible in wallets.</strong>
-      </p>
+      {isVault ? (
+        <p className={styles.stepDesc}>
+          Your art is already stored in the Pepe Vault.<br /><br />
+          To appear in wallets when your token is certified, your Counterparty token&apos;s
+          description field must contain your <strong>UNATRARE directory URL</strong> —
+          not the Vault JSON URL.<br /><br />
+          Enter your token name below to generate it.
+          If you&apos;ve already created the token, just enter the name and click Continue.
+        </p>
+      ) : (
+        <p className={styles.stepDesc}>
+          <strong>Before you create your Counterparty token</strong>, you need your metadata URL.<br />
+          Enter the token name you plan to register below. Copy the URL.<br />
+          Then go to Counterparty and paste it into the <strong>description field</strong> of your token.
+          <br /><br />
+          <strong>If you create the token before getting this URL, your art will not be visible in wallets.</strong>
+        </p>
+      )}
 
       <div className={styles.inputGroup}>
         <label className={styles.inputLabel} htmlFor="tokenname">Token Name</label>
@@ -135,15 +146,29 @@ function Step0({ onNext }) {
           </div>
 
           <div className={styles.warningBox}>
-            <div className={styles.warningTitle}>⚠ important — read before creating token</div>
-            <div className={styles.warningText}>
-              1. Copy the URL above.<br />
-              2. Go to Counterparty (Freewallet, Rarepepewallet, etc.).<br />
-              3. Create your token with <strong>name exactly: {result.normalized}</strong><br />
-              4. Paste the URL into the <strong>Description</strong> field.<br />
-              5. Set supply to <strong>at least {MIN_SUPPLY}</strong>. Non-divisible. Locked.<br />
-              6. Return here and click Continue to submit your art.
-            </div>
+            {isVault ? (
+              <>
+                <div className={styles.warningTitle}>◈ vault submission checklist</div>
+                <div className={styles.warningText}>
+                  1. Copy the URL above.<br />
+                  2. If your token <strong>already exists</strong>: update its Description field with this URL in Freewallet/Rarepepewallet.<br />
+                  3. If your token <strong>doesn&apos;t exist yet</strong>: create it with <strong>name: {result.normalized}</strong>, paste this URL into Description, supply ≥{MIN_SUPPLY}, non-divisible, locked.<br />
+                  4. Click Continue — your vault art will be used automatically.
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={styles.warningTitle}>⚠ important — read before creating token</div>
+                <div className={styles.warningText}>
+                  1. Copy the URL above.<br />
+                  2. Go to Counterparty (Freewallet, Rarepepewallet, etc.).<br />
+                  3. Create your token with <strong>name exactly: {result.normalized}</strong><br />
+                  4. Paste the URL into the <strong>Description</strong> field.<br />
+                  5. Set supply to <strong>at least {MIN_SUPPLY}</strong>. Non-divisible. Locked.<br />
+                  6. Return here and click Continue to submit your art.
+                </div>
+              </>
+            )}
           </div>
 
           {/* Optional Series 0 invite code */}
@@ -172,7 +197,7 @@ function Step0({ onNext }) {
             className={styles.nextBtn}
             onClick={() => onNext({ tokenName: result.normalized, inviteCode: inviteCode.trim().toUpperCase() || '' })}
           >
-            i created the token → continue
+            {isVault ? 'my token is ready → continue' : 'i created the token → continue'}
           </button>
         </>
       )}
@@ -284,10 +309,11 @@ function Step2({ data, onNext, onBack }) {
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [errMsg, setErrMsg] = useState('');
+  const [useVault, setUseVault] = useState(true);
   const fileRef = useRef();
 
   // ── Vault bypass: art already stored ─────────────────────────
-  if (data.vaultHash && data.vaultMime) {
+  if (data.vaultHash && data.vaultMime && useVault) {
     const ext = ({ 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp', 'image/svg+xml': 'svg' })[data.vaultMime] ?? 'png';
     const artUrl = `/uploads/vault/${data.vaultHash}.${ext}`;
     return (
@@ -308,10 +334,16 @@ function Step2({ data, onNext, onBack }) {
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
           <button className={styles.backBtn} onClick={onBack}>← back</button>
           <button className={styles.nextBtn} onClick={() => onNext({ ...data, artUrl, artMime: data.vaultMime, artHash: data.vaultHash })}>
             use this art →
+          </button>
+          <button
+            onClick={() => setUseVault(false)}
+            style={{ background: 'none', border: 'none', color: 'var(--text-dim)', fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', cursor: 'pointer', padding: '4px 0', textDecoration: 'underline', textUnderlineOffset: 3 }}
+          >
+            upload a different file instead
           </button>
         </div>
       </div>
@@ -864,7 +896,7 @@ function SubmitWizard() {
         </nav>
 
         {/* Step components */}
-        {currentStep === 0 && <Step0 onNext={handleNext} />}
+        {currentStep === 0 && <Step0 onNext={handleNext} isVault={!!formData.vaultHash} />}
         {currentStep === 1 && <Step1 data={formData} onNext={handleNext} onBack={handleBack} />}
         {currentStep === 2 && <Step2 data={formData} onNext={handleNext} onBack={handleBack} />}
         {currentStep === 3 && <Step3 data={formData} onNext={handleNext} onBack={handleBack} />}
