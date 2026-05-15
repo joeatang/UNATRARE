@@ -303,7 +303,7 @@ export default function NodesPage() {
         <div className={styles.reqGrid}>
           <div className={styles.reqRow}>
             <span className={styles.reqLabel}>OPERATING SYSTEM</span>
-            <span className={styles.reqVal}>Ubuntu 20.04+ &nbsp;✓&nbsp; &nbsp;macOS 12+ &nbsp;✓&nbsp; &nbsp;Windows &nbsp;✗</span>
+            <span className={styles.reqVal}>Ubuntu 20.04+ &nbsp;✓&nbsp; &nbsp;macOS 12+ &nbsp;✓&nbsp; &nbsp;Windows &nbsp;✓&nbsp; (Docker)</span>
           </div>
           <div className={styles.reqRow}>
             <span className={styles.reqLabel}>RAM</span>
@@ -332,7 +332,7 @@ export default function NodesPage() {
         </a>
 
         <div className={styles.codeBlock} style={{marginTop: '1.5rem'}}>
-          <span className={styles.codeComment}># Quick start (Linux / macOS)</span>
+          <span className={styles.codeComment}># Quick start — Linux / macOS (native)</span>
           <span className={styles.codeLine}>npm install -g pear</span>
           <span className={styles.codeLine}>git clone https://github.com/joeatang/unatrare-intercom node &amp;&amp; cd node &amp;&amp; npm install</span>
           <span className={styles.codeLine}>pear run . --peer-store-name unatrare-node \</span>
@@ -340,8 +340,19 @@ export default function NodesPage() {
           <span className={styles.codeLine}>&nbsp;&nbsp;--btc-address YOUR_BITCOIN_ADDRESS \</span>
           <span className={styles.codeLine}>&nbsp;&nbsp;--xcp-address YOUR_XCP_ADDRESS</span>
         </div>
+
+        <div className={styles.codeBlock} style={{marginTop: '1rem'}}>
+          <span className={styles.codeComment}># Quick start — Windows / any platform (Docker)</span>
+          <span className={styles.codeComment}># Install Docker Desktop first: https://docs.docker.com/get-docker/</span>
+          <span className={styles.codeLine}>git clone https://github.com/joeatang/unatrare-intercom node &amp;&amp; cd node</span>
+          <span className={styles.codeLine}>cp .env.example .env</span>
+          <span className={styles.codeComment}># Edit .env — set BTC_ADDRESS and XCP_ADDRESS</span>
+          <span className={styles.codeLine}>docker compose up -d</span>
+          <span className={styles.codeComment}># Watch it connect:</span>
+          <span className={styles.codeLine}>docker compose logs -f</span>
+        </div>
         <p className={styles.joinNote}>
-          Requires Node.js v22+. &nbsp;
+          Native: requires Node.js v22+. &nbsp; Docker: requires Docker Desktop (Windows / macOS) or Docker Engine (Linux). &nbsp;
           <a className={styles.joinLink} href="/nodes/guide">Full guide with Linux VPS + Raspberry Pi instructions →</a>
         </p>
       </div>
