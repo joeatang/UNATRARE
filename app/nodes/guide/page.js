@@ -97,7 +97,7 @@ export default function NodeGuidePage() {
                 Ubuntu 20.04 or newer &nbsp;<span className={styles.yes}>✓</span><br/>
                 macOS 12 Monterey or newer &nbsp;<span className={styles.yes}>✓</span><br/>
                 macOS 11 Big Sur / Catalina or older &nbsp;<span className={styles.no}>✗ will not work</span><br/>
-                Windows &nbsp;<span className={styles.no}>✗ not yet supported</span>
+                Windows &nbsp;<span className={styles.yes}>✓</span>&nbsp; via Docker Desktop
               </td>
             </tr>
             <tr>
@@ -114,7 +114,7 @@ export default function NodeGuidePage() {
             </tr>
             <tr>
               <td className={styles.td1}>Node.js</td>
-              <td className={styles.td2}>Version 22 or newer</td>
+              <td className={styles.td2}>Version 22 or newer &nbsp;·&nbsp; <em>Windows users: Docker Desktop replaces this requirement</em></td>
             </tr>
             <tr>
               <td className={styles.td1}>Bitcoin wallet</td>
@@ -240,6 +240,59 @@ export default function NodeGuidePage() {
         <Note>Keep this terminal window open. Closing it stops the node. For 24/7 operation, use a VPS or a Mac that never sleeps.</Note>
       </Section>
 
+      {/* ── Windows ── */}
+      <Section title="SETUP: WINDOWS (DOCKER DESKTOP)">
+        <p className={styles.body}>
+          Windows cannot run the Pear runtime natively, but <strong>Docker Desktop</strong> wraps everything
+          inside a Linux container — no Pear install, no Node.js version management, no manual PATH setup.
+          The node runs identically to a Linux server.
+        </p>
+
+        <h3 className={styles.step}>Step 1 — Install Docker Desktop</h3>
+        <p className={styles.body}>
+          Download from <strong>docker.com/get-docker</strong> and install. Accept the default settings.
+          Docker Desktop uses WSL2 or Hyper-V to run a real Linux environment inside Windows.
+          Restart when prompted.
+        </p>
+        <Good>After install, open Docker Desktop and confirm it shows &ldquo;Engine running&rdquo; in the bottom-left.</Good>
+
+        <h3 className={styles.step}>Step 2 — Clone the node software</h3>
+        <p className={styles.body}>Open <strong>PowerShell</strong> or <strong>Windows Terminal</strong>:</p>
+        <CodeBlock lines={[
+          '# If you don\'t have git, install it from git-scm.com first',
+          'git clone https://github.com/joeatang/unatrare-intercom node',
+          'cd node',
+        ]} />
+
+        <h3 className={styles.step}>Step 3 — Set your addresses</h3>
+        <CodeBlock lines={[
+          '# Copy the template .env file',
+          'copy .env.example .env',
+          '# Then open .env in Notepad (or any text editor) and fill in:',
+          '#   BTC_ADDRESS=1YourBitcoinAddress',
+          '#   XCP_ADDRESS=1YourXCPAddress',
+        ]} />
+        <Note>BTC_ADDRESS is required. XCP_ADDRESS is optional but recommended — it shows on your node card and qualifies you for future rewards.</Note>
+
+        <h3 className={styles.step}>Step 4 — Start the node</h3>
+        <CodeBlock lines={[
+          'docker compose up -d',
+          '# Watch the node connect to peers:',
+          'docker compose logs -f',
+        ]} />
+        <Good>The first start downloads the Pear platform from the network (~30–60 seconds). Subsequent starts are instant.</Good>
+        <Good>The node runs in the background. Close your terminal — it keeps running. It will auto-restart if Docker restarts.</Good>
+
+        <h3 className={styles.step}>Stopping and updating</h3>
+        <CodeBlock lines={[
+          '# Stop the node',
+          'docker compose down',
+          '# Pull the latest node software and rebuild',
+          'git pull && docker compose build --no-cache && docker compose up -d',
+        ]} />
+        <Note>Your art archive and peer identity are stored in Docker volumes (not inside the container) — they survive updates and rebuilds.</Note>
+      </Section>
+
       {/* ── Raspberry Pi ── */}
       <Section title="SETUP: RASPBERRY PI (BEST VALUE)">
         <p className={styles.body}>
@@ -255,6 +308,15 @@ export default function NodeGuidePage() {
       {/* ── FAQ ── */}
       <Section title="COMMON QUESTIONS">
         <div className={styles.faq}>
+          <div className={styles.faqItem}>
+            <p className={styles.faqQ}>Can I run this on Windows?</p>
+            <p className={styles.faqA}>
+              Yes, via Docker Desktop. The Pear runtime that powers the node doesn&rsquo;t run natively on
+              Windows, but Docker Desktop wraps it in a Linux container so it works identically to a Linux
+              server. Follow the Windows setup section above. You do <strong>not</strong> need to install
+              Node.js or Pear separately — Docker handles all of that.
+            </p>
+          </div>
           <div className={styles.faqItem}>
             <p className={styles.faqQ}>What is a heartbeat?</p>
             <p className={styles.faqA}>
