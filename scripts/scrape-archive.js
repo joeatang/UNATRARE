@@ -43,6 +43,9 @@ const DATA_DIR    = path.join(ROOT_DIR, 'data');
 const UPLOADS_DIR = path.join(ROOT_DIR, 'public', 'uploads', 'archive');
 const DB_PATH     = path.join(DATA_DIR, 'unatrare.db');
 
+// Loaded via dynamic import in main() (tracBridge is ESM)
+let storeArt = null;
+
 // ── CLI args ─────────────────────────────────────────────────────
 function arg(flag, def) {
   const i = process.argv.indexOf(flag);
@@ -54,6 +57,7 @@ const COLLECTION     = arg('--collection', 'rarepepe');
 const BATCH_SIZE     = Math.min(parseInt(arg('--batch-size', '20'), 10) || 20, 100);
 const DISCOVER_ONLY  = flag('--discover-only');
 const RETRY_FAILED   = flag('--retry-failed');
+const BACKFILL_NAMES = flag('--backfill-names');
 const ASSET_FILE     = arg('--file', null);
 const SOURCE         = arg('--source', null);   // 'pepewtf' to use pepe.wtf API
 const XCP_API_OVERRIDE = arg('--api', null);
@@ -105,6 +109,7 @@ function openDb() {
       display_title     TEXT,
       description       TEXT,
       artist_address    TEXT,
+      artist_name       TEXT,
       image_url_original TEXT,
       image_url_type    TEXT,
       arweave_txid      TEXT,
@@ -360,6 +365,9 @@ async function scrapeOne(db, assetName, collection) {
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, `${hash}.${ext}`), buffer);
 
+    // 5b. Replicate to Hyperdrive so network nodes store this file
+    if (storeArt) storeArt(hash, buffer.toString('base64'), mimeType).catch(() => {});
+
     // 6. Parse extra metadata fields
     const urlType    = detectUrlType(imageUrl);
     const arweaveTxid = urlType === 'arweave'
@@ -427,6 +435,14 @@ function getStats(db, collection) {
 
 // ── Main ─────────────────────────────────────────────────────────
 async function main() {
+  // Load ESM tracBridge for Hyperdrive replication (fire-and-forget, non-blocking)
+  try {
+    const bridge = await import('../lib/tracBridge.js');
+    storeArt = bridge.storeArt;
+  } catch {
+    // intercom not available — archive still works, just no Hyperdrive replication
+  }
+
   const cfg = COLLECTIONS[COLLECTION];
   if (!cfg) {
     log(clr.red(`\n  Unknown collection: "${COLLECTION}". Valid: ${Object.keys(COLLECTIONS).join(', ')}\n`));
@@ -443,6 +459,25 @@ async function main() {
 
   const db = openDb();
 
+  // ── BACKFILL NAMES MODE ──────────────────────────────────────
+  if (BACKFILL_NAMES) {
+    log(`  ${clr.cyan('[backfill-names]')} Fetching artist names from pepe.wtf…`);
+    const pepeAssets = await discoverViaPepeWtf();
+    const updateStmt = db.prepare(
+      `UPDATE archived_tokens SET artist_name = ? WHERE asset_name = ? AND collection = ?`
+    );
+    let updated = 0;
+    for (const a of pepeAssets) {
+      if (a.artist) {
+        const r = updateStmt.run(a.artist, a.name, COLLECTION);
+        updated += r.changes;
+      }
+    }
+    tick(`Updated ${clr.bold(updated)} rows with artist names`);
+    log('');
+    process.exit(0);
+  }
+
   // ── STEP 1: Discover + import asset list ──────────────────────
   log(`  ${clr.cyan('[1/3]')} Discovering + importing assets…`);
   log('');
@@ -455,8 +490,8 @@ async function main() {
     const insertFullStmt = db.prepare(`
       INSERT OR IGNORE INTO archived_tokens
         (asset_name, collection, series_number, card_number, display_title,
-         artist_address, image_url_original, image_url_type, fetch_status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'http', 'pending')
+         artist_address, artist_name, image_url_original, image_url_type, fetch_status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'http', 'pending')
     `);
     // For rows that already exist but have no image URL, fill it in
     const updateUrlStmt = db.prepare(`
@@ -476,6 +511,7 @@ async function main() {
         a.card   ?? null,
         a.title  || a.name,
         a.issuer || null,
+        a.artist || null,
         a.mediaUrl || null,
       );
       if (r.changes) {

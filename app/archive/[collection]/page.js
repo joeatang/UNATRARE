@@ -42,7 +42,7 @@ function CardTile({ asset, color }) {
   const label = asset.series_number && asset.card_number
     ? `S${asset.series_number} · C${String(asset.card_number).padStart(3,'0')}`
     : null;
-  const artistShort = asset.artist_address ? truncateAddr(asset.artist_address) : null;
+  const artistShort = asset.artist_name || (asset.artist_address ? truncateAddr(asset.artist_address) : null);
 
   return (
     <div className={styles.cardTile} style={{ '--col-color': color }}>
@@ -61,9 +61,9 @@ function CardTile({ asset, color }) {
         <div className={styles.cardOverlay}>
           <div className={styles.cardOverlayName}>{asset.asset_name}</div>
           {label && <div className={styles.cardOverlayLabel}>{label}</div>}
-          {asset.artist_address && (
-            <div className={styles.cardOverlayArtist} title={asset.artist_address}>
-              {truncateAddr(asset.artist_address)}
+          {(asset.artist_name || asset.artist_address) && (
+            <div className={styles.cardOverlayArtist} title={asset.artist_address || asset.artist_name}>
+              {asset.artist_name || truncateAddr(asset.artist_address)}
             </div>
           )}
           <a
@@ -262,8 +262,8 @@ export default function CollectionPage({ params }) {
             </code>
             <p className={styles.howToText}>
               Wallets that support Counterparty Enhanced Asset Info (CIP-25) will
-              immediately display your preserved image. No Arweave. No IPFS. Just
-              Bitcoin-hosted, permanent, free to use.
+              immediately display your preserved image. No Arweave. No IPFS.
+              Hosted and replicated across UNATRARE network nodes, free to use.
             </p>
           </section>
         )}

@@ -150,7 +150,8 @@ export default function ArchivePage() {
               <div className={styles.explainerText}>
                 The image file is SHA-256 hashed. The hash becomes the permanent
                 filename. Content-addressed means the same file is never stored twice,
-                and the URL never changes.
+                and the URL never changes. The file is replicated across UNATRARE
+                network nodes via Hyperdrive.
               </div>
             </div>
             <div className={styles.explainerItem}>
