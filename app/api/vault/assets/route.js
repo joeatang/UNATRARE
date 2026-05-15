@@ -19,7 +19,7 @@ export async function GET(req) {
     const db     = getDb();
     const total  = db.prepare('SELECT COUNT(*) as n FROM vault_assets').get().n;
     const assets = db.prepare(
-      'SELECT id, art_hash, token_name, asset_name, description, art_mime, uploaded_at, is_promo FROM vault_assets ORDER BY uploaded_at DESC LIMIT ? OFFSET ?'
+      'SELECT id, art_hash, token_name, asset_name, description, art_mime, owner_xcp, uploaded_at, is_promo FROM vault_assets ORDER BY uploaded_at DESC LIMIT ? OFFSET ?'
     ).all(limit, offset);
 
     // Get promo status

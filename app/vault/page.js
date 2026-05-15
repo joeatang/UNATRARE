@@ -42,6 +42,14 @@ function AssetCard({ asset }) {
         <div className={styles.tokenName}>{asset.token_name}</div>
         {asset.asset_name && <div className={styles.assetName}>{asset.asset_name}</div>}
         <div className={styles.uploaded}>{timeAgo(asset.uploaded_at)}</div>
+        {asset.owner_xcp ? (
+          <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '1px', color: 'var(--text-dim)', margin: '4px 0 6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            title={asset.owner_xcp}>
+            {asset.owner_xcp.slice(0, 6)}…{asset.owner_xcp.slice(-4)}
+          </div>
+        ) : (
+          <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '1px', color: 'var(--red)', margin: '4px 0 6px' }}>no address</div>
+        )}
         <button className={styles.copyBtn} onClick={copyJson}>
           {copied ? '✓ copied' : 'copy JSON URL'}
         </button>
