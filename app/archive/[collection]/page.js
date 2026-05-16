@@ -183,25 +183,16 @@ export default function CollectionPage({ params }) {
             value={query}
             onChange={e => setQuery(e.target.value)}
           />
-          <div className={styles.seriesButtons}>
-            <button
-              className={`${styles.seriesBtn} ${!seriesFilter ? styles.seriesBtnActive : ''}`}
-              style={!seriesFilter ? { borderColor: color, color } : {}}
-              onClick={() => setSeriesFilter('')}
-            >
-              ALL
-            </button>
+          <select
+            className={styles.seriesSelect}
+            value={seriesFilter}
+            onChange={e => setSeriesFilter(e.target.value)}
+          >
+            <option value="">ALL SERIES</option>
             {seriesList.map(s => (
-              <button
-                key={s}
-                className={`${styles.seriesBtn} ${seriesFilter === String(s) ? styles.seriesBtnActive : ''}`}
-                style={seriesFilter === String(s) ? { borderColor: color, color } : {}}
-                onClick={() => setSeriesFilter(String(s))}
-              >
-                S{s}
-              </button>
+              <option key={s} value={String(s)}>SERIES {s}</option>
             ))}
-          </div>
+          </select>
         </div>
 
         {/* Grid */}

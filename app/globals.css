@@ -30,6 +30,7 @@ body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 a { color: var(--green); text-decoration: none; }

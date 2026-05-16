@@ -284,26 +284,28 @@
 .searchInput::placeholder { color: var(--text-dim); }
 .searchInput:focus { border-color: var(--green); }
 
-.seriesButtons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.seriesBtn {
+.seriesSelect {
   font-family: var(--font-card);
   font-size: 13px;
-  letter-spacing: 1px;
-  background: transparent;
-  border: 1px solid var(--border-dim);
+  letter-spacing: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border);
   color: var(--text-dim);
-  padding: 5px 10px;
+  padding: 8px 36px 8px 14px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
   cursor: pointer;
+  min-width: 160px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235a9a5a' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
   transition: border-color 0.15s, color 0.15s;
 }
 
-.seriesBtn:hover { border-color: var(--border); color: var(--text); }
-.seriesBtnActive { /* set inline via style prop */ }
+.seriesSelect:hover { border-color: var(--border); color: var(--text); }
+.seriesSelect:focus { border-color: var(--green); color: var(--text); }
+.seriesSelect option { background: var(--surface); color: var(--text); }
 
 /* ── Card grid ────────────────────────────────────────────────── */
 .cardGrid {
