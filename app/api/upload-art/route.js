@@ -8,24 +8,52 @@ import { storeArt } from '../../../lib/tracBridge.js';
 
 // Uploads are stored in /public/uploads/ — served by Next.js as /uploads/FILENAME
 // This directory persists on the server across restarts.
-// Max size: 3 MB. Allowed: PNG, JPG, GIF, WebP, SVG, HTML.
-// A 48x48 PNG icon thumbnail is also generated at upload time (used as wallet `image` field).
+// Allowed: PNG, JPG, GIF, WebP, SVG, HTML (images); MP3/WAV/OGG/FLAC (audio); MP4/WebM (video).
+// Size limits: images 3 MB, audio 15 MB, video 25 MB.
+// A 48x48 PNG icon thumbnail is generated for raster images only (wallet `image` field).
 
 // process.cwd() is always the Next.js project root in both dev and production
 const UPLOAD_DIR = path.resolve(process.cwd(), 'public', 'uploads');
 
+const AUDIO_MIME = new Set(['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/mp4']);
+const VIDEO_MIME = new Set(['video/mp4', 'video/webm']);
 const ALLOWED_MIME = new Set([
   'image/png', 'image/jpeg', 'image/gif', 'image/webp',
   'image/svg+xml', 'text/html',
+  ...AUDIO_MIME, ...VIDEO_MIME,
 ]);
+
 // Extension map for MIME types that need explicit mapping
 const MIME_EXT = {
   'image/svg+xml': 'svg',
-  'text/html': 'html',
+  'text/html':     'html',
+  'audio/mpeg':    'mp3',
+  'audio/wav':     'wav',
+  'audio/ogg':     'ogg',
+  'audio/flac':    'flac',
+  'audio/mp4':     'm4a',
+  'video/mp4':     'mp4',
+  'video/webm':    'webm',
 };
-const MAX_BYTES = 3 * 1024 * 1024; // 3 MB ceiling
 
-// MIME types we can thumbnail with sharp (excludes SVG/HTML)
+// Per-type size limits
+const MAX_BYTES_IMAGE = 3  * 1024 * 1024; //  3 MB
+const MAX_BYTES_AUDIO = 15 * 1024 * 1024; // 15 MB
+const MAX_BYTES_VIDEO = 25 * 1024 * 1024; // 25 MB
+
+function getMediaType(mime) {
+  if (AUDIO_MIME.has(mime)) return 'audio';
+  if (VIDEO_MIME.has(mime)) return 'video';
+  return 'image';
+}
+function getMaxBytes(mime) {
+  const t = getMediaType(mime);
+  if (t === 'audio') return MAX_BYTES_AUDIO;
+  if (t === 'video') return MAX_BYTES_VIDEO;
+  return MAX_BYTES_IMAGE;
+}
+
+// MIME types we can thumbnail with sharp (raster images only)
 const THUMBABLE_MIME = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
 
 export async function POST(request) {
@@ -55,22 +83,27 @@ export async function POST(request) {
   if (!ALLOWED_MIME.has(file.type)) {
     return NextResponse.json({
       ok: false,
-      error: 'File must be PNG, JPG, GIF, WebP, SVG, or HTML',
+      error: 'Unsupported file type',
     }, { status: 422 });
   }
 
-  const bytes = await file.arrayBuffer();
-  if (bytes.byteLength > MAX_BYTES) {
+  const bytes     = await file.arrayBuffer();
+  const mediaType = getMediaType(file.type);
+  const maxBytes  = getMaxBytes(file.type);
+  if (bytes.byteLength > maxBytes) {
+    const limitLabel = mediaType === 'audio' ? '15 MB' : mediaType === 'video' ? '25 MB' : '3 MB';
     return NextResponse.json({
       ok: false,
-      error: `File too large (${(bytes.byteLength / 1024 / 1024).toFixed(1)} MB). Max is 1.5 MB — optimise your file before uploading.`,
+      error: `File too large (${(bytes.byteLength / 1024 / 1024).toFixed(1)} MB). Max for ${mediaType} is ${limitLabel}.`,
     }, { status: 422 });
   }
 
-  const buf      = Buffer.from(bytes);
-  const hash     = createHash('sha256').update(buf).digest('hex');
-  const ext      = MIME_EXT[file.type] || file.type.split('/')[1].replace('jpeg', 'jpg');
-  const filename = `${normalized}.${ext}`;
+  const buf    = Buffer.from(bytes);
+  const hash   = createHash('sha256').update(buf).digest('hex');
+  const ext    = MIME_EXT[file.type] || file.type.split('/')[1].replace('jpeg', 'jpg');
+  // Audio/video get a _audio/_video suffix so they don't collide with the image file
+  const suffix = mediaType === 'audio' ? '_audio' : mediaType === 'video' ? '_video' : '';
+  const filename = `${normalized}${suffix}.${ext}`;
 
   try {
     await mkdir(UPLOAD_DIR, { recursive: true });
@@ -101,7 +134,7 @@ export async function POST(request) {
 
     // Public URL — served by Next.js static file serving
     const url = `/uploads/${filename}`;
-    return NextResponse.json({ ok: true, url, filename, hash, icon_url });
+    return NextResponse.json({ ok: true, url, filename, hash, icon_url, mediaType });
   } catch (err) {
     console.error('Upload error:', err);
     return NextResponse.json({ ok: false, error: 'Storage error — please try again' }, { status: 500 });

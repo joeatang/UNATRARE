@@ -126,6 +126,14 @@ export default async function CardPage({ params }) {
     : token.art_url?.startsWith('http') ? token.art_url
     : token.art_url ? `https://unatrare.wtf${token.art_url}` : null;
 
+  const audioDisplayUrl = token.audio_url?.startsWith('http')
+    ? token.audio_url
+    : token.audio_url ? `https://unatrare.wtf${token.audio_url}` : null;
+
+  const videoDisplayUrl = token.video_url?.startsWith('http')
+    ? token.video_url
+    : token.video_url ? `https://unatrare.wtf${token.video_url}` : null;
+
   return (
     <>
       <Nav />
@@ -230,6 +238,24 @@ export default async function CardPage({ params }) {
                 className={styles.description}
                 dangerouslySetInnerHTML={{ __html: token.description }}
               />
+            )}
+
+            {/* ── Supplemental media ── */}
+            {token.revealed_at && videoDisplayUrl && (
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 8 }}>VIDEO</div>
+                <video
+                  controls loop playsInline
+                  src={videoDisplayUrl}
+                  style={{ width: '100%', maxWidth: 400, display: 'block', border: '1px solid var(--border)' }}
+                />
+              </div>
+            )}
+            {token.revealed_at && audioDisplayUrl && (
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 8 }}>AUDIO</div>
+                <audio controls src={audioDisplayUrl} style={{ width: '100%', maxWidth: 400 }} />
+              </div>
             )}
 
             <div className={styles.metaGrid}>

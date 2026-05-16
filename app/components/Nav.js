@@ -1,11 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './Nav.module.css';
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
+
+  // Lock body scroll when drawer is open
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
 
   return (
     <>
@@ -46,24 +52,36 @@ export default function Nav() {
         </div>
       </nav>
 
-      {/* Mobile drawer */}
-      {open && (
-        <div className={styles.drawer} onClick={() => setOpen(false)}>
-          <ul className={styles.drawerLinks}>
-            <li><Link href="/directory">Directory</Link></li>
-            <li><Link href="/archive">Archive</Link></li>
-            <li><Link href="/artists">Artists</Link></li>
-            <li><Link href="/drops">Drops</Link></li>
-            <li><Link href="/wallets">Wallets</Link></li>
-            <li><Link href="/nodes">Nodes</Link></li>
-            <li><Link href="/vault">Vault</Link></li>
-            <li><Link href="/council">Council</Link></li>
-            <li><Link href="/about">About</Link></li>
-            <li><Link href="/register" className={styles['nav-register']}>✦ Register</Link></li>
-            <li><Link href="/submit" className={styles.drawerSubmit}>Open Pepe Wizard →</Link></li>
-          </ul>
+      {/* Backdrop */}
+      <div
+        className={`${styles.backdrop} ${open ? styles.backdropOpen : ''}`}
+        onClick={() => setOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* Mobile side panel */}
+      <div
+        className={`${styles.drawer} ${open ? styles.drawerOpen : ''}`}
+        aria-hidden={!open}
+      >
+        <div className={styles.drawerHeader}>
+          <span className={styles.drawerLogo}>UNATR<span className={styles.drawerLogoA}>A</span>RE</span>
+          <button className={styles.drawerClose} onClick={() => setOpen(false)} aria-label="Close menu">✕</button>
         </div>
-      )}
+        <ul className={styles.drawerLinks} onClick={() => setOpen(false)}>
+          <li><Link href="/directory">Directory</Link></li>
+          <li><Link href="/archive">Archive</Link></li>
+          <li><Link href="/artists">Artists</Link></li>
+          <li><Link href="/drops">Drops</Link></li>
+          <li><Link href="/wallets">Wallets</Link></li>
+          <li><Link href="/nodes">Nodes</Link></li>
+          <li><Link href="/vault">Vault</Link></li>
+          <li><Link href="/council">Council</Link></li>
+          <li><Link href="/about">About</Link></li>
+          <li><Link href="/register" className={styles['nav-register']}>✦ Register</Link></li>
+          <li><Link href="/submit" className={styles.drawerSubmit}>Open Pepe Wizard →</Link></li>
+        </ul>
+      </div>
     </>
   );
 }

@@ -43,6 +43,7 @@ button {
 
 input, textarea {
   font-family: var(--font-body);
+  font-size: 16px; /* prevent iOS auto-zoom on focus */
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text);

@@ -1,5 +1,5 @@
 .page {
-  padding-top: 48px; /* nav height */
+  padding-top: 88px; /* nav height + breathing room */
   min-height: 100vh;
 }
 

@@ -503,7 +503,55 @@ function Step3({ data, onNext, onBack }) {
   const [inscription, setInscription] = useState('');
   const [errMsg, setErrMsg] = useState('');
 
+  const [audioResult, setAudioResult]     = useState(null); // {url, hash, mime}
+  const [audioErr, setAudioErr]           = useState('');
+  const [audioUploading, setAudioUploading] = useState(false);
+  const audioRef = useRef();
+
+  const [videoResult, setVideoResult]     = useState(null); // {url, hash, mime}
+  const [videoErr, setVideoErr]           = useState('');
+  const [videoUploading, setVideoUploading] = useState(false);
+  const videoRef = useRef();
+
   const INSC_RE = /^[0-9a-fA-F]{64}$/;
+
+  async function handleAudioUpload(e) {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    const AUDIO_OK = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/mp4'];
+    if (!AUDIO_OK.includes(f.type)) { setAudioErr('Must be MP3, WAV, OGG, FLAC, or M4A'); return; }
+    if (f.size > 15 * 1024 * 1024) { setAudioErr('Audio must be under 15 MB'); return; }
+    setAudioUploading(true); setAudioErr('');
+    try {
+      const form = new FormData();
+      form.append('file', f);
+      form.append('tokenName', data.tokenName);
+      const res  = await fetch('/api/upload-art', { method: 'POST', body: form });
+      const json = await res.json();
+      if (json.ok) setAudioResult({ url: json.url, hash: json.hash || '', mime: f.type });
+      else         setAudioErr(json.error || 'Upload failed');
+    } catch { setAudioErr('Network error — please try again'); }
+    setAudioUploading(false);
+  }
+
+  async function handleVideoUpload(e) {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    const VIDEO_OK = ['video/mp4', 'video/webm'];
+    if (!VIDEO_OK.includes(f.type)) { setVideoErr('Must be MP4 or WebM'); return; }
+    if (f.size > 25 * 1024 * 1024) { setVideoErr('Video must be under 25 MB'); return; }
+    setVideoUploading(true); setVideoErr('');
+    try {
+      const form = new FormData();
+      form.append('file', f);
+      form.append('tokenName', data.tokenName);
+      const res  = await fetch('/api/upload-art', { method: 'POST', body: form });
+      const json = await res.json();
+      if (json.ok) setVideoResult({ url: json.url, hash: json.hash || '', mime: f.type });
+      else         setVideoErr(json.error || 'Upload failed');
+    } catch { setVideoErr('Network error — please try again'); }
+    setVideoUploading(false);
+  }
 
   function handleContinue() {
     if (inscription && !INSC_RE.test(inscription.trim())) {
@@ -515,6 +563,12 @@ function Step3({ data, onNext, onBack }) {
       artistHandle:   handle.trim().replace(/^@/, '').slice(0, 64),
       description:    desc.trim().slice(0, 280),
       ordInscription: inscription.trim() || '',
+      audioUrl:       audioResult?.url  || '',
+      audioMime:      audioResult?.mime || '',
+      audioHash:      audioResult?.hash || '',
+      videoUrl:       videoResult?.url  || '',
+      videoMime:      videoResult?.mime || '',
+      videoHash:      videoResult?.hash || '',
     });
   }
 
@@ -581,6 +635,63 @@ function Step3({ data, onNext, onBack }) {
           If your art is inscribed on Bitcoin Ordinals, paste the reveal txid here.
         </div>
         {errMsg && <div className={styles.inputError}>{errMsg}</div>}
+      </div>
+
+      {/* ── Optional: Audio upload ── */}
+      <div className={styles.inputGroup}>
+        <label className={styles.inputLabel}>Audio Track — optional (MP3, WAV, OGG · max 15 MB)</label>
+        <div style={{display:'flex', gap:10, alignItems:'center', flexWrap:'wrap'}}>
+          <button
+            type="button"
+            className={styles.backBtn}
+            style={{margin:0}}
+            onClick={() => audioRef.current?.click()}
+            disabled={audioUploading}
+          >
+            {audioUploading ? 'uploading...' : audioResult ? 'change file' : 'select audio'}
+          </button>
+          {audioResult && !audioUploading && (
+            <span style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px', color:'var(--green)'}}>✓ uploaded</span>
+          )}
+        </div>
+        <input ref={audioRef} type="file" accept="audio/mpeg,audio/wav,audio/ogg,audio/flac,audio/mp4"
+          style={{display:'none'}} onChange={handleAudioUpload} />
+        {audioErr && <div className={styles.inputError}>{audioErr}</div>}
+        {audioResult && (
+          <audio controls src={audioResult.url} style={{marginTop:10, width:'100%', maxWidth:340}} />
+        )}
+        <div className={styles.inputHint}>
+          Stored on the UNATRARE network · appears in wallets that support audio cards (like GHOSTFAKE)
+        </div>
+      </div>
+
+      {/* ── Optional: Video upload ── */}
+      <div className={styles.inputGroup}>
+        <label className={styles.inputLabel}>Video — optional (MP4, WebM · max 25 MB)</label>
+        <div style={{display:'flex', gap:10, alignItems:'center', flexWrap:'wrap'}}>
+          <button
+            type="button"
+            className={styles.backBtn}
+            style={{margin:0}}
+            onClick={() => videoRef.current?.click()}
+            disabled={videoUploading}
+          >
+            {videoUploading ? 'uploading...' : videoResult ? 'change file' : 'select video'}
+          </button>
+          {videoResult && !videoUploading && (
+            <span style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px', color:'var(--green)'}}>✓ uploaded</span>
+          )}
+        </div>
+        <input ref={videoRef} type="file" accept="video/mp4,video/webm"
+          style={{display:'none'}} onChange={handleVideoUpload} />
+        {videoErr && <div className={styles.inputError}>{videoErr}</div>}
+        {videoResult && (
+          <video controls loop playsInline src={videoResult.url}
+            style={{marginTop:10, width:'100%', maxWidth:340, maxHeight:200, display:'block', border:'1px solid var(--border)'}} />
+        )}
+        <div className={styles.inputHint}>
+          Stored on the UNATRARE network · appears in wallets that support video cards (like PEPELEVANDAL)
+        </div>
       </div>
 
       <div style={{display:'flex', gap:12, flexWrap:'wrap'}}>
@@ -710,6 +821,12 @@ function Step5({ data }) {
             description:    data.description    || '',
             ordInscription: data.ordInscription || '',
             inviteCode:     data.inviteCode     || '',
+            audioUrl:       data.audioUrl       || '',
+            audioMime:      data.audioMime      || '',
+            audioHash:      data.audioHash      || '',
+            videoUrl:       data.videoUrl       || '',
+            videoMime:      data.videoMime      || '',
+            videoHash:      data.videoHash      || '',
           }),
         });
         const json = await res.json();

@@ -12,12 +12,20 @@ export const metadata = {
     images: [{ url: '/og-default.png', width: 1200, height: 630 }],
   },
   twitter: { card: 'summary_large_image' },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'UNATRARE',
+  },
 };
 
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
+  viewportFit: 'cover',
+  themeColor: '#080808',
 };
 
 export default function RootLayout({ children }) {

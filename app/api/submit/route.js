@@ -26,6 +26,12 @@ export async function POST(request) {
     description    = '',
     ordInscription = '',
     inviteCode     = '',
+    audioUrl       = '',
+    audioMime      = '',
+    audioHash      = '',
+    videoUrl       = '',
+    videoMime      = '',
+    videoHash      = '',
   } = body || {};
 
   // ── Required field checks ───────────────────────────────────
@@ -119,8 +125,9 @@ export async function POST(request) {
       INSERT INTO tokens
         (token_name, display_title, artist_address, artist_handle,
          description, status, art_url, art_mime, art_hash,
-         supply, cp_version, ord_inscription, submitted_at, series0_code_used)
-      VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, unixepoch(), ?)
+         supply, cp_version, ord_inscription, submitted_at, series0_code_used,
+         audio_url, audio_hash, audio_mime, video_url, video_hash, video_mime)
+      VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, unixepoch(), ?, ?, ?, ?, ?, ?, ?)
     `).run(
       normalized,
       normalized,
@@ -134,6 +141,13 @@ export async function POST(request) {
       cpVersion === 2 ? 2 : 1,
       safeInscription,
       s0CodeUsed,
+      // Audio — only store if it looks like a real URL
+      audioUrl && audioUrl.length > 4 ? audioUrl.slice(0, 500) : '',
+      audioHash && /^[0-9a-f]{64}$/i.test(audioHash) ? audioHash : '',
+      audioMime.slice(0, 50),
+      videoUrl && videoUrl.length > 4 ? videoUrl.slice(0, 500) : '',
+      videoHash && /^[0-9a-f]{64}$/i.test(videoHash) ? videoHash : '',
+      videoMime.slice(0, 50),
     );
 
     // Consume invite code if used
