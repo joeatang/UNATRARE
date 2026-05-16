@@ -4,14 +4,13 @@
   position: fixed;
   top: 0; left: 0; right: 0;
   height: 48px;
-  background: rgba(8,8,8,0.96);
+  background: #080808;
   border-bottom: 1px solid var(--border-dim);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 32px;
   z-index: 200;
-  backdrop-filter: blur(4px);
 }
 
 /* Green top edge */
