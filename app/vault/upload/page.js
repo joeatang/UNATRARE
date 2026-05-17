@@ -18,8 +18,8 @@ export default function VaultUploadPage() {
   });
   const [status,   setStatus]   = useState('');          // idle | uploading | done | error
   const [result,   setResult]   = useState(null);
-  const [copied,      setCopied]      = useState('');
-  const [previewOpen, setPreviewOpen] = useState(false);
+  const [copied,     setCopied]     = useState('');
+  const [previewTab, setPreviewTab] = useState('card');
   const fileRef  = useRef();
 
   useEffect(() => {
@@ -145,6 +145,12 @@ export default function VaultUploadPage() {
         return `<span style="color:#6ba8d6">${m}</span>`;                             // number
       }
     );
+  }
+
+  function extractHandle(url, type) {
+    if (!url?.trim()) return '';
+    const last = url.trim().replace(/\/$/, '').split('/').pop() || url;
+    return type === 'twitter' ? (last.startsWith('@') ? last : '@' + last) : last;
   }
 
   const promoSlotsLeft = promo ? promo.max - promo.count : null;
@@ -381,17 +387,61 @@ export default function VaultUploadPage() {
             <div className={styles.errorMsg}>{result.error}</div>
           )}
 
-          {/* ── JSON Preview ── */}
+          {/* ── Card / JSON Preview ── */}
           <div className={styles.previewSection}>
-            <button
-              type="button"
-              className={styles.previewToggle}
-              onClick={() => setPreviewOpen(o => !o)}
-            >
-              <span>PREVIEW JSON</span>
-              <span style={{ fontSize: '0.75rem' }}>{previewOpen ? '▴' : '▾'}</span>
-            </button>
-            {previewOpen && (
+            <div className={styles.previewTabs}>
+              <button
+                type="button"
+                className={`${styles.previewTab} ${previewTab === 'card' ? styles.previewTabActive : ''}`}
+                onClick={() => setPreviewTab('card')}
+              >CARD PREVIEW</button>
+              <button
+                type="button"
+                className={`${styles.previewTab} ${previewTab === 'json' ? styles.previewTabActive : ''}`}
+                onClick={() => setPreviewTab('json')}
+              >JSON</button>
+            </div>
+
+            {previewTab === 'card' ? (
+              <div className={styles.cardWrap}>
+                <div className={styles.cardPreview}>
+                  <div className={styles.cardImgWrap}>
+                    {preview ? (
+                      <img className={styles.cardImgEl} src={preview} alt="art preview" />
+                    ) : (
+                      <div className={styles.cardImgPlaceholder}>
+                        <span>DROP ART TO PREVIEW</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className={styles.cardBody}>
+                    <div className={styles.cardToken}>{form.token_name || 'YOURTOKEN'}</div>
+                    {form.asset_name && form.asset_name !== form.token_name && (
+                      <div className={styles.cardName}>{form.asset_name}</div>
+                    )}
+                    {form.description && (
+                      <div className={styles.cardDesc}>
+                        {form.description.length > 120 ? form.description.slice(0, 120) + '…' : form.description}
+                      </div>
+                    )}
+                    {(form.artist_handle?.trim() || form.owner_xcp?.trim()) && (
+                      <div className={styles.cardSig}>
+                        by {form.artist_handle?.trim() || (form.owner_xcp ? form.owner_xcp.slice(0, 10) + '…' : '')}
+                      </div>
+                    )}
+                    {(form.twitter || form.telegram) && (
+                      <div className={styles.cardSocials}>
+                        {form.twitter  && <span className={styles.cardSocialBadge}>𝕏 {extractHandle(form.twitter, 'twitter')}</span>}
+                        {form.telegram && <span className={styles.cardSocialBadge}>✈ {extractHandle(form.telegram, 'telegram')}</span>}
+                      </div>
+                    )}
+                    <div className={styles.cardFooter}>
+                      <span className={styles.cardBadge}>◈ UNATRARE VAULT</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
               <div className={styles.previewBlock}>
                 <pre
                   dangerouslySetInnerHTML={{
@@ -400,8 +450,11 @@ export default function VaultUploadPage() {
                 />
               </div>
             )}
+
             <p className={styles.previewNote}>
-              Exactly what wallets and explorers will read from your token. Placeholders are replaced with real values after upload.
+              {previewTab === 'card'
+                ? 'Live card preview · updates as you type · drop art to see image'
+                : 'Exactly what wallets and explorers read · placeholders replaced after upload'}
             </p>
           </div>
 

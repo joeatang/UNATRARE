@@ -359,28 +359,39 @@
   margin-bottom: 1.25rem;
 }
 
-.previewToggle {
+.previewTabs {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.previewTab {
+  flex: 1;
   font-family: monospace;
-  font-size: 0.63rem;
+  font-size: 0.62rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-dim);
   background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 0.45rem 0.85rem;
+  border: none;
+  padding: 0.5rem 0.75rem;
   cursor: pointer;
-  width: 100%;
-  text-align: left;
-  margin-bottom: 0.6rem;
-  transition: border-color 0.15s, color 0.15s;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  transition: background 0.15s, color 0.15s;
 }
 
-.previewToggle:hover {
-  border-color: rgba(245, 166, 35, 0.5);
+.previewTab + .previewTab {
+  border-left: 1px solid var(--border);
+}
+
+.previewTab:hover {
+  background: rgba(180, 255, 111, 0.04);
+  color: var(--green);
+}
+
+.previewTabActive {
+  background: rgba(180, 255, 111, 0.07);
   color: var(--green);
 }
 
@@ -413,4 +424,129 @@
   color: #3a3a3a;
   margin: 0.1rem 0 0.75rem;
   text-align: center;
+}
+
+/* ── Card preview ────────────────────────────────────────────── */
+.cardWrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.cardPreview {
+  width: 100%;
+  max-width: 380px;
+  background: #060804;
+  border: 1px solid rgba(180, 255, 111, 0.18);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 0 24px rgba(180, 255, 111, 0.03);
+}
+
+.cardImgWrap {
+  width: 100%;
+  background: #020301;
+  border-bottom: 1px solid rgba(180, 255, 111, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardImgEl {
+  max-width: 100%;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.cardImgPlaceholder {
+  width: 100%;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardImgPlaceholder span {
+  font-family: monospace;
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(180, 255, 111, 0.18);
+}
+
+.cardBody {
+  padding: 0.9rem 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.cardToken {
+  font-family: var(--font-card);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--green);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.cardName {
+  font-family: monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+
+.cardDesc {
+  font-family: monospace;
+  font-size: 0.67rem;
+  color: var(--text-dim);
+  opacity: 0.7;
+  line-height: 1.5;
+  margin-top: 0.15rem;
+}
+
+.cardSig {
+  font-family: monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.03em;
+  color: rgba(245, 166, 35, 0.55);
+  font-style: italic;
+  margin-top: 0.1rem;
+}
+
+.cardSocials {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+.cardSocialBadge {
+  font-family: monospace;
+  font-size: 0.56rem;
+  letter-spacing: 0.05em;
+  color: rgba(90, 191, 90, 0.65);
+  background: rgba(90, 191, 90, 0.07);
+  border: 1px solid rgba(90, 191, 90, 0.18);
+  border-radius: 2px;
+  padding: 0.15rem 0.4rem;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(180, 255, 111, 0.07);
+}
+
+.cardBadge {
+  font-family: monospace;
+  font-size: 0.54rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--green);
+  opacity: 0.6;
 }
