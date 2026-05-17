@@ -83,8 +83,9 @@ export async function POST(req) {
   const owner_btc   = String(formData.get('owner_btc')   || '').trim().slice(0, 100);
   const fee_tx      = String(formData.get('fee_tx')      || '').trim().slice(0, 100);
   const fee_currency = String(formData.get('fee_currency') || '').trim().slice(0, 20);
-  const twitter      = String(formData.get('twitter')      || '').trim().slice(0, 120);
-  const telegram     = String(formData.get('telegram')     || '').trim().slice(0, 120);
+  const twitter       = String(formData.get('twitter')       || '').trim().slice(0, 120);
+  const telegram      = String(formData.get('telegram')      || '').trim().slice(0, 120);
+  const artist_handle = String(formData.get('artist_handle') || '').trim().slice(0, 64);
 
   // Validate file
   if (!file || typeof file === 'string') {
@@ -160,14 +161,14 @@ export async function POST(req) {
       INSERT INTO vault_assets
         (art_hash, token_name, asset_name, description, owner_xcp, owner_btc,
          art_mime, file_size, json_url, art_url, fee_paid, fee_currency, fee_tx, is_promo, uploaded_at,
-         twitter, telegram)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         twitter, telegram, artist_handle)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       hash, token_name, asset_name, description, owner_xcp, owner_btc,
       file.type, buf.length, json_url, art_url,
       promo.promo ? 0 : 1, fee_currency, fee_tx,
       promo.promo ? 1 : 0, Date.now(),
-      twitter, telegram
+      twitter, telegram, artist_handle
     );
 
     console.log(`[vault/upload] ${token_name} ${hash.slice(0, 8)}... promo=${promo.promo}`);

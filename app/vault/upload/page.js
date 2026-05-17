@@ -14,7 +14,7 @@ export default function VaultUploadPage() {
   const [preview,  setPreview]  = useState(null);
   const [form,     setForm]     = useState({
     token_name: '', asset_name: '', description: '', owner_xcp: '', owner_btc: '',
-    fee_tx: '', fee_currency: 'PEPECASH', twitter: '', telegram: '',
+    fee_tx: '', fee_currency: 'PEPECASH', twitter: '', telegram: '', artist_handle: '',
   });
   const [status,   setStatus]   = useState('');          // idle | uploading | done | error
   const [result,   setResult]   = useState(null);
@@ -112,7 +112,7 @@ export default function VaultUploadPage() {
       image_large:           art_url,
       image_title:           name,
       website:               BASE,
-      pgpsig:                f.owner_xcp || '',
+      pgpsig:                f.artist_handle?.trim() || f.owner_xcp || '',
       category:              'Art',
       subcategory:           'UNATRARE Vault',
       category_custom:       '',
@@ -209,7 +209,7 @@ export default function VaultUploadPage() {
               <code className={styles.successVal}>{result.hash}</code>
             </div>
           </div>
-          <button className={styles.resetBtn} onClick={() => { setStatus(''); setResult(null); setFile(null); setPreview(null); setForm({ token_name:'',asset_name:'',description:'',owner_xcp:'',owner_btc:'',fee_tx:'',fee_currency:'PEPECASH',twitter:'',telegram:''}); }}>
+          <button className={styles.resetBtn} onClick={() => { setStatus(''); setResult(null); setFile(null); setPreview(null); setForm({ token_name:'',asset_name:'',description:'',owner_xcp:'',owner_btc:'',fee_tx:'',fee_currency:'PEPECASH',twitter:'',telegram:'',artist_handle:''}); }}>
             Upload another
           </button>
           <Link href="/vault" style={{ display:'block', textAlign:'center', marginTop:12,
@@ -307,6 +307,18 @@ export default function VaultUploadPage() {
                 onChange={field('owner_btc')}
                 placeholder="bc1q…"
                 maxLength={100}
+              />
+            </label>
+
+            {/* ── PGP sig / artist signature ── */}
+            <label className={styles.field}>
+              <span className={styles.label}>ARTIST SIGNATURE · PGPSIG (optional)</span>
+              <input
+                className={styles.input}
+                value={form.artist_handle}
+                onChange={field('artist_handle')}
+                placeholder="your name, handle, or @username"
+                maxLength={64}
               />
             </label>
 

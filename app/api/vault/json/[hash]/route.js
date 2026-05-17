@@ -59,7 +59,7 @@ export async function GET(req, { params }) {
       image_large:           art_url,
       image_title:           name,
       website:               baseUrl,
-      pgpsig:                asset.owner_xcp || '',
+      pgpsig:                asset.artist_handle || asset.owner_xcp || '',
       category:              'Art',
       subcategory:           'UNATRARE Vault',
       category_custom:       '',
