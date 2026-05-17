@@ -72,6 +72,9 @@ export default function DirectoryPage({ searchParams }) {
             <h1 className={styles.title}>DIRECT<span>O</span>RY</h1>
             <div className={styles.totalCount}>{total} certified card{total !== 1 ? 's' : ''}</div>
           </div>
+          <Link href="/submit" className={styles.submitCta}>
+            submit your token →
+          </Link>
         </div>
 
         {/* ── Series filter + Sort ── */}

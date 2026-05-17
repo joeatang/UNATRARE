@@ -45,6 +45,25 @@
   margin-top: 10px;
 }
 
+.submitCta {
+  font-family: var(--font-card);
+  font-size: 15px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 12px 28px;
+  background: var(--green);
+  color: var(--bg);
+  text-decoration: none;
+  border: 1px solid var(--green);
+  white-space: nowrap;
+  align-self: flex-end;
+  transition: background 0.15s, color 0.15s;
+}
+.submitCta:hover {
+  background: var(--green-hot);
+  border-color: var(--green-hot);
+}
+
 /* ─── Filter bar ─────────────────────────────────────────── */
 .filterBar {
   max-width: 1440px;
