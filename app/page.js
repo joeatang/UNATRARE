@@ -380,7 +380,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── CTA ── */
+        {/* ── CTA ── */}
         <div className={styles.ctaStrip}>
           <div className={styles.ctaTitle}>IS YOUR ART DANK ENOUGH?</div>
           <div className={styles.ctaSub}>
