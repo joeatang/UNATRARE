@@ -133,6 +133,9 @@ export default function HomePage() {
   const { pending, approved, rejected, recent, pending3, feedTokens, drops } = getPageData();
   const { total: archiveTotal, recent: archiveRecent } = getArchiveSummary();
   const nonDemo = feedTokens.filter(t => !t.is_demo);
+  const showcaseTokens = feedTokens
+    .filter(t => t.status === 'approved' && t.revealed_at && t.art_hash && !t.is_demo)
+    .slice(0, 6);
 
   function archiveArtUrl(a) {
     if (!a?.art_hash) return null;
@@ -151,56 +154,41 @@ export default function HomePage() {
       <Nav />
       <main className={styles.page}>
 
-        {/* ── PEPEMPOOL — compact hero row ── */}
+        {/* ── HERO ── */}
         <section className={styles.hero}>
           <div className={styles.eyebrow}>· bitcoin · counterparty · dmt-nat ·</div>
-          <h1 className={styles.heroTitle}>PEPEMPO<span>O</span>L</h1>
-          <div className={styles.heroSub}>real-time submission activity · unatrare curated directory</div>
+          <h1 className={styles.heroTitle}>THE DIRECT<span>O</span>RY</h1>
+          <div className={styles.heroSub}>The curated registry of Counterparty art on Bitcoin.</div>
           <p className={styles.heroExplainer}>
+            Every submission judged by the Pepe Council. Only the best get listed — permanently, on Bitcoin.
             The art is Counterparty. The currency is NAT. The Council is the filter.
-            Every rare before this required you to already be in the room.
-            UNATRARE is the first directory built for the people who found Bitcoin
-            a completely different way — and still ended up at Pepe.
           </p>
-        </section>
-
-        {/* ── ARCHIVE BANNER ── */}
-        <section className={styles.archiveBanner}>
-          <div className={styles.archiveBannerInner}>
-            <div className={styles.archiveBannerLeft}>
-              <div className={styles.archiveBannerEyebrow}>· the archive ·</div>
-              <div className={styles.archiveBannerTitle}>
-                THE PERMANENT HOME FOR COUNTERPARTY ART HISTORY
-              </div>
-              <div className={styles.archiveBannerSub}>
-                Rare Pepe Series 1–38 · broken Arweave links · dead IPFS nodes ·
-                every card, hashed and served forever from Bitcoin&apos;s oldest art protocol.
-              </div>
-              <div className={styles.archiveBannerStats}>
-                {archiveTotal > 0 ? (
-                  <><span className={styles.archiveBannerCount}>{archiveTotal.toLocaleString()}</span> cards preserved</>
-                ) : (
-                  <span className={styles.archiveBannerCount}>seeding...</span>
-                )}
-              </div>
-              <Link href="/archive" className={styles.archiveBannerCta}>
-                explore the archive →
-              </Link>
-            </div>
-            {archiveRecent.length > 0 && (
-              <div className={styles.archiveBannerPreviews}>
-                {archiveRecent.slice(0, 4).map(a => {
-                  const url = archiveArtUrl(a);
-                  return url ? (
-                    <div key={a.asset_name} className={styles.archiveBannerThumb}>
-                      <img src={url} alt={a.asset_name} />
-                    </div>
-                  ) : null;
-                })}
-              </div>
-            )}
+          <div className={styles.heroCtas}>
+            <Link href="/directory" className={styles.heroCtaPrimary}>browse the directory →</Link>
+            <Link href="/submit" className={styles.heroCtaSecondary}>submit your token →</Link>
           </div>
         </section>
+
+        {/* ── RECENTLY CERTIFIED ── */}
+        {showcaseTokens.length > 0 && (
+          <section className={styles.showcaseSection}>
+            <div className={styles.sectionLabel}>recently certified</div>
+            <div className={styles.showcaseRow}>
+              {showcaseTokens.map(t => (
+                <Link key={t.token_name} href={`/card/${t.token_name}`} className={styles.showcaseCard}>
+                  <div className={styles.showcaseImg}>
+                    <img src={`https://unatrare.wtf/art/${t.art_hash}`} alt={t.token_name} />
+                  </div>
+                  <div className={styles.showcaseToken}>{t.token_name}</div>
+                  {t.display_title && <div className={styles.showcaseName}>{t.display_title}</div>}
+                </Link>
+              ))}
+            </div>
+            <div className={styles.showcaseFooter}>
+              <Link href="/directory" className={styles.showcaseAll}>browse all certified →</Link>
+            </div>
+          </section>
+        )}
 
         <MempoolLive
           initialStats={{ pending, approved, rejected }}
@@ -211,7 +199,7 @@ export default function HomePage() {
         {/* ── Unified Timeline: Verdicts + Council Signal drops ── */}
         <div className={styles.feedBlock}>
         <div className={feedStyles.header} style={{ marginTop: 48 }}>
-          <div className={feedStyles.eyebrow}>PEPE COUNCIL · LIVE FEED</div>
+          <div className={feedStyles.eyebrow}>THE COUNCIL · LIVE</div>
           <h2 className={feedStyles.title}>THE F<span>E</span>ED</h2>
           <p className={feedStyles.subtitle}>
             Verdicts, council commentary, and cultural dispatches — all in one place.
@@ -354,7 +342,45 @@ export default function HomePage() {
         </div>
         </div>{/* end feedBlock */}
 
-        {/* ── CTA ── */}
+        {/* ── ARCHIVE BANNER ── */}
+        <section className={styles.archiveBanner}>
+          <div className={styles.archiveBannerInner}>
+            <div className={styles.archiveBannerLeft}>
+              <div className={styles.archiveBannerEyebrow}>· the archive ·</div>
+              <div className={styles.archiveBannerTitle}>
+                THE PERMANENT HOME FOR COUNTERPARTY ART HISTORY
+              </div>
+              <div className={styles.archiveBannerSub}>
+                Rare Pepe Series 1–38 · broken Arweave links · dead IPFS nodes ·
+                every card, hashed and served forever from Bitcoin&apos;s oldest art protocol.
+              </div>
+              <div className={styles.archiveBannerStats}>
+                {archiveTotal > 0 ? (
+                  <><span className={styles.archiveBannerCount}>{archiveTotal.toLocaleString()}</span> cards preserved</>
+                ) : (
+                  <span className={styles.archiveBannerCount}>seeding...</span>
+                )}
+              </div>
+              <Link href="/archive" className={styles.archiveBannerCta}>
+                explore the archive →
+              </Link>
+            </div>
+            {archiveRecent.length > 0 && (
+              <div className={styles.archiveBannerPreviews}>
+                {archiveRecent.slice(0, 4).map(a => {
+                  const url = archiveArtUrl(a);
+                  return url ? (
+                    <div key={a.asset_name} className={styles.archiveBannerThumb}>
+                      <img src={url} alt={a.asset_name} />
+                    </div>
+                  ) : null;
+                })}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* ── CTA ── */
         <div className={styles.ctaStrip}>
           <div className={styles.ctaTitle}>IS YOUR ART DANK ENOUGH?</div>
           <div className={styles.ctaSub}>
@@ -362,7 +388,7 @@ export default function HomePage() {
             then create your counterparty token.<br />
             then submit to the pepe council.
           </div>
-          <Link href="/submit" className={styles.ctaButton}>open pepe wizard →</Link>
+          <Link href="/submit" className={styles.ctaButton}>submit your token →</Link>
           <div style={{ marginTop: 16 }}>
             <Link href="/terms" style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '3px', color: 'var(--text-dim)', textDecoration: 'none' }}>
               read enrollment rules →

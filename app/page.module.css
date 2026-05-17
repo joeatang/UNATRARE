@@ -691,3 +691,138 @@
   .archiveBannerTitle { font-size: 18px; letter-spacing: 2px; }
   .archiveBannerEyebrow { letter-spacing: 3px; }
 }
+
+/* ─── Hero CTAs ─────────────────────────────────────────── */
+.heroCtas {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.heroCtaPrimary {
+  display: inline-block;
+  font-family: var(--font-card);
+  font-size: 15px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--green);
+  padding: 12px 28px;
+  text-decoration: none;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.heroCtaPrimary:hover { background: var(--green-hot); color: var(--bg); }
+
+.heroCtaSecondary {
+  display: inline-block;
+  font-family: var(--font-card);
+  font-size: 15px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 12px 28px;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.heroCtaSecondary:hover { border-color: var(--green); color: var(--green); }
+
+/* ─── Recently Certified Showcase ───────────────────────── */
+.showcaseSection {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 48px 32px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.showcaseRow {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-top: 24px;
+}
+.showcaseRow::-webkit-scrollbar { height: 2px; }
+.showcaseRow::-webkit-scrollbar-track { background: var(--border-dim); }
+.showcaseRow::-webkit-scrollbar-thumb { background: var(--green); }
+
+.showcaseCard {
+  flex-shrink: 0;
+  width: 140px;
+  border: 1px solid var(--border-dim);
+  background: var(--surface);
+  text-decoration: none;
+  transition: border-color 0.15s;
+}
+.showcaseCard:hover { border-color: var(--green); }
+
+.showcaseImg {
+  width: 140px;
+  height: 140px;
+  overflow: hidden;
+  background: var(--bg);
+}
+.showcaseImg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.showcaseToken {
+  padding: 6px 8px 2px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.showcaseName {
+  padding: 0 8px 6px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.showcaseFooter {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.showcaseAll {
+  font-family: var(--font-card);
+  font-size: 15px;
+  letter-spacing: 3px;
+  color: var(--green);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.showcaseAll:hover { color: var(--green-hot); }
+
+@media (max-width: 900px) {
+  .showcaseSection { padding-left: 20px; padding-right: 20px; }
+}
+
+@media (max-width: 600px) {
+  .heroCtas { flex-direction: column; }
+  .heroCtaPrimary,
+  .heroCtaSecondary { text-align: center; width: 100%; box-sizing: border-box; }
+  .showcaseSection { padding-left: 20px; padding-right: 20px; padding-top: 28px; padding-bottom: 28px; }
+  .showcaseCard { width: 120px; }
+  .showcaseImg { width: 120px; height: 120px; }
+}
+
+@media (min-width: 1600px) {
+  .showcaseSection { padding-left: 64px; padding-right: 64px; }
+}

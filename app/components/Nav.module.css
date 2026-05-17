@@ -207,6 +207,27 @@
 }
 .drawerSubmit:hover { background: var(--green-hot) !important; }
 
+/* Drawer section divider + secondary links */
+.drawerSectionDivider {
+  border-bottom: none !important;
+  padding: 12px 24px 4px !important;
+  pointer-events: none;
+}
+.drawerSectionDivider span {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+.drawerSecondaryLink {
+  font-size: 13px !important;
+  letter-spacing: 2px !important;
+  opacity: 0.6;
+}
+.drawerSecondaryLink:hover { opacity: 1 !important; }
+
 /* Responsive */
 @media (max-width: 1024px) {
   .nav { padding: env(safe-area-inset-top, 0px) 20px 0; height: calc(56px + env(safe-area-inset-top, 0px)); }

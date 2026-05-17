@@ -24,14 +24,9 @@ export default function Nav() {
         <ul className={styles['nav-links']}>
           <li><Link href="/directory">Directory</Link></li>
           <li><Link href="/archive">Archive</Link></li>
-          <li><Link href="/artists">Artists</Link></li>
-          <li><Link href="/drops">Drops</Link></li>
-          <li><Link href="/wallets">Wallets</Link></li>
-          <li><Link href="/nodes">Nodes</Link></li>
           <li><Link href="/vault">Vault</Link></li>
-          <li><Link href="/council">Council</Link></li>
-          <li><Link href="/about">About</Link></li>
-          <li><Link href="/register" className={styles['nav-register']}>✦ Register</Link></li>
+          <li><Link href="/nodes">Nodes</Link></li>
+          <li><Link href="/register" className={styles['nav-register']}>✦ UNATPEPE</Link></li>
         </ul>
 
         <div className={styles.navRight}>
@@ -71,15 +66,16 @@ export default function Nav() {
         <ul className={styles.drawerLinks} onClick={() => setOpen(false)}>
           <li><Link href="/directory">Directory</Link></li>
           <li><Link href="/archive">Archive</Link></li>
-          <li><Link href="/artists">Artists</Link></li>
-          <li><Link href="/drops">Drops</Link></li>
-          <li><Link href="/wallets">Wallets</Link></li>
-          <li><Link href="/nodes">Nodes</Link></li>
           <li><Link href="/vault">Vault</Link></li>
-          <li><Link href="/council">Council</Link></li>
-          <li><Link href="/about">About</Link></li>
-          <li><Link href="/register" className={styles['nav-register']}>✦ Register</Link></li>
-          <li><Link href="/submit" className={styles.drawerSubmit}>Open Pepe Wizard →</Link></li>
+          <li><Link href="/nodes">Nodes</Link></li>
+          <li><Link href="/register" className={styles['nav-register']}>✦ UNATPEPE</Link></li>
+          <li className={styles.drawerSectionDivider}><span>more</span></li>
+          <li><Link href="/council" className={styles.drawerSecondaryLink}>Council</Link></li>
+          <li><Link href="/artists" className={styles.drawerSecondaryLink}>Artists</Link></li>
+          <li><Link href="/about" className={styles.drawerSecondaryLink}>About</Link></li>
+          <li><Link href="/wallets" className={styles.drawerSecondaryLink}>Wallets</Link></li>
+          <li><Link href="/drops" className={styles.drawerSecondaryLink}>Drops</Link></li>
+          <li><Link href="/submit" className={styles.drawerSubmit}>Submit Your Token →</Link></li>
         </ul>
       </div>
     </>
