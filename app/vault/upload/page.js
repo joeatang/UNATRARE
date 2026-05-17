@@ -338,7 +338,7 @@ export default function VaultUploadPage() {
             </div>
           </div>
 
-          {/* ── Fee fields (hidden during promo) ── */}}
+          {/* ── Fee fields (hidden during promo) ── */}
           {promo && !promo.promo && (
             <div className={styles.feeSection}>
               <div className={styles.feeTitle}>PAYMENT</div>
