@@ -536,7 +536,7 @@
 
   /* ── Mobile density: hide verbose secondary text, limit list length ── */
   .heroExplainer { display: none; }
-  .eyebrow { letter-spacing: 3px; }
+  .eyebrow { letter-spacing: 0; font-size: 13px; }
   .stats { justify-content: space-around; }
 
   /* Center and slightly compact the 3 mystery pending cards */
@@ -555,7 +555,7 @@
 @media (max-width: 380px) {
   .heroTitle { font-size: 22px; }
   .ctaTitle  { font-size: 18px; }
-  .eyebrow   { letter-spacing: 2px; font-size: 13px; }
+  .eyebrow   { letter-spacing: 0; font-size: 12px; }
   .heroSub   { letter-spacing: 1px; }
 }
 
