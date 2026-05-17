@@ -315,3 +315,102 @@
 }
 
 .resetBtn:hover { color: var(--green); border-color: var(--green); }
+
+/* ── Thumbnail auto-note ─────────────────────────────────────── */
+.thumbNote {
+  font-family: monospace;
+  font-size: 0.62rem;
+  color: var(--green);
+  opacity: 0.65;
+  letter-spacing: 0.04em;
+  margin: -0.75rem 0 1.25rem;
+  text-align: center;
+}
+
+/* ── Social section ──────────────────────────────────────────── */
+.socialSection {
+  border-top: 1px solid var(--border);
+  padding-top: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.socialTitle {
+  font-family: monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 0.65rem;
+}
+
+.socialRow {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.socialRow .field {
+  flex: 1;
+  min-width: 180px;
+}
+
+/* ── JSON Preview ────────────────────────────────────────────── */
+.previewSection {
+  margin-bottom: 1.25rem;
+}
+
+.previewToggle {
+  font-family: monospace;
+  font-size: 0.63rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 0.6rem;
+  transition: border-color 0.15s, color 0.15s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.previewToggle:hover {
+  border-color: rgba(245, 166, 35, 0.5);
+  color: var(--green);
+}
+
+.previewBlock {
+  background: #020202;
+  border: 1px solid rgba(245, 166, 35, 0.18);
+  border-radius: 4px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.5rem;
+  overflow-x: auto;
+  max-height: 440px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
+}
+
+.previewBlock pre {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.68rem;
+  line-height: 1.6;
+  color: #777;
+  margin: 0;
+  white-space: pre;
+}
+
+.previewNote {
+  font-family: monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.03em;
+  color: #3a3a3a;
+  margin: 0.1rem 0 0.75rem;
+  text-align: center;
+}

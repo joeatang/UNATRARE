@@ -44,6 +44,11 @@ export async function GET(req, { params }) {
     const descText    = asset.description || name;
     const description = `<br /><img src="${art_url}" class="img-responsive" /><br /><div><p>${descText}</p></div>`;
 
+    // Build social array from fields provided at upload time
+    const social = [];
+    if (asset.twitter)  social.push({ type: 'twitter',  data: asset.twitter });
+    if (asset.telegram) social.push({ type: 'telegram', data: asset.telegram });
+
     const json = {
       // v1.0.0 fields (broad wallet / explorer compatibility)
       success:               true,
@@ -60,10 +65,19 @@ export async function GET(req, { params }) {
       category_custom:       '',
       website_social_twitter: 'https://twitter.com/unatpepe',
 
-      // v2.0.0 images array
+      // v2.0.0 categories array
+      categories: [
+        { type: 'main', data: 'Art' },
+        { type: 'sub',  data: 'UNATRARE Vault' },
+      ],
+
+      // v2.0.0 social array (only included when uploader provides social links)
+      ...(social.length > 0 && { social }),
+
+      // v2.0.0 images array (size on icon entry, sha256 hash on both)
       images: [
-        { type: 'icon',  name, data: icon_url },
-        { type: 'large', name, data: art_url  },
+        { type: 'icon', size: '48x48', name, data: icon_url, hash },
+        { type: 'large',               name, data: art_url,  hash },
       ],
     };
 

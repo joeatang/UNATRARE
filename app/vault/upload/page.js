@@ -14,11 +14,12 @@ export default function VaultUploadPage() {
   const [preview,  setPreview]  = useState(null);
   const [form,     setForm]     = useState({
     token_name: '', asset_name: '', description: '', owner_xcp: '', owner_btc: '',
-    fee_tx: '', fee_currency: 'PEPECASH',
+    fee_tx: '', fee_currency: 'PEPECASH', twitter: '', telegram: '',
   });
   const [status,   setStatus]   = useState('');          // idle | uploading | done | error
   const [result,   setResult]   = useState(null);
-  const [copied,   setCopied]   = useState('');
+  const [copied,      setCopied]      = useState('');
+  const [previewOpen, setPreviewOpen] = useState(false);
   const fileRef  = useRef();
 
   useEffect(() => {
@@ -87,6 +88,65 @@ export default function VaultUploadPage() {
     setTimeout(() => setCopied(''), 1800);
   }
 
+  // Build the preview JSON object from current form state.
+  // Uses [sha256_hash] as a visible placeholder since the real hash isn't
+  // known until after the file is uploaded.
+  function buildPreviewJson(f, uploadedFile) {
+    const HASH     = '[sha256_hash]';
+    const ext      = uploadedFile
+      ? (uploadedFile.type === 'image/jpeg' ? 'jpg' : uploadedFile.type.split('/')[1])
+      : 'png';
+    const art_url  = `${BASE}/uploads/vault/${HASH}.${ext}`;
+    const icon_url = `${BASE}/uploads/vault/${HASH}_icon.png`;
+    const name     = f.asset_name || f.token_name || 'YOURTOKEN';
+    const descText = f.description || name;
+    const social   = [];
+    if (f.twitter?.trim())  social.push({ type: 'twitter',  data: f.twitter.trim() });
+    if (f.telegram?.trim()) social.push({ type: 'telegram', data: f.telegram.trim() });
+    const out = {
+      success:               true,
+      asset:                 f.token_name  || 'YOURTOKEN',
+      name,
+      description:           `<br /><img src="${art_url}" class="img-responsive" /><br /><div><p>${descText}</p></div>`,
+      image:                 icon_url,
+      image_large:           art_url,
+      image_title:           name,
+      website:               BASE,
+      pgpsig:                f.owner_xcp || '',
+      category:              'Art',
+      subcategory:           'UNATRARE Vault',
+      category_custom:       '',
+      website_social_twitter: 'https://twitter.com/unatpepe',
+      categories: [
+        { type: 'main', data: 'Art' },
+        { type: 'sub',  data: 'UNATRARE Vault' },
+      ],
+      ...(social.length > 0 && { social }),
+      images: [
+        { type: 'icon', size: '48x48', name, data: icon_url, hash: HASH },
+        { type: 'large',               name, data: art_url,  hash: HASH },
+      ],
+    };
+    return out;
+  }
+
+  // Syntax-highlight a JSON string for display in the preview block.
+  // Uses inline styles (not CSS module classes) so the HTML can be set via
+  // dangerouslySetInnerHTML without needing hashed class names.
+  function highlightJson(str) {
+    const esc = str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return esc.replace(
+      /("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^\\"])*"(?:\s*:)?|\b(?:true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+      m => {
+        if (/^".+"\s*:$/.test(m))   return `<span style="color:#f0a020">${m}</span>`; // key
+        if (/^"/.test(m))           return `<span style="color:#8bc98a">${m}</span>`; // string
+        if (/true|false/.test(m))   return `<span style="color:#a78bfa">${m}</span>`; // bool
+        if (/null/.test(m))         return `<span style="color:#555">${m}</span>`;    // null
+        return `<span style="color:#6ba8d6">${m}</span>`;                             // number
+      }
+    );
+  }
+
   const promoSlotsLeft = promo ? promo.max - promo.count : null;
 
   return (
@@ -149,7 +209,7 @@ export default function VaultUploadPage() {
               <code className={styles.successVal}>{result.hash}</code>
             </div>
           </div>
-          <button className={styles.resetBtn} onClick={() => { setStatus(''); setResult(null); setFile(null); setPreview(null); setForm({ token_name:'',asset_name:'',description:'',owner_xcp:'',owner_btc:'',fee_tx:'',fee_currency:'PEPECASH'}); }}>
+          <button className={styles.resetBtn} onClick={() => { setStatus(''); setResult(null); setFile(null); setPreview(null); setForm({ token_name:'',asset_name:'',description:'',owner_xcp:'',owner_btc:'',fee_tx:'',fee_currency:'PEPECASH',twitter:'',telegram:''}); }}>
             Upload another
           </button>
           <Link href="/vault" style={{ display:'block', textAlign:'center', marginTop:12,
@@ -184,6 +244,9 @@ export default function VaultUploadPage() {
               onChange={onFileChange}
             />
           </div>
+          <p className={styles.thumbNote}>
+            ★ A 48×48 thumbnail is auto-generated from your art — no extra step needed.
+          </p>
 
           {/* ── Token fields ── */}
           <div className={styles.fields}>
@@ -246,9 +309,36 @@ export default function VaultUploadPage() {
                 maxLength={100}
               />
             </label>
+
+            {/* ── Social links ── */}
+            <div className={styles.socialSection}>
+              <div className={styles.socialTitle}>SOCIAL LINKS · OPTIONAL</div>
+              <div className={styles.socialRow}>
+                <label className={styles.field}>
+                  <span className={styles.label}>TWITTER / X</span>
+                  <input
+                    className={styles.input}
+                    value={form.twitter}
+                    onChange={field('twitter')}
+                    placeholder="https://twitter.com/yourhandle"
+                    maxLength={120}
+                  />
+                </label>
+                <label className={styles.field}>
+                  <span className={styles.label}>TELEGRAM</span>
+                  <input
+                    className={styles.input}
+                    value={form.telegram}
+                    onChange={field('telegram')}
+                    placeholder="https://t.me/yourhandle"
+                    maxLength={120}
+                  />
+                </label>
+              </div>
+            </div>
           </div>
 
-          {/* ── Fee fields (hidden during promo) ── */}
+          {/* ── Fee fields (hidden during promo) ── */}}
           {promo && !promo.promo && (
             <div className={styles.feeSection}>
               <div className={styles.feeTitle}>PAYMENT</div>
@@ -278,6 +368,30 @@ export default function VaultUploadPage() {
           {status === 'error' && result?.error && (
             <div className={styles.errorMsg}>{result.error}</div>
           )}
+
+          {/* ── JSON Preview ── */}
+          <div className={styles.previewSection}>
+            <button
+              type="button"
+              className={styles.previewToggle}
+              onClick={() => setPreviewOpen(o => !o)}
+            >
+              <span>PREVIEW JSON</span>
+              <span style={{ fontSize: '0.75rem' }}>{previewOpen ? '▴' : '▾'}</span>
+            </button>
+            {previewOpen && (
+              <div className={styles.previewBlock}>
+                <pre
+                  dangerouslySetInnerHTML={{
+                    __html: highlightJson(JSON.stringify(buildPreviewJson(form, file), null, 2))
+                  }}
+                />
+              </div>
+            )}
+            <p className={styles.previewNote}>
+              Exactly what wallets and explorers will read from your token. Placeholders are replaced with real values after upload.
+            </p>
+          </div>
 
           <button className={styles.submitBtn} type="submit" disabled={status === 'uploading'}>
             {status === 'uploading' ? 'UPLOADING…' : 'VAULT THIS ART'}
