@@ -26,12 +26,26 @@
   /* Scale display title fluidly — long display_title values overflow at 48px on narrow screens */
   .infoTitle { font-size: clamp(28px, 7vw, 48px); }
   .statusToken { font-size: clamp(28px, 7vw, 48px); }
+  /* Hide truncated address in artist row — handle alone is sufficient at mobile width */
+  .addressTrunc { display: none; }
+  /* Cap artist link in card frame footer so long handles don't spill out */
+  .cardArtistLink {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 55%;
+  }
 }
 
 /* ─── Card frame ─────────────────────────────────────────── */
 .cardSide {
   position: sticky;
   top: 72px;
+  min-width: 0; /* prevent grid track from expanding to min-content */
+}
+
+.infoSide {
+  min-width: 0; /* prevent grid track from expanding to min-content */
 }
 
 .cardFrame {
@@ -192,6 +206,7 @@
   padding: 10px 16px;
   border-bottom: 1px solid var(--border-dim);
   gap: 16px;
+  overflow: hidden; /* clip value content that exceeds row width */
 }
 
 .metaRow:last-child { border-bottom: none; }
@@ -211,6 +226,8 @@
   font-size: 15px;
   letter-spacing: 1px;
   color: var(--text);
+  min-width: 0;  /* allow flex item to shrink below content size */
+  flex: 1 1 0;
 }
 
 .metaArtistLink {
@@ -219,6 +236,9 @@
   gap: 6px;
   text-decoration: none;
   transition: color 0.15s;
+  min-width: 0;    /* allow shrinking below text content width */
+  flex: 1 1 0;
+  overflow: hidden; /* clip address+handle if container shrinks */
 }
 
 .metaArtistLink:hover { color: var(--amber); }
@@ -246,6 +266,11 @@
   font-family: var(--font-body);
   font-size: 15px;
   color: var(--text-dim);
+  min-width: 0;
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ─── Action buttons ─────────────────────────────────────── */
