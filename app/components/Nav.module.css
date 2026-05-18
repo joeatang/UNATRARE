@@ -104,12 +104,20 @@
 .barMid  { opacity: 0; }
 .barBot  { transform: translateY(-6px) rotate(-45deg); background: var(--green); }
 
-/* Mobile drawer — right-side panel */
-.backdrop {
+/* Mobile drawer — wrapper clips off-screen drawer so it can't expand page scrollWidth on iOS */
+.drawerWrapper {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.72);
+  overflow: hidden;
+  pointer-events: none;
   z-index: 198;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  pointer-events: auto;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.28s ease, visibility 0.28s ease;
@@ -121,14 +129,14 @@
 }
 
 .drawer {
-  position: fixed;
+  position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   width: min(320px, 85vw);
   background: #0a0a0a;
   border-left: 1px solid var(--border);
-  z-index: 199;
+  pointer-events: auto;
   transform: translateX(100%);
   transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;

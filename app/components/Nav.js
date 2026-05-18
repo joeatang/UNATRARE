@@ -47,18 +47,20 @@ export default function Nav() {
         </div>
       </nav>
 
-      {/* Backdrop */}
-      <div
-        className={`${styles.backdrop} ${open ? styles.backdropOpen : ''}`}
-        onClick={() => setOpen(false)}
-        aria-hidden="true"
-      />
+      {/* Drawer wrapper — overflow:hidden clips off-screen drawer; prevents iOS scroll-width expansion */}
+      <div className={styles.drawerWrapper}>
+        {/* Backdrop */}
+        <div
+          className={`${styles.backdrop} ${open ? styles.backdropOpen : ''}`}
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+        />
 
-      {/* Mobile side panel */}
-      <div
-        className={`${styles.drawer} ${open ? styles.drawerOpen : ''}`}
-        aria-hidden={!open}
-      >
+        {/* Mobile side panel */}
+        <div
+          className={`${styles.drawer} ${open ? styles.drawerOpen : ''}`}
+          aria-hidden={!open}
+        >
         <div className={styles.drawerHeader}>
           <span className={styles.drawerLogo}>UNATR<span className={styles.drawerLogoA}>A</span>RE</span>
           <button className={styles.drawerClose} onClick={() => setOpen(false)} aria-label="Close menu">✕</button>
@@ -78,6 +80,7 @@ export default function Nav() {
           <li><Link href="/submit" className={styles.drawerSubmit}>Submit Your Token →</Link></li>
         </ul>
       </div>
+      </div>{/* /drawerWrapper */}
     </>
   );
 }
