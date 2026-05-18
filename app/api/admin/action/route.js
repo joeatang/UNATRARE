@@ -61,7 +61,10 @@ export async function POST(request) {
       if (token.status !== 'approved') {
         return NextResponse.json({ error: 'token must be approved before stamping' }, { status: 400 });
       }
-      db.prepare('UPDATE tokens SET council_certified=1 WHERE token_name=?').run(name);
+      // Auto-reveal: certifying as dank means it's ready to go public
+      db.prepare(
+        'UPDATE tokens SET council_certified=1, revealed_at=COALESCE(revealed_at, unixepoch()) WHERE token_name=?'
+      ).run(name);
       return NextResponse.json({ ok: true, action: 'certify_stamp', council_certified: 1 });
     }
 
@@ -124,8 +127,8 @@ export async function POST(request) {
 
       db.prepare(
         `UPDATE tokens
-         SET status='approved', judged_at=unixepoch(), series=?, card_number=?,
-             rejection_reason=?, supply=?, council_certified=1
+         SET status='approved', judged_at=unixepoch(), revealed_at=COALESCE(revealed_at, unixepoch()),
+             series=?, card_number=?, rejection_reason=?, supply=?, council_certified=1
          WHERE token_name=?`
       ).run(genesisSeriesNum, card_number, note ? `Genesis: ${note}` : `Genesis Series ${genesisSeriesNum} — founding collection`, supply, name);
 
@@ -177,8 +180,8 @@ export async function POST(request) {
 
       db.prepare(
         `UPDATE tokens
-         SET status='approved', judged_at=unixepoch(), series=?, card_number=?,
-             rejection_reason=?, supply=?
+         SET status='approved', judged_at=unixepoch(), revealed_at=COALESCE(revealed_at, unixepoch()),
+             series=?, card_number=?, rejection_reason=?, supply=?
          WHERE token_name=?`
       ).run(series, card_number, note ? `Admin note: ${note}` : '', supply, name);
 
