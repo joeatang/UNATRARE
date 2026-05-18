@@ -77,6 +77,7 @@ export default function Nav() {
           <li><Link href="/about" className={styles.drawerSecondaryLink}>About</Link></li>
           <li><Link href="/wallets" className={styles.drawerSecondaryLink}>Wallets</Link></li>
           <li><Link href="/drops" className={styles.drawerSecondaryLink}>Drops</Link></li>
+          <li><Link href="/rules" className={styles.drawerSecondaryLink}>Rules</Link></li>
           <li><Link href="/submit" className={styles.drawerSubmit}>Submit Your Token →</Link></li>
         </ul>
       </div>

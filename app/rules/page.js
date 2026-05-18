@@ -104,7 +104,7 @@ export default function RulesPage() {
               <p className={styles.sectionNote}>Four steps. The order is not optional.</p>
               <div className={styles.infoNote} style={{lineHeight:2}}>
                 <strong>01</strong> &mdash; Get your metadata URL from <Link href="/submit" className={styles.inlineLink}>/submit</Link>. This is your token&apos;s permanent record address.<br />
-                <strong>02</strong> &mdash; Issue your Counterparty token with that URL in the Description field. Locked, non-divisible, supply 1&ndash;21,000.<br />
+                <strong>02</strong> &mdash; Issue your Counterparty token with that URL in the Description field. Locked, non-divisible, supply 16&ndash;20,016.<br />
                 <strong>03</strong> &mdash; Return to <Link href="/submit" className={styles.inlineLink}>/submit</Link>, upload your art, sign with the issuing address, pay the fee.<br />
                 <strong>04</strong> &mdash; The Pepe Council evaluates. Certified cards go live in the directory and in wallets automatically.
               </div>
@@ -120,8 +120,8 @@ export default function RulesPage() {
                   <tr><td className={styles.td}>Token must already exist</td><td className={styles.td}>Create your Counterparty token BEFORE submitting</td></tr>
                   <tr><td className={styles.td}>Issuance must be LOCKED</td><td className={styles.td}>No future minting — supply is final forever</td></tr>
                   <tr><td className={styles.td}>Token must be NON-DIVISIBLE</td><td className={styles.td}>Whole tokens only. No fractions.</td></tr>
-                  <tr><td className={styles.td}>Minimum supply</td><td className={styles.td}>Equal to registered UNATPEPE holder count (currently 420)</td></tr>
-                  <tr><td className={styles.td}>Maximum supply</td><td className={styles.td}>21,000 tokens</td></tr>
+                  <tr><td className={styles.td}>Minimum supply</td><td className={styles.td}>16 tokens</td></tr>
+                  <tr><td className={styles.td}>Maximum supply</td><td className={styles.td}>20,016 tokens</td></tr>
                   <tr><td className={styles.td}>No distribution before approval</td><td className={styles.td}>Do NOT send, sell, or share your token to ANYONE until approved. You may be disqualified.</td></tr>
                 </tbody>
               </table>
