@@ -26,7 +26,7 @@ export async function POST(request) {
     description    = '',
     category       = '',
     subcategory    = '',
-    ordInscription = '',,
+    ordInscription = '',
     inviteCode     = '',
     audioUrl       = '',
     audioMime      = '',
