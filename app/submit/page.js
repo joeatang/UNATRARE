@@ -527,6 +527,8 @@ function Step2({ data, onNext, onBack }) {
 function Step3({ data, onNext, onBack }) {
   const [handle, setHandle] = useState('');
   const [desc, setDesc] = useState('');
+  const [category, setCategory] = useState('');
+  const [subcategory, setSubcategory] = useState('');
   const [inscription, setInscription] = useState('');
   const [unatAgreement, setUnatAgreement] = useState(false);
   const [errMsg, setErrMsg] = useState('');
@@ -594,6 +596,8 @@ function Step3({ data, onNext, onBack }) {
       ...data,
       artistHandle:   handle.trim().replace(/^@/, '').slice(0, 64),
       description:    desc.trim().slice(0, 280),
+      category:       category.trim().slice(0, 64),
+      subcategory:    subcategory.trim().slice(0, 64),
       ordInscription: inscription.trim() || '',
       audioUrl:       audioResult?.url  || '',
       audioMime:      audioResult?.mime || '',
@@ -647,6 +651,38 @@ function Step3({ data, onNext, onBack }) {
         <div style={{fontFamily:'var(--font-body)', fontSize:'10px', color:'var(--text-dim)', textAlign:'right', marginTop:2}}>
           {desc.length}/280
         </div>
+      </div>
+
+      <div className={styles.inputGroup}>
+        <label className={styles.inputLabel} htmlFor="category">Category (optional)</label>
+        <input
+          id="category"
+          className={styles.tokenInput}
+          style={{fontSize:'13px', letterSpacing:'1px', textTransform:'none'}}
+          type="text"
+          value={category}
+          onChange={e => { setCategory(e.target.value.slice(0, 64)); setErrMsg(''); }}
+          placeholder="e.g. Art"
+          maxLength={64}
+          autoComplete="off"
+          spellCheck={false}
+        />
+      </div>
+
+      <div className={styles.inputGroup}>
+        <label className={styles.inputLabel} htmlFor="subcategory">Subcategory (optional)</label>
+        <input
+          id="subcategory"
+          className={styles.tokenInput}
+          style={{fontSize:'13px', letterSpacing:'1px', textTransform:'none'}}
+          type="text"
+          value={subcategory}
+          onChange={e => { setSubcategory(e.target.value.slice(0, 64)); setErrMsg(''); }}
+          placeholder="e.g. Rare Pepe"
+          maxLength={64}
+          autoComplete="off"
+          spellCheck={false}
+        />
       </div>
 
       <div className={styles.inputGroup}>
@@ -878,6 +914,8 @@ function Step5({ data }) {
             signature:      data.signature,
             artistHandle:   data.artistHandle   || '',
             description:    data.description    || '',
+            category:       data.category       || '',
+            subcategory:    data.subcategory     || '',
             ordInscription: data.ordInscription || '',
             inviteCode:     data.inviteCode     || '',
             audioUrl:       data.audioUrl       || '',

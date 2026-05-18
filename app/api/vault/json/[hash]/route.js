@@ -60,16 +60,9 @@ export async function GET(req, { params }) {
       image_title:           name,
       website:               baseUrl,
       pgpsig:                asset.artist_handle || asset.owner_xcp || '',
-      category:              'Art',
-      subcategory:           'UNATRARE Vault',
-      category_custom:       '',
-      website_social_twitter: 'https://twitter.com/unatpepe',
 
-      // v2.0.0 categories array
-      categories: [
-        { type: 'main', data: 'Art' },
-        { type: 'sub',  data: 'UNATRARE Vault' },
-      ],
+      // Social — use artist's own twitter if provided, otherwise omit
+      ...(asset.twitter ? { website_social_twitter: asset.twitter } : {}),
 
       // v2.0.0 social array (only included when uploader provides social links)
       ...(social.length > 0 && { social }),

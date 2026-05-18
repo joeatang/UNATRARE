@@ -24,7 +24,9 @@ export async function POST(request) {
     currency,
     artistHandle   = '',
     description    = '',
-    ordInscription = '',
+    category       = '',
+    subcategory    = '',
+    ordInscription = '',,
     inviteCode     = '',
     audioUrl       = '',
     audioMime      = '',
@@ -124,16 +126,18 @@ export async function POST(request) {
     db.prepare(`
       INSERT INTO tokens
         (token_name, display_title, artist_address, artist_handle,
-         description, status, art_url, art_mime, art_hash,
+         description, category, subcategory, status, art_url, art_mime, art_hash,
          supply, cp_version, ord_inscription, submitted_at, series0_code_used,
          audio_url, audio_hash, audio_mime, video_url, video_hash, video_mime)
-      VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, unixepoch(), ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, unixepoch(), ?, ?, ?, ?, ?, ?, ?)
     `).run(
       normalized,
       normalized,
       owner,
       artistHandle.trim().slice(0, 64),
       description.trim().slice(0, 2000),
+      category.trim().slice(0, 64),
+      subcategory.trim().slice(0, 64),
       artUrl,
       artMime || 'image/png',
       artHash && /^[0-9a-f]{64}$/i.test(artHash) ? artHash : '',

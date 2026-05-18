@@ -113,14 +113,10 @@ export default function VaultUploadPage() {
       image_title:           name,
       website:               BASE,
       pgpsig:                f.artist_handle?.trim() || f.owner_xcp || '',
-      category:              'Art',
-      subcategory:           'UNATRARE Vault',
-      category_custom:       '',
-      website_social_twitter: 'https://twitter.com/unatpepe',
-      categories: [
-        { type: 'main', data: 'Art' },
-        { type: 'sub',  data: 'UNATRARE Vault' },
-      ],
+
+      // Social — artist's own twitter only, omitted if not provided
+      ...(f.twitter?.trim() ? { website_social_twitter: f.twitter.trim() } : {}),
+
       ...(social.length > 0 && { social }),
       images: [
         { type: 'icon', size: '48x48', name, data: icon_url, hash: HASH },
