@@ -411,6 +411,17 @@ tr .td:first-child {
     text-align: center;
     box-sizing: border-box;
   }
+
+  /* UNAT examples — 2 cols on mobile */
+  .unatExamples {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Numbered rules list */
+  .rulesItem {
+    grid-template-columns: 28px 1fr;
+    gap: 10px;
+  }
 }
 
 .outcomeApproved {
@@ -478,3 +489,91 @@ tr .td:first-child {
 }
 
 .ctaBtn:hover { background: var(--amber-hot); }
+
+/* ─── Concept box ────────────────────────────────────────── */
+.conceptBox {
+  border: 1px solid var(--green);
+  background: rgba(180,255,111,0.03);
+  padding: 28px 32px;
+  margin-bottom: 24px;
+}
+
+.conceptLabel {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 5px;
+  color: var(--green);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.conceptText {
+  font-family: var(--font-body);
+  font-size: 17px;
+  color: var(--text);
+  line-height: 2;
+}
+
+.conceptText strong { color: var(--green); font-weight: 400; }
+
+/* ─── UNAT examples grid ─────────────────────────────────── */
+.unatExamples {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.unatChip {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dim);
+  padding: 12px 14px;
+  border: 1px solid var(--border-dim);
+  line-height: 1.5;
+}
+
+.unatChip strong {
+  display: block;
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--text);
+  font-weight: 400;
+  margin-bottom: 4px;
+}
+
+/* ─── Numbered rules list ────────────────────────────────── */
+.rulesList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--border-dim);
+}
+
+.rulesItem {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-dim);
+  align-items: baseline;
+}
+
+.rulesItem:last-child { border-bottom: none; }
+
+.rulesNum {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--border);
+  line-height: 1.4;
+}
+
+.rulesText {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--text-dim);
+  line-height: 1.75;
+}
+
+.rulesText strong { color: var(--text); font-weight: 400; }
