@@ -38,9 +38,9 @@ function buildUrl(tokenName) {
   return `https://unatrare.wtf/c/${tokenName}.json`;
 }
 
-// Min supply = number of UNATPEPE holder addresses (artist gets 2%)
-const HOLDER_COUNT = parseInt(process.env.NEXT_PUBLIC_HOLDER_COUNT || '420', 10);
-const MIN_SUPPLY   = HOLDER_COUNT;
+// Supply rules: minimum 16, maximum 20,016. Full supply must be intact at submission.
+const MIN_SUPPLY = 16;
+const MAX_SUPPLY = 20_016;
 
 // ─────────────────────────────────────────────────────────────────
 //  Step 0 — Get Your Metadata URL
@@ -152,7 +152,7 @@ function Step0({ onNext, isVault }) {
                 <div className={styles.warningText}>
                   1. Copy the URL above.<br />
                   2. If your token <strong>already exists</strong>: update its Description field with this URL in Freewallet/Rarepepewallet.<br />
-                  3. If your token <strong>doesn&apos;t exist yet</strong>: create it with <strong>name: {result.normalized}</strong>, paste this URL into Description, supply ≥{MIN_SUPPLY}, non-divisible, locked.<br />
+                  3. If your token <strong>doesn&apos;t exist yet</strong>: create it with <strong>name: {result.normalized}</strong>, paste this URL into Description, supply 16–20,016, non-divisible, locked, full supply intact in your wallet.<br />
                   4. Click Continue — your vault art will be used automatically.
                 </div>
               </>
@@ -164,8 +164,9 @@ function Step0({ onNext, isVault }) {
                   2. Go to Counterparty (Freewallet, Rarepepewallet, etc.).<br />
                   3. Create your token with <strong>name exactly: {result.normalized}</strong><br />
                   4. Paste the URL into the <strong>Description</strong> field.<br />
-                  5. Set supply to <strong>at least {MIN_SUPPLY}</strong>. Non-divisible. Locked.<br />
-                  6. Return here and click Continue to submit your art.
+                  5. Set supply between <strong>16 and 20,016</strong>. Non-divisible. Locked.<br />
+                  6. <strong>Do not distribute any supply</strong> before submitting — your full issuance must remain in your wallet.<br />
+                  7. Return here and click Continue to submit your art.
                 </div>
               </>
             )}
@@ -238,7 +239,9 @@ function Step1({ data, onNext, onBack }) {
       <h2 className={styles.stepTitle}>VERIF<span>Y</span> TOKEN</h2>
       <p className={styles.stepDesc}>
         We check that <strong>{data.tokenName}</strong> exists on Counterparty,
-        is locked, non-divisible, and has a supply of at least {MIN_SUPPLY} (up to 21,000).
+        is locked, non-divisible, and has a supply between <strong>16 and 20,016</strong>.
+        Your full supply must be intact in your issuing address — tokens already distributed
+        will route to manual review (approval bin) rather than the live pepempool.
       </p>
 
       {status === 'idle' && (
@@ -266,31 +269,55 @@ function Step1({ data, onNext, onBack }) {
       )}
 
       {status === 'ok' && result && (() => {
-        const belowMin = result.supply < MIN_SUPPLY;
+        const belowMin  = result.supply < MIN_SUPPLY;
+        const aboveMax  = result.supply > MAX_SUPPLY;
+        const outOfRange = belowMin || aboveMax;
         return (
           <>
-            <div className={styles.urlBox} style={{borderColor: belowMin ? 'var(--red)' : 'var(--green)'}}>
-              <div className={styles.urlBoxLabel}>{belowMin ? '⚠ supply too low' : 'token confirmed'}</div>
+            <div className={styles.urlBox} style={{borderColor: outOfRange ? 'var(--red)' : 'var(--green)'}}>
+              <div className={styles.urlBoxLabel}>{outOfRange ? '⚠ supply out of range' : 'token confirmed'}</div>
               <div className={styles.urlBoxValue}>{data.tokenName}</div>
               <div className={styles.urlBoxMeta}>
                 Supply: {result.supply} · Owner: {result.owner?.slice(0,12)}…
-                {belowMin && ` · minimum required: ${MIN_SUPPLY}`}
+                {outOfRange && ` · allowed range: 16–20,016`}
               </div>
             </div>
             {belowMin && (
               <div className={styles.warningBox} style={{borderColor:'var(--red)', marginBottom:16}}>
-                <div className={styles.warningTitle} style={{color:'var(--red)'}}>supply below minimum</div>
+                <div className={styles.warningTitle} style={{color:'var(--red)'}}>supply too low</div>
                 <div className={styles.warningText}>
-                  Your token has a supply of <strong>{result.supply}</strong>, but UNATRARE requires
-                  at least <strong>{MIN_SUPPLY}</strong> (based on {HOLDER_COUNT} registered holders).<br /><br />
-                  You will need to issue additional supply on Counterparty before submitting.
-                  See <a href="/terms" target="_blank" style={{color:'var(--amber)'}}>enrollment rules</a> for the full formula.
+                  Your token has a supply of <strong>{result.supply}</strong>. UNATRARE requires
+                  a minimum of <strong>16</strong> and a maximum of <strong>20,016</strong>.<br /><br />
+                  Issue additional supply on Counterparty to bring it into range, then return here.
+                </div>
+              </div>
+            )}
+            {aboveMax && (
+              <div className={styles.warningBox} style={{borderColor:'var(--red)', marginBottom:16}}>
+                <div className={styles.warningTitle} style={{color:'var(--red)'}}>supply exceeds maximum</div>
+                <div className={styles.warningText}>
+                  Your token has a supply of <strong>{result.supply.toLocaleString()}</strong>.
+                  UNATRARE&apos;s maximum issuance is <strong>20,016</strong>.<br /><br />
+                  Tokens above this threshold are not eligible for submission.
+                  This limit preserves the scarcity that makes UNATRARE certification meaningful.
+                </div>
+              </div>
+            )}
+            {!outOfRange && (
+              <div className={styles.warningBox} style={{borderColor:'var(--amber)', marginBottom:16, background:'rgba(255,200,0,0.03)'}}>
+                <div className={styles.warningTitle} style={{color:'var(--amber)'}}>⚠ full supply check</div>
+                <div className={styles.warningText}>
+                  Confirmed: <strong>{result.supply.toLocaleString()}</strong> tokens — within the 16–20,016 range.<br /><br />
+                  UNATRARE also requires that your <strong>full supply is still held by your issuing address</strong>.
+                  If any tokens have already been sent to other wallets, your submission will be routed to the
+                  <strong> approval bin</strong> for manual review instead of entering the live pepempool.
+                  Hold your full supply until after certification.
                 </div>
               </div>
             )}
             <div style={{display:'flex', gap:12, flexWrap:'wrap'}}>
               <button className={styles.backBtn} onClick={onBack}>← back</button>
-              {!belowMin && (
+              {!outOfRange && (
                 <button className={styles.nextBtn} onClick={() => onNext({ ...data, owner: result.owner, supply: result.supply })}>continue → upload art</button>
               )}
             </div>
@@ -501,6 +528,7 @@ function Step3({ data, onNext, onBack }) {
   const [handle, setHandle] = useState('');
   const [desc, setDesc] = useState('');
   const [inscription, setInscription] = useState('');
+  const [unatAgreement, setUnatAgreement] = useState(false);
   const [errMsg, setErrMsg] = useState('');
 
   const [audioResult, setAudioResult]     = useState(null); // {url, hash, mime}
@@ -554,6 +582,10 @@ function Step3({ data, onNext, onBack }) {
   }
 
   function handleContinue() {
+    if (!unatAgreement) {
+      setErrMsg('You must agree to the UNATPEPE holder allocation before continuing.');
+      return;
+    }
     if (inscription && !INSC_RE.test(inscription.trim())) {
       setErrMsg('Inscription ID must be 64 hex characters (the reveal txid)');
       return;
@@ -692,6 +724,33 @@ function Step3({ data, onNext, onBack }) {
         <div className={styles.inputHint}>
           Stored on the UNATRARE network · appears in wallets that support video cards (like PEPELEVANDAL)
         </div>
+      </div>
+
+      {/* ── UNATPEPE holder agreement ── */}
+      <div style={{
+        marginTop: 8, marginBottom: 20,
+        padding: '14px 16px',
+        border: `1px solid ${unatAgreement ? 'var(--green)' : 'var(--amber)'}`,
+        background: unatAgreement ? 'rgba(61,158,61,0.04)' : 'rgba(255,200,0,0.03)',
+        transition: 'border-color 0.2s, background 0.2s',
+      }}>
+        <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'3px',
+          color: unatAgreement ? 'var(--green)' : 'var(--amber)', marginBottom:10}}>
+          ★ UNATPEPE HOLDER AGREEMENT
+        </div>
+        <label style={{display:'flex', gap:12, alignItems:'flex-start', cursor:'pointer'}}>
+          <input
+            type="checkbox"
+            checked={unatAgreement}
+            onChange={e => { setUnatAgreement(e.target.checked); setErrMsg(''); }}
+            style={{marginTop:3, accentColor:'var(--amber)', width:16, height:16, flexShrink:0, cursor:'pointer'}}
+          />
+          <span style={{fontFamily:'var(--font-body)', fontSize:'12px', color:'var(--text)', lineHeight:1.7}}>
+            I understand that registered <strong>UNATPEPE holders</strong> will each receive one free
+            allocation of <strong>{data.tokenName}</strong> before this card is publicly distributed.
+            I agree to honor this allocation as a condition of UNATRARE certification.
+          </span>
+        </label>
       </div>
 
       <div style={{display:'flex', gap:12, flexWrap:'wrap'}}>
