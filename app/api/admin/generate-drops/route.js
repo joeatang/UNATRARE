@@ -3,6 +3,7 @@ import { verifyAdminToken } from '../auth/route';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { getDb } from '../../../../lib/db.js';
+import { notifyDropsGenerated } from '../../../../lib/telegram.js';
 
 // ── Call Groq (text only, no image) ──────────────────────────────
 async function callGroqText(systemPrompt, userPrompt, maxTokens = 300) {
@@ -307,6 +308,11 @@ export async function POST(req) {
     // Prepend new entries, cap at 300 total
     history = [...newEntries, ...history].slice(0, 300);
     writeFileSync(histPath, JSON.stringify({ drops: history }, null, 2), 'utf8');
+
+    // Fire Telegram — fire-and-forget, never blocks the response
+    if (newEntries.length) {
+      notifyDropsGenerated(newEntries).catch(e => console.warn('[telegram] drops:', e.message));
+    }
 
     // Also write legacy file so fallback paths still work
     const legacyOutput = { generated_at: Date.now(), drops: generated };
