@@ -335,6 +335,9 @@ export default async function CardPage({ params }) {
               <Link href={`/c/${token.token_name}.json`} className={styles.actionBtnSecondary}>
                 metadata json →
               </Link>
+              <Link href={`/update/${token.token_name}`} className={styles.actionBtnSecondary}>
+                artist: update card →
+              </Link>
             </div>
 
             <div className={styles.backRow}>
