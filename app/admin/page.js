@@ -1503,10 +1503,11 @@ export default function AdminPage() {
   if (!authToken) return <LoginGate onAuth={handleAuth} />;
 
   const TABS = [
-    { key: 'pending',   label: 'Pending' },
+    { key: 'pending',    label: 'Pending' },
     { key: 'borderline', label: 'Review Queue' },
-    { key: 'approved',  label: 'Certified' },
-    { key: 'rejected',  label: 'Rejected' },
+    { key: 'approved',   label: 'Certified' },
+    { key: 'rejected',   label: 'Rejected' },
+    { key: 'tools',      label: '⚙ Tools' },
   ];
 
   return (
@@ -1623,25 +1624,31 @@ export default function AdminPage() {
       </div>
 
       <div className={styles.queue}>
-        {loading && <div className={styles.loading}>loading...</div>}
-        {!loading && tokens.length === 0 && (
-          <div className={styles.empty}>no {tab} submissions</div>
+        {tab === 'tools' ? (
+          <>
+            <DemoPanel authToken={authToken} />
+            <S0CodesPanel authToken={authToken} />
+            <ClaimsPanel authToken={authToken} />
+            <ArchivePanel authToken={authToken} />
+            <ArtistProfilePanel authToken={authToken} />
+          </>
+        ) : (
+          <>
+            {loading && <div className={styles.loading}>loading...</div>}
+            {!loading && tokens.length === 0 && (
+              <div className={styles.empty}>no {tab} submissions</div>
+            )}
+            {!loading && tokens.map(token => (
+              <TokenRow
+                key={token.token_name}
+                token={token}
+                authToken={authToken}
+                onAction={handleAction}
+              />
+            ))}
+          </>
         )}
-        {!loading && tokens.map(token => (
-          <TokenRow
-            key={token.token_name}
-            token={token}
-            authToken={authToken}
-            onAction={handleAction}
-          />
-        ))}
       </div>
-
-      <DemoPanel authToken={authToken} />
-      <S0CodesPanel authToken={authToken} />
-      <ClaimsPanel authToken={authToken} />
-      <ArchivePanel authToken={authToken} />
-      <ArtistProfilePanel authToken={authToken} />
     </div>
   );
 }
