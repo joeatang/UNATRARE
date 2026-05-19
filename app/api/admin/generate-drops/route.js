@@ -245,6 +245,11 @@ export async function POST(req) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
+  // Parse optional body params (allow empty/non-JSON body safely)
+  let bodyParams = {};
+  try { bodyParams = await req.json(); } catch { /* no body */ }
+  const forceAll = bodyParams.force_all === true;
+
   try {
     const cfgPath  = join(process.cwd(), 'judges.config.json');
     const config   = JSON.parse(readFileSync(cfgPath, 'utf8'));
@@ -266,34 +271,44 @@ export async function POST(req) {
       rare_srilla:    { name: 'RARE SRILLA',     sigil: '◇' },
     };
 
-    // ── Randomly pick 1-3 judges to post this run (rotation) ─────
-    // Weight: PROF NAKA C fires ~25% of runs (rarer = more impactful)
-    //         Others fire ~50% chance each
+    // ── Select judges for this run ────────────────────────────────
     const NAKA_ID = 'prof_naka_c';
-    const nakaJudge = allJudges.find(j => j.id === NAKA_ID);
-    const otherJudges = allJudges.filter(j => j.id !== NAKA_ID);
+    let selectedJudges;
 
-    // Shuffle other judges
-    const shuffled = [...otherJudges].sort(() => Math.random() - 0.5);
-
-    // Pick 1-2 from others (sometimes 0 if array is short)
-    const pickCount = Math.random() < 0.3 ? 1 : 2;
-    const selectedJudges = shuffled.slice(0, Math.min(pickCount, shuffled.length));
-
-    // PROF NAKA C joins ~25% of runs
-    if (nakaJudge && Math.random() < 0.25) {
-      selectedJudges.push(nakaJudge);
+    if (forceAll) {
+      // Full council mode: all 8 judges fire, NAKAMOJO last (the final word)
+      const nakaJudge = allJudges.find(j => j.id === NAKA_ID);
+      const rest = allJudges.filter(j => j.id !== NAKA_ID).sort(() => Math.random() - 0.5);
+      selectedJudges = nakaJudge ? [...rest, nakaJudge] : rest;
+    } else {
+      // Normal rotation: 1-2 random judges, NAKAMOJO at ~25%
+      const nakaJudge = allJudges.find(j => j.id === NAKA_ID);
+      const otherJudges = allJudges.filter(j => j.id !== NAKA_ID);
+      const shuffled = [...otherJudges].sort(() => Math.random() - 0.5);
+      const pickCount = Math.random() < 0.3 ? 1 : 2;
+      selectedJudges = shuffled.slice(0, Math.min(pickCount, shuffled.length));
+      if (nakaJudge && Math.random() < 0.25) selectedJudges.push(nakaJudge);
+      if (!selectedJudges.length && allJudges.length) selectedJudges.push(allJudges[0]);
     }
 
-    if (!selectedJudges.length && allJudges.length) {
-      selectedJudges.push(allJudges[0]);
-    }
-
-    // ── Build topic pool and assign each judge a random topic ─────
+    // ── Build topic pool ──────────────────────────────────────────
     const allJudgeNamesStr = allJudges
       .map(j => JUDGE_META[j.id]?.name || j.display_name)
       .join(', ');
     const topicPool = buildTopicPool(context, allJudgeNamesStr);
+
+    // In full-council mode, each judge gets a different topic from the pool
+    // so the 8 posts don't all hit the same angle.
+    const usedTopicIndices = new Set();
+    const pickUniqueTopic = () => {
+      if (usedTopicIndices.size >= topicPool.length) {
+        usedTopicIndices.clear();
+      }
+      let idx;
+      do { idx = Math.floor(Math.random() * topicPool.length); } while (usedTopicIndices.has(idx));
+      usedTopicIndices.add(idx);
+      return topicPool[idx];
+    };
 
     // Sequential with delay — stay within Groq free tier rate limits
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -305,8 +320,8 @@ export async function POST(req) {
       try {
         const outputCfg = JUDGE_OUTPUT_CONFIG[judge.id] || { count: 2, maxTokens: 280, note: '' };
 
-        // Each judge gets a randomly chosen topic this run
-        const topic = topicPool[Math.floor(Math.random() * topicPool.length)];
+        // Each judge gets a topic — unique across the run in full-council mode
+        const topic = forceAll ? pickUniqueTopic() : topicPool[Math.floor(Math.random() * topicPool.length)];
         const postCount = judge.id === NAKA_ID ? 1 : topic.count;
         const countWord = postCount === 1 ? '1 post' : `${postCount} posts`;
 
@@ -387,6 +402,7 @@ export async function POST(req) {
       judges_generated: Object.keys(generated).length,
       total_drops: total,
       history_count: history.length,
+      mode: forceAll ? 'full_council' : 'rotation',
       drops: generated,
     });
   } catch (err) {

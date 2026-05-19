@@ -1364,6 +1364,7 @@ export default function AdminPage() {
   const [eaToggling, setEaToggling] = useState(false);
   const [genDropsLoading, setGenDropsLoading] = useState(false);
   const [genDropsStatus, setGenDropsStatus] = useState(null);
+  const [fullCouncilLoading, setFullCouncilLoading] = useState(false);
 
   // Try to restore session token from sessionStorage
   useEffect(() => {
@@ -1461,6 +1462,28 @@ export default function AdminPage() {
     }
   }
 
+  async function handleFullCouncil() {
+    setFullCouncilLoading(true);
+    setGenDropsStatus(null);
+    try {
+      const res = await fetch('/api/admin/generate-drops', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({ force_all: true }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setGenDropsStatus(`⬡ FULL COUNCIL: ${data.total_drops} drops (${data.judges_generated}/8 judges)`);
+      } else {
+        setGenDropsStatus(`error: ${data.error}`);
+      }
+    } catch (err) {
+      setGenDropsStatus(`error: ${err.message}`);
+    } finally {
+      setFullCouncilLoading(false);
+    }
+  }
+
   async function toggleEarlyAccess() {
     setEaToggling(true);
     const newVal = earlyAccess ? '0' : '1';
@@ -1499,10 +1522,19 @@ export default function AdminPage() {
           <button
             className={styles.judgeAllBtn}
             onClick={handleGenerateDrops}
-            disabled={genDropsLoading}
+            disabled={genDropsLoading || fullCouncilLoading}
             title="Generate LLM council drops for the feed"
           >
             {genDropsLoading ? 'generating...' : '⬡ gen drops'}
+          </button>
+          <button
+            className={styles.judgeAllBtn}
+            onClick={handleFullCouncil}
+            disabled={genDropsLoading || fullCouncilLoading}
+            title="Fire all 8 judges at once — full council chaos"
+            style={{ background: 'var(--surface)', color: 'var(--amber)', border: '1px solid var(--amber)' }}
+          >
+            {fullCouncilLoading ? 'summoning...' : '⬡ full council'}
           </button>
           <button
             className={styles.judgeAllBtn}
