@@ -1,0 +1,24 @@
+{
+  "skill": "judge-dankshawn",
+  "version": "1.0.0",
+  "provider": "unatrare",
+  "title": "DANKSHAWN",
+  "sigil": "◉",
+  "encodes": "Cultural lineage detection — does this respect the timeline?",
+  "domain": "Counterparty cultural history, community lineage, crypto-native feel.",
+  "tagline": "Does this respect the timeline?",
+  "channel": "unatrare-judge-dankshawn",
+  "accepts": {
+    "text": { "type": "string", "required": true },
+    "context": { "type": "object", "required": false }
+  },
+  "returns": {
+    "signal": { "type": "number", "range": "0-1" },
+    "angle": { "type": "string", "description": "lineage | culture | rejection | welcome | general" },
+    "keywords": { "type": "string[]" },
+    "response": { "type": "string" },
+    "summary": { "type": "string" }
+  },
+  "whenToUse": ["Topic involves cultural history, Rare Pepe lineage, or community belonging"],
+  "chainsWith": ["unatrare-judge-nakamojo", "unatrare-judge-catalogus"]
+}

@@ -1,0 +1,24 @@
+{
+  "skill": "judge-nakamojo",
+  "version": "1.0.0",
+  "provider": "unatrare",
+  "title": "NAKAMOJO",
+  "sigil": "⬡",
+  "encodes": "Inevitability scoring — the original signal, dank confidence, Bitcoin origins lens.",
+  "domain": "Inevitability, digital scarcity, Bitcoin-native art authentication.",
+  "tagline": "Bold, dank, final. The origin signal.",
+  "channel": "unatrare-judge-nakamojo",
+  "accepts": {
+    "text": { "type": "string", "required": true, "description": "Topic or context text to scan." },
+    "context": { "type": "object", "required": false, "description": "Optional metadata." }
+  },
+  "returns": {
+    "signal": { "type": "number", "range": "0-1", "description": "Domain resonance strength." },
+    "angle": { "type": "string", "description": "Dominant angle: origins | inevitability | verdict | scarcity | general" },
+    "keywords": { "type": "string[]", "description": "Trigger keywords matched." },
+    "response": { "type": "string", "description": "Template drop in NAKAMOJO voice." },
+    "summary": { "type": "string", "description": "Brief scan summary." }
+  },
+  "whenToUse": ["Topic involves Bitcoin origins, digital scarcity, or dankness philosophy", "Need a short bold verdict", "Tie-breaking scenario"],
+  "chainsWith": ["unatrare-judge-dankshawn", "unatrare-judge-djpepai"]
+}

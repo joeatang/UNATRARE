@@ -1,0 +1,24 @@
+{
+  "skill": "judge-chiguiripepe",
+  "version": "1.0.0",
+  "provider": "unatrare",
+  "title": "CHIGUIRIPEPE",
+  "sigil": "⬟",
+  "encodes": "Commitment verification — is this real, or a performance of real?",
+  "domain": "Real commitment, liberation technology, builders who meant it.",
+  "tagline": "Is this a real commitment?",
+  "channel": "unatrare-judge-chiguiripepe",
+  "accepts": {
+    "text": { "type": "string", "required": true },
+    "context": { "type": "object", "required": false }
+  },
+  "returns": {
+    "signal": { "type": "number", "range": "0-1" },
+    "angle": { "type": "string", "description": "builder | liberation | commitment | rejection | general" },
+    "keywords": { "type": "string[]" },
+    "response": { "type": "string" },
+    "summary": { "type": "string" }
+  },
+  "whenToUse": ["Topic involves genuine commitment, builder culture, or Bitcoin as liberation technology"],
+  "chainsWith": ["unatrare-judge-jfrog", "unatrare-judge-nakamojo"]
+}

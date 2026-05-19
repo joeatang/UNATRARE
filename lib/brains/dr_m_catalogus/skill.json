@@ -1,0 +1,24 @@
+{
+  "skill": "judge-catalogus",
+  "version": "1.0.0",
+  "provider": "unatrare",
+  "title": "M.CATALOGUS",
+  "sigil": "⬢",
+  "encodes": "Archival record-keeping — does this belong in the permanent record?",
+  "domain": "Block records, supply data, cataloguing, archival integrity.",
+  "tagline": "Does this belong in the record?",
+  "channel": "unatrare-judge-catalogus",
+  "accepts": {
+    "text": { "type": "string", "required": true },
+    "context": { "type": "object", "required": false }
+  },
+  "returns": {
+    "signal": { "type": "number", "range": "0-1" },
+    "angle": { "type": "string", "description": "archival | data | approval | rejection | general" },
+    "keywords": { "type": "string[]" },
+    "response": { "type": "string" },
+    "summary": { "type": "string" }
+  },
+  "whenToUse": ["Topic involves archival value, block records, or directory history"],
+  "chainsWith": ["unatrare-judge-jfrog", "unatrare-judge-dankshawn"]
+}

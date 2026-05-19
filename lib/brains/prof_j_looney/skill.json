@@ -1,0 +1,24 @@
+{
+  "skill": "judge-rarelooney",
+  "version": "1.0.0",
+  "provider": "unatrare",
+  "title": "RARELOONEY",
+  "sigil": "◈",
+  "encodes": "Infrastructure integrity — format, technical craft, the rails that culture runs on.",
+  "domain": "Technical format, marketplace rails, craft standards, shill detection.",
+  "tagline": "Does this integrate clean?",
+  "channel": "unatrare-judge-rarelooney",
+  "accepts": {
+    "text": { "type": "string", "required": true },
+    "context": { "type": "object", "required": false }
+  },
+  "returns": {
+    "signal": { "type": "number", "range": "0-1" },
+    "angle": { "type": "string", "description": "technical | rejection | culture | craft | general" },
+    "keywords": { "type": "string[]" },
+    "response": { "type": "string" },
+    "summary": { "type": "string" }
+  },
+  "whenToUse": ["Topic involves technical craft, format integrity, or shill/rejection patterns"],
+  "chainsWith": ["unatrare-judge-jfrog", "unatrare-judge-catalogus"]
+}

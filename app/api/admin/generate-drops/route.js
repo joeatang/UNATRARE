@@ -4,6 +4,52 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { getDb } from '../../../../lib/db.js';
 import { notifyDropsGenerated } from '../../../../lib/telegram.js';
+import { broadcastCouncilDrops } from '../../../../lib/tracBridge.js';
+
+// ── Judge brain modules (deterministic scan + template fallback) ──
+import nakamojo   from '../../../../lib/brains/prof_naka_c/index.js';
+import rarelooney from '../../../../lib/brains/prof_j_looney/index.js';
+import dankshawn  from '../../../../lib/brains/dank_shawn/index.js';
+import catalogus  from '../../../../lib/brains/dr_m_catalogus/index.js';
+import tg00dman   from '../../../../lib/brains/theo_goodman/index.js';
+import djpepai    from '../../../../lib/brains/dj_pepai/index.js';
+import chiguiri   from '../../../../lib/brains/chiguiripepe/index.js';
+import jfrog      from '../../../../lib/brains/j_frog/index.js';
+
+const BRAIN_MAP = {
+  prof_naka_c:    nakamojo,
+  prof_j_looney:  rarelooney,
+  dank_shawn:     dankshawn,
+  dr_m_catalogus: catalogus,
+  theo_goodman:   tg00dman,
+  dj_pepai:       djpepai,
+  chiguiripepe:   chiguiri,
+  j_frog:         jfrog,
+};
+
+/**
+ * Run deterministic keyword scan on topic text, return a context string
+ * to append to the system prompt. Empty string if no signal.
+ */
+function getBrainEnrichment(judgeId, text) {
+  const brain = BRAIN_MAP[judgeId];
+  if (!brain) return '';
+  try {
+    const result = brain.scan(text);
+    if (!result.keywords?.length) return '';
+    return `\n\n[ACTIVE SIGNAL — angle: ${result.angle}, keywords: ${result.keywords.slice(0, 5).join(', ')}]`;
+  } catch { return ''; }
+}
+
+/**
+ * Generate a template-based fallback drop when Groq is unavailable.
+ * Returns null if no brain or template available.
+ */
+function getBrainFallback(judgeId, scanResult) {
+  const brain = BRAIN_MAP[judgeId];
+  if (!brain) return null;
+  try { return brain.fulfill('', scanResult || {}); } catch { return null; }
+}
 
 // ── Call Groq (text only, no image) ──────────────────────────────
 async function callGroqText(systemPrompt, userPrompt, maxTokens = 300) {
@@ -264,11 +310,26 @@ export async function POST(req) {
         const postCount = judge.id === NAKA_ID ? 1 : topic.count;
         const countWord = postCount === 1 ? '1 post' : `${postCount} posts`;
 
-        const systemPrompt = `${config.system_prompt_header}\n\n${judge.personality_prompt}${outputCfg.note ? `\n\nFORMAT NOTE: ${outputCfg.note}` : ''}`;
+        // Brain scan — deterministic enrichment before LLM call
+        const brainScan  = BRAIN_MAP[judge.id]?.scan?.(topic.instruction) || null;
+        const brainCtx   = getBrainEnrichment(judge.id, topic.instruction);
+
+        // Prefer brain's roleConfig.systemPrompt; fall back to judges.config.json field
+        const brainPrompt = BRAIN_MAP[judge.id]?.roleConfig?.systemPrompt || judge.personality_prompt;
+        const systemPrompt = `${config.system_prompt_header}\n\n${brainPrompt}${brainCtx}${outputCfg.note ? `\n\nFORMAT NOTE: ${outputCfg.note}` : ''}`;
         const userPrompt = `${topic.instruction}\n\nOutput exactly ${countWord}, one per line, no numbering, no intro, no sign-off. Pure character voice only.`;
 
-        const raw = await callGroqText(systemPrompt, userPrompt, outputCfg.maxTokens);
-        const drops = parseDrops(raw);
+        let drops = [];
+        try {
+          const raw = await callGroqText(systemPrompt, userPrompt, outputCfg.maxTokens);
+          drops = parseDrops(raw);
+        } catch (groqErr) {
+          console.warn(`[generate-drops] Groq failed for ${judge.id}:`, groqErr.message);
+          // Template fallback — deterministic voice when LLM is unavailable
+          const fallback = getBrainFallback(judge.id, brainScan);
+          if (fallback) drops = [fallback];
+        }
+
         if (drops.length >= 1) {
           generated[judge.id] = drops.slice(0, postCount);
         }
@@ -312,6 +373,7 @@ export async function POST(req) {
     // Fire Telegram — fire-and-forget, never blocks the response
     if (newEntries.length) {
       notifyDropsGenerated(newEntries).catch(e => console.warn('[telegram] drops:', e.message));
+      broadcastCouncilDrops(newEntries).catch(e => console.warn('[tracBridge] council drops:', e.message));
     }
 
     // Also write legacy file so fallback paths still work

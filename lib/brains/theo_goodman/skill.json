@@ -1,0 +1,24 @@
+{
+  "skill": "judge-tg00dman",
+  "version": "1.0.0",
+  "provider": "unatrare",
+  "title": "PROF.TG00DMAN",
+  "sigil": "◆",
+  "encodes": "Comedy + fine art analysis — is this worth talking about at the show?",
+  "domain": "Wit, timing, originality, the intersection of shitposting and fine art.",
+  "tagline": "Is this worth talking about at the show?",
+  "channel": "unatrare-judge-tg00dman",
+  "accepts": {
+    "text": { "type": "string", "required": true },
+    "context": { "type": "object", "required": false }
+  },
+  "returns": {
+    "signal": { "type": "number", "range": "0-1" },
+    "angle": { "type": "string", "description": "comedy | analysis | bitcoin | verdict | general" },
+    "keywords": { "type": "string[]" },
+    "response": { "type": "string" },
+    "summary": { "type": "string" }
+  },
+  "whenToUse": ["Topic involves comedy, timing, memetic density, or cultural explanation"],
+  "chainsWith": ["unatrare-judge-djpepai", "unatrare-judge-nakamojo"]
+}

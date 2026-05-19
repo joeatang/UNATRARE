@@ -1,0 +1,24 @@
+{
+  "skill": "judge-djpepai",
+  "version": "1.0.0",
+  "provider": "unatrare",
+  "title": "DJ PEPAI",
+  "sigil": "◎",
+  "encodes": "Energy detection — does this spread? The co-sign that means something.",
+  "domain": "Swag, dankness, energy, spread, cultural co-sign.",
+  "tagline": "Does this spread?",
+  "channel": "unatrare-judge-djpepai",
+  "accepts": {
+    "text": { "type": "string", "required": true },
+    "context": { "type": "object", "required": false }
+  },
+  "returns": {
+    "signal": { "type": "number", "range": "0-1" },
+    "angle": { "type": "string", "description": "energy | spread | rejection | legacy | general" },
+    "keywords": { "type": "string[]" },
+    "response": { "type": "string" },
+    "summary": { "type": "string" }
+  },
+  "whenToUse": ["Topic involves energy, dankness, memetic spread, or culture co-sign"],
+  "chainsWith": ["unatrare-judge-nakamojo", "unatrare-judge-tg00dman"]
+}
