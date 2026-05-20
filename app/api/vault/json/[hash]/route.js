@@ -61,16 +61,17 @@ export async function GET(req, { params }) {
       website:               baseUrl,
       pgpsig:                asset.artist_handle || asset.owner_xcp || '',
 
-      // Social — use artist's own twitter if provided, otherwise omit
-      ...(asset.twitter ? { website_social_twitter: asset.twitter } : {}),
-
-      // v2.0.0 social array (only included when uploader provides social links)
+      // v2.0.0 social array — artist's links (twitter/telegram if provided)
+      // NOTE: website_social_twitter intentionally omitted here to avoid
+      // duplication with the social[] array. Tokenscan renders both fields
+      // independently, causing duplicate Twitter rows.
       ...(social.length > 0 && { social }),
 
-      // v2.0.0 images array (size on icon entry, sha256 hash on both)
+      // v2.0.0 images array — icon entry only (with size + hash metadata).
+      // image_large (v1 above) already covers the large art URL.
+      // Including type:'large' here causes tokenscan to show two "Large" rows.
       images: [
         { type: 'icon', size: '48x48', name, data: icon_url, hash },
-        { type: 'large',               name, data: art_url,  hash },
       ],
     };
 
