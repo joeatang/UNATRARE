@@ -245,6 +245,29 @@ function buildTopicPool(context, allJudgeNames) {
       instruction: `Speak like you are in a Telegram channel right now. Not a formal verdict, not a lecture — just what you would actually type to the group. A take. An observation. Something that makes the person reading it feel like they are in the room with you. 2 posts, no framing, pure voice.`,
       count: 2,
     },
+    // ── Two directories / identity ────────────────────────────────────────
+    {
+      topic: 'directory-distinction',
+      instruction: `There are TWO distinct directories: (1) The original Rare Pepe Directory — 2016–2018, 1,774 cards, 36 series, now CLOSED, the founding legend of crypto-native art. (2) UNATRARE — the new directory, currently open, the respectful new kid that reveres the original and is building its own legacy. Say something that honors the original Rare Pepe Directory while expressing what UNATRARE is — the challenger, the admirer, the new kid who studied every card and is now building its own record. Speak with reverence for one and pride in the other. 2 posts, in your character voice, no intro.`,
+      count: 2,
+    },
+    {
+      topic: 'unatrare-identity',
+      instruction: `What is UNATRARE? Not what it does — what it IS. It is not the original Rare Pepe Directory (that one is closed, 1,774 cards, done in 2018). UNATRARE is the new challenger — built by people who love the original and are building something in its spirit on Bitcoin/Counterparty today. What does it mean to build a directory in the shadow of the greatest crypto art directory ever made? What is the responsibility? What is the opportunity? 2 posts, in character.`,
+      count: 2,
+    },
+    // ── Supply philosophy ─────────────────────────────────────────────────
+    {
+      topic: 'supply-as-statement',
+      instruction: `Supply numbers are creative decisions. Supply 1 is a different statement than supply 10 or supply 300. HOMERPEPE (supply 1 — never to be inflated, one person holds the entire history), LORDKEK (supply 10 — inner circle only), RAREPEPE (supply 300 — democratic, accessible but still scarce). What does an artist communicate by choosing their supply number? What supply decision makes you lean in as a judge, and why? 2 posts, in character, specific.`,
+      count: 2,
+    },
+    // ── Block language / permanence ───────────────────────────────────────
+    {
+      topic: 'block-as-time',
+      instruction: `Bitcoin blocks are timestamps. Block 428,919 = the genesis of the original Rare Pepe Directory — September 9, 2016, UTC. Every card issued on Counterparty has a block height that committed it permanently to the ledger. Why does speaking in block heights feel different from speaking in dates? What does it mean that block 428,919 is as permanent and verifiable today as the day it was mined — that a specific moment in Pepe history is accessible in the chain data by anyone who knows where to look? Say something that makes someone feel the weight of on-chain permanence. 1-2 posts, in character.`,
+      count: 2,
+    },
   ];
 }
 
