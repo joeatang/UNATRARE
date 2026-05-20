@@ -41,8 +41,8 @@ export async function GET(req, { params }) {
     // Embed the large image in the description so HTML-rendering explorers
     // (tokenscan, RarePepeWallet) show the artwork inline — mirrors the
     // standard format used by established Counterparty collections.
-    const descText    = asset.description || name;
-    const description = `<br /><img src="${art_url}" class="img-responsive" /><br /><div><p>${descText}</p></div>`;
+    const descText    = asset.description || '';
+    const description = `<br /><img src="${art_url}" class="img-responsive" /><br />${descText ? `<div><p>${descText}</p></div>` : ''}`;
 
     // Build social array from fields provided at upload time
     const social = [];
