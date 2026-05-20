@@ -88,7 +88,7 @@ function parseDrops(text) {
   return text
     .split('\n')
     .map(l => l.replace(/^[\s\-\*\d\.\)]+/, '').replace(/^["']|["']$/g, '').trim())
-    .filter(l => l.length > 10 && l.length < 220);
+    .filter(l => l.length > 10 && l.length < 500);
 }
 
 // ── Build context summary from recent verdicts ────────────────────
