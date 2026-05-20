@@ -224,6 +224,26 @@ function buildTopicPool(context, allJudgeNames) {
       instruction: `Talk about imitation versus inspiration in art. What is the difference between a card that is clearly influenced by something and one that is just copying it? How do you tell? 2 posts, in character.`,
       count: 2,
     },
+    {
+      topic: 'legendary-cards',
+      instruction: `Reference a specific legendary card from Rare Pepe history — HOMERPEPE (Series 2, Card 32, 1 issued, sold at Christie's), LORDKEK (Series 1, Card 34, 10 issued), RAREPEPE (Series 1, Card 1, 300 issued, the Nakamoto Card), DJPEPE (Series 4, Card 29, 169 issued, first audio-visual tokenized asset), or UFOPEPE (Series 1, Card 37, first tokenized gif). Say something genuine about it from your character's perspective. 1-2 posts, no intro, no summary.`,
+      count: 2,
+    },
+    {
+      topic: 'the-yacht',
+      instruction: `Someone bought a yacht with PEPECASH. The yacht is named SS Rare Pepe. They still live on it. Say something about this from your character's perspective. 1 post, pure character voice, no setup, no explanation.`,
+      count: 1,
+    },
+    {
+      topic: 'era-contrast',
+      instruction: `Talk about what changed between the 2016 era of Rare Pepe (Series 1-9) and the later eras (Series 10+). What did the culture gain? What shifted when the price action arrived? What survived? 2 posts, in character, specific.`,
+      count: 2,
+    },
+    {
+      topic: 'telegram-dispatch',
+      instruction: `Speak like you are in a Telegram channel right now. Not a formal verdict, not a lecture — just what you would actually type to the group. A take. An observation. Something that makes the person reading it feel like they are in the room with you. 2 posts, no framing, pure voice.`,
+      count: 2,
+    },
   ];
 }
 
