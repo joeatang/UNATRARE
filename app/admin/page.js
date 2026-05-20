@@ -1657,54 +1657,62 @@ export default function AdminPage() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <div className={styles.headerLogo}>UNATR<span>A</span>RE <span className={styles.headerSub}>ADMIN</span></div>
+        {/* Row 1 — logo + quick actions */}
+        <div className={styles.headerTop}>
+          <div className={styles.headerLogo}>UNATR<span>A</span>RE <span className={styles.headerSub}>ADMIN</span></div>
+          <div className={styles.headerRight}>
+            {genDropsStatus && (
+              <span style={{ fontSize: '9px', letterSpacing: '1px', color: genDropsStatus.startsWith('error') ? 'var(--red)' : 'var(--green-hot)', fontFamily: 'var(--font-card)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 160 }}>
+                {genDropsStatus}
+              </span>
+            )}
+            <button className={styles.refreshBtn} onClick={fetchData} disabled={loading} title="Refresh">
+              {loading ? '···' : '↻'}
+            </button>
+            <button className={styles.logoutBtn} onClick={handleLogout}>
+              out
+            </button>
+          </div>
+        </div>
+        {/* Row 2 — scrollable tool buttons */}
         <div className={styles.headerActions}>
-          {genDropsStatus && (
-            <span style={{ fontSize: '10px', letterSpacing: '1px', color: genDropsStatus.startsWith('error') ? 'var(--red)' : 'var(--green-hot)', fontFamily: 'var(--font-card)' }}>
-              {genDropsStatus}
-            </span>
-          )}
           <button
             className={styles.judgeAllBtn}
-            onClick={handleGenerateDrops}
-            disabled={genDropsLoading || fullCouncilLoading}
-            title="Generate LLM council drops for the feed"
+            onClick={handleJudgeAll}
+            disabled={judgeAllLoading}
+            title="Run judge pipeline on all pending submissions"
           >
-            {genDropsLoading ? 'generating...' : '⬡ gen drops'}
-          </button>
-          <button
-            className={styles.judgeAllBtn}
-            onClick={handleFullCouncil}
-            disabled={genDropsLoading || fullCouncilLoading}
-            title="Fire all 8 judges at once — full council chaos"
-            style={{ background: 'var(--surface)', color: 'var(--amber)', border: '1px solid var(--amber)' }}
-          >
-            {fullCouncilLoading ? 'summoning...' : '⬡ full council'}
+            {judgeAllLoading ? 'judging…' : '⚡ judge all'}
           </button>
           <button
             className={styles.judgeAllBtn}
             onClick={toggleEarlyAccess}
             disabled={eaToggling}
             style={{
-              background: earlyAccess ? 'var(--amber)' : 'var(--surface)',
+              background: earlyAccess ? 'var(--amber)' : 'transparent',
               color: earlyAccess ? 'var(--bg)' : 'var(--amber)',
               border: '1px solid var(--amber)',
             }}
+            title="Toggle holder-only early access gate"
           >
-            {eaToggling ? '...' : earlyAccess ? '⚡ HOLDER-ONLY: ON' : '⚡ HOLDER-ONLY: OFF'}
+            {eaToggling ? '…' : earlyAccess ? '⚡ holders only: ON' : '⚡ holders only: OFF'}
           </button>
           <button
             className={styles.judgeAllBtn}
-            onClick={handleJudgeAll}
-            disabled={judgeAllLoading}
+            onClick={handleGenerateDrops}
+            disabled={genDropsLoading || fullCouncilLoading}
+            title="Generate LLM council drops for the feed"
           >
-            {judgeAllLoading ? 'judging...' : '⚡ judge all pending'}
+            {genDropsLoading ? 'generating…' : '⬡ gen drops'}
           </button>
-          <button className={styles.refreshBtn} onClick={fetchData} disabled={loading}>
-            {loading ? '...' : '↻ refresh'}
-          </button>
-          <button className={styles.logoutBtn} onClick={handleLogout}>
-            logout
+          <button
+            className={styles.judgeAllBtn}
+            onClick={handleFullCouncil}
+            disabled={genDropsLoading || fullCouncilLoading}
+            style={{ background: 'transparent', color: 'var(--amber)', border: '1px solid var(--amber)' }}
+            title="Fire all 8 judges at once — full council"
+          >
+            {fullCouncilLoading ? 'summoning…' : '⬡ full council'}
           </button>
         </div>
       </header>
