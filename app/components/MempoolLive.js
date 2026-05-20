@@ -125,8 +125,8 @@ export default function MempoolLive({ initialStats, initialRecent, initialPendin
                   </div>
                 </div>
                 {/* Card footer */}
-                <div className={styles.pendingLabel} style={{ opacity: t ? 1 : 0.5 }}>
-                  {t ? 'PENDING' : '· · ·'}
+                <div className={styles.pendingLabel} style={{ opacity: t ? 1 : 0.5, fontSize: t ? '9px' : undefined }}>
+                  {t ? t.token_name : '· · ·'}
                 </div>
               </div>
             );

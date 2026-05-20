@@ -50,6 +50,7 @@ function Step0({ onNext, isVault }) {
   const [result, setResult] = useState(null);
   const [copied, setCopied] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
+  const [showInvite, setShowInvite] = useState(false);
 
   function handleChange(e) {
     const v = e.target.value.toUpperCase().replace(/[^A-Z0-9.]/g, '');
@@ -172,26 +173,42 @@ function Step0({ onNext, isVault }) {
             )}
           </div>
 
-          {/* Optional Series 0 invite code */}
-          <div style={{marginTop:20, padding:'14px 16px', border:'1px solid var(--border-dim)', background:'rgba(255,200,0,0.03)'}}>
-            <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'3px', color:'var(--amber)', marginBottom:8}}>
-              ★ SERIES 0 INVITE CODE — OPTIONAL
-            </div>
-            <div style={{fontFamily:'var(--font-body)', fontSize:'12px', color:'var(--text-dim)', marginBottom:10, lineHeight:1.5}}>
-              If you received a Series 0 honorary invite code, enter it here.
-            </div>
-            <input
-              type="text"
-              value={inviteCode}
-              onChange={e => setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 9))}
-              placeholder="S0-XXXXXX"
-              style={{
-                width:'100%', boxSizing:'border-box', padding:'8px 12px',
-                background:'var(--bg)', border:'1px solid var(--border)',
-                color:'var(--text)', fontFamily:'var(--font-card)', fontSize:'12px',
-                letterSpacing:'3px',
-              }}
-            />
+          {/* Optional Series 0 invite code — collapsed by default */}
+          <div style={{marginTop:20}}>
+            {!showInvite ? (
+              <button
+                onClick={() => setShowInvite(true)}
+                style={{
+                  background:'none', border:'none', cursor:'pointer', padding:0,
+                  fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px',
+                  color:'var(--text-dim)', textDecoration:'underline',
+                }}
+              >
+                have a series 0 invite code?
+              </button>
+            ) : (
+              <div style={{padding:'14px 16px', border:'1px solid var(--border-dim)', background:'rgba(255,200,0,0.03)'}}>
+                <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'3px', color:'var(--amber)', marginBottom:8}}>
+                  ★ SERIES 0 INVITE CODE
+                </div>
+                <div style={{fontFamily:'var(--font-body)', fontSize:'12px', color:'var(--text-dim)', marginBottom:10, lineHeight:1.5}}>
+                  <strong>Only for artists who received a personal invite.</strong><br />
+                  If you weren&apos;t given a code, leave this blank and continue — it won&apos;t affect your submission.
+                </div>
+                <input
+                  type="text"
+                  value={inviteCode}
+                  onChange={e => setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 9))}
+                  placeholder="S0-XXXXXX"
+                  style={{
+                    width:'100%', boxSizing:'border-box', padding:'8px 12px',
+                    background:'var(--bg)', border:'1px solid var(--border)',
+                    color:'var(--text)', fontFamily:'var(--font-card)', fontSize:'12px',
+                    letterSpacing:'3px',
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           <button
