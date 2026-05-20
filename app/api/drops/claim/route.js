@@ -72,7 +72,7 @@ export async function POST(request) {
 
   // Phase 1: UNATPEPE holders only — verify server-side to prevent bypassing the UI
   if (drop.requires_unatpepe) {
-    const qty = await getUnatpepeBalance(cp_address.trim());
+    const qty = await getUnatpepeBalance(tap_address.trim());
     if (qty === -1) {
       return NextResponse.json(
         { ok: false, error: 'Could not verify UNATPEPE — Counterparty API unavailable. Try again in a moment.' },

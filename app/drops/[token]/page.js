@@ -364,8 +364,8 @@ export default function DropClaimPage() {
                 {verifyErr && <div style={S.errText}>✗ {verifyErr}</div>}
                 <button
                   type="submit"
-                  style={{ ...S.btnPrimary, ...(!ADDR_RE.test(tapAddress.trim()) || verifyLoading ? S.btnOff : {}) }}
-                  disabled={!ADDR_RE.test(tapAddress.trim()) || verifyLoading}
+                  style={{ ...S.btnPrimary, ...(!ADDR_RE.test(tapAddress.trim()) || verifyLoading || (remaining !== null && remaining <= 0) ? S.btnOff : {}) }}
+                  disabled={!ADDR_RE.test(tapAddress.trim()) || verifyLoading || (remaining !== null && remaining <= 0)}
                 >
                   {verifyLoading ? 'verifying...' : '⬡ verify holdings →'}
                 </button>
@@ -463,12 +463,10 @@ export default function DropClaimPage() {
                   {claimErr && <div style={S.errText}>✗ {claimErr}</div>}
                   <button
                     type="submit"
-                    style={{
-                      ...S.btnPrimary,
-                      ...(!ADDR_RE.test(cpAddress.trim()) || (drop.claim_type === 'support' && !selectedTier) || claimLoading
+                    style={{ ...S.btnPrimary, ...(!ADDR_RE.test(cpAddress.trim()) || (drop.claim_type === 'support' && !selectedTier) || claimLoading || (remaining !== null && remaining <= 0)
                         ? S.btnOff : {}),
                     }}
-                    disabled={!ADDR_RE.test(cpAddress.trim()) || (drop.claim_type === 'support' && !selectedTier) || claimLoading}
+                    disabled={!ADDR_RE.test(cpAddress.trim()) || (drop.claim_type === 'support' && !selectedTier) || claimLoading || (remaining !== null && remaining <= 0)}
                   >
                     {claimLoading ? 'registering...' : '◈ register claim →'}
                   </button>
@@ -519,8 +517,8 @@ export default function DropClaimPage() {
                   {txidErr && <div style={S.errText}>✗ {txidErr}</div>}
                   <button
                     type="submit"
-                    style={{ ...S.btnPrimary, ...(!TXID_RE.test(txid.trim()) || txidLoading ? S.btnOff : {}) }}
-                    disabled={!TXID_RE.test(txid.trim()) || txidLoading}
+                  style={{ ...S.btnPrimary, ...(!TXID_RE.test(txid.trim()) || txidLoading || (remaining !== null && remaining <= 0) ? S.btnOff : {}) }}
+                  disabled={!TXID_RE.test(txid.trim()) || txidLoading || (remaining !== null && remaining <= 0)}
                   >
                     {txidLoading ? 'submitting...' : '◆ confirm payment →'}
                   </button>
@@ -578,7 +576,7 @@ export default function DropClaimPage() {
                       )}
                       <p style={{ ...S.statusDesc, marginTop: 14, fontSize: '12px' }}>
                         No further action needed. Your card{claimResult?.bonus_token ? ` + ${claimResult.bonus_token}` : ''} will be sent to your receiving
-                        address after the window closes.
+                        address after the window closes. To check your status later, return to this page and enter your address in Step 01.
                       </p>
                       <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
                         <a

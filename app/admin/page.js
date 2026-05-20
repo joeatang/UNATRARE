@@ -551,6 +551,150 @@ function StatsBar({ stats }) {
   );
 }
 
+// ── Art Drops management panel ─────────────────────────────────
+function DropsPanel({ authToken }) {
+  const [open, setOpen] = useState(false);
+  const [drops, setDrops] = useState([]);
+  const [allClaims, setAllClaims] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [windowHours, setWindowHours] = useState('168');
+  const [natAddr, setNatAddr] = useState('');
+  const [actionMsg, setActionMsg] = useState('');
+
+  async function fetchDrops() {
+    setLoading(true);
+    const res = await fetch('/api/admin/art-drops', {
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    const json = await res.json();
+    setLoading(false);
+    if (json.ok) { setDrops(json.drops); setAllClaims(json.claims); }
+  }
+
+  useEffect(() => { if (open) fetchDrops(); }, [open]);
+
+  async function doAction(body) {
+    setActionMsg('');
+    const res = await fetch('/api/admin/art-drops', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify(body),
+    });
+    const json = await res.json();
+    setActionMsg(json.ok ? '✓ done' : `✗ ${json.error || 'error'}`);
+    if (json.ok) fetchDrops();
+  }
+
+  function exportCsv(dropId, tokenName) {
+    const dc = allClaims.filter(c => c.drop_id === dropId);
+    const rows = [['claim_id', 'cp_address', 'tap_address', 'claim_type', 'unatpepe_qty', 'status', 'notes', 'claimed_at']];
+    for (const c of dc) {
+      rows.push([c.id, c.cp_address, c.tap_address, c.claim_type, c.unatpepe_qty || 0, c.status, c.notes || '', c.claimed_at ? new Date(c.claimed_at * 1000).toISOString() : '']);
+    }
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `${tokenName}-drop-claims.csv`; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const totalPending = drops.reduce((a, d) => a + (d.pending_dist || 0), 0);
+  const dBtn = (c = 'var(--amber)') => ({ padding: '4px 12px', border: `1px solid ${c}`, background: 'transparent', color: c, fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', cursor: 'pointer', whiteSpace: 'nowrap' });
+  const dInput = (w = 80) => ({ padding: '5px 8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'var(--font-card)', fontSize: '10px', width: w, boxSizing: 'border-box' });
+
+  return (
+    <div style={{ margin: '24px 0', border: '1px solid var(--border-dim)', background: 'rgba(168,144,96,0.02)' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ width: '100%', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '3px', color: 'var(--amber)' }}
+      >
+        <span>◈ ART DROPS {totalPending > 0 ? `(${totalPending} PENDING SEND)` : drops.length > 0 ? `(${drops.length})` : ''}</span>
+        <span style={{ color: 'var(--text-dim)' }}>{open ? '▲' : '▼'}</span>
+      </button>
+      {open && (
+        <div style={{ padding: '0 20px 20px' }}>
+          {actionMsg && (
+            <div style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: actionMsg.startsWith('✓') ? 'var(--green)' : '#cc4444', marginBottom: 12 }}>
+              {actionMsg}
+            </div>
+          )}
+          {drops.length === 0 && !loading && (
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)' }}>no drops found</div>
+          )}
+          {drops.map(drop => {
+            const dropClaims = allClaims.filter(c => c.drop_id === drop.id);
+            const pendingClaims = dropClaims.filter(c => c.status === 'awaiting_distribution');
+            const statusColor = drop.status === 'active' ? 'var(--green)' : drop.status === 'upcoming' ? 'var(--amber)' : 'var(--text-dim)';
+            return (
+              <div key={drop.id} style={{ marginBottom: 28, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 8, flexWrap: 'wrap' }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: 3, color: 'var(--text)' }}>{drop.token_name}</span>
+                  <span style={{ fontFamily: 'var(--font-card)', fontSize: '11px', letterSpacing: '2px', fontWeight: 700, color: statusColor }}>{drop.status.toUpperCase()}</span>
+                  <span style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '1px', color: 'var(--text-dim)' }}>
+                    {drop.sent_count || 0} sent · {drop.pending_dist || 0} pending · {drop.pending_payment || 0} awaiting payment · {drop.supply_remaining}/{drop.supply_total} remaining
+                  </span>
+                </div>
+                {drop.status === 'upcoming' && (
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10, flexWrap: 'wrap', padding: '10px 0', borderBottom: '1px solid var(--border-dim)' }}>
+                    <input type="number" value={windowHours} onChange={e => setWindowHours(e.target.value)} placeholder="hours" style={dInput(70)} min="1" />
+                    <span style={{ fontFamily: 'var(--font-card)', fontSize: '9px', color: 'var(--text-dim)' }}>hrs open</span>
+                    {drop.claim_type === 'support' && (
+                      <input type="text" placeholder="NAT payment address (required)" value={natAddr} onChange={e => setNatAddr(e.target.value)} style={dInput(240)} />
+                    )}
+                    <button
+                      onClick={() => doAction({ action: 'activate', drop_id: drop.id, window_hours: Number(windowHours || 168), ...(natAddr ? { nat_address: natAddr } : {}) })}
+                      style={dBtn('var(--green)')}
+                    >
+                      ▶ ACTIVATE
+                    </button>
+                  </div>
+                )}
+                {drop.status === 'active' && (
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+                    <button onClick={() => doAction({ action: 'close', drop_id: drop.id })} style={dBtn()}>■ CLOSE WINDOW</button>
+                    {dropClaims.length > 0 && <button onClick={() => exportCsv(drop.id, drop.token_name)} style={dBtn('var(--text-dim)')}>↓ CSV</button>}
+                  </div>
+                )}
+                {drop.status === 'closed' && (
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+                    <button onClick={() => doAction({ action: 'distributed', drop_id: drop.id })} style={dBtn('var(--green)')}>✓ MARK DISTRIBUTED</button>
+                    {dropClaims.length > 0 && <button onClick={() => exportCsv(drop.id, drop.token_name)} style={dBtn('var(--text-dim)')}>↓ CSV</button>}
+                  </div>
+                )}
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px', color: 'var(--text-dim)', margin: '8px 0 4px' }}>
+                  CLAIMS ({dropClaims.length}){pendingClaims.length > 0 && <span style={{ color: 'var(--amber)', marginLeft: 10 }}>⬡ {pendingClaims.length} need sending</span>}
+                </div>
+                {dropClaims.length === 0 && (
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)', marginBottom: 8 }}>no claims yet</div>
+                )}
+                {dropClaims.map(c => (
+                  <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--border-dim)', fontFamily: 'var(--font-card)', fontSize: '9px' }}>
+                    <span style={{ color: 'var(--text-dim)', minWidth: 24 }}>#{c.id}</span>
+                    <span style={{ flex: 1, wordBreak: 'break-all', letterSpacing: '0.5px' }} title={`TAP: ${c.tap_address}`}>
+                      <span style={{ color: 'var(--text-dim)' }}>SEND TO: </span>{c.cp_address}
+                    </span>
+                    {c.unatpepe_qty > 0 && <span style={{ color: 'var(--green)', letterSpacing: '1px', whiteSpace: 'nowrap' }}>UNAT:{c.unatpepe_qty}</span>}
+                    <span style={{ color: c.status === 'sent' ? 'var(--green)' : c.status === 'awaiting_distribution' ? 'var(--amber)' : 'var(--text-dim)', letterSpacing: '1px', minWidth: 80, textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      {c.status.toUpperCase().replace(/_/g, ' ')}
+                    </span>
+                    {c.status === 'awaiting_distribution' && (
+                      <button onClick={() => doAction({ action: 'mark_sent', claim_id: c.id })} style={dBtn('var(--green)')}>✓ sent</button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+          <button onClick={fetchDrops} disabled={loading} style={{ ...dBtn('var(--text-dim)'), marginTop: 8 }}>
+            {loading ? '...' : '↻ refresh'}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Demo card creation panel ───────────────────────────────────
 function DemoPanel({ authToken }) {
   const [open, setOpen] = useState(false);
@@ -1626,6 +1770,7 @@ export default function AdminPage() {
       <div className={styles.queue}>
         {tab === 'tools' ? (
           <>
+            <DropsPanel authToken={authToken} />
             <DemoPanel authToken={authToken} />
             <S0CodesPanel authToken={authToken} />
             <ClaimsPanel authToken={authToken} />
