@@ -852,9 +852,21 @@ function Step4({ data, onNext, onBack }) {
       <div className={styles.stepEyebrow}>Step 5 of 6</div>
       <h2 className={styles.stepTitle}>PR<span>O</span>VE OWNERSHIP</h2>
       <p className={styles.stepDesc}>
-        Sign the message below with <strong>{data.owner?.slice(0,16)}…</strong><br />
-        using your Bitcoin wallet (Electrum, etc.) to prove you own this address.
+        Prove you own <strong>{data.tokenName}</strong> by signing a message with its owner address.
       </p>
+
+      <div style={{marginBottom:16, padding:'10px 14px', border:'1px solid rgba(255,180,0,0.4)', background:'rgba(255,180,0,0.06)'}}>
+        <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'3px', color:'#ffb400', marginBottom:6}}>
+          ⚠ SIGN FROM THIS EXACT ADDRESS
+        </div>
+        <div style={{fontFamily:'var(--font-card)', fontSize:'11px', color:'var(--text)', wordBreak:'break-all', letterSpacing:'1px'}}>
+          {data.owner}
+        </div>
+        <div style={{fontFamily:'var(--font-body)', fontSize:'11px', color:'var(--text-dim)', marginTop:6, lineHeight:1.5}}>
+          Open the wallet that <strong>holds {data.tokenName}</strong> and sign from this address.<br />
+          Signing from any other address will fail.
+        </div>
+      </div>
 
       <div className={styles.urlBox} style={{marginBottom:24}}>
         <div className={styles.urlBoxLabel}>message to sign</div>
@@ -867,6 +879,7 @@ function Step4({ data, onNext, onBack }) {
         </div>
         <div style={{fontFamily:'var(--font-body)', fontSize:'12px', color:'var(--text-dim)', lineHeight:1.6}}>
           Menu → Advanced → Sign Message<br />
+          Make sure your active address is <strong style={{color:'var(--text)'}}>{data.owner?.slice(0,8)}…{data.owner?.slice(-6)}</strong><br />
           Paste the message above → Sign → Copy the result
         </div>
       </div>
@@ -876,7 +889,7 @@ function Step4({ data, onNext, onBack }) {
         </div>
         <div style={{fontFamily:'var(--font-body)', fontSize:'12px', color:'var(--text-dim)', lineHeight:1.6}}>
           Tools → Sign / Verify Message<br />
-          Enter your address → paste the message → Sign
+          Enter address <strong style={{color:'var(--text)'}}>{data.owner?.slice(0,8)}…{data.owner?.slice(-6)}</strong> → paste the message → Sign
         </div>
       </div>
 
