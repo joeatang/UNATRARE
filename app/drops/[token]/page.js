@@ -28,6 +28,9 @@ function fmtTime(s) {
   return [h, m, sec].map(n => String(n).padStart(2, '0')).join(':');
 }
 
+const ROMAN = { 0: '0', 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V', 6: 'VI', 7: 'VII', 8: 'VIII', 9: 'IX', 10: 'X' };
+function toRoman(n) { return ROMAN[n] || String(n); }
+
 const ADDR_RE = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
 const TXID_RE = /^[a-fA-F0-9]{64}$/;
 
@@ -272,8 +275,22 @@ export default function DropClaimPage() {
             ? '  ·  CULTURAL CLAIM · FREE'
             : `  ·  SUPPORT CLAIM · $${tiers.join('/$')}`}
         </div>
+        {drop.art_url && (
+          <div style={{ marginBottom: 28 }}>
+            <img
+              src={drop.art_url}
+              alt={drop.token_name}
+              style={{ width: '100%', maxWidth: 260, height: 'auto', display: 'block', border: '1px solid var(--border)' }}
+            />
+          </div>
+        )}
         <h1 style={S.title}>{drop.title}</h1>
         <div style={S.artist}>by {drop.artist_handle}</div>
+        <div style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: 28, lineHeight: 1.8 }}>
+          ◈ {drop.claims_count || 0} claimed
+          {drop.unatpepe_holders > 0 && <span> · <span style={{ color: 'var(--amber)' }}>{drop.unatpepe_holders} UNATPEPE holders</span></span>}
+          {' '}· {drop.supply_remaining ?? drop.supply_total} / {drop.supply_total} remaining
+        </div>
 
         {/* ── Bonus notice ── */}
         {drop.bonus_token && drop.bonus_remaining > 0 && (
@@ -521,7 +538,22 @@ export default function DropClaimPage() {
 
                   {finalStatus === 'awaiting_distribution' && (
                     <>
+                      {drop.art_url && (
+                        <img
+                          src={drop.art_url}
+                          alt={drop.token_name}
+                          style={{ width: '100%', maxWidth: 180, height: 'auto', display: 'block', margin: '20px auto 20px', border: '1px solid var(--border)' }}
+                        />
+                      )}
                       <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '16px 0' }} />
+                      <div style={S.row}>
+                        <span>TOKEN</span>
+                        <span style={S.rowVal}>{drop.token_name}</span>
+                      </div>
+                      <div style={S.row}>
+                        <span>SERIES</span>
+                        <span style={S.rowVal}>Series {toRoman(drop.series)} · Card #{String(drop.card_number).padStart(3, '0')}</span>
+                      </div>
                       <div style={S.row}>
                         <span>CLAIM TYPE</span>
                         <span style={S.rowVal}>
@@ -532,9 +564,9 @@ export default function DropClaimPage() {
                         <span>RECEIVING</span>
                         <span style={S.rowVal}>{cpAddress.slice(0, 8)}…{cpAddress.slice(-6)}</span>
                       </div>
-                      <div style={{ ...S.row, borderBottom: claimResult?.bonus_token ? '1px solid var(--border)' : 'none' }}>
-                        <span>DROP</span>
-                        <span style={S.rowVal}>{drop.token_name}</span>
+                      <div style={S.row}>
+                        <span>HOLDER</span>
+                        <span style={{ ...S.rowVal, color: 'var(--amber)' }}>#{drop.claims_count || '—'} of {drop.supply_total}</span>
                       </div>
                       {claimResult?.bonus_token && (
                         <div style={{ ...S.row, borderBottom: 'none', color: 'var(--green)' }}>
@@ -546,9 +578,21 @@ export default function DropClaimPage() {
                       )}
                       <p style={{ ...S.statusDesc, marginTop: 14, fontSize: '12px' }}>
                         No further action needed. Your card{claimResult?.bonus_token ? ` + ${claimResult.bonus_token}` : ''} will be sent to your receiving
-                        address after the window closes.{' '}
-                        <Link href="/drops" style={{ color: 'var(--amber)' }}>← back to chamber</Link>
+                        address after the window closes.
                       </p>
+                      <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
+                        <a
+                          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`🐸 Just claimed ${drop.token_name} — Series ${toRoman(drop.series)} · Card #${String(drop.card_number).padStart(3,'0')}\nCertified by the AI Pepe Council on UNATRARE\nhttps://unatrare.wtf/drops/${drop.token_name}`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ ...S.btnPrimary, textDecoration: 'none', display: 'inline-block', color: 'var(--text-dim)', borderColor: 'var(--border)' }}
+                        >
+                          share on X →
+                        </a>
+                        <Link href="/drops" style={{ ...S.btnPrimary, textDecoration: 'none', display: 'inline-block', color: 'var(--text-dim)', borderColor: 'var(--border)' }}>
+                          ← back to chamber
+                        </Link>
+                      </div>
                     </>
                   )}
                 </div>

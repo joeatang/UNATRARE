@@ -6,9 +6,13 @@ export async function GET() {
     const db = getDb();
     const drops = db.prepare(`
       SELECT d.*,
+        t.art_url,
         (SELECT COUNT(*) FROM drop_claims dc
-         WHERE dc.drop_id = d.id AND dc.status NOT IN ('expired')) AS claims_count
+         WHERE dc.drop_id = d.id AND dc.status NOT IN ('expired')) AS claims_count,
+        (SELECT COUNT(*) FROM drop_claims dc
+         WHERE dc.drop_id = d.id AND dc.status NOT IN ('expired') AND dc.unatpepe_qty > 0) AS unatpepe_holders
       FROM art_drops d
+      LEFT JOIN tokens t ON t.token_name = d.token_name
       ORDER BY
         CASE d.status
           WHEN 'active'       THEN 0
