@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { getDb } from '../../../../lib/db.js';
 import { notifyDropsGenerated } from '../../../../lib/telegram.js';
+import { notifyDropsGenerated as discordDropsGenerated } from '../../../../lib/discord.js';
 import { broadcastCouncilDrops } from '../../../../lib/tracBridge.js';
 
 // ── Judge brain modules (deterministic scan + template fallback) ──
@@ -405,9 +406,10 @@ export async function POST(req) {
     history = [...newEntries, ...history].slice(0, 300);
     writeFileSync(histPath, JSON.stringify({ drops: history }, null, 2), 'utf8');
 
-    // Fire Telegram — fire-and-forget, never blocks the response
+    // Fire Telegram + Discord — fire-and-forget, never blocks the response
     if (newEntries.length) {
       notifyDropsGenerated(newEntries).catch(e => console.warn('[telegram] drops:', e.message));
+      discordDropsGenerated(newEntries).catch(e => console.warn('[discord] drops:', e.message));
       broadcastCouncilDrops(newEntries).catch(e => console.warn('[tracBridge] council drops:', e.message));
     }
 

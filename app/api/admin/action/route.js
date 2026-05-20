@@ -5,6 +5,11 @@ import { getDb } from '../../../../lib/db';
 import { verifyAdminToken } from '../auth/route';
 import { judgeToken } from '../../../../lib/judge';
 import { notifyApproval, notifyGenesis, notifyCertification } from '../../../../lib/telegram.js';
+import {
+  notifyApproval    as discordApproval,
+  notifyGenesis     as discordGenesis,
+  notifyCertification as discordCertification,
+} from '../../../../lib/discord.js';
 
 // Auto-update exemplar calibration list when a human overrides the AI verdict.
 // Graceful — any failure here never blocks the actual admin action.
@@ -67,6 +72,7 @@ export async function POST(request) {
         'UPDATE tokens SET council_certified=1, revealed_at=COALESCE(revealed_at, unixepoch()) WHERE token_name=?'
       ).run(name);
       notifyCertification(token).catch(e => console.warn('[telegram] stamp:', e.message));
+      discordCertification(token).catch(e => console.warn('[discord] stamp:', e.message));
       return NextResponse.json({ ok: true, action: 'certify_stamp', council_certified: 1 });
     }
 
@@ -135,6 +141,7 @@ export async function POST(request) {
       ).run(genesisSeriesNum, card_number, note ? `Genesis: ${note}` : `Genesis Series ${genesisSeriesNum} — founding collection`, supply, name);
 
       notifyGenesis(token, { series: genesisSeriesNum, card_number }).catch(e => console.warn('[telegram] genesis:', e.message));
+      discordGenesis(token, { series: genesisSeriesNum, card_number }).catch(e => console.warn('[discord] genesis:', e.message));
       return NextResponse.json({ ok: true, action: 'genesis', series: genesisSeriesNum, card_number, supply });
     }
 
@@ -194,6 +201,7 @@ export async function POST(request) {
       }
 
       notifyApproval(token, { series, card_number, supply }).catch(e => console.warn('[telegram] approve:', e.message));
+      discordApproval(token, { series, card_number, supply }).catch(e => console.warn('[discord] approve:', e.message));
       return NextResponse.json({ ok: true, action: 'approved', series, card_number, supply, payUrl: `https://unatrare.wtf/pay/${name}` });
     }
 
