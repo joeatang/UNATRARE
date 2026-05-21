@@ -692,6 +692,116 @@
   .archiveBannerEyebrow { letter-spacing: 3px; }
 }
 
+/* ─── Pepe Vault Banner ────────────────────────────────────────── */
+.vaultBanner {
+  border-top: 1px solid var(--border-dim);
+  border-bottom: 1px solid var(--border-dim);
+  background: linear-gradient(135deg, #080808 0%, #100a00 100%);
+}
+
+.vaultBannerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 36px 32px;
+}
+
+.vaultBannerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 520px;
+}
+
+.vaultBannerEyebrow {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 6px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.vaultBannerTitle {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 3px;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.vaultBannerSub {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+.vaultBannerStats {
+  font-family: var(--font-card);
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.vaultBannerCount {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--amber);
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.vaultBannerCta {
+  display: inline-block;
+  align-self: flex-start;
+  font-family: var(--font-card);
+  font-size: 14px;
+  letter-spacing: 3px;
+  color: var(--bg);
+  background: var(--amber);
+  padding: 10px 22px;
+  text-decoration: none;
+  margin-top: 4px;
+  transition: background 0.15s;
+}
+
+.vaultBannerCta:hover {
+  background: var(--amber-hot);
+  color: var(--bg);
+}
+
+.vaultBannerThumbs {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.vaultBannerThumb {
+  width: 72px;
+  height: 100px;
+  border: 1px solid rgba(255, 180, 0, 0.3);
+  overflow: hidden;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.vaultBannerThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .vaultBannerThumbs { display: none; }
+  .vaultBannerInner  { padding: 24px 20px; }
+  .vaultBannerTitle  { font-size: 18px; }
+}
+
 /* ─── Hero CTAs ─────────────────────────────────────────── */
 .heroCtas {
   display: flex;

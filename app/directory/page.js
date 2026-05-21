@@ -43,12 +43,23 @@ function getApproved(series, sort) {
   }
 }
 
+function getDirectoryStats() {
+  try {
+    const db = getDb();
+    const pending  = db.prepare("SELECT COUNT(*) as n FROM tokens WHERE status='pending' AND (is_demo IS NULL OR is_demo=0)").get().n;
+    const approved = db.prepare("SELECT COUNT(*) as n FROM tokens WHERE status='approved' AND (is_demo IS NULL OR is_demo=0)").get().n;
+    const rejected = db.prepare("SELECT COUNT(*) as n FROM tokens WHERE status='rejected' AND (is_demo IS NULL OR is_demo=0)").get().n;
+    return { pending, approved, rejected };
+  } catch { return { pending: 0, approved: 0, rejected: 0 }; }
+}
+
 export const revalidate = 60;
 
 export default function DirectoryPage({ searchParams }) {
   const seriesFilter = searchParams?.series ? Number(searchParams.series) : null;
   const sortMode = searchParams?.sort === 'rarity' ? 'rarity' : 'card';
   const { grouped, total } = getApproved(seriesFilter, sortMode);
+  const stats = getDirectoryStats();
   const seriesNumbers = Object.keys(grouped).map(Number).sort((a, b) => a - b);
 
   // Build series list for filter buttons
@@ -71,6 +82,13 @@ export default function DirectoryPage({ searchParams }) {
             <div className={styles.eyebrow}>· certified dank art ·</div>
             <h1 className={styles.title}>DIRECT<span>O</span>RY</h1>
             <div className={styles.totalCount}>{total} certified card{total !== 1 ? 's' : ''}</div>
+            <div className={styles.dirStats}>
+              <span className={styles.dirStatPending}>{stats.pending} pending</span>
+              <span className={styles.dirStatSep}>·</span>
+              <span className={styles.dirStatApproved}>{stats.approved} certified</span>
+              <span className={styles.dirStatSep}>·</span>
+              <span className={styles.dirStatRejected}>{stats.rejected} rejected</span>
+            </div>
           </div>
           <Link href="/submit" className={styles.submitCta}>
             submit your token →

@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import Nav from './components/Nav';
-import MempoolLive from './components/MempoolLive';
 import styles from './page.module.css';
 import feedStyles from './feed/feed.module.css';
 import archiveStyles from './archive/archive.module.css';
@@ -83,16 +82,6 @@ function getArchiveSummary() {
 function getPageData() {
   try {
     const db = getDb();
-    const pending  = db.prepare("SELECT COUNT(*) as n FROM tokens WHERE status='pending' AND (is_demo IS NULL OR is_demo=0)").get().n;
-    const approved = db.prepare("SELECT COUNT(*) as n FROM tokens WHERE status='approved' AND (is_demo IS NULL OR is_demo=0)").get().n;
-    const rejected = db.prepare("SELECT COUNT(*) as n FROM tokens WHERE status='rejected' AND (is_demo IS NULL OR is_demo=0)").get().n;
-    const recent   = db.prepare(
-      "SELECT token_name, display_title, status, art_url, art_mime, series, card_number, judged_at, revealed_at " +
-      "FROM tokens WHERE status IN ('approved','rejected') AND (is_demo IS NULL OR is_demo=0) ORDER BY judged_at DESC LIMIT 20"
-    ).all();
-    const pending3 = db.prepare(
-      "SELECT token_name FROM tokens WHERE status='pending' ORDER BY submitted_at DESC LIMIT 3"
-    ).all();
     const feedTokens = db.prepare(`
       SELECT token_name, display_title, status, artist_handle, art_hash, art_url, art_mime,
              judge_score, judge_notes, judged_at, revealed_at, series, card_number,
@@ -101,15 +90,18 @@ function getPageData() {
       WHERE status IN ('approved','rejected') AND judged_at IS NOT NULL
       ORDER BY is_demo ASC, judged_at DESC
     `).all();
+    const vaultCount  = db.prepare("SELECT COUNT(*) as n FROM vault_assets").get().n;
+    const vaultRecent = db.prepare(
+      "SELECT art_hash, art_mime, token_name FROM vault_assets ORDER BY uploaded_at DESC LIMIT 4"
+    ).all();
     return {
-      pending, approved, rejected,
-      recent:     recent.map(r => ({ ...r })),
-      pending3:   pending3.map(r => ({ ...r })),
       feedTokens: feedTokens.map(r => ({ ...r })),
       drops:      getDropsHistory(),
+      vaultCount,
+      vaultRecent: vaultRecent.map(r => ({ ...r })),
     };
   } catch {
-    return { pending: 0, approved: 0, rejected: 0, recent: [], pending3: [], feedTokens: [], drops: [] };
+    return { feedTokens: [], drops: [], vaultCount: 0, vaultRecent: [] };
   }
 }
 
@@ -130,7 +122,7 @@ function cardLabel(series, cardNumber) {
 }
 
 export default function HomePage() {
-  const { pending, approved, rejected, recent, pending3, feedTokens, drops } = getPageData();
+  const { feedTokens, drops, vaultCount, vaultRecent } = getPageData();
   const { total: archiveTotal, recent: archiveRecent } = getArchiveSummary();
   const nonDemo = feedTokens.filter(t => !t.is_demo);
   const showcaseTokens = feedTokens
@@ -141,6 +133,12 @@ export default function HomePage() {
     if (!a?.art_hash) return null;
     const ext = a.art_mime?.includes('gif') ? 'gif' : a.art_mime?.includes('jpg') || a.art_mime?.includes('jpeg') ? 'jpg' : 'png';
     return `/uploads/archive/${a.collection}/${a.art_hash}.${ext}`;
+  }
+
+  function vaultArtUrl(a) {
+    if (!a?.art_hash) return null;
+    const ext = a.art_mime?.includes('gif') ? 'gif' : a.art_mime?.includes('jpg') || a.art_mime?.includes('jpeg') ? 'jpg' : a.art_mime?.includes('webp') ? 'webp' : 'png';
+    return `/uploads/vault/${a.art_hash}.${ext}`;
   }
 
   // Unified chronological timeline — verdicts + signal drops interleaved by timestamp
@@ -189,12 +187,6 @@ export default function HomePage() {
             </div>
           </section>
         )}
-
-        <MempoolLive
-          initialStats={{ pending, approved, rejected }}
-          initialRecent={recent}
-          initialPending3={pending3}
-        />
 
         {/* ── Unified Timeline: Verdicts + Council Signal drops ── */}
         <div className={styles.feedBlock}>
@@ -379,6 +371,43 @@ export default function HomePage() {
             )}
           </div>
         </section>
+
+        {/* ── PEPE VAULT ── */}
+        {vaultCount > 0 && (
+          <section className={styles.vaultBanner}>
+            <div className={styles.vaultBannerInner}>
+              <div className={styles.vaultBannerLeft}>
+                <div className={styles.vaultBannerEyebrow}>· pepe vault ·</div>
+                <div className={styles.vaultBannerTitle}>
+                  COUNTERPARTY ART, STORED ON THE UNATRARE NETWORK
+                </div>
+                <div className={styles.vaultBannerSub}>
+                  Artists store their Counterparty token art directly on UNATRARE infrastructure —
+                  permanent, Bitcoin-native, no Arweave required.
+                </div>
+                <div className={styles.vaultBannerStats}>
+                  <span className={styles.vaultBannerCount}>{vaultCount}</span>
+                  {vaultCount === 1 ? 'Counterparty token stored in the vault' : 'Counterparty tokens stored in the vault'}
+                </div>
+                <Link href="/vault" className={styles.vaultBannerCta}>
+                  explore the vault →
+                </Link>
+              </div>
+              {vaultRecent.length > 0 && (
+                <div className={styles.vaultBannerThumbs}>
+                  {vaultRecent.map(a => {
+                    const url = vaultArtUrl(a);
+                    return url ? (
+                      <div key={a.token_name} className={styles.vaultBannerThumb}>
+                        <img src={url} alt={a.token_name} />
+                      </div>
+                    ) : null;
+                  })}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* ── CTA ── */}
         <div className={styles.ctaStrip}>

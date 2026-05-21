@@ -291,3 +291,21 @@
   /* Min 44px touch target on filter buttons */
   .filterBtn { padding: 9px 14px; font-size: 15px; }
 }
+
+/* ─── Stats row (directory header) ──────────────────────────── */
+.dirStats {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 8px;
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  flex-wrap: wrap;
+}
+
+.dirStatPending  { color: var(--amber); }
+.dirStatApproved { color: var(--green); }
+.dirStatRejected { color: var(--red); }
+.dirStatSep      { color: var(--border-dim); }
