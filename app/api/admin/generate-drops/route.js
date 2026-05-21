@@ -390,8 +390,9 @@ export async function POST(req) {
     }
 
     const nowTs = Math.floor(Date.now() / 1000);
-    // Stagger posts 15-30 min apart so they spread through the feed instead of clustering
-    const staggerSecs = 900 + Math.floor(Math.random() * 900);
+    // Rotation: stagger 15-30 min so one judge's posts spread through the feed.
+    // Full council: tight 60s stagger — council event should cluster, not scatter across hours.
+    const staggerSecs = forceAll ? 60 : 900 + Math.floor(Math.random() * 900);
     const newEntries = [];
     let entryIdx = 0;
     for (const [judgeId, texts] of Object.entries(generated)) {

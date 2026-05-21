@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // unatrare-drops.js — generates council commentary, triggered by cron
 // Place at /usr/local/bin/unatrare-drops.js on the server
-// cron: 0 */4 * * * node /usr/local/bin/unatrare-drops.js >> /var/log/unatrare-drops.log 2>&1
+// cron: 0 * * * * node /usr/local/bin/unatrare-drops.js >> /var/log/unatrare-drops.log 2>&1
 
 const crypto = require('crypto');
 const http = require('http');
