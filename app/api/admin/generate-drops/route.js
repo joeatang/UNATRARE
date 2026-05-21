@@ -29,20 +29,6 @@ const BRAIN_MAP = {
 };
 
 /**
- * Run deterministic keyword scan on topic text, return a context string
- * to append to the system prompt. Empty string if no signal.
- */
-function getBrainEnrichment(judgeId, text) {
-  const brain = BRAIN_MAP[judgeId];
-  if (!brain) return '';
-  try {
-    const result = brain.scan(text);
-    if (!result.keywords?.length) return '';
-    return `\n\n[ACTIVE SIGNAL — angle: ${result.angle}, keywords: ${result.keywords.slice(0, 5).join(', ')}]`;
-  } catch { return ''; }
-}
-
-/**
  * Generate a template-based fallback drop when Groq is unavailable.
  * Returns null if no brain or template available.
  */
@@ -274,13 +260,12 @@ function buildTopicPool(context, allJudgeNames) {
 // ── Per-judge config: how many posts, how terse ───────────────────
 const JUDGE_OUTPUT_CONFIG = {
   prof_naka_c:    { count: 1, maxTokens: 80,  note: 'You speak in 1 short, final statement only. No explanation. Maximum 20 words.' },
-  dr_m_catalogus: { count: 2, maxTokens: 280, note: 'Be precise and direct. No fluff.' },
-  prof_j_looney:  { count: 2, maxTokens: 280, note: 'Be sharp and market-minded.' },
-  dank_shawn:     { count: 2, maxTokens: 280, note: 'Be casual and community-grounded.' },
-  rare_srilla:    { count: 2, maxTokens: 280, note: 'Be gut-instinct and decisive.' },
-  theo_goodman:   { count: 2, maxTokens: 280, note: 'Be sharp and Bitcoin-minded.' },
-  dj_pepai:       { count: 2, maxTokens: 280, note: 'Be culturally aware and energetic.' },
-  chiguiripepe:   { count: 2, maxTokens: 280, note: 'Be cryptic and poetic.' },
+  dr_m_catalogus: { count: 2, maxTokens: 280, note: 'Archival precision. Clinical observation. Reference a supply number, a series fact, or a specific on-chain finding.' },
+  prof_j_looney:  { count: 2, maxTokens: 280, note: 'Builder voice. Self-deprecating. Reference something you built before they had a name for it. Dad-joke optional.' },
+  dank_shawn:     { count: 2, maxTokens: 280, note: 'Cultural memory. Reference a specific Telegram era, a moment in the timeline, or a card from lore — not vibes, specifics.' },
+  theo_goodman:   { count: 2, maxTokens: 280, note: 'Be witty. The joke IS the critique. Make someone actually smile — at least one line should be screenshot-worthy.' },
+  dj_pepai:       { count: 2, maxTokens: 280, note: 'Maximum swag. Do not explain the reference. If they need a footnote they are not the audience. Drop it and walk away.' },
+  chiguiripepe:   { count: 2, maxTokens: 280, note: "Warm, unhurried, builder's precision. South American confidence. Reference the chiguire, a CIP, or the PEPECASH yacht." },
   j_frog:         { count: 2, maxTokens: 280, note: 'Be technical and builder-focused.' },
 };
 
@@ -312,7 +297,6 @@ export async function POST(req) {
       dj_pepai:       { name: 'DJ PEPAI',        sigil: '◎' },
       chiguiripepe:   { name: 'CHIGUIRIPEPE',    sigil: '⬟' },
       j_frog:         { name: 'J.FROG',          sigil: '◧' },
-      rare_srilla:    { name: 'RARE SRILLA',     sigil: '◇' },
     };
 
     // ── Select judges for this run ────────────────────────────────
@@ -369,13 +353,13 @@ export async function POST(req) {
         const postCount = judge.id === NAKA_ID ? 1 : topic.count;
         const countWord = postCount === 1 ? '1 post' : `${postCount} posts`;
 
-        // Brain scan — deterministic enrichment before LLM call
+        // Brain scan — used for template fallback selection only
         const brainScan  = BRAIN_MAP[judge.id]?.scan?.(topic.instruction) || null;
-        const brainCtx   = getBrainEnrichment(judge.id, topic.instruction);
 
         // Prefer brain's roleConfig.systemPrompt; fall back to judges.config.json field
+        // NOTE: system_prompt_header (judging rules) is intentionally excluded here — Mode 2 (feed)
         const brainPrompt = BRAIN_MAP[judge.id]?.roleConfig?.systemPrompt || judge.personality_prompt;
-        const systemPrompt = `${config.system_prompt_header}\n\n${brainPrompt}${brainCtx}${outputCfg.note ? `\n\nFORMAT NOTE: ${outputCfg.note}` : ''}`;
+        const systemPrompt = `${brainPrompt}${outputCfg.note ? `\n\nFORMAT NOTE: ${outputCfg.note}` : ''}`;
         const userPrompt = `${topic.instruction}\n\nOutput exactly ${countWord}, one per line, no numbering, no intro, no sign-off. Pure character voice only.`;
 
         let drops = [];
@@ -410,18 +394,22 @@ export async function POST(req) {
     }
 
     const nowTs = Math.floor(Date.now() / 1000);
+    // Stagger posts 15-30 min apart so they spread through the feed instead of clustering
+    const staggerSecs = 900 + Math.floor(Math.random() * 900);
     const newEntries = [];
+    let entryIdx = 0;
     for (const [judgeId, texts] of Object.entries(generated)) {
       const meta = JUDGE_META[judgeId] || { name: judgeId.toUpperCase(), sigil: '○' };
-      texts.forEach((text, i) => {
+      texts.forEach((text) => {
         newEntries.push({
-          id:         `${nowTs}_${judgeId}_${i}`,
+          id:         `${nowTs}_${judgeId}_${entryIdx}`,
           judge_id:   judgeId,
           judge_name: meta.name,
           sigil:      meta.sigil,
           text,
-          ts:         nowTs,
+          ts:         nowTs + entryIdx * staggerSecs,
         });
+        entryIdx++;
       });
     }
 
