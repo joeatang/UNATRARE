@@ -309,14 +309,10 @@ export async function POST(req) {
       const rest = allJudges.filter(j => j.id !== NAKA_ID).sort(() => Math.random() - 0.5);
       selectedJudges = nakaJudge ? [...rest, nakaJudge] : rest;
     } else {
-      // Normal rotation: 1-2 random judges, NAKAMOJO at ~25%
-      const nakaJudge = allJudges.find(j => j.id === NAKA_ID);
-      const otherJudges = allJudges.filter(j => j.id !== NAKA_ID);
-      const shuffled = [...otherJudges].sort(() => Math.random() - 0.5);
-      const pickCount = Math.random() < 0.3 ? 1 : 2;
-      selectedJudges = shuffled.slice(0, Math.min(pickCount, shuffled.length));
-      if (nakaJudge && Math.random() < 0.25) selectedJudges.push(nakaJudge);
-      if (!selectedJudges.length && allJudges.length) selectedJudges.push(allJudges[0]);
+      // Rotation: exactly 1 random judge per run from the full council pool.
+      // Cron fires hourly — one voice at a time, spread across the day.
+      const pick = [...allJudges].sort(() => Math.random() - 0.5)[0];
+      selectedJudges = pick ? [pick] : [allJudges[0]];
     }
 
     // ── Build topic pool ──────────────────────────────────────────
