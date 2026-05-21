@@ -214,6 +214,16 @@ export default function NodeGuidePage() {
           '# Check status',
           'pm2 logs unatrare-node --lines 20',
         ]} />
+
+        <h3 className={styles.step}>Pausing and resuming (travel, hardware changes, etc.)</h3>
+        <CodeBlock lines={[
+          '# Stop the node (and save stopped state so it does not auto-restart on reboot)',
+          'pm2 stop unatrare-node && pm2 save',
+          '',
+          '# Resume when you are back',
+          'pm2 start unatrare-node && pm2 save',
+        ]} />
+        <Note>Stopping your node pauses heartbeat accumulation. The 7-day genesis window keeps ticking while you are offline. See the FAQ below for what this means for your GENESIS slot.</Note>
       </Section>
 
       {/* ── macOS ── */}
@@ -353,6 +363,28 @@ export default function NodeGuidePage() {
             <p className={styles.faqA}>
               No. That is just a bookmark shortcut. A node means your computer is actively storing and
               serving files. They are completely different things.
+            </p>
+          </div>
+          <div className={styles.faqItem}>
+            <p className={styles.faqQ}>What if I need to pause my node? (travel, hardware swap, etc.)</p>
+            <p className={styles.faqA}>
+              You can stop your node any time — just run <code className={styles.code}>pm2 stop unatrare-node &amp;&amp; pm2 save</code> on Linux,
+              or <code className={styles.code}>docker compose down</code> on Windows. On macOS, press Ctrl+C in the terminal.
+              To resume, run <code className={styles.code}>pm2 start unatrare-node &amp;&amp; pm2 save</code> (or <code className={styles.code}>docker compose up -d</code>).
+              Your node picks up exactly where it left off — same pubkey, same heartbeat count, same identity.
+            </p>
+            <p className={styles.faqA}>
+              <strong className={styles.amber}>Genesis window note:</strong> The 7-day genesis confirmation clock starts
+              when you first register and does <em>not</em> pause while you are offline. You need 140 total heartbeats
+              (≈ 83% uptime over 7 days) to confirm your slot. If you are offline for more than ~40 hours during
+              that first week, you will not hit 140 beats by day 7 — but your slot stays reserved.
+              Just keep running once you are back and your beat count will catch up. Genesis confirms automatically
+              on the next heartbeat after you cross 140 beats, even if that happens well after day 7.
+            </p>
+            <p className={styles.faqA}>
+              If you are already confirmed genesis (the 7-day window is done), stopping has no effect on your status —
+              it is permanent. You will simply miss heartbeats while offline, which reduces your share of future rewards
+              for that period.
             </p>
           </div>
           <div className={styles.faqItem}>
