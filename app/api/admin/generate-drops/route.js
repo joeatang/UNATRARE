@@ -266,7 +266,7 @@ const JUDGE_OUTPUT_CONFIG = {
   theo_goodman:   { count: 2, maxTokens: 280, note: 'Be witty. The joke IS the critique. Make someone actually smile — at least one line should be screenshot-worthy.' },
   dj_pepai:       { count: 2, maxTokens: 280, note: 'Maximum swag. Do not explain the reference. If they need a footnote they are not the audience. Drop it and walk away.' },
   chiguiripepe:   { count: 2, maxTokens: 280, note: "Warm, unhurried, builder's precision. South American confidence. Reference the chiguire, a CIP, or the PEPECASH yacht." },
-  j_frog:         { count: 2, maxTokens: 280, note: 'Be technical and builder-focused.' },
+  j_frog:         { count: 2, maxTokens: 280, note: 'Reference a specific on-chain data point — supply number, block height, or explorer finding. Let the chain data do the talking.' },
 };
 
 export async function POST(req) {
