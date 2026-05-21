@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 
 // Simple stateless token: HMAC-SHA256(password + day) — expires at midnight UTC
-function makeToken(password) {
+export function makeToken(password) {
   const day = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
   return crypto
     .createHmac('sha256', process.env.ADMIN_SECRET || 'changeme')

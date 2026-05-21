@@ -2,7 +2,17 @@ import { NextResponse } from 'next/server';
 import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { getDb } from '../../../../lib/db';
-import { verifyAdminToken } from '../auth/route';
+import { verifyAdminToken, makeToken } from '../auth/route';
+
+// Fire the full 8-judge council as a background job — fire-and-forget, never blocks the caller
+function fireFullCouncil() {
+  const tok = makeToken(process.env.ADMIN_PASSWORD || '');
+  fetch(`http://localhost:${process.env.PORT || 3007}/api/admin/generate-drops`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tok}` },
+    body: JSON.stringify({ force_all: true }),
+  }).catch(e => console.warn('[generate-drops] council auto-fire failed:', e.message));
+}
 import { judgeToken } from '../../../../lib/judge';
 import { notifyApproval, notifyGenesis, notifyCertification } from '../../../../lib/telegram.js';
 import {
@@ -73,6 +83,7 @@ export async function POST(request) {
       ).run(name);
       notifyCertification(token).catch(e => console.warn('[telegram] stamp:', e.message));
       discordCertification(token).catch(e => console.warn('[discord] stamp:', e.message));
+      fireFullCouncil();
       return NextResponse.json({ ok: true, action: 'certify_stamp', council_certified: 1 });
     }
 
@@ -142,6 +153,7 @@ export async function POST(request) {
 
       notifyGenesis(token, { series: genesisSeriesNum, card_number }).catch(e => console.warn('[telegram] genesis:', e.message));
       discordGenesis(token, { series: genesisSeriesNum, card_number }).catch(e => console.warn('[discord] genesis:', e.message));
+      fireFullCouncil();
       return NextResponse.json({ ok: true, action: 'genesis', series: genesisSeriesNum, card_number, supply });
     }
 
