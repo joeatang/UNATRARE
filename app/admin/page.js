@@ -560,6 +560,7 @@ function DropsPanel({ authToken }) {
   const [windowHours, setWindowHours] = useState('168');
   const [natAddr, setNatAddr] = useState('');
   const [actionMsg, setActionMsg] = useState('');
+  const [bundleInputs, setBundleInputs] = useState({});
 
   async function fetchDrops() {
     setLoading(true);
@@ -662,27 +663,99 @@ function DropsPanel({ authToken }) {
                     {dropClaims.length > 0 && <button onClick={() => exportCsv(drop.id, drop.token_name)} style={dBtn('var(--text-dim)')}>↓ CSV</button>}
                   </div>
                 )}
+                {/* Bundle config row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap', padding: '8px 0', borderBottom: '1px solid var(--border-dim)' }}>
+                  {drop.bundle_token ? (
+                    <>
+                      <span style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--text-dim)' }}>BUNDLE:</span>
+                      <span style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--amber)', fontWeight: 700 }}>{drop.bundle_token}</span>
+                      <span style={{ fontFamily: 'var(--font-card)', fontSize: '9px', color: 'var(--text-dim)' }}>{drop.bundle_limit > 0 ? `first ${drop.bundle_limit} claims` : 'all claims'}</span>
+                      <button onClick={() => doAction({ action: 'set_bundle', drop_id: drop.id, bundle_token: '', bundle_limit: 0 })} style={{ ...dBtn('var(--text-dim)'), padding: '2px 8px' }}>✕ remove</button>
+                    </>
+                  ) : (
+                    <>
+                      <span style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--text-dim)' }}>BUNDLE TOKEN:</span>
+                      <input
+                        type="text"
+                        placeholder="e.g. RAREUNATPEPE"
+                        value={(bundleInputs[drop.id] || {}).token || ''}
+                        onChange={e => setBundleInputs(prev => ({ ...prev, [drop.id]: { ...prev[drop.id], token: e.target.value.toUpperCase() } }))}
+                        style={dInput(160)}
+                      />
+                      <input
+                        type="number"
+                        placeholder="limit (0=all)"
+                        value={(bundleInputs[drop.id] || {}).limit ?? ''}
+                        onChange={e => setBundleInputs(prev => ({ ...prev, [drop.id]: { ...prev[drop.id], limit: e.target.value } }))}
+                        style={dInput(80)}
+                        min="0"
+                      />
+                      <button
+                        onClick={() => {
+                          const inp = bundleInputs[drop.id] || {};
+                          if (!inp.token) return;
+                          doAction({ action: 'set_bundle', drop_id: drop.id, bundle_token: inp.token, bundle_limit: Number(inp.limit) || 0 });
+                          setBundleInputs(prev => ({ ...prev, [drop.id]: {} }));
+                        }}
+                        style={dBtn('var(--amber)')}
+                      >⬡ set bundle</button>
+                    </>
+                  )}
+                </div>
                 <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px', color: 'var(--text-dim)', margin: '8px 0 4px' }}>
                   CLAIMS ({dropClaims.length}){pendingClaims.length > 0 && <span style={{ color: 'var(--amber)', marginLeft: 10 }}>⬡ {pendingClaims.length} need sending</span>}
+                  {drop.bundle_token && dropClaims.some(c => !c.bundle_sent && (drop.bundle_limit === 0 || dropClaims.indexOf(c) < drop.bundle_limit)) && (
+                    <span style={{ color: '#9b8cff', marginLeft: 10 }}>⬡ bundle pending</span>
+                  )}
                 </div>
                 {dropClaims.length === 0 && (
                   <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)', marginBottom: 8 }}>no claims yet</div>
                 )}
-                {dropClaims.map(c => (
-                  <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--border-dim)', fontFamily: 'var(--font-card)', fontSize: '9px' }}>
-                    <span style={{ color: 'var(--text-dim)', minWidth: 24 }}>#{c.id}</span>
-                    <span style={{ flex: 1, wordBreak: 'break-all', letterSpacing: '0.5px' }} title={`TAP: ${c.tap_address}`}>
-                      <span style={{ color: 'var(--text-dim)' }}>SEND TO: </span>{c.cp_address}
-                    </span>
-                    {c.unatpepe_qty > 0 && <span style={{ color: 'var(--green)', letterSpacing: '1px', whiteSpace: 'nowrap' }}>UNAT:{c.unatpepe_qty}</span>}
-                    <span style={{ color: c.status === 'sent' ? 'var(--green)' : c.status === 'awaiting_distribution' ? 'var(--amber)' : 'var(--text-dim)', letterSpacing: '1px', minWidth: 80, textAlign: 'right', whiteSpace: 'nowrap' }}>
-                      {c.status.toUpperCase().replace(/_/g, ' ')}
-                    </span>
-                    {c.status === 'awaiting_distribution' && (
-                      <button onClick={() => doAction({ action: 'mark_sent', claim_id: c.id })} style={dBtn('var(--green)')}>✓ sent</button>
-                    )}
-                  </div>
-                ))}
+                {(() => {
+                  const sortedForRank = [...dropClaims].sort((a, b) => a.claimed_at - b.claimed_at);
+                  const rankMap = {};
+                  sortedForRank.forEach((c, i) => { rankMap[c.id] = i + 1; });
+                  return dropClaims.map(c => {
+                    const rank = rankMap[c.id];
+                    const bundleEligible = drop.bundle_token && (drop.bundle_limit === 0 || rank <= drop.bundle_limit);
+                    return (
+                      <div key={c.id} style={{ borderBottom: '1px solid var(--border-dim)' }}>
+                        {/* Primary token row */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0 4px', fontFamily: 'var(--font-card)', fontSize: '9px' }}>
+                          <span style={{ color: 'var(--text-dim)', minWidth: 24 }}>#{c.id}</span>
+                          <span style={{ flex: 1, wordBreak: 'break-all', letterSpacing: '0.5px' }} title={`TAP: ${c.tap_address}`}>
+                            <span style={{ color: 'var(--text-dim)' }}>SEND TO: </span>{c.cp_address}
+                          </span>
+                          {c.unatpepe_qty > 0 && <span style={{ color: 'var(--green)', letterSpacing: '1px', whiteSpace: 'nowrap' }}>UNAT:{c.unatpepe_qty}</span>}
+                          <span style={{ color: c.status === 'sent' ? 'var(--green)' : c.status === 'awaiting_distribution' ? 'var(--amber)' : 'var(--text-dim)', letterSpacing: '1px', minWidth: 80, textAlign: 'right', whiteSpace: 'nowrap' }}>
+                            {c.status.toUpperCase().replace(/_/g, ' ')}
+                          </span>
+                          {c.status === 'awaiting_distribution' && (
+                            <button onClick={() => doAction({ action: 'mark_sent', claim_id: c.id })} style={dBtn('var(--green)')}>✓ sent</button>
+                          )}
+                        </div>
+                        {/* Bundle token row — only when eligible */}
+                        {bundleEligible && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 0 6px 24px', fontFamily: 'var(--font-card)', fontSize: '9px' }}>
+                            <span style={{ color: 'var(--text-dim)', letterSpacing: '0.5px' }}>↳ ALSO SEND:</span>
+                            <span style={{ color: 'var(--amber)', letterSpacing: '2px', fontWeight: 700 }}>{drop.bundle_token} × 1</span>
+                            <span style={{ color: 'var(--text-dim)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.cp_address}</span>
+                            <button
+                              onClick={() => { navigator.clipboard.writeText(c.cp_address); }}
+                              style={{ ...dBtn('var(--text-dim)'), padding: '2px 8px' }}
+                              title="Copy address"
+                            >⊕ copy</button>
+                            {c.bundle_sent ? (
+                              <span style={{ color: 'var(--green)', letterSpacing: '1px', whiteSpace: 'nowrap', minWidth: 80, textAlign: 'right' }}>✓ BUNDLE SENT</span>
+                            ) : (
+                              <button onClick={() => doAction({ action: 'mark_bundle_sent', claim_id: c.id })} style={{ ...dBtn('#9b8cff'), minWidth: 80 }}>✓ bundle sent</button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  });
+                })()}
               </div>
             );
           })}

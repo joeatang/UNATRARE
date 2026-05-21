@@ -132,6 +132,24 @@ export async function POST(request) {
     return NextResponse.json({ ok: true });
   }
 
+  if (action === 'mark_bundle_sent') {
+    const { claim_id } = body;
+    if (!claim_id) return NextResponse.json({ error: 'claim_id required' }, { status: 422 });
+    db.prepare(
+      'UPDATE drop_claims SET bundle_sent = 1, updated_at = unixepoch() WHERE id = ?'
+    ).run(claim_id);
+    return NextResponse.json({ ok: true });
+  }
+
+  if (action === 'set_bundle') {
+    const { drop_id, bundle_token, bundle_limit } = body;
+    if (!drop_id) return NextResponse.json({ error: 'drop_id required' }, { status: 422 });
+    db.prepare(
+      "UPDATE art_drops SET bundle_token = ?, bundle_limit = ? WHERE id = ?"
+    ).run((bundle_token || '').toUpperCase().trim(), Number(bundle_limit) || 0, drop_id);
+    return NextResponse.json({ ok: true });
+  }
+
   if (action === 'expire_claim') {
     const { claim_id } = body;
     if (!claim_id) return NextResponse.json({ error: 'claim_id required' }, { status: 422 });
