@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { validateTokenName } from '../../../lib/tokenValidator';
 import { getDb } from '../../../lib/db';
 import { judgeToken } from '../../../lib/judge.js';
+import { verifyBitcoinMessage } from '../../../lib/btcVerify.mjs';
 
 const ADDR_RE   = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
 const BASE64_RE = /^[A-Za-z0-9+/=]{87,88}$/; // 65 bytes base64, may end with =
@@ -59,6 +60,18 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, error: 'Invalid signature format' }, { status: 422 });
   }
 
+  // ── Verify BIP-137 Bitcoin message signature server-side ─────
+  // Prevents bypassing the wizard to submit with a fake signature.
+  // Challenge must match exactly what the submit wizard asks the artist to sign.
+  const challenge = `UNATRARE:${tokenName.toUpperCase().trim()}:${owner}`;
+  const sigCandidates = [challenge, challenge + '\r\n', challenge + '\n', challenge + '\r'];
+  let sigOk = false;
+  for (const c of sigCandidates) {
+    if (verifyBitcoinMessage(owner, c, signature).ok) { sigOk = true; break; }
+  }
+  if (!sigOk) {
+    return NextResponse.json({ ok: false, error: 'Signature verification failed. Sign the exact message shown in the submission wizard with the address holding this token.' }, { status: 422 });
+  }
 
   // ── Validate art URL (must be a relative or absolute URL) ───
   if (!artUrl || artUrl.length < 4) {

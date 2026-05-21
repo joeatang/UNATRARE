@@ -3,6 +3,13 @@ import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { getDb } from '../../../../lib/db';
 import { verifyAdminToken, makeToken } from '../auth/route';
+import { judgeToken } from '../../../../lib/judge';
+import { notifyApproval, notifyGenesis, notifyCertification } from '../../../../lib/telegram.js';
+import {
+  notifyApproval    as discordApproval,
+  notifyGenesis     as discordGenesis,
+  notifyCertification as discordCertification,
+} from '../../../../lib/discord.js';
 
 // Fire the full 8-judge council as a background job — fire-and-forget, never blocks the caller
 function fireFullCouncil() {
@@ -13,13 +20,6 @@ function fireFullCouncil() {
     body: JSON.stringify({ force_all: true }),
   }).catch(e => console.warn('[generate-drops] council auto-fire failed:', e.message));
 }
-import { judgeToken } from '../../../../lib/judge';
-import { notifyApproval, notifyGenesis, notifyCertification } from '../../../../lib/telegram.js';
-import {
-  notifyApproval    as discordApproval,
-  notifyGenesis     as discordGenesis,
-  notifyCertification as discordCertification,
-} from '../../../../lib/discord.js';
 
 // Auto-update exemplar calibration list when a human overrides the AI verdict.
 // Graceful — any failure here never blocks the actual admin action.

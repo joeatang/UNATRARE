@@ -86,6 +86,7 @@ function TokenRow({ token, authToken, onAction }) {
         setDirHidden(false);
       } else if (action === 'certify_stamp') {
         setStamped(true);
+        setRevealed(true); // certify_stamp auto-reveals server-side
       } else if (action === 'decertify_stamp') {
         setStamped(false);
       } else if (action === 'approve' || action === 'genesis') {
