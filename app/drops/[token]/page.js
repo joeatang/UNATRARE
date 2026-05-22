@@ -59,7 +59,7 @@ const S = {
   stepDesc:   { fontFamily: 'var(--font-body)', fontSize: '13px', lineHeight: 1.8, color: 'var(--text-dim)', marginBottom: 18 },
   label:      { display: 'block', fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 8, textTransform: 'uppercase' },
   input:      { width: '100%', boxSizing: 'border-box', padding: '12px 14px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', fontFamily: 'var(--font-card)', fontSize: '11px', letterSpacing: '1px', outline: 'none', marginBottom: 8 },
-  errText:    { fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: '#cc4444', marginBottom: 10 },
+  errText:    { fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--red)', marginBottom: 10 },
   btnPrimary: { padding: '12px 28px', border: '1px solid var(--amber)', background: 'transparent', color: 'var(--amber)', fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '3px', cursor: 'pointer', textTransform: 'uppercase' },
   btnOff:     { opacity: 0.35, cursor: 'not-allowed' },
   tierGrid:   { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: 'var(--border)', marginBottom: 20 },
@@ -252,7 +252,7 @@ export default function DropClaimPage() {
       <Nav />
       <main style={S.page}>
         <Link href="/drops" style={S.back}>← the claim chamber</Link>
-        <div style={{ ...S.stepTitle, color: '#cc4444', marginTop: 20 }}>{dropErr || 'Drop not found.'}</div>
+        <div style={{ ...S.stepTitle, color: 'var(--red)', marginTop: 20 }}>{dropErr || 'Drop not found.'}</div>
       </main>
     </>
   );

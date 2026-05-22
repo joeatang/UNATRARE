@@ -545,14 +545,14 @@
 .judgeBtn { color: var(--amber); border-color: var(--amber); }
 .judgeBtn:hover:not(:disabled) { background: var(--amber); color: var(--bg); }
 
-.genesisBtn { color: #C9A84C; border-color: #C9A84C; font-weight: 700; }
-.genesisBtn:hover:not(:disabled) { background: #C9A84C; color: var(--bg); }
+.genesisBtn { color: var(--amber-hot); border-color: var(--amber-hot); font-weight: 700; }
+.genesisBtn:hover:not(:disabled) { background: var(--amber-hot); color: var(--bg); }
 
 .purgeBtn { color: #444; border-color: #2e2e2e; }
-.purgeBtn:hover:not(:disabled) { background: #c0392b; border-color: #c0392b; color: #fff; opacity: 1; }
+.purgeBtn:hover:not(:disabled) { background: var(--red); border-color: var(--red); color: #fff; opacity: 1; }
 
-.dropBtn { color: #00ff87; border-color: #00ff87; font-weight: 700; }
-.dropBtn:hover:not(:disabled) { background: #00ff87; color: #000; }
+.dropBtn { color: var(--green); border-color: var(--green); font-weight: 700; }
+.dropBtn:hover:not(:disabled) { background: var(--green); color: var(--bg); }
 
 /* ─────────────────────────────────────────────────────────────
    TABLET / DESKTOP  ≥640px

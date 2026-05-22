@@ -341,7 +341,7 @@ function TokenRow({ token, authToken, onAction }) {
                 revealed ? (
                   <span
                     className={styles.actionBtn}
-                    style={{ background: '#00ff87', color: '#000', fontWeight: 700, cursor: 'default', opacity: 1 }}
+                    style={{ background: 'var(--green)', color: 'var(--bg)', fontWeight: 700, cursor: 'default', opacity: 1 }}
                     title="Art is live publicly"
                   >
                     ● LIVE
@@ -706,7 +706,7 @@ function DropsPanel({ authToken }) {
                 <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px', color: 'var(--text-dim)', margin: '8px 0 4px' }}>
                   CLAIMS ({dropClaims.length}){pendingClaims.length > 0 && <span style={{ color: 'var(--amber)', marginLeft: 10 }}>⬡ {pendingClaims.length} need sending</span>}
                   {drop.bundle_token && (() => { const sr = [...dropClaims].sort((a,b) => a.claimed_at - b.claimed_at); return dropClaims.some(c => !c.bundle_sent && (drop.bundle_limit === 0 || sr.findIndex(x => x.id === c.id) + 1 <= drop.bundle_limit)); })() && (
-                    <span style={{ color: '#9b8cff', marginLeft: 10 }}>⬡ bundle pending</span>
+                    <span style={{ color: 'var(--amber)', marginLeft: 10 }}>⬡ bundle pending</span>
                   )}
                 </div>
                 {dropClaims.length === 0 && (

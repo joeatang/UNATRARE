@@ -94,7 +94,7 @@
 }
 
 .cardMemorial {
-  border-left: 3px solid #c084fc;
+  border-left: 3px solid var(--amber);
 }
 
 .cardTop {
@@ -174,7 +174,7 @@
   display: block;
   font-size: 0.75rem;
   letter-spacing: 0.12em;
-  color: #c084fc;
+  color: var(--amber);
   text-transform: uppercase;
   margin-bottom: 6px;
   font-weight: 600;

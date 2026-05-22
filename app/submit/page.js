@@ -855,8 +855,8 @@ function Step4({ data, onNext, onBack }) {
         Prove you own <strong>{data.tokenName}</strong> by signing a message with its owner address.
       </p>
 
-      <div style={{marginBottom:16, padding:'10px 14px', border:'1px solid rgba(255,180,0,0.4)', background:'rgba(255,180,0,0.06)'}}>
-        <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'3px', color:'#ffb400', marginBottom:6}}>
+      <div style={{marginBottom:16, padding:'10px 14px', border:'1px solid rgba(201,168,76,0.4)', background:'rgba(201,168,76,0.06)'}}>
+        <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'3px', color:'var(--amber-hot)', marginBottom:6}}>
           ⚠ SIGN FROM THIS EXACT ADDRESS
         </div>
         <div style={{fontFamily:'var(--font-card)', fontSize:'11px', color:'var(--text)', wordBreak:'break-all', letterSpacing:'1px'}}>

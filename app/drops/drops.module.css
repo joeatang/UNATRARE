@@ -439,7 +439,7 @@
   font-family: var(--font-card);
   font-size: 15px;
   letter-spacing: 2px;
-  color: #cc4444;
+  color: var(--red);
   margin-bottom: 10px;
 }
 
@@ -455,8 +455,8 @@
 }
 
 .verifyResult[data-eligible="false"] {
-  border-color: #cc4444;
-  background: rgba(204, 68, 68, 0.04);
+  border-color: var(--red);
+  background: rgba(192, 57, 43, 0.04);
 }
 
 .verifyResultRow {
@@ -488,7 +488,7 @@
 }
 
 .verifyResultVal[data-ok="false"] {
-  color: #cc4444;
+  color: var(--red);
   font-weight: 700;
 }
 

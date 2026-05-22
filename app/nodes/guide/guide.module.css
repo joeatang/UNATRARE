@@ -127,18 +127,18 @@
 /* ── Notes ───────────────────────────────────────────────────────── */
 .note {
   font-size: 0.82rem;
-  color: #c47f00;
+  color: var(--amber);
   line-height: 1.6;
   margin: 0.5rem 0;
   padding: 0.5rem 0.75rem;
-  border-left: 2px solid #c47f00;
-  background: rgba(196, 127, 0, 0.05);
+  border-left: 2px solid var(--amber);
+  background: rgba(168, 144, 96, 0.05);
   max-width: 620px;
 }
 
 .good {
   font-size: 0.82rem;
-  color: #4caf50;
+  color: var(--text);
   line-height: 1.6;
   margin: 0.35rem 0;
   max-width: 620px;
@@ -180,7 +180,7 @@
 }
 
 .yes {
-  color: #4caf50;
+  color: var(--text);
 }
 
 .no {

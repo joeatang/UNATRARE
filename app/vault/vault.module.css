@@ -191,9 +191,9 @@
   letter-spacing: 0.07em;
   text-transform: uppercase;
   text-decoration: none;
-  color: var(--amber, #f5a623);
+  color: var(--amber);
   background: transparent;
-  border: 1px solid rgba(245, 166, 35, 0.4);
+  border: 1px solid rgba(168, 144, 96, 0.4);
   border-radius: 3px;
   padding: 0.3rem 0.5rem;
   margin-top: 6px;
