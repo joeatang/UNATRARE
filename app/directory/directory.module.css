@@ -51,17 +51,17 @@
   letter-spacing: 3px;
   text-transform: uppercase;
   padding: 12px 28px;
-  background: var(--green);
+  background: var(--amber-hot);
   color: var(--bg);
   text-decoration: none;
-  border: 1px solid var(--green);
+  border: 1px solid var(--amber-hot);
   white-space: nowrap;
   align-self: flex-end;
   transition: background 0.15s, color 0.15s;
 }
 .submitCta:hover {
-  background: var(--green-hot);
-  border-color: var(--green-hot);
+  background: var(--amber);
+  border-color: var(--amber);
 }
 
 /* ─── Filter bar ─────────────────────────────────────────── */

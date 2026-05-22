@@ -330,7 +330,7 @@
 
 .successSigil {
   font-size: 48px;
-  color: var(--green-hot);
+  color: var(--amber);
   margin-bottom: 16px;
   display: block;
   line-height: 1;
@@ -339,7 +339,7 @@
 .successTitle {
   font-family: var(--font-card);
   font-size: 16px;
-  color: var(--green-hot);
+  color: var(--amber);
   margin-bottom: 12px;
   letter-spacing: 3px;
   text-transform: uppercase;

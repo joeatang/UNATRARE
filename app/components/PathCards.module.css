@@ -25,13 +25,13 @@
   transition: border-color 0.2s, background 0.2s;
   cursor: pointer;
 }
-.primaryCard:hover { border-color: var(--green); background: #111; }
+.primaryCard:hover { border-color: var(--amber-hot); background: #111; }
 .primaryCardSubmit:hover { border-color: var(--amber-hot); }
 
 .pcSigil {
   font-family: var(--font-display);
   font-size: 32px;
-  color: var(--green);
+  color: var(--amber-hot);
   line-height: 1;
 }
 .primaryCardSubmit .pcSigil { color: var(--amber); }
@@ -57,7 +57,7 @@
   font-family: var(--font-card);
   font-size: 13px;
   letter-spacing: 2px;
-  color: var(--green);
+  color: var(--amber-hot);
   margin-top: 4px;
 }
 .primaryCardSubmit .pcCta { color: var(--amber); }
@@ -153,7 +153,7 @@
   margin-top: 2px;
   transition: color 0.15s;
 }
-.pathHeader:hover .pathToggle { color: var(--green); }
+.pathHeader:hover .pathToggle { color: var(--amber-hot); }
 
 /* ─── Expanded body ──────────────────────────────────────── */
 .pathBody {
@@ -199,11 +199,11 @@
   font-family: var(--font-card);
   font-size: 12px;
   letter-spacing: 2px;
-  color: var(--green);
+  color: var(--amber-hot);
   text-decoration: none;
   transition: color 0.15s;
 }
-.pathBodyLinks a:hover { color: var(--green-hot); }
+.pathBodyLinks a:hover { color: var(--amber); }
 
 /* ═══════════════════════════════════════════════════════════
    SCALE UP — min-width

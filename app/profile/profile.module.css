@@ -330,7 +330,7 @@
   font-family: var(--font-card);
   font-size: 13px;
   letter-spacing: 5px;
-  color: var(--green);
+  color: var(--amber-hot);
   margin-bottom: 16px;
   text-transform: uppercase;
 }

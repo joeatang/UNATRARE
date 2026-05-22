@@ -46,8 +46,8 @@
 }
 
 .stepNum.done {
-  border-color: var(--green);
-  color: var(--green);
+  border-color: var(--amber-hot);
+  color: var(--amber-hot);
   background: rgba(61,158,61,0.08);
 }
 
@@ -82,7 +82,7 @@
   font-family: var(--font-card);
   font-size: 15px;
   letter-spacing: 4px;
-  color: var(--green);
+  color: var(--amber-hot);
   text-transform: uppercase;
   margin-bottom: 12px;
 }
@@ -164,7 +164,7 @@
 
 /* ─── URL result box ─────────────────────────────────── */
 .urlBox {
-  border: 1px solid var(--green);
+  border: 1px solid var(--amber-hot);
   background: rgba(61,158,61,0.04);
   padding: 20px 24px;
   margin: 24px 0;
@@ -177,7 +177,7 @@
   font-family: var(--font-card);
   font-size: 15px;
   letter-spacing: 4px;
-  color: var(--green);
+  color: var(--amber-hot);
   text-transform: uppercase;
 }
 
@@ -199,7 +199,7 @@
   font-family: var(--font-card);
   font-size: 15px;
   letter-spacing: 3px;
-  background: var(--green);
+  background: var(--amber-hot);
   color: var(--bg);
   border: none;
   padding: 8px 20px;
@@ -209,7 +209,7 @@
   transition: background 0.15s;
 }
 
-.copyBtn:hover { background: var(--green-hot); }
+.copyBtn:hover { background: var(--amber); }
 .copyBtn.copied { background: var(--amber); }
 
 /* ─── Warning box ────────────────────────────────────── */

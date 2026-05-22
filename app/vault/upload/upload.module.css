@@ -19,7 +19,7 @@
   transition: color 0.15s;
 }
 
-.back:hover { color: var(--green); }
+.back:hover { color: var(--amber-hot); }
 
 /* ── Heading ─────────────────────────────────────────────────────── */
 .title {
@@ -27,7 +27,7 @@
   font-size: clamp(1rem, 4vw, 1.4rem);
   font-weight: 700;
   letter-spacing: 0.15em;
-  color: var(--green);
+  color: var(--amber-hot);
   margin: 0 0 0.5rem;
   text-transform: uppercase;
 }
@@ -45,7 +45,7 @@
   font-size: 0.7rem;
   letter-spacing: 0.08em;
   color: #0a0a0a;
-  background: var(--green);
+  background: var(--amber-hot);
   padding: 0.45rem 1rem;
   border-radius: 3px;
   margin-bottom: 1.5rem;
@@ -165,7 +165,7 @@
 .input:focus,
 .textarea:focus,
 .select:focus {
-  border-color: var(--green);
+  border-color: var(--amber-hot);
 }
 
 /* ── Fee section ─────────────────────────────────────────────────── */
@@ -211,7 +211,7 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #0a0a0a;
-  background: var(--green);
+  background: var(--amber-hot);
   border: none;
   border-radius: 4px;
   padding: 0.7rem 1.5rem;
@@ -236,7 +236,7 @@
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.14em;
-  color: var(--green);
+  color: var(--amber-hot);
   text-transform: uppercase;
   margin-bottom: 1.25rem;
 }
@@ -288,7 +288,7 @@
   font-size: 0.6rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--green);
+  color: var(--amber-hot);
   background: transparent;
   border: 1px solid rgba(245, 166, 35, 0.35);
   border-radius: 3px;
@@ -314,13 +314,13 @@
   transition: color 0.15s;
 }
 
-.resetBtn:hover { color: var(--green); border-color: var(--green); }
+.resetBtn:hover { color: var(--amber-hot); border-color: var(--amber-hot); }
 
 /* ── Thumbnail auto-note ─────────────────────────────────────── */
 .thumbNote {
   font-family: monospace;
   font-size: 0.62rem;
-  color: var(--green);
+  color: var(--amber-hot);
   opacity: 0.65;
   letter-spacing: 0.04em;
   margin: -0.75rem 0 1.25rem;
@@ -386,13 +386,13 @@
 }
 
 .previewTab:hover {
-  background: rgba(180, 255, 111, 0.04);
-  color: var(--green);
+  background: rgba(201, 168, 76, 0.04);
+  color: var(--amber-hot);
 }
 
 .previewTabActive {
-  background: rgba(180, 255, 111, 0.07);
-  color: var(--green);
+  background: rgba(201, 168, 76, 0.07);
+  color: var(--amber-hot);
 }
 
 .previewBlock {
@@ -437,16 +437,16 @@
   width: 100%;
   max-width: 380px;
   background: #060804;
-  border: 1px solid rgba(180, 255, 111, 0.18);
+  border: 1px solid rgba(201, 168, 76, 0.18);
   border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 0 24px rgba(180, 255, 111, 0.03);
+  box-shadow: 0 0 24px rgba(201, 168, 76, 0.03);
 }
 
 .cardImgWrap {
   width: 100%;
   background: #020301;
-  border-bottom: 1px solid rgba(180, 255, 111, 0.1);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -471,7 +471,7 @@
   font-size: 0.56rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(180, 255, 111, 0.18);
+  color: rgba(201, 168, 76, 0.18);
 }
 
 .cardBody {
@@ -486,7 +486,7 @@
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.12em;
-  color: var(--green);
+  color: var(--amber-hot);
   text-transform: uppercase;
   line-height: 1;
 }
@@ -539,7 +539,7 @@
   justify-content: flex-end;
   margin-top: 0.6rem;
   padding-top: 0.5rem;
-  border-top: 1px solid rgba(180, 255, 111, 0.07);
+  border-top: 1px solid rgba(201, 168, 76, 0.07);
 }
 
 .cardBadge {
@@ -547,6 +547,6 @@
   font-size: 0.54rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--green);
+  color: var(--amber-hot);
   opacity: 0.6;
 }

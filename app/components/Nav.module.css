@@ -19,7 +19,7 @@
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 1px;
-  background: var(--green);
+  background: var(--amber-hot);
   opacity: 0.6;
 }
 
@@ -31,7 +31,7 @@
   text-decoration: none;
   line-height: 1;
 }
-.nav-logo span { color: var(--green); }
+.nav-logo span { color: var(--amber-hot); }
 
 /* Desktop nav links */
 .nav-links {
@@ -49,9 +49,9 @@
   text-decoration: none;
   transition: color 0.15s;
 }
-.nav-links a:hover { color: var(--green); }
+.nav-links a:hover { color: var(--amber-hot); }
 
-.nav-register { color: var(--green) !important; opacity: 0.9; }
+.nav-register { color: var(--amber-hot) !important; opacity: 0.9; }
 .nav-register:hover { opacity: 1 !important; }
 
 /* Right side wrapper */
@@ -66,7 +66,7 @@
   font-size: 15px;
   letter-spacing: 3px;
   color: var(--bg);
-  background: var(--green);
+  background: var(--amber-hot);
   border: none;
   padding: 7px 18px;
   text-transform: uppercase;
@@ -74,7 +74,7 @@
   transition: background 0.15s;
   white-space: nowrap;
 }
-.nav-submit:hover { background: var(--green-hot); color: var(--bg); }
+.nav-submit:hover { background: var(--amber); color: var(--bg); }
 
 /* Hamburger — hidden on desktop */
 .hamburger {
@@ -100,9 +100,9 @@
   transform-origin: center;
 }
 
-.barTop  { transform: translateY(6px) rotate(45deg); background: var(--green); }
+.barTop  { transform: translateY(6px) rotate(45deg); background: var(--amber-hot); }
 .barMid  { opacity: 0; }
-.barBot  { transform: translateY(-6px) rotate(-45deg); background: var(--green); }
+.barBot  { transform: translateY(-6px) rotate(-45deg); background: var(--amber-hot); }
 
 /* Mobile drawer — wrapper clips off-screen drawer so it can't expand page scrollWidth on iOS */
 .drawerWrapper {
@@ -164,7 +164,7 @@
   color: var(--text);
   letter-spacing: 3px;
 }
-.drawerLogoA { color: var(--green); }
+.drawerLogoA { color: var(--amber-hot); }
 .drawerClose {
   background: transparent;
   border: 1px solid var(--border);
@@ -180,7 +180,7 @@
   flex-shrink: 0;
   letter-spacing: 0;
 }
-.drawerClose:hover { color: var(--green); border-color: var(--green); }
+.drawerClose:hover { color: var(--amber-hot); border-color: var(--amber-hot); }
 
 .drawerLinks {
   list-style: none;
@@ -203,17 +203,17 @@
   transition: color 0.15s, background 0.15s;
 }
 .drawerLinks a:hover,
-.drawerLinks a:active { color: var(--green); background: rgba(180, 255, 111, 0.06); }
+.drawerLinks a:active { color: var(--amber-hot); background: rgba(201, 168, 76, 0.06); }
 
 .drawerSubmit {
   color: var(--bg) !important;
-  background: var(--green) !important;
+  background: var(--amber-hot) !important;
   margin: 16px 24px 8px !important;
   padding: 12px 20px !important;
   display: block !important;
   text-align: center;
 }
-.drawerSubmit:hover { background: var(--green-hot) !important; }
+.drawerSubmit:hover { background: var(--amber) !important; }
 
 /* Drawer section divider + secondary links */
 .drawerSectionDivider {

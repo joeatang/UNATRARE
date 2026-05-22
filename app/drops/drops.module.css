@@ -29,7 +29,7 @@
 }
 
 .title span {
-  color: var(--green);
+  color: var(--amber-hot);
 }
 
 .subtitle {
@@ -71,7 +71,7 @@
   font-family: var(--font-card);
   font-size: 15px;
   letter-spacing: 3px;
-  color: var(--green);
+  color: var(--amber-hot);
   padding-top: 2px;
   min-width: 28px;
 }
@@ -137,7 +137,7 @@
 }
 
 .pricingValue em {
-  color: var(--green);
+  color: var(--amber-hot);
   font-style: normal;
 }
 
@@ -326,8 +326,8 @@
 }
 
 .ctaBtn[data-primary="true"] {
-  border-color: var(--green);
-  color: var(--green);
+  border-color: var(--amber-hot);
+  color: var(--amber-hot);
 }
 
 .ctaBtn[data-primary="true"]:hover {
@@ -450,7 +450,7 @@
 }
 
 .verifyResult[data-eligible="true"] {
-  border-color: var(--green);
+  border-color: var(--amber-hot);
   background: rgba(61, 158, 61, 0.04);
 }
 
@@ -483,7 +483,7 @@
 }
 
 .verifyResultVal[data-ok="true"] {
-  color: var(--green);
+  color: var(--amber-hot);
   font-weight: 700;
 }
 
@@ -533,7 +533,7 @@
 }
 
 .dropCardActive {
-  border-top: 2px solid var(--green);
+  border-top: 2px solid var(--amber-hot);
   background: rgba(61, 158, 61, 0.015);
 }
 
@@ -559,8 +559,8 @@
 }
 
 .claimTypeBadge[data-type="cultural"] {
-  border-color: var(--green);
-  color: var(--green);
+  border-color: var(--amber-hot);
+  color: var(--amber-hot);
 }
 
 .claimTypeBadge[data-type="support"] {
@@ -572,9 +572,9 @@
   font-family: var(--font-card);
   font-size: 10px;
   letter-spacing: 2px;
-  color: var(--green);
-  border: 1px solid var(--green);
-  border-left: 3px solid var(--green);
+  color: var(--amber-hot);
+  border: 1px solid var(--amber-hot);
+  border-left: 3px solid var(--amber-hot);
   padding: 8px 12px;
   margin-bottom: 16px;
   background: rgba(61, 158, 61, 0.04);
@@ -610,7 +610,7 @@
 
 /* ── Status values on meta cells ── */
 .dropMetaValue[data-status="active"] {
-  color: var(--green);
+  color: var(--amber-hot);
 }
 
 .dropMetaValue[data-status="upcoming"] {
@@ -689,8 +689,8 @@
   font-size: 15px;
   letter-spacing: 3px;
   padding: 12px 28px;
-  border: 1px solid var(--green);
-  color: var(--green);
+  border: 1px solid var(--amber-hot);
+  color: var(--amber-hot);
   text-decoration: none;
   text-transform: lowercase;
   transition: background 0.15s;
@@ -795,7 +795,7 @@
 }
 
 .dropArchiveStatus[data-status="distributed"] {
-  color: var(--green);
+  color: var(--amber-hot);
 }
 
 /* ── Mobile additions ── */

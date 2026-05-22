@@ -425,7 +425,7 @@ tr .td:first-child {
 }
 
 .outcomeApproved {
-  border: 1px solid var(--green);
+  border: 1px solid var(--amber-hot);
   padding: 20px;
 }
 
@@ -492,7 +492,7 @@ tr .td:first-child {
 
 /* ─── Concept box ────────────────────────────────────────── */
 .conceptBox {
-  border: 1px solid var(--green);
+  border: 1px solid var(--amber-hot);
   background: rgba(180,255,111,0.03);
   padding: 28px 32px;
   margin-bottom: 24px;
@@ -502,7 +502,7 @@ tr .td:first-child {
   font-family: var(--font-card);
   font-size: 13px;
   letter-spacing: 5px;
-  color: var(--green);
+  color: var(--amber-hot);
   text-transform: uppercase;
   margin-bottom: 16px;
 }
@@ -514,7 +514,7 @@ tr .td:first-child {
   line-height: 2;
 }
 
-.conceptText strong { color: var(--green); font-weight: 400; }
+.conceptText strong { color: var(--amber-hot); font-weight: 400; }
 
 /* ─── UNAT examples grid ─────────────────────────────────── */
 .unatExamples {

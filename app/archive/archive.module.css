@@ -35,7 +35,7 @@
   margin-bottom: 16px;
 }
 
-.title span { color: var(--green); }
+.title span { color: var(--amber-hot); }
 
 .subtitle {
   font-family: var(--font-body);
@@ -63,7 +63,7 @@
 .heroStatNum {
   font-family: var(--font-display);
   font-size: 36px;
-  color: var(--green);
+  color: var(--amber-hot);
   line-height: 1;
 }
 
@@ -172,7 +172,7 @@
 }
 
 .collectionCard:hover .collectionCta {
-  color: var(--green);
+  color: var(--amber-hot);
 }
 
 /* ── Explainer section ────────────────────────────────────────── */
@@ -189,7 +189,7 @@
   margin-bottom: 32px;
 }
 
-.explainerTitle span { color: var(--green); }
+.explainerTitle span { color: var(--amber-hot); }
 
 .explainerGrid {
   display: grid;
@@ -206,7 +206,7 @@
 .explainerGlyph {
   font-family: var(--font-display);
   font-size: 40px;
-  color: var(--green);
+  color: var(--amber-hot);
   line-height: 1;
 }
 
@@ -220,7 +220,7 @@
 .explainerText code {
   font-family: var(--font-card);
   font-size: 12px;
-  color: var(--green);
+  color: var(--amber-hot);
   background: var(--surface);
   padding: 2px 6px;
   border: 1px solid var(--border-dim);
@@ -242,7 +242,7 @@
   margin-bottom: 16px;
 }
 
-.backLink:hover { color: var(--green); }
+.backLink:hover { color: var(--amber-hot); }
 
 .collTitle {
   font-family: var(--font-display);
@@ -282,7 +282,7 @@
 }
 
 .searchInput::placeholder { color: var(--text-dim); }
-.searchInput:focus { border-color: var(--green); }
+.searchInput:focus { border-color: var(--amber-hot); }
 
 .seriesSelect {
   font-family: var(--font-card);
@@ -304,7 +304,7 @@
 }
 
 .seriesSelect:hover { border-color: var(--border); color: var(--text); }
-.seriesSelect:focus { border-color: var(--green); color: var(--text); }
+.seriesSelect:focus { border-color: var(--amber-hot); color: var(--text); }
 .seriesSelect option { background: var(--surface); color: var(--text); }
 
 /* ── Card grid ────────────────────────────────────────────────── */
@@ -380,7 +380,7 @@
   font-family: var(--font-display);
   font-size: 18px;
   letter-spacing: 2px;
-  color: var(--col-color, var(--green));
+  color: var(--col-color, var(--amber-hot));
   text-align: center;
 }
 
@@ -388,7 +388,7 @@
   font-family: var(--font-card);
   font-size: 12px;
   letter-spacing: 2px;
-  color: var(--col-color, var(--green));
+  color: var(--col-color, var(--amber-hot));
 }
 
 .cardOverlayArtist {
@@ -414,8 +414,8 @@
 }
 
 .cardOverlayCip:hover {
-  color: var(--col-color, var(--green));
-  border-color: var(--col-color, var(--green));
+  color: var(--col-color, var(--amber-hot));
+  border-color: var(--col-color, var(--amber-hot));
 }
 
 .cardName {
@@ -432,7 +432,7 @@
   font-family: var(--font-card);
   font-size: 13px;
   letter-spacing: 2px;
-  color: var(--col-color, var(--green));
+  color: var(--col-color, var(--amber-hot));
   font-weight: 600;
 }
 
@@ -468,7 +468,7 @@
   transition: color 0.15s, border-color 0.15s;
 }
 
-.pageBtn:hover:not(:disabled) { color: var(--green); border-color: var(--green); }
+.pageBtn:hover:not(:disabled) { color: var(--amber-hot); border-color: var(--amber-hot); }
 .pageBtn:disabled { opacity: 0.3; cursor: default; }
 
 .pageInfo {
@@ -508,7 +508,7 @@
   font-family: var(--font-card);
   font-size: 13px;
   letter-spacing: 2px;
-  color: var(--green);
+  color: var(--amber-hot);
   background: var(--surface);
   border: 1px solid var(--border-dim);
   padding: 12px 16px;

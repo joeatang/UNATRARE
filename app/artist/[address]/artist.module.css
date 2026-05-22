@@ -61,7 +61,7 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
-.dot[data-color="green"]  { background: var(--green-hot); }
+.dot[data-color="green"]  { background: var(--amber); }
 .dot[data-color="amber"]  { background: var(--amber-hot); animation: blink 1.4s step-end infinite; }
 .dot[data-color="red"]    { background: var(--red); }
 
@@ -537,7 +537,7 @@
   flex-shrink: 0;
 }
 
-.dropStatus[data-status='active']       { color: var(--green);    border-color: var(--green); }
+.dropStatus[data-status='active']    { color: var(--green);    border-color: var(--green); }
 .dropStatus[data-status='upcoming']     { color: var(--amber);    border-color: var(--amber); opacity: 0.7; }
 .dropStatus[data-status='closed']       { color: var(--text-dim); }
 .dropStatus[data-status='distributed']  { color: var(--text-dim); }

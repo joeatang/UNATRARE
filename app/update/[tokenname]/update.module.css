@@ -15,7 +15,7 @@
   font-family: var(--font-card);
   font-size: 14px;
   letter-spacing: 5px;
-  color: var(--green);
+  color: var(--amber-hot);
   text-transform: uppercase;
   margin-bottom: 10px;
 }
@@ -58,7 +58,7 @@
   font-family: var(--font-card);
   font-size: 13px;
   letter-spacing: 5px;
-  color: var(--green);
+  color: var(--amber-hot);
   text-transform: uppercase;
   margin-bottom: 24px;
 }
@@ -75,8 +75,8 @@
 
 /* ─── Challenge block ─────────────────────────────────────── */
 .challengeBlock {
-  background: rgba(180, 255, 111, 0.04);
-  border: 1px solid var(--green);
+  background: rgba(201, 168, 76, 0.04);
+  border: 1px solid var(--amber-hot);
   padding: 20px 24px;
   margin-bottom: 28px;
 }
@@ -101,7 +101,7 @@
   font-family: var(--font-card);
   font-size: 17px;
   letter-spacing: 1px;
-  color: var(--green);
+  color: var(--amber-hot);
   flex: 1 1 auto;
   word-break: break-all;
 }
@@ -121,8 +121,8 @@
 }
 
 .copyBtn:hover {
-  color: var(--green);
-  border-color: var(--green);
+  color: var(--amber-hot);
+  border-color: var(--amber-hot);
 }
 
 .challengeHint {
@@ -277,7 +277,7 @@
   font-family: var(--font-card);
   font-size: 13px;
   letter-spacing: 2px;
-  color: var(--green);
+  color: var(--amber-hot);
   text-transform: uppercase;
 }
 
@@ -326,7 +326,7 @@
   letter-spacing: 3px;
   text-transform: uppercase;
   color: #000;
-  background: var(--green);
+  background: var(--amber-hot);
   border: none;
   padding: 18px 36px;
   cursor: pointer;
@@ -364,8 +364,8 @@
 
 /* ─── Success state ───────────────────────────────────────── */
 .successBox {
-  border: 1px solid var(--green);
-  background: rgba(180, 255, 111, 0.04);
+  border: 1px solid var(--amber-hot);
+  background: rgba(201, 168, 76, 0.04);
   padding: 48px 40px;
   text-align: center;
 }
@@ -373,7 +373,7 @@
 .successMark {
   font-family: var(--font-display);
   font-size: 64px;
-  color: var(--green);
+  color: var(--amber-hot);
   line-height: 1;
   margin-bottom: 12px;
 }
@@ -414,7 +414,7 @@
   font-family: var(--font-card);
   font-size: 15px;
   letter-spacing: 2px;
-  color: var(--green);
+  color: var(--amber-hot);
   text-decoration: none;
   text-transform: uppercase;
 }

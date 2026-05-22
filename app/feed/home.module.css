@@ -29,7 +29,7 @@
   margin-bottom: 8px;
 }
 
-.heroTitle span { color: var(--green); }
+.heroTitle span { color: var(--amber-hot); }
 
 .heroSub {
   font-family: var(--font-card);
@@ -137,7 +137,7 @@
   position: absolute;
   left: 0; right: 0;
   height: 2px;
-  background: rgba(180, 255, 111, 0.3);
+  background: rgba(201, 168, 76, 0.3);
   top: 0;
   animation: scandown 3s ease-in-out infinite;
 }
@@ -170,7 +170,7 @@
   font-family: var(--font-card);
   font-size: 15px;
   letter-spacing: 2px;
-  color: var(--green);
+  color: var(--amber-hot);
   text-align: center;
   animation: blink 2s step-end infinite;
 }
@@ -281,13 +281,13 @@
   font-family: var(--font-card);
   font-size: 15px;
   letter-spacing: 3px;
-  color: var(--green);
+  color: var(--amber-hot);
   text-decoration: none;
   transition: color 0.15s;
 }
 
 .feedStripAll:hover {
-  color: var(--green-hot);
+  color: var(--amber);
 }
 
 .feedTicker {
@@ -366,7 +366,7 @@
   letter-spacing: 4px;
   text-transform: uppercase;
   color: var(--bg);
-  background: var(--green);
+  background: var(--amber-hot);
   border: none;
   padding: 14px 40px;
   text-decoration: none;
@@ -374,7 +374,7 @@
 }
 
 .ctaButton:hover {
-  background: var(--green-hot);
+  background: var(--amber);
   color: var(--bg);
 }
 
@@ -401,7 +401,7 @@
   font-family: var(--font-card);
   font-size: 16px;
   letter-spacing: 4px;
-  color: var(--green);
+  color: var(--amber-hot);
 }
 
 .holderSub {
@@ -417,8 +417,8 @@
   font-family: var(--font-card);
   font-size: 15px;
   letter-spacing: 3px;
-  color: var(--green);
-  border: 1px solid var(--green);
+  color: var(--amber-hot);
+  border: 1px solid var(--amber-hot);
   padding: 10px 24px;
   text-decoration: none;
   white-space: nowrap;
@@ -427,7 +427,7 @@
 }
 
 .holderBtn:hover {
-  background: var(--green);
+  background: var(--amber-hot);
   color: var(--bg);
 }
 
@@ -466,7 +466,7 @@
 
 .artistRow::-webkit-scrollbar { height: 2px; }
 .artistRow::-webkit-scrollbar-track { background: var(--border-dim); }
-.artistRow::-webkit-scrollbar-thumb { background: var(--green); }
+.artistRow::-webkit-scrollbar-thumb { background: var(--amber-hot); }
 
 /* ─── Responsive ─────────────────────────────────────────── */
 
@@ -634,7 +634,7 @@
 .archiveBannerCount {
   font-family: var(--font-display);
   font-size: 28px;
-  color: var(--green);
+  color: var(--amber-hot);
   margin-right: 6px;
   vertical-align: middle;
 }
@@ -646,7 +646,7 @@
   font-size: 14px;
   letter-spacing: 3px;
   color: var(--bg);
-  background: var(--green);
+  background: var(--amber-hot);
   padding: 10px 22px;
   text-decoration: none;
   margin-top: 6px;
@@ -654,7 +654,7 @@
 }
 
 .archiveBannerCta:hover {
-  background: var(--green-hot);
+  background: var(--amber);
   color: var(--bg);
 }
 
@@ -817,13 +817,13 @@
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--bg);
-  background: var(--green);
+  background: var(--amber-hot);
   padding: 12px 28px;
   text-decoration: none;
   transition: background 0.15s;
   white-space: nowrap;
 }
-.heroCtaPrimary:hover { background: var(--green-hot); color: var(--bg); }
+.heroCtaPrimary:hover { background: var(--amber); color: var(--bg); }
 
 .heroCtaSecondary {
   display: inline-block;
@@ -838,7 +838,7 @@
   transition: border-color 0.15s, color 0.15s;
   white-space: nowrap;
 }
-.heroCtaSecondary:hover { border-color: var(--green); color: var(--green); }
+.heroCtaSecondary:hover { border-color: var(--amber-hot); color: var(--amber-hot); }
 
 /* ─── Recently Certified Showcase ───────────────────────── */
 .showcaseSection {
@@ -857,7 +857,7 @@
 }
 .showcaseRow::-webkit-scrollbar { height: 2px; }
 .showcaseRow::-webkit-scrollbar-track { background: var(--border-dim); }
-.showcaseRow::-webkit-scrollbar-thumb { background: var(--green); }
+.showcaseRow::-webkit-scrollbar-thumb { background: var(--amber-hot); }
 
 .showcaseCard {
   flex-shrink: 0;
@@ -867,7 +867,7 @@
   text-decoration: none;
   transition: border-color 0.15s;
 }
-.showcaseCard:hover { border-color: var(--green); }
+.showcaseCard:hover { border-color: var(--amber-hot); }
 
 .showcaseImg {
   width: 140px;
@@ -914,11 +914,11 @@
   font-family: var(--font-card);
   font-size: 15px;
   letter-spacing: 3px;
-  color: var(--green);
+  color: var(--amber-hot);
   text-decoration: none;
   transition: color 0.15s;
 }
-.showcaseAll:hover { color: var(--green-hot); }
+.showcaseAll:hover { color: var(--amber); }
 
 @media (max-width: 900px) {
   .showcaseSection { padding-left: 20px; padding-right: 20px; }

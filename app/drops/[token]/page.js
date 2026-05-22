@@ -295,15 +295,15 @@ export default function DropClaimPage() {
         {/* ── Bonus notice ── */}
         {drop.bonus_token && drop.bonus_remaining > 0 && (
           <div style={{
-            border: '1px solid var(--green)',
-            borderLeft: '3px solid var(--green)',
-            background: 'rgba(61,158,61,0.04)',
+            border: '1px solid var(--amber-hot)',
+            borderLeft: '3px solid var(--amber-hot)',
+            background: 'rgba(201, 168, 76, 0.06)',
             padding: '12px 18px',
             marginBottom: 28,
             fontFamily: 'var(--font-card)',
             fontSize: '10px',
             letterSpacing: '2px',
-            color: 'var(--green)',
+            color: 'var(--amber-hot)',
           }}>
             ◈ BONUS — Every purchase includes 1 free {drop.bonus_token} · {drop.bonus_remaining} remaining
           </div>

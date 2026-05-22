@@ -29,7 +29,7 @@
 }
 
 .title span {
-  color: var(--green);
+  color: var(--amber-hot);
 }
 
 .subtitle {
@@ -69,14 +69,14 @@
 
 .pathBtnActive {
   background: rgba(0, 255, 100, 0.04);
-  border-bottom-color: var(--green);
+  border-bottom-color: var(--amber-hot);
 }
 
 .pathBtnLetter {
   font-family: var(--font-card);
   font-size: 15px;
   letter-spacing: 3px;
-  color: var(--green);
+  color: var(--amber-hot);
 }
 
 .pathBtnLabel {
@@ -135,7 +135,7 @@
   font-family: var(--font-card);
   font-size: 15px;
   letter-spacing: 3px;
-  color: var(--green);
+  color: var(--amber-hot);
   padding-top: 2px;
   min-width: 36px;
 }
@@ -182,8 +182,8 @@
   font-size: 15px;
   letter-spacing: 3px;
   padding: 10px 20px;
-  border: 1px solid var(--green);
-  color: var(--green);
+  border: 1px solid var(--amber-hot);
+  color: var(--amber-hot);
   text-decoration: none;
   text-transform: uppercase;
   background: none;
@@ -271,8 +271,8 @@
 }
 
 .ctaBtn[data-primary="true"] {
-  border-color: var(--green);
-  color: var(--green);
+  border-color: var(--amber-hot);
+  color: var(--amber-hot);
 }
 
 .ctaBtn[data-primary="true"]:hover {

@@ -29,13 +29,13 @@ export default function OgImage() {
       />
 
       {/* Inner corner accents — top left */}
-      <div style={{ position: 'absolute', top: '28px', left: '28px', width: '40px', height: '40px', borderTop: '2px solid #b4ff6f', borderLeft: '2px solid #b4ff6f', display: 'flex' }} />
+      <div style={{ position: 'absolute', top: '28px', left: '28px', width: '40px', height: '40px', borderTop: '2px solid #C9A84C', borderLeft: '2px solid #C9A84C', display: 'flex' }} />
       {/* top right */}
-      <div style={{ position: 'absolute', top: '28px', right: '28px', width: '40px', height: '40px', borderTop: '2px solid #b4ff6f', borderRight: '2px solid #b4ff6f', display: 'flex' }} />
+      <div style={{ position: 'absolute', top: '28px', right: '28px', width: '40px', height: '40px', borderTop: '2px solid #C9A84C', borderRight: '2px solid #C9A84C', display: 'flex' }} />
       {/* bottom left */}
-      <div style={{ position: 'absolute', bottom: '28px', left: '28px', width: '40px', height: '40px', borderBottom: '2px solid #b4ff6f', borderLeft: '2px solid #b4ff6f', display: 'flex' }} />
+      <div style={{ position: 'absolute', bottom: '28px', left: '28px', width: '40px', height: '40px', borderBottom: '2px solid #C9A84C', borderLeft: '2px solid #C9A84C', display: 'flex' }} />
       {/* bottom right */}
-      <div style={{ position: 'absolute', bottom: '28px', right: '28px', width: '40px', height: '40px', borderBottom: '2px solid #b4ff6f', borderRight: '2px solid #b4ff6f', display: 'flex' }} />
+      <div style={{ position: 'absolute', bottom: '28px', right: '28px', width: '40px', height: '40px', borderBottom: '2px solid #C9A84C', borderRight: '2px solid #C9A84C', display: 'flex' }} />
 
       {/* Top label */}
       <div
@@ -58,7 +58,7 @@ export default function OgImage() {
         style={{
           fontSize: '128px',
           fontWeight: '900',
-          color: '#b4ff6f',
+          color: '#C9A84C',
           letterSpacing: '-0.03em',
           lineHeight: 1,
           textTransform: 'uppercase',

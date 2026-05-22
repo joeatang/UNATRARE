@@ -19,7 +19,7 @@
   font-size: clamp(1.1rem, 4vw, 1.6rem);
   font-weight: 700;
   letter-spacing: 0.15em;
-  color: var(--green);
+  color: var(--amber-hot);
   margin: 0;
   text-transform: uppercase;
 }
@@ -40,7 +40,7 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   color: #0a0a0a;
-  background: var(--green);
+  background: var(--amber-hot);
   padding: 0.5rem 1.1rem;
   border-radius: 3px;
   text-decoration: none;
@@ -57,7 +57,7 @@
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   color: #0a0a0a;
-  background: var(--green);
+  background: var(--amber-hot);
   padding: 0.5rem 1rem;
   border-radius: 3px;
   margin-bottom: 1.5rem;
@@ -132,7 +132,7 @@
   font-size: 0.55rem;
   letter-spacing: 0.08em;
   color: #0a0a0a;
-  background: var(--green);
+  background: var(--amber-hot);
   padding: 0.15rem 0.4rem;
   border-radius: 2px;
   text-transform: uppercase;
@@ -172,7 +172,7 @@
   font-size: 0.6rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--green);
+  color: var(--amber-hot);
   background: transparent;
   border: 1px solid rgba(245, 166, 35, 0.3);
   border-radius: 3px;
@@ -223,7 +223,7 @@
   transition: color 0.15s;
 }
 
-.pgBtn:hover:not(:disabled) { color: var(--green); border-color: var(--green); }
+.pgBtn:hover:not(:disabled) { color: var(--amber-hot); border-color: var(--amber-hot); }
 .pgBtn:disabled { opacity: 0.3; cursor: default; }
 
 .pgInfo {
@@ -241,7 +241,7 @@
 }
 
 .emptyLink {
-  color: var(--green);
+  color: var(--amber-hot);
   text-decoration: none;
 }
 
@@ -259,7 +259,7 @@
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.14em;
-  color: var(--green);
+  color: var(--amber-hot);
   text-transform: uppercase;
   margin: 0 0 0.85rem;
 }
@@ -280,7 +280,7 @@
 }
 
 .infoLink {
-  color: var(--green);
+  color: var(--amber-hot);
   text-decoration: none;
 }
 

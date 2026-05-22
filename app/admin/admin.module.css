@@ -232,7 +232,7 @@
   line-height: 1;
   margin-bottom: 5px;
 }
-.statNum[data-color="green"] { color: var(--green-hot); }
+.statNum[data-color="green"] { color: var(--amber); }
 .statNum[data-color="red"]   { color: var(--red); }
 .statNum[data-color="amber"] { color: var(--amber-hot); }
 
@@ -536,8 +536,8 @@
 }
 .actionBtn:disabled { opacity: 0.35; cursor: default; }
 
-.approveBtn { color: var(--green-hot); border-color: var(--green-hot); }
-.approveBtn:hover:not(:disabled) { background: var(--green-hot); color: var(--bg); }
+.approveBtn { color: var(--amber); border-color: var(--amber); }
+.approveBtn:hover:not(:disabled) { background: var(--amber); color: var(--bg); }
 
 .rejectBtn { color: var(--red); border-color: var(--red); }
 .rejectBtn:hover:not(:disabled) { background: var(--red); color: var(--bg); }
@@ -551,8 +551,8 @@
 .purgeBtn { color: #444; border-color: #2e2e2e; }
 .purgeBtn:hover:not(:disabled) { background: var(--red); border-color: var(--red); color: #fff; opacity: 1; }
 
-.dropBtn { color: var(--green); border-color: var(--green); font-weight: 700; }
-.dropBtn:hover:not(:disabled) { background: var(--green); color: var(--bg); }
+.dropBtn { color: var(--amber-hot); border-color: var(--amber-hot); font-weight: 700; }
+.dropBtn:hover:not(:disabled) { background: var(--amber-hot); color: var(--bg); }
 
 /* ─────────────────────────────────────────────────────────────
    TABLET / DESKTOP  ≥640px

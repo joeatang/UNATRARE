@@ -646,7 +646,7 @@ function DropsPanel({ authToken }) {
                     )}
                     <button
                       onClick={() => doAction({ action: 'activate', drop_id: drop.id, window_hours: Number(windowHours || 168), ...(natAddr ? { nat_address: natAddr } : {}) })}
-                      style={dBtn('var(--green)')}
+                      style={dBtn('var(--amber-hot)')}
                     >
                       ▶ ACTIVATE
                     </button>

@@ -150,7 +150,7 @@ export default function CollectionPage({ params }) {
 
   useEffect(() => { fetchAssets(); }, [fetchAssets]);
 
-  const color = collInfo?.color || '#b4ff6f';
+  const color = collInfo?.color || '#C9A84C';
   const name  = collInfo?.name  || collection.toUpperCase();
 
   return (
