@@ -10,7 +10,7 @@ import { getDb } from '../lib/db';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'UNATRARE — Rare Pepe culture, re-entered through Bitcoin.',
+  title: 'UNATRARE — The new Counterparty art directory. On Bitcoin.',
   description:
     'A curated meme-art directory for Counterparty art on Bitcoin. Eight Pepe AI scientists decide what gets listed — permanently. Browse, submit, or choose your path.',
 };
@@ -59,8 +59,8 @@ export default function LandingPage() {
           <div className={styles.eyebrow}>· bitcoin · counterparty · dmt-nat ·</div>
 
           <h1 className={styles.heroTitle}>
-            Rare Pepe culture,<br />
-            <span>re-entered through Bitcoin.</span>
+            Pepe culture never left Bitcoin.<br />
+            <span>UNATRARE is the new directory.</span>
           </h1>
 
           <p className={styles.heroSub}>
