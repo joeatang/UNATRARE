@@ -12,7 +12,8 @@ const STEPS = [
   { num: 2, label: 'Art' },
   { num: 3, label: 'Details' },
   { num: 4, label: 'Sign' },
-  { num: 5, label: 'Submit' },
+  { num: 5, label: 'Burn' },
+  { num: 6, label: 'Submit' },
 ];
 
 // ── Token name validator (client-side mirror of server validator) ──
@@ -88,7 +89,7 @@ function Step0({ onNext, isVault }) {
 
   return (
     <div className={styles.stepBox}>
-      <div className={styles.stepEyebrow}>Step 1 of 6</div>
+      <div className={styles.stepEyebrow}>Step 1 of 7</div>
       <h2 className={styles.stepTitle}>GET Y<span>O</span>UR URL</h2>
       {isVault ? (
         <p className={styles.stepDesc}>
@@ -252,7 +253,7 @@ function Step1({ data, onNext, onBack }) {
 
   return (
     <div className={styles.stepBox}>
-      <div className={styles.stepEyebrow}>Step 2 of 6</div>
+      <div className={styles.stepEyebrow}>Step 2 of 7</div>
       <h2 className={styles.stepTitle}>VERIF<span>Y</span> TOKEN</h2>
       <p className={styles.stepDesc}>
         We check that <strong>{data.tokenName}</strong> exists on Counterparty,
@@ -362,7 +363,7 @@ function Step2({ data, onNext, onBack }) {
     const artUrl = `/uploads/vault/${data.vaultHash}.${ext}`;
     return (
       <div className={styles.stepBox}>
-        <div className={styles.stepEyebrow}>Step 3 of 6</div>
+        <div className={styles.stepEyebrow}>Step 3 of 7</div>
         <h2 className={styles.stepTitle}>UPL<span>O</span>AD ART</h2>
         <div style={{ border: '1px solid var(--green)', borderLeft: '3px solid var(--green)', padding: '14px 18px', marginBottom: 24, fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--green)', background: 'rgba(61,158,61,0.04)' }}>
           ◈ ART LOADED FROM PEPE VAULT — no upload needed
@@ -447,7 +448,7 @@ function Step2({ data, onNext, onBack }) {
 
   return (
     <div className={styles.stepBox}>
-      <div className={styles.stepEyebrow}>Step 3 of 6</div>
+      <div className={styles.stepEyebrow}>Step 3 of 7</div>
       <h2 className={styles.stepTitle}>UPL<span>O</span>AD ART</h2>
       <p className={styles.stepDesc}>
         Upload the art for <strong>{data.tokenName}</strong>.<br />
@@ -624,7 +625,7 @@ function Step3({ data, onNext, onBack }) {
 
   return (
     <div className={styles.stepBox}>
-      <div className={styles.stepEyebrow}>Step 4 of 6</div>
+      <div className={styles.stepEyebrow}>Step 4 of 7</div>
       <h2 className={styles.stepTitle}>ART D<span>E</span>TAILS</h2>
       <p className={styles.stepDesc}>
         Optional. These appear in wallets and the directory.<br />
@@ -876,7 +877,7 @@ function Step4({ data, onNext, onBack }) {
 
   return (
     <div className={styles.stepBox}>
-      <div className={styles.stepEyebrow}>Step 5 of 6</div>
+      <div className={styles.stepEyebrow}>Step 5 of 7</div>
       <h2 className={styles.stepTitle}>PR<span>O</span>VE OWNERSHIP</h2>
       <p className={styles.stepDesc}>
         Prove you own <strong>{data.tokenName}</strong> by signing a message with its owner address.
@@ -946,7 +947,120 @@ function Step4({ data, onNext, onBack }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-//  Step 5 — Submitted to the Pepempool
+//  Step 5 — Burn SOFTPWAR (admission card)
+// ─────────────────────────────────────────────────────────────────
+const SOFTPWAR_BURN_ADDR = '1CounterpartyXXXXXXXXXXXXXXXUWLpVr';
+
+function StepBurn({ data, onNext, onBack }) {
+  const [verifying, setVerifying] = useState(false);
+  const [errMsg, setErrMsg] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  function copyBurnAddr() {
+    navigator.clipboard?.writeText(SOFTPWAR_BURN_ADDR).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  async function handleVerify() {
+    setVerifying(true);
+    setErrMsg('');
+    try {
+      const res = await fetch(`/api/verify-burn?address=${encodeURIComponent(data.owner)}`);
+      const json = await res.json();
+      if (json.ok) {
+        onNext({ ...data, burnTxid: json.txid });
+      } else {
+        setErrMsg(json.error || 'No valid burn found');
+        setVerifying(false);
+      }
+    } catch {
+      setErrMsg('Network error — please try again');
+      setVerifying(false);
+    }
+  }
+
+  return (
+    <div className={styles.stepBox}>
+      <div className={styles.stepEyebrow}>Step 6 of 7</div>
+      <h2 className={styles.stepTitle}>BURN S<span>O</span>FTPWAR</h2>
+      <p className={styles.stepDesc}>
+        SOFTPWAR is the admission card for the Pepempool.<br />
+        Burn 1 SOFTPWAR to submit — permanently destroyed, non-refundable.<br />
+        Each burn unlocks one submission attempt.
+      </p>
+
+      {/* Send from address */}
+      <div style={{marginBottom:16, padding:'10px 14px', border:'1px solid rgba(201,168,76,0.4)', background:'rgba(201,168,76,0.06)'}}>
+        <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'3px', color:'var(--amber-hot)', marginBottom:6}}>
+          ⚠ BURN FROM THIS ADDRESS
+        </div>
+        <div style={{fontFamily:'var(--font-card)', fontSize:'11px', color:'var(--text)', wordBreak:'break-all', letterSpacing:'1px'}}>
+          {data.owner}
+        </div>
+        <div style={{fontFamily:'var(--font-body)', fontSize:'11px', color:'var(--text-dim)', marginTop:6, lineHeight:1.5}}>
+          This is the address holding <strong>{data.tokenName}</strong>. Use Freewallet or Rarepepewallet.<br />
+          Burning from any other address will fail verification.
+        </div>
+      </div>
+
+      {/* Burn address (copyable) */}
+      <div className={styles.urlBox} style={{marginBottom:16}}>
+        <div className={styles.urlBoxLabel}>burn address (send to)</div>
+        <div className={styles.urlBoxValue} style={{fontSize:11, letterSpacing:1, cursor:'pointer'}} onClick={copyBurnAddr}>
+          {SOFTPWAR_BURN_ADDR}
+        </div>
+        <div className={styles.urlBoxMeta}>
+          {copied ? '✓ copied to clipboard' : 'click to copy · unspendable — tokens sent here are destroyed forever'}
+        </div>
+      </div>
+
+      {/* How-to */}
+      <div style={{marginBottom:16, padding:'12px 16px', border:'1px solid var(--border-dim)', background:'rgba(90,191,90,0.04)'}}>
+        <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'3px', color:'var(--text)', marginBottom:6}}>
+          ⚡ HOW TO BURN IN FREEWALLET
+        </div>
+        <div style={{fontFamily:'var(--font-body)', fontSize:'12px', color:'var(--text-dim)', lineHeight:1.7}}>
+          Send → Asset: <strong style={{color:'var(--text)'}}>SOFTPWAR</strong> → Amount: <strong style={{color:'var(--text)'}}>1</strong><br />
+          Destination: paste the burn address above<br />
+          Send → wait for 1 Bitcoin confirmation (~10 min) → click Verify below
+        </div>
+      </div>
+
+      {/* Acquire SOFTPWAR */}
+      <div style={{marginBottom:20, padding:'12px 16px', border:'1px solid var(--border-dim)', background:'var(--surface)', fontSize:'12px', fontFamily:'var(--font-body)', color:'var(--text-dim)', lineHeight:1.6}}>
+        <strong style={{color:'var(--text)', fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px', display:'block', marginBottom:6}}>
+          DON&apos;T HAVE SOFTPWAR?
+        </strong>
+        SOFTPWAR is available on Counterparty dispensers or peer-to-peer.<br />
+        Supply: 2,009 · Indivisible · Locked
+        <div style={{marginTop:8}}>
+          <a href="https://tokenscan.io/asset/SOFTPWAR" target="_blank" rel="noopener noreferrer"
+            style={{color:'var(--amber)', textDecoration:'none', fontFamily:'var(--font-card)', fontSize:'10px', letterSpacing:'2px'}}>
+            view on tokenscan ↗
+          </a>
+        </div>
+      </div>
+
+      {errMsg && (
+        <div style={{fontFamily:'var(--font-body)', fontSize:'12px', color:'var(--red)', marginBottom:16, padding:'10px 14px', border:'1px solid var(--red)', background:'rgba(255,80,80,0.04)'}}>
+          {errMsg}
+        </div>
+      )}
+
+      <div style={{display:'flex', gap:12, flexWrap:'wrap'}}>
+        <button className={styles.backBtn} onClick={onBack} disabled={verifying}>← back</button>
+        <button className={styles.nextBtn} disabled={verifying} onClick={handleVerify}>
+          {verifying ? 'checking burn...' : 'verify burn →'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  Step 6 — Submitted to the Pepempool
 // ─────────────────────────────────────────────────────────────────
 function Step5({ data }) {
   const [submitState, setSubmitState] = useState('idle'); // idle | loading | ok | error
@@ -982,6 +1096,7 @@ function Step5({ data }) {
             videoMime:      data.videoMime      || '',
             videoHash:      data.videoHash      || '',
             unatpepeAllocQty: data.unatpepeAllocQty || 0,
+            burnTxid:         data.burnTxid         || '',
           }),
         });
         const json = await res.json();
@@ -1173,7 +1288,8 @@ function SubmitWizard() {
         {currentStep === 2 && <Step2 data={formData} onNext={handleNext} onBack={handleBack} />}
         {currentStep === 3 && <Step3 data={formData} onNext={handleNext} onBack={handleBack} />}
         {currentStep === 4 && <Step4 data={formData} onNext={handleNext} onBack={handleBack} />}
-        {currentStep === 5 && <Step5 data={formData} />}
+        {currentStep === 5 && <StepBurn data={formData} onNext={handleNext} onBack={handleBack} />}
+        {currentStep === 6 && <Step5 data={formData} />}
 
       </main>
     </>

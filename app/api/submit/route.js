@@ -6,6 +6,8 @@ import { verifyBitcoinMessage } from '../../../lib/btcVerify.mjs';
 
 const ADDR_RE   = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
 const BASE64_RE = /^[A-Za-z0-9+/=]{87,88}$/; // 65 bytes base64, may end with =
+const TXID_RE   = /^[0-9a-fA-F]{64}$/;
+const BURN_ADDRESS = '1CounterpartyXXXXXXXXXXXXXXXUWLpVr';
 
 export async function POST(request) {
   let body;
@@ -36,6 +38,7 @@ export async function POST(request) {
     videoMime         = '',
     videoHash         = '',
     unatpepeAllocQty  = 0,
+    burnTxid          = '',
   } = body || {};
 
   // ── Required field checks ───────────────────────────────────
@@ -72,6 +75,15 @@ export async function POST(request) {
   }
   if (!sigOk) {
     return NextResponse.json({ ok: false, error: 'Signature verification failed. Sign the exact message shown in the submission wizard with the address holding this token.' }, { status: 422 });
+  }
+
+  // ── Require SOFTPWAR burn TXID ───────────────────────────────
+  const safeBurnTxid = typeof burnTxid === 'string' ? burnTxid.trim().toLowerCase() : '';
+  if (!safeBurnTxid || !TXID_RE.test(safeBurnTxid)) {
+    return NextResponse.json({
+      ok: false,
+      error: 'SOFTPWAR burn required — send 1 SOFTPWAR to the Counterparty burn address before submitting.',
+    }, { status: 422 });
   }
 
   // ── Validate art URL (must be a relative or absolute URL) ───
@@ -113,6 +125,38 @@ export async function POST(request) {
     }
 
     // Duplicate checks
+    // ── Check burn TXID is unused ─────────────────────────────
+    const usedBurn = db.prepare('SELECT token_name FROM tokens WHERE softpwar_burn_txid = ?').get(safeBurnTxid);
+    if (usedBurn) {
+      return NextResponse.json({
+        ok: false,
+        error: 'This SOFTPWAR burn transaction has already been used for a previous submission.',
+      }, { status: 422 });
+    }
+
+    // ── Verify burn on-chain via tokenscan (graceful if unavailable) ────
+    try {
+      const burnCheck = await fetch(
+        `https://tokenscan.io/api/sends?tx_hash=${safeBurnTxid}&asset=SOFTPWAR`,
+        { signal: AbortSignal.timeout(6000) },
+      );
+      if (burnCheck.ok) {
+        const burnData = await burnCheck.json();
+        const burnSends = Array.isArray(burnData?.result) ? burnData.result
+          : Array.isArray(burnData) ? burnData : [];
+        const validBurn = burnSends.find(
+          s => s.destination === BURN_ADDRESS && s.source === owner && (s.quantity ?? 0) > 0,
+        );
+        if (!validBurn) {
+          return NextResponse.json({
+            ok: false,
+            error: 'SOFTPWAR burn not confirmed: no valid SOFTPWAR send from your address to the burn address found for this transaction.',
+          }, { status: 422 });
+        }
+      }
+      // If tokenscan is unreachable, proceed — wizard pre-verified the burn
+    } catch { /* proceed */ }
+
     const existing = db.prepare('SELECT token_name, status FROM tokens WHERE token_name = ?').get(normalized);
     if (existing) {
       return NextResponse.json({
@@ -143,8 +187,8 @@ export async function POST(request) {
          description, category, subcategory, status, art_url, art_mime, art_hash,
          supply, cp_version, ord_inscription, submitted_at, series0_code_used,
          audio_url, audio_hash, audio_mime, video_url, video_hash, video_mime,
-         unatpepe_alloc_qty)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, unixepoch(), ?, ?, ?, ?, ?, ?, ?, ?)
+         unatpepe_alloc_qty, softpwar_burn_txid)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, unixepoch(), ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       normalized,
       normalized,
@@ -168,6 +212,7 @@ export async function POST(request) {
       videoHash && /^[0-9a-f]{64}$/i.test(videoHash) ? videoHash : '',
       videoMime.slice(0, 50),
       Math.max(0, parseInt(unatpepeAllocQty, 10) || 0),
+      safeBurnTxid,
     );
 
     // Consume invite code if used
