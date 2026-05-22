@@ -1580,6 +1580,8 @@ export default function AdminPage() {
   const [judgeAllLoading, setJudgeAllLoading] = useState(false);
   const [earlyAccess, setEarlyAccess] = useState(false);
   const [eaToggling, setEaToggling] = useState(false);
+  const [burnRequired, setBurnRequired] = useState(false);
+  const [burnToggling, setBurnToggling] = useState(false);
   const [genDropsLoading, setGenDropsLoading] = useState(false);
   const [genDropsStatus, setGenDropsStatus] = useState(null);
   const [fullCouncilLoading, setFullCouncilLoading] = useState(false);
@@ -1624,7 +1626,10 @@ export default function AdminPage() {
       const settingsData = await settingsRes.json();
       setTokens(tokenData.tokens ?? []);
       setStats(statsData);
-      if (settingsData.ok) setEarlyAccess(settingsData.settings?.early_access_mode === '1');
+      if (settingsData.ok) {
+        setEarlyAccess(settingsData.settings?.early_access_mode === '1');
+        setBurnRequired(settingsData.settings?.burn_required === '1');
+      }
     } finally {
       setLoading(false);
     }
@@ -1718,6 +1723,22 @@ export default function AdminPage() {
     }
   }
 
+  async function toggleBurnRequired() {
+    setBurnToggling(true);
+    const newVal = burnRequired ? '0' : '1';
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({ key: 'burn_required', value: newVal }),
+      });
+      const json = await res.json();
+      if (json.ok) setBurnRequired(newVal === '1');
+    } finally {
+      setBurnToggling(false);
+    }
+  }
+
   if (!authToken) return <LoginGate onAuth={handleAuth} />;
 
   const TABS = [
@@ -1770,6 +1791,19 @@ export default function AdminPage() {
             title="Toggle holder-only early access gate"
           >
             {eaToggling ? '…' : earlyAccess ? '⚡ holders only: ON' : '⚡ holders only: OFF'}
+          </button>
+          <button
+            className={styles.judgeAllBtn}
+            onClick={toggleBurnRequired}
+            disabled={burnToggling}
+            style={{
+              background: burnRequired ? 'var(--amber)' : 'transparent',
+              color: burnRequired ? 'var(--bg)' : 'var(--amber)',
+              border: '1px solid var(--amber)',
+            }}
+            title="Toggle SOFTPWAR burn gate for submissions"
+          >
+            {burnToggling ? '…' : burnRequired ? '🔥 burn gate: ON' : '🔥 burn gate: OFF'}
           </button>
           <button
             className={styles.judgeAllBtn}

@@ -951,10 +951,16 @@ function Step4({ data, onNext, onBack }) {
 // ─────────────────────────────────────────────────────────────────
 const SOFTPWAR_BURN_ADDR = '1CounterpartyXXXXXXXXXXXXXXXUWLpVr';
 
-function StepBurn({ data, onNext, onBack }) {
+function StepBurn({ data, onNext, onBack, burnRequired }) {
   const [verifying, setVerifying] = useState(false);
   const [errMsg, setErrMsg] = useState('');
   const [copied, setCopied] = useState(false);
+
+  // Auto-advance when burn gate is off
+  useEffect(() => {
+    if (burnRequired === false) { onNext({ ...data, burnTxid: '' }); }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [burnRequired]);
 
   function copyBurnAddr() {
     navigator.clipboard?.writeText(SOFTPWAR_BURN_ADDR).then(() => {
@@ -1243,6 +1249,14 @@ function SubmitWizard() {
   const [formData, setFormData] = useState(
     vaultHash ? { vaultHash, vaultMime } : {}
   );
+  const [burnRequired, setBurnRequired] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/burn-config')
+      .then(r => r.json())
+      .then(d => setBurnRequired(d.burnRequired === true))
+      .catch(() => setBurnRequired(false));
+  }, []);
 
   function handleNext(newData) {
     setFormData(prev => ({ ...prev, ...newData }));
@@ -1288,7 +1302,7 @@ function SubmitWizard() {
         {currentStep === 2 && <Step2 data={formData} onNext={handleNext} onBack={handleBack} />}
         {currentStep === 3 && <Step3 data={formData} onNext={handleNext} onBack={handleBack} />}
         {currentStep === 4 && <Step4 data={formData} onNext={handleNext} onBack={handleBack} />}
-        {currentStep === 5 && <StepBurn data={formData} onNext={handleNext} onBack={handleBack} />}
+        {currentStep === 5 && <StepBurn data={formData} onNext={handleNext} onBack={handleBack} burnRequired={burnRequired} />}
         {currentStep === 6 && <Step5 data={formData} />}
 
       </main>

@@ -77,14 +77,8 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, error: 'Signature verification failed. Sign the exact message shown in the submission wizard with the address holding this token.' }, { status: 422 });
   }
 
-  // ── Require SOFTPWAR burn TXID ───────────────────────────────
+  // ── Compute burn TXID (validation deferred to DB check below if gate is active) ──
   const safeBurnTxid = typeof burnTxid === 'string' ? burnTxid.trim().toLowerCase() : '';
-  if (!safeBurnTxid || !TXID_RE.test(safeBurnTxid)) {
-    return NextResponse.json({
-      ok: false,
-      error: 'SOFTPWAR burn required — send 1 SOFTPWAR to the Counterparty burn address before submitting.',
-    }, { status: 422 });
-  }
 
   // ── Validate art URL (must be a relative or absolute URL) ───
   if (!artUrl || artUrl.length < 4) {
@@ -124,38 +118,44 @@ export async function POST(request) {
       s0CodeUsed = codeNorm;
     }
 
-    // Duplicate checks
-    // ── Check burn TXID is unused ─────────────────────────────
-    const usedBurn = db.prepare('SELECT token_name FROM tokens WHERE softpwar_burn_txid = ?').get(safeBurnTxid);
-    if (usedBurn) {
-      return NextResponse.json({
-        ok: false,
-        error: 'This SOFTPWAR burn transaction has already been used for a previous submission.',
-      }, { status: 422 });
-    }
-
-    // ── Verify burn on-chain via tokenscan (graceful if unavailable) ────
-    try {
-      const burnCheck = await fetch(
-        `https://tokenscan.io/api/sends?tx_hash=${safeBurnTxid}&asset=SOFTPWAR`,
-        { signal: AbortSignal.timeout(6000) },
-      );
-      if (burnCheck.ok) {
-        const burnData = await burnCheck.json();
-        const burnSends = Array.isArray(burnData?.result) ? burnData.result
-          : Array.isArray(burnData) ? burnData : [];
-        const validBurn = burnSends.find(
-          s => s.destination === BURN_ADDRESS && s.source === owner && (s.quantity ?? 0) > 0,
-        );
-        if (!validBurn) {
-          return NextResponse.json({
-            ok: false,
-            error: 'SOFTPWAR burn not confirmed: no valid SOFTPWAR send from your address to the burn address found for this transaction.',
-          }, { status: 422 });
-        }
+    // ── SOFTPWAR burn gate (conditional on settings) ────────────────────
+    const burnGateRow = db.prepare("SELECT value FROM settings WHERE key='burn_required'").get();
+    if (burnGateRow?.value === '1') {
+      if (!safeBurnTxid || !TXID_RE.test(safeBurnTxid)) {
+        return NextResponse.json({
+          ok: false,
+          error: 'SOFTPWAR burn required — send 1 SOFTPWAR to the Counterparty burn address before submitting.',
+        }, { status: 422 });
       }
-      // If tokenscan is unreachable, proceed — wizard pre-verified the burn
-    } catch { /* proceed */ }
+      const usedBurn = db.prepare('SELECT token_name FROM tokens WHERE softpwar_burn_txid = ?').get(safeBurnTxid);
+      if (usedBurn) {
+        return NextResponse.json({
+          ok: false,
+          error: 'This SOFTPWAR burn transaction has already been used for a previous submission.',
+        }, { status: 422 });
+      }
+      try {
+        const burnCheck = await fetch(
+          `https://tokenscan.io/api/sends?tx_hash=${safeBurnTxid}&asset=SOFTPWAR`,
+          { signal: AbortSignal.timeout(6000) },
+        );
+        if (burnCheck.ok) {
+          const burnData = await burnCheck.json();
+          const burnSends = Array.isArray(burnData?.result) ? burnData.result
+            : Array.isArray(burnData) ? burnData : [];
+          const validBurn = burnSends.find(
+            s => s.destination === BURN_ADDRESS && s.source === owner && (s.quantity ?? 0) > 0,
+          );
+          if (!validBurn) {
+            return NextResponse.json({
+              ok: false,
+              error: 'SOFTPWAR burn not confirmed: no valid SOFTPWAR send from your address to the burn address found for this transaction.',
+            }, { status: 422 });
+          }
+        }
+        // If tokenscan is unreachable, proceed — wizard pre-verified the burn
+      } catch { /* proceed */ }
+    }
 
     const existing = db.prepare('SELECT token_name, status FROM tokens WHERE token_name = ?').get(normalized);
     if (existing) {
