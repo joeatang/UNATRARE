@@ -633,6 +633,11 @@ function DropsPanel({ authToken }) {
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 8, flexWrap: 'wrap' }}>
                   <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: 3, color: 'var(--text)' }}>{drop.token_name}</span>
                   <span style={{ fontFamily: 'var(--font-card)', fontSize: '11px', letterSpacing: '2px', fontWeight: 700, color: statusColor }}>{drop.status.toUpperCase()}</span>
+                  {drop.distribution_mode === 'managed' && (
+                    <span style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--amber)', border: '1px solid var(--amber)', padding: '1px 6px' }}>
+                      ⬡ ARTIST USING MANAGED DIST — AWAITING SUPPLY
+                    </span>
+                  )}
                   <span style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '1px', color: 'var(--text-dim)' }}>
                     {drop.sent_count || 0} sent · {drop.pending_dist || 0} pending · {drop.pending_payment || 0} awaiting payment · {drop.supply_remaining}/{drop.supply_total} remaining
                   </span>

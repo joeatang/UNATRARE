@@ -39,12 +39,13 @@ export async function GET(request, { params }) {
         `).get(r.token_name);
         if (d) {
           drop = {
-            dropId:        d.id,
-            dropStatus:    d.status,
-            supplyTotal:   d.supply_total,
-            windowOpensAt: d.window_opens_at,
-            windowClosesAt: d.window_closes_at,
-            totalClaims:   d.total_claims,
+            dropId:           d.id,
+            dropStatus:       d.status,
+            supplyTotal:      d.supply_total,
+            windowOpensAt:    d.window_opens_at,
+            windowClosesAt:   d.window_closes_at,
+            totalClaims:      d.total_claims,
+            distributionMode: d.distribution_mode || 'self',
           };
         }
       }

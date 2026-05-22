@@ -78,13 +78,17 @@ function formatDate(unixSec) {
 function DropSection({ drop, tokenName, artistAddress }) {
   const [open, setOpen] = useState(false);
   const [sig, setSig] = useState('');
-  const [dlState, setDlState] = useState('idle');   // idle | loading | ok | error
+  const [modeView, setModeView] = useState(drop.distributionMode || 'self'); // what the UI shows
+  const [pendingMode, setPendingMode] = useState(null); // mode being confirmed
+  const [adminAddr, setAdminAddr] = useState(''); // returned after managed confirmed
+  const [dlState, setDlState]     = useState('idle');
   const [distState, setDistState] = useState('idle');
+  const [modeState, setModeState] = useState('idle');
   const [err, setErr] = useState('');
 
   const challenge = `UNATRARE:DROP:${tokenName}`;
-  const canAct = ['active', 'closed'].includes(drop.dropStatus);
   const isDist = drop.dropStatus === 'distributed';
+  const canAct = ['active', 'closed'].includes(drop.dropStatus);
 
   const statusColor = {
     upcoming:    'var(--text-dim)',
@@ -92,6 +96,31 @@ function DropSection({ drop, tokenName, artistAddress }) {
     closed:      'var(--amber)',
     distributed: 'var(--green)',
   }[drop.dropStatus] || 'var(--text-dim)';
+
+  function resetActionState() {
+    setErr(''); setDlState('idle'); setDistState('idle'); setModeState('idle');
+  }
+
+  async function handleSetMode(mode) {
+    if (!sig.trim()) { setErr('Paste your signature first'); return; }
+    setModeState('loading'); setErr('');
+    try {
+      const res = await fetch('/api/drops/set-mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tokenName, address: artistAddress, signature: sig.trim(), mode }),
+      });
+      const j = await res.json();
+      if (j.ok) {
+        setModeView(mode);
+        setPendingMode(null);
+        if (j.adminXcpAddress) setAdminAddr(j.adminXcpAddress);
+        setModeState('ok');
+      } else {
+        setErr(j.error || 'Failed to set mode'); setModeState('error');
+      }
+    } catch { setErr('Network error'); setModeState('error'); }
+  }
 
   async function handleDownload() {
     if (!sig.trim()) { setErr('Paste your signature first'); return; }
@@ -131,6 +160,14 @@ function DropSection({ drop, tokenName, artistAddress }) {
     } catch { setErr('Network error'); setDistState('error'); }
   }
 
+  const optionBtn = (active) => ({
+    flex: 1, padding: '10px 12px', cursor: 'pointer', textAlign: 'left',
+    border: `1px solid ${active ? 'var(--amber)' : 'var(--border)'}`,
+    background: active ? 'rgba(184,134,44,0.08)' : 'transparent',
+    color: active ? 'var(--amber)' : 'var(--text-dim)',
+    fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px',
+  });
+
   return (
     <div style={{ borderTop: '1px solid var(--border)', marginTop: 12, paddingTop: 12 }}>
       <button className={styles.expandBtn} onClick={() => setOpen(o => !o)}>
@@ -139,7 +176,7 @@ function DropSection({ drop, tokenName, artistAddress }) {
       {open && (
         <div style={{ marginTop: 12 }}>
           {/* Status row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
             <span style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: statusColor }}>
               {drop.dropStatus.toUpperCase()}
             </span>
@@ -158,27 +195,59 @@ function DropSection({ drop, tokenName, artistAddress }) {
             )}
           </div>
 
-          {/* Active: info only */}
-          {drop.dropStatus === 'active' && (
+          {/* Upcoming */}
+          {drop.dropStatus === 'upcoming' && (
             <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6 }}>
-              Claim window is open. Holders are registering their addresses. You&apos;ll be able to download the full list once the window closes.
+              Scheduled — admin will open the claim window. You&apos;ll be able to choose your distribution method once it opens.
             </div>
           )}
 
-          {/* Distributed: confirmed */}
+          {/* Active: info only */}
+          {drop.dropStatus === 'active' && (
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6 }}>
+              Claim window is open. Holders are registering their Counterparty addresses. The full distribution list will be available when the window closes.
+            </div>
+          )}
+
+          {/* Distributed */}
           {isDist && (
             <div style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--green)' }}>
               ✓ DISTRIBUTION CONFIRMED
             </div>
           )}
 
-          {/* Closed: download + mark distributed */}
-          {canAct && !isDist && (
+          {/* Closed: distribution workflow */}
+          {drop.dropStatus === 'closed' && !isDist && (
             <>
-              <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 12 }}>
-                The claim window is closed. Download the verified list of recipient CP addresses, send your token from your Counterparty wallet, then confirm distribution below.
+              {/* Mode picker — two option buttons */}
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 8 }}>
+                  DISTRIBUTION METHOD
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    style={optionBtn(modeView === 'self' && pendingMode !== 'managed')}
+                    onClick={() => { setPendingMode(null); setModeView('self'); resetActionState(); }}
+                  >
+                    SEND MYSELF
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 4, textTransform: 'none', letterSpacing: 0, lineHeight: 1.5 }}>
+                      Download the claim list and send from your own Counterparty wallet.
+                    </div>
+                  </button>
+                  <button
+                    style={optionBtn(modeView === 'managed' || pendingMode === 'managed')}
+                    onClick={() => { setPendingMode('managed'); resetActionState(); }}
+                  >
+                    UNATRARE SENDS
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 4, textTransform: 'none', letterSpacing: 0, lineHeight: 1.5 }}>
+                      Send your supply to UNATRARE. We handle the distribution.
+                    </div>
+                  </button>
+                </div>
               </div>
-              <div style={{ marginBottom: 8 }}>
+
+              {/* Shared signature field */}
+              <div style={{ marginBottom: 10 }}>
                 <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 4 }}>
                   SIGN TO AUTHENTICATE
                 </div>
@@ -193,7 +262,7 @@ function DropSection({ drop, tokenName, artistAddress }) {
                 <textarea
                   rows={3}
                   value={sig}
-                  onChange={e => { setSig(e.target.value); setErr(''); setDlState('idle'); setDistState('idle'); }}
+                  onChange={e => { setSig(e.target.value); resetActionState(); }}
                   placeholder="Paste BIP-137 signature here..."
                   style={{
                     width: '100%', padding: '7px 10px', boxSizing: 'border-box', resize: 'vertical',
@@ -203,41 +272,80 @@ function DropSection({ drop, tokenName, artistAddress }) {
                   }}
                 />
               </div>
+
               {err && (
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--red)', marginBottom: 8 }}>
                   {err}
                 </div>
               )}
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {dlState === 'ok' ? (
-                  <span style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--green)' }}>
-                    ✓ CSV DOWNLOADED
-                  </span>
-                ) : (
-                  <button
-                    className={styles.lookupBtn}
-                    onClick={handleDownload}
-                    disabled={dlState === 'loading'}
-                    style={{ fontSize: 11, padding: '6px 14px' }}
-                  >
-                    {dlState === 'loading' ? 'downloading...' : 'download claim list (CSV) →'}
+
+              {/* SELF-DISTRIBUTE actions */}
+              {(modeView === 'self' && pendingMode !== 'managed') && (
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {dlState === 'ok' ? (
+                    <span style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--green)' }}>✓ CSV DOWNLOADED</span>
+                  ) : (
+                    <button className={styles.lookupBtn} onClick={handleDownload} disabled={dlState === 'loading'} style={{ fontSize: 11, padding: '6px 14px' }}>
+                      {dlState === 'loading' ? 'downloading...' : 'download claim list (CSV) →'}
+                    </button>
+                  )}
+                  {distState === 'ok' ? (
+                    <span style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--green)' }}>✓ DISTRIBUTION CONFIRMED</span>
+                  ) : (
+                    <button className={styles.lookupBtn} onClick={handleMarkDistributed} disabled={distState === 'loading'} style={{ fontSize: 11, padding: '6px 14px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-dim)' }}>
+                      {distState === 'loading' ? 'confirming...' : 'confirm distribution →'}
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* MANAGED: confirm selection */}
+              {pendingMode === 'managed' && modeState !== 'ok' && (
+                <div>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 10 }}>
+                    Once confirmed, you&apos;ll receive the UNATRARE Counterparty address to send your supply to.
+                    UNATRARE will distribute {drop.totalClaims} token{drop.totalClaims !== 1 ? 's' : ''} to all verified claimants.
+                  </div>
+                  <button className={styles.lookupBtn} onClick={() => handleSetMode('managed')} disabled={modeState === 'loading'} style={{ fontSize: 11, padding: '6px 14px' }}>
+                    {modeState === 'loading' ? 'confirming...' : 'confirm — use managed service →'}
                   </button>
-                )}
-                {distState === 'ok' ? (
-                  <span style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--green)' }}>
-                    ✓ DISTRIBUTION CONFIRMED
-                  </span>
-                ) : (
-                  <button
-                    className={styles.lookupBtn}
-                    onClick={handleMarkDistributed}
-                    disabled={distState === 'loading'}
-                    style={{ fontSize: 11, padding: '6px 14px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-dim)' }}
-                  >
-                    {distState === 'loading' ? 'confirming...' : 'confirm distribution →'}
-                  </button>
-                )}
-              </div>
+                </div>
+              )}
+
+              {/* MANAGED: send instructions (after confirmed) */}
+              {(modeView === 'managed' && modeState === 'ok' && adminAddr) && (
+                <div style={{ marginTop: 8, padding: '12px', border: '1px solid var(--amber)', background: 'rgba(184,134,44,0.05)' }}>
+                  <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--amber)', marginBottom: 8 }}>
+                    SEND YOUR SUPPLY TO:
+                  </div>
+                  <code style={{ display: 'block', fontFamily: "'Courier New', monospace", fontSize: 12, color: 'var(--text)', wordBreak: 'break-all', marginBottom: 8 }}>
+                    {adminAddr}
+                  </code>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6 }}>
+                    Send exactly <strong>{drop.totalClaims} × {tokenName}</strong> from your Counterparty wallet.
+                    UNATRARE will distribute to all {drop.totalClaims} verified claimants.
+                  </div>
+                </div>
+              )}
+
+              {/* MANAGED: already set (loaded from DB) — show send instructions */}
+              {(modeView === 'managed' && modeState !== 'ok') && (() => {
+                // They've already chosen managed in a previous session — show instructions
+                // But we don't have adminAddr yet (need to fetch it). Prompt them to re-sign.
+                return (
+                  <div style={{ marginTop: 8, padding: '12px', border: '1px solid var(--border)', background: 'var(--surface)' }}>
+                    <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--amber)', marginBottom: 8 }}>
+                      MANAGED DISTRIBUTION SELECTED
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 10 }}>
+                      UNATRARE will handle distribution. Paste your signature above and click below to reveal the send address.
+                    </div>
+                    <button className={styles.lookupBtn} onClick={() => handleSetMode('managed')} disabled={modeState === 'loading'} style={{ fontSize: 11, padding: '6px 14px' }}>
+                      {modeState === 'loading' ? 'loading...' : 'reveal send address →'}
+                    </button>
+                  </div>
+                );
+              })()}
             </>
           )}
         </div>
