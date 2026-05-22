@@ -1,56 +1,45 @@
-/* PathCards.module.css — "Choose Your Path" interactive cards on the landing page */
+/* PathCards.module.css — mobile-first: base = 1-col, min-width scales up */
 
 .wrap {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
 }
 
-/* ─── Primary action row — 2 big cards (Browse + Submit) ─── */
+/* ─── Primary row — stacked on mobile, 2-col at 640px+ ─── */
 .primaryRow {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
 .primaryCard {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 32px 28px;
+  gap: 12px;
+  padding: 24px 20px;
   border: 1px solid var(--border);
   background: var(--surface);
   text-decoration: none;
   transition: border-color 0.2s, background 0.2s;
   cursor: pointer;
 }
-
-.primaryCard:hover {
-  border-color: var(--green);
-  background: #111;
-}
-
-/* Submit card uses amber accent */
-.primaryCardSubmit:hover {
-  border-color: var(--amber-hot);
-}
+.primaryCard:hover { border-color: var(--green); background: #111; }
+.primaryCardSubmit:hover { border-color: var(--amber-hot); }
 
 .pcSigil {
   font-family: var(--font-display);
-  font-size: 40px;
+  font-size: 32px;
   color: var(--green);
   line-height: 1;
 }
-
-.primaryCardSubmit .pcSigil {
-  color: var(--amber);
-}
+.primaryCardSubmit .pcSigil { color: var(--amber); }
 
 .pcTitle {
   font-family: var(--font-card);
-  font-size: 20px;
-  letter-spacing: 3px;
+  font-size: 17px;
+  letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--text);
   line-height: 1.2;
@@ -58,7 +47,7 @@
 
 .pcDesc {
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text-dim);
   line-height: 1.7;
   flex: 1;
@@ -66,21 +55,18 @@
 
 .pcCta {
   font-family: var(--font-card);
-  font-size: 14px;
-  letter-spacing: 3px;
+  font-size: 13px;
+  letter-spacing: 2px;
   color: var(--green);
   margin-top: 4px;
 }
+.primaryCardSubmit .pcCta { color: var(--amber); }
 
-.primaryCardSubmit .pcCta {
-  color: var(--amber);
-}
-
-/* ─── Context path row — 3 audience cards ──────────────── */
+/* ─── Context path row — stacked on mobile, 3-col at 900px+ */
 .pathRow {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 10px;
 }
 
 .pathCard {
@@ -92,30 +78,21 @@
   transition: border-color 0.2s;
   overflow: hidden;
 }
+.pathCard:hover { border-color: var(--border); }
 
-.pathCard:hover {
-  border-color: var(--border);
-}
-
-/* Node card is a full Link — different hover */
 .pathCardNode {
-  padding: 24px 20px;
+  padding: 20px 18px;
   gap: 10px;
   cursor: pointer;
 }
+.pathCardNode:hover { border-color: var(--amber); background: #110d00; }
 
-.pathCardNode:hover {
-  border-color: var(--amber);
-  background: #110d00;
-}
-
-/* Expandable card header — acts as toggle button */
 .pathHeader {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  padding: 24px 20px;
+  padding: 20px 18px;
   background: none;
   border: none;
   text-align: left;
@@ -123,46 +100,34 @@
   width: 100%;
   transition: background 0.15s;
 }
-
-.pathHeader:hover {
-  background: rgba(255, 255, 255, 0.02);
-}
+.pathHeader:hover { background: rgba(255,255,255,0.02); }
 
 .pathHeaderInner {
   display: flex;
   flex-direction: column;
-  gap: 0;
   flex: 1;
   min-width: 0;
 }
 
 .pathSigil {
   font-family: var(--font-display);
-  font-size: 32px;
+  font-size: 28px;
   color: var(--text-dim);
   line-height: 1;
-  margin-bottom: 10px;
-}
-
-.pathCardNode .pathSigil {
-  color: var(--amber);
-  font-size: 28px;
   margin-bottom: 8px;
 }
+.pathCardNode .pathSigil { color: var(--amber); font-size: 26px; }
 
 .pathTitle {
   font-family: var(--font-card);
-  font-size: 15px;
-  letter-spacing: 3px;
+  font-size: 14px;
+  letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--text);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   line-height: 1.2;
 }
-
-.pathCardNode .pathTitle {
-  color: var(--amber);
-}
+.pathCardNode .pathTitle { color: var(--amber); }
 
 .pathDesc {
   font-family: var(--font-body);
@@ -173,29 +138,26 @@
 
 .pathNodeCta {
   font-family: var(--font-card);
-  font-size: 13px;
-  letter-spacing: 3px;
+  font-size: 12px;
+  letter-spacing: 2px;
   color: var(--amber);
-  margin-top: 14px;
+  margin-top: 12px;
 }
 
 .pathToggle {
   font-family: var(--font-display);
-  font-size: 32px;
+  font-size: 28px;
   color: var(--text-dim);
   flex-shrink: 0;
   line-height: 1;
   margin-top: 2px;
   transition: color 0.15s;
 }
-
-.pathHeader:hover .pathToggle {
-  color: var(--green);
-}
+.pathHeader:hover .pathToggle { color: var(--green); }
 
 /* ─── Expanded body ──────────────────────────────────────── */
 .pathBody {
-  padding: 0 20px 24px;
+  padding: 0 18px 20px;
   border-top: 1px solid var(--border-dim);
   display: flex;
   flex-direction: column;
@@ -212,80 +174,65 @@
   font-size: 14px;
   color: var(--text-dim);
   line-height: 1.75;
-  margin-top: 18px;
+  margin-top: 16px;
 }
 
-/* Callout note — amber left-border, card font */
 .pathBodyNote {
   font-family: var(--font-card) !important;
   font-size: 13px !important;
   letter-spacing: 1px;
-  color: rgba(201, 168, 76, 0.85) !important;
+  color: rgba(201,168,76,0.85) !important;
   border-left: 2px solid var(--amber);
   padding-left: 12px;
-  margin-top: 16px !important;
+  margin-top: 14px !important;
 }
 
-/* Next-step link list */
 .pathBodyLinks {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 20px;
-  padding-top: 16px;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 14px;
   border-top: 1px solid var(--border-dim);
 }
-
 .pathBodyLinks a {
   font-family: var(--font-card);
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: var(--green);
   text-decoration: none;
   transition: color 0.15s;
 }
+.pathBodyLinks a:hover { color: var(--green-hot); }
 
-.pathBodyLinks a:hover {
-  color: var(--green-hot);
+/* ═══════════════════════════════════════════════════════════
+   SCALE UP — min-width
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── 640px: primary row goes 2-col ──────────────────────── */
+@media (min-width: 640px) {
+  .wrap        { gap: 14px; }
+  .primaryRow  { grid-template-columns: 1fr 1fr; gap: 14px; }
+  .primaryCard { padding: 28px 24px; gap: 14px; }
+  .pcSigil     { font-size: 36px; }
+  .pcTitle     { font-size: 18px; letter-spacing: 2.5px; }
+  .pcDesc      { font-size: 14px; }
 }
 
-/* ─── Responsive ─────────────────────────────────────────── */
-@media (max-width: 900px) {
-  .primaryRow {
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
+/* ── 900px: context row goes 3-col ──────────────────────── */
+@media (min-width: 900px) {
+  .wrap       { gap: 16px; }
+  .primaryRow { gap: 16px; }
+  .primaryCard { padding: 32px 28px; }
+  .pcSigil    { font-size: 40px; }
+  .pcTitle    { font-size: 20px; letter-spacing: 3px; }
+  .pcCta      { font-size: 14px; letter-spacing: 3px; }
 
-  .pathRow {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  .primaryCard {
-    padding: 24px 20px;
-    gap: 12px;
-  }
-
-  .pcTitle { font-size: 18px; }
-  .pcSigil { font-size: 32px; }
-}
-
-@media (max-width: 600px) {
-  .primaryRow {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  .primaryCard {
-    padding: 20px 16px;
-    gap: 10px;
-  }
-
-  .pcTitle { font-size: 17px; letter-spacing: 2px; }
-  .pcSigil { font-size: 28px; }
-  .pcDesc  { font-size: 14px; }
-
-  .pathHeader { padding: 20px 16px; }
-  .pathBody   { padding: 0 16px 20px; }
-  .pathBodyLinks { gap: 10px; }
+  .pathRow    { grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .pathHeader { padding: 24px 20px; }
+  .pathBody   { padding: 0 20px 24px; }
+  .pathCardNode { padding: 24px 20px; }
+  .pathSigil  { font-size: 32px; }
+  .pathTitle  { font-size: 15px; letter-spacing: 3px; }
+  .pathToggle { font-size: 32px; }
 }

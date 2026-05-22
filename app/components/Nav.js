@@ -24,7 +24,7 @@ export default function Nav() {
         <ul className={styles['nav-links']}>
           <li><Link href="/directory">Directory</Link></li>
           <li><Link href="/archive">Archive</Link></li>
-          <li><Link href="/vault">Vault</Link></li>
+          <li><Link href="/council">Council</Link></li>
           <li><Link href="/nodes">Nodes</Link></li>
           <li><Link href="/register" className={styles['nav-register']}>✦ UNATPEPE</Link></li>
         </ul>
