@@ -173,6 +173,12 @@ export default function NodesPage() {
               </span>
               <span className={styles.summaryLabel}>HEARTBEATS</span>
             </div>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryVal}>
+                {data.nodes.filter(n => n.is_unatpepe_node).length}
+              </span>
+              <span className={styles.summaryLabel}>UNATPEPE NODES</span>
+            </div>
           </div>
 
           {data.nodes.length === 0 ? (

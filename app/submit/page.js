@@ -547,7 +547,7 @@ function Step3({ data, onNext, onBack }) {
   const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
   const [inscription, setInscription] = useState('');
-  const [unatAgreement, setUnatAgreement] = useState(false);
+  const [allocQty, setAllocQty] = useState('');
   const [errMsg, setErrMsg] = useState('');
 
   const [audioResult, setAudioResult]     = useState(null); // {url, hash, mime}
@@ -601,27 +601,24 @@ function Step3({ data, onNext, onBack }) {
   }
 
   function handleContinue() {
-    if (!unatAgreement) {
-      setErrMsg('You must agree to the UNATPEPE holder allocation before continuing.');
-      return;
-    }
     if (inscription && !INSC_RE.test(inscription.trim())) {
       setErrMsg('Inscription ID must be 64 hex characters (the reveal txid)');
       return;
     }
     onNext({
       ...data,
-      artistHandle:   handle.trim().replace(/^@/, '').slice(0, 64),
-      description:    desc.trim().slice(0, 280),
-      category:       category.trim().slice(0, 64),
-      subcategory:    subcategory.trim().slice(0, 64),
-      ordInscription: inscription.trim() || '',
-      audioUrl:       audioResult?.url  || '',
-      audioMime:      audioResult?.mime || '',
-      audioHash:      audioResult?.hash || '',
-      videoUrl:       videoResult?.url  || '',
-      videoMime:      videoResult?.mime || '',
-      videoHash:      videoResult?.hash || '',
+      artistHandle:      handle.trim().replace(/^@/, '').slice(0, 64),
+      description:       desc.trim().slice(0, 280),
+      category:          category.trim().slice(0, 64),
+      subcategory:       subcategory.trim().slice(0, 64),
+      ordInscription:    inscription.trim() || '',
+      audioUrl:          audioResult?.url  || '',
+      audioMime:         audioResult?.mime || '',
+      audioHash:         audioResult?.hash || '',
+      videoUrl:          videoResult?.url  || '',
+      videoMime:         videoResult?.mime || '',
+      videoHash:         videoResult?.hash || '',
+      unatpepeAllocQty:  Math.max(0, parseInt(allocQty, 10) || 0),
     });
   }
 
@@ -779,31 +776,61 @@ function Step3({ data, onNext, onBack }) {
         </div>
       </div>
 
-      {/* ── UNATPEPE holder agreement ── */}
-      <div style={{
-        marginTop: 8, marginBottom: 20,
-        padding: '14px 16px',
-        border: `1px solid ${unatAgreement ? 'var(--green)' : 'var(--amber)'}`,
-        background: unatAgreement ? 'rgba(61,158,61,0.04)' : 'rgba(255,200,0,0.03)',
-        transition: 'border-color 0.2s, background 0.2s',
-      }}>
-        <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'3px',
-          color: unatAgreement ? 'var(--green)' : 'var(--amber)', marginBottom:10}}>
-          ★ UNATPEPE HOLDER AGREEMENT
+      {/* ── UNATPEPE holder drop (optional) ── */}
+      <div style={{ marginTop: 8, marginBottom: 20 }}>
+        <div style={{
+          fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px',
+          color: 'var(--text-dim)', marginBottom: 10,
+        }}>
+          ★ UNATPEPE HOLDER DROP · OPTIONAL
         </div>
-        <label style={{display:'flex', gap:12, alignItems:'flex-start', cursor:'pointer'}}>
+        <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 10 }}>
+          UNATPEPE holders are the founding community of this platform. You can offer them an allocation of your token — completely optional. Your approval is based on the art, not this.
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
           <input
-            type="checkbox"
-            checked={unatAgreement}
-            onChange={e => { setUnatAgreement(e.target.checked); setErrMsg(''); }}
-            style={{marginTop:3, accentColor:'var(--amber)', width:16, height:16, flexShrink:0, cursor:'pointer'}}
+            type="number"
+            min="0"
+            value={allocQty}
+            onChange={e => setAllocQty(e.target.value)}
+            placeholder="0"
+            style={{
+              width: 80, padding: '6px 10px',
+              background: 'var(--bg-card)', border: '1px solid var(--border)',
+              color: 'var(--text)', fontFamily: 'var(--font-card)', fontSize: 14,
+              letterSpacing: '1px', outline: 'none',
+            }}
           />
-          <span style={{fontFamily:'var(--font-body)', fontSize:'12px', color:'var(--text)', lineHeight:1.7}}>
-            I understand that registered <strong>UNATPEPE holders</strong> will each receive one free
-            allocation of <strong>{data.tokenName}</strong> before this card is publicly distributed.
-            I agree to honor this allocation as a condition of UNATRARE certification.
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)' }}>
+            copies · UNATPEPE total supply: 420
           </span>
-        </label>
+        </div>
+        {(() => {
+          const n = parseInt(allocQty, 10);
+          if (!n || n <= 0) return (
+            <div style={{ fontSize: '11px', color: 'var(--text-dim)', fontStyle: 'italic' }}>
+              Leave blank or 0 to skip. No effect on your submission.
+            </div>
+          );
+          if (n < 10) return (
+            <div style={{ fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.5 }}>
+              Private raffle. One verified UNATPEPE holder will be selected randomly. No public announcement.
+            </div>
+          );
+          if (n < 420) return (
+            <div style={{ fontSize: '11px', color: 'var(--amber)', lineHeight: 1.5 }}>
+              Partial drop. Distributed by raffle among verified claimants, up to {n} total. Announced on the platform.
+            </div>
+          );
+          return (
+            <div style={{ fontSize: '11px', color: 'var(--green)', lineHeight: 1.5 }}>
+              Full drop. Enough for every active UNATPEPE holder. Featured announcement + UNATPEPE SUPPORTED treatment on your card.
+            </div>
+          );
+        })()}
+        <div style={{ marginTop: 8, fontSize: '10px', color: 'var(--text-dim)', lineHeight: 1.5 }}>
+          Only verified holders who claim during the drop window receive a copy. Unclaimed copies stay with you.
+        </div>
       </div>
 
       <div style={{display:'flex', gap:12, flexWrap:'wrap'}}>
@@ -954,6 +981,7 @@ function Step5({ data }) {
             videoUrl:       data.videoUrl       || '',
             videoMime:      data.videoMime      || '',
             videoHash:      data.videoHash      || '',
+            unatpepeAllocQty: data.unatpepeAllocQty || 0,
           }),
         });
         const json = await res.json();

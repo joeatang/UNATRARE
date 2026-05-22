@@ -28,13 +28,14 @@ export async function POST(request) {
     category       = '',
     subcategory    = '',
     ordInscription = '',
-    inviteCode     = '',
-    audioUrl       = '',
-    audioMime      = '',
-    audioHash      = '',
-    videoUrl       = '',
-    videoMime      = '',
-    videoHash      = '',
+    inviteCode        = '',
+    audioUrl          = '',
+    audioMime         = '',
+    audioHash         = '',
+    videoUrl          = '',
+    videoMime         = '',
+    videoHash         = '',
+    unatpepeAllocQty  = 0,
   } = body || {};
 
   // ── Required field checks ───────────────────────────────────
@@ -141,8 +142,9 @@ export async function POST(request) {
         (token_name, display_title, artist_address, artist_handle,
          description, category, subcategory, status, art_url, art_mime, art_hash,
          supply, cp_version, ord_inscription, submitted_at, series0_code_used,
-         audio_url, audio_hash, audio_mime, video_url, video_hash, video_mime)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, unixepoch(), ?, ?, ?, ?, ?, ?, ?)
+         audio_url, audio_hash, audio_mime, video_url, video_hash, video_mime,
+         unatpepe_alloc_qty)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, unixepoch(), ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       normalized,
       normalized,
@@ -165,6 +167,7 @@ export async function POST(request) {
       videoUrl && videoUrl.length > 4 ? videoUrl.slice(0, 500) : '',
       videoHash && /^[0-9a-f]{64}$/i.test(videoHash) ? videoHash : '',
       videoMime.slice(0, 50),
+      Math.max(0, parseInt(unatpepeAllocQty, 10) || 0),
     );
 
     // Consume invite code if used

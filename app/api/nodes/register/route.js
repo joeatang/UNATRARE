@@ -25,6 +25,7 @@
 
 import { NextResponse } from 'next/server';
 import { getDb } from '../../../../lib/db';
+import { refreshUnatpepeNodeTier } from '../../../../lib/tapApi.js';
 
 const GENESIS_CAP     = 100;
 const MAX_ADDR_LEN    = 100;
@@ -197,6 +198,11 @@ export async function POST(req) {
         (pubkey, btc_address, xcp_address, tap_address, registered_at, is_genesis, genesis_provisional)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `).run(pubkey, btc_address, xcp_address, tap_address, now, is_genesis, genesis_provisional);
+
+    // UNATPEPE tier — check async so registration doesn't stall on tap3.link latency
+    if (tap_address) {
+      refreshUnatpepeNodeTier(getDb(), pubkey, tap_address).catch(() => {});
+    }
 
     console.log(
       `[nodes/register] ${pubkey.slice(0, 8)}... xcp=${xcp_address.slice(0, 14)}... ` +

@@ -59,9 +59,52 @@ function JudgeBreakdown({ breakdown }) {
   );
 }
 
-function SubmissionCard({ sub }) {
+function SubmissionCard({ sub, artistAddress }) {
   const [expanded, setExpanded] = useState(false);
+  const [manageOpen, setManageOpen] = useState(false);
+  const [dispenser, setDispenser] = useState(sub.dispenserAddress || '');
+  const [manageSig, setManageSig] = useState('');
+  const [manageState, setManageState] = useState('idle'); // idle | loading | ok | error
+  const [manageErr, setManageErr] = useState('');
   const meta = STATUS_META[sub.status] || STATUS_META.pending;
+
+  const DISPENSER_RE = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
+  const challenge = `UNATRARE:UPDATE:${sub.tokenName}`;
+
+  async function handleManageSubmit() {
+    if (dispenser && !DISPENSER_RE.test(dispenser)) {
+      setManageErr('Invalid address — must be a legacy Bitcoin address starting with 1');
+      return;
+    }
+    if (!manageSig.trim()) {
+      setManageErr('Paste your BIP-137 signature');
+      return;
+    }
+    setManageState('loading');
+    setManageErr('');
+    try {
+      const res = await fetch('/api/update-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tokenName:        sub.tokenName,
+          artistAddress:    artistAddress,
+          signature:        manageSig.trim(),
+          dispenserAddress: dispenser.trim(),
+        }),
+      });
+      const json = await res.json();
+      if (json.ok) {
+        setManageState('ok');
+      } else {
+        setManageErr(json.error || 'Update failed');
+        setManageState('error');
+      }
+    } catch {
+      setManageErr('Network error — please try again');
+      setManageState('error');
+    }
+  }
 
   return (
     <div className={`${styles.card} ${styles['card_' + sub.status]}`}>
@@ -129,6 +172,94 @@ function SubmissionCard({ sub }) {
         </button>
       )}
       {expanded && <JudgeBreakdown breakdown={sub.judgeBreakdown} />}
+
+      {/* Manage listing — approved tokens only */}
+      {sub.status === 'approved' && (
+        <div style={{ borderTop: '1px solid var(--border)', marginTop: 12, paddingTop: 12 }}>
+          <button
+            className={styles.expandBtn}
+            onClick={() => { setManageOpen(o => !o); setManageErr(''); setManageState('idle'); }}
+          >
+            {manageOpen ? '▲ hide listing settings' : '▼ manage your listing'}
+          </button>
+          {manageOpen && (
+            <div style={{ marginTop: 12 }}>
+              {sub.unatpepeAllocQty > 0 && (
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', marginBottom: 12 }}>
+                  UNATPEPE drop: <strong>{sub.unatpepeAllocQty}</strong> copies offered to holders
+                </div>
+              )}
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 6 }}>
+                  DISPENSER ADDRESS
+                </div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', marginBottom: 8, lineHeight: 1.5 }}>
+                  Add your Counterparty dispenser address to show a secondary market link on your card page.
+                </div>
+                <input
+                  type="text"
+                  value={dispenser}
+                  onChange={e => { setDispenser(e.target.value.trim()); setManageErr(''); setManageState('idle'); }}
+                  placeholder="1YourDispenserAddress... (leave blank to remove)"
+                  style={{
+                    width: '100%', padding: '7px 10px', boxSizing: 'border-box',
+                    background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 12,
+                    outline: 'none',
+                  }}
+                />
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 6 }}>
+                  SIGN TO VERIFY OWNERSHIP
+                </div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', marginBottom: 6, lineHeight: 1.5 }}>
+                  Sign this message with the Bitcoin address you used for this token:
+                </div>
+                <code style={{
+                  display: 'block', padding: '6px 10px', marginBottom: 8,
+                  background: 'var(--bg)', border: '1px solid var(--border)',
+                  fontFamily: "'Courier New', monospace", fontSize: 11, color: 'var(--amber)',
+                  wordBreak: 'break-all', lineHeight: 1.6,
+                }}>
+                  {challenge}
+                </code>
+                <textarea
+                  rows={3}
+                  value={manageSig}
+                  onChange={e => { setManageSig(e.target.value); setManageErr(''); setManageState('idle'); }}
+                  placeholder="Paste BIP-137 signature here..."
+                  style={{
+                    width: '100%', padding: '7px 10px', boxSizing: 'border-box', resize: 'vertical',
+                    background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    color: 'var(--text)', fontFamily: "'Courier New', monospace", fontSize: 11,
+                    outline: 'none',
+                  }}
+                />
+              </div>
+              {manageErr && (
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--red)', marginBottom: 8 }}>
+                  {manageErr}
+                </div>
+              )}
+              {manageState === 'ok' ? (
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--green)' }}>
+                  ✓ LISTING UPDATED — refresh /card/{sub.tokenName} to confirm
+                </div>
+              ) : (
+                <button
+                  className={styles.lookupBtn}
+                  onClick={handleManageSubmit}
+                  disabled={manageState === 'loading'}
+                  style={{ fontSize: 11, padding: '6px 14px' }}
+                >
+                  {manageState === 'loading' ? 'saving...' : 'save changes →'}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -232,7 +363,7 @@ export default function StatusPage() {
                   </div>
                   <div className={styles.cardList}>
                     {data.submissions.map(sub => (
-                      <SubmissionCard key={sub.tokenName} sub={sub} />
+                      <SubmissionCard key={sub.tokenName} sub={sub} artistAddress={data.address} />
                     ))}
                   </div>
                 </>

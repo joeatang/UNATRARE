@@ -136,8 +136,9 @@ export default function ApplyPage() {
                 DMT-NAT holders found Bitcoin through TAP inscription. Different door, same table.
                 They believe in supply-capped, on-chain art — they just couldn&apos;t reach CP-native work
                 without a bridge. UNATRARE is the bridge.
-                Every certified piece enters the drops rotation: UNATPEPE holders get first allocation,
-                then public. Your CP token. Your ask. 100% to you.
+                UNATPEPE holders are the founding community here. When you submit a card, you can optionally
+                offer them a free allocation — it&apos;s your choice, not a condition of certification.
+                Your CP token. Your ask. 100% to you.
               </p>
             </div>
           </div>

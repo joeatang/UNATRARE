@@ -367,6 +367,11 @@
   position: relative;
 }
 
+/* Green border applied to certified cards instead of the stamp overlay */
+.cardArtCertified {
+  box-shadow: 0 0 0 2px var(--green), 0 0 18px rgba(0, 255, 135, 0.15);
+}
+
 .councilStamp {
   position: absolute;
   bottom: 10px;

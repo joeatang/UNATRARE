@@ -24,6 +24,17 @@ function getToken(tokenname) {
   }
 }
 
+function getDrop(tokenName) {
+  try {
+    const db = getDb();
+    return db.prepare(
+      'SELECT id, supply_total, supply_remaining, status FROM art_drops WHERE token_name = ? LIMIT 1'
+    ).get(tokenName);
+  } catch {
+    return null;
+  }
+}
+
 export async function generateMetadata({ params }) {
   const { tokenname } = await params;
   const token = getToken(tokenname);
@@ -110,6 +121,8 @@ export default async function CardPage({ params }) {
     );
   }
 
+  const drop = getDrop(token.token_name);
+
   const xcpUrl   = `https://tokenscan.io/asset/${token.token_name}`;
   const ordUrl   = token.ord_inscription
     ? `https://ordinals.com/inscription/${token.ord_inscription}`
@@ -167,7 +180,7 @@ export default async function CardPage({ params }) {
                 <span className={styles.cardHeaderDot}>·</span>
                 <span className={styles.cardHeaderText}>#{String(token.card_number).padStart(3,'0')}</span>
               </div>
-              <div className={`${styles.cardArt} ${styles.cardArtWrap}`}>
+              <div className={`${styles.cardArt} ${styles.cardArtWrap}${token.council_certified === 1 ? ' ' + styles.cardArtCertified : ''}`}>
                 {token.revealed_at && artDisplayUrl ? (
                   <img
                     src={artDisplayUrl}
@@ -187,12 +200,7 @@ export default async function CardPage({ params }) {
                 ) : (
                   <div className={styles.artPlaceholder} />
                 )}
-                {token.council_certified === 1 && (
-                  <div className={styles.councilStamp} title="Certified by the UNATRARE Pepe Council">
-                    <span className={styles.councilStampFrog}>🐸</span>
-                    <span className={styles.councilStampText}>PEPE{'\n'}COUNCIL</span>
-                  </div>
-                )}
+                {/* council_certified green border handled via .cardArtCertified CSS class */}
               </div>
               <div className={styles.cardFooter}>
                 <div className={styles.cardTitle}>{token.display_title || token.token_name}</div>
@@ -230,6 +238,43 @@ export default async function CardPage({ params }) {
               <div className={styles.councilBadge}>
                 <span className={styles.councilBadgeFrog}>🐸</span>
                 <span className={styles.councilBadgeText}>Certified by the Pepe Council</span>
+              </div>
+            )}
+
+            {/* ── UNATPEPE drop section ── */}
+            {drop && (
+              <div style={{
+                margin: '0 0 20px',
+                padding: '12px 14px',
+                border: '1px solid var(--amber)',
+                background: 'rgba(255,200,0,0.03)',
+              }}>
+                <div style={{
+                  fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px',
+                  color: 'var(--amber)', marginBottom: 8,
+                }}>
+                  ★ UNATPEPE HOLDER DROP
+                </div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text)', lineHeight: 1.6 }}>
+                  {drop.status === 'active' ? (
+                    <>UNATPEPE holders can claim a free copy of this card.
+                    {' '}<strong>{drop.supply_remaining}</strong> / {drop.supply_total} remaining.</>
+                  ) : drop.status === 'complete' ? (
+                    <>Drop complete. All {drop.supply_total} allocations have been claimed.</>
+                  ) : (
+                    <>Drop announced — claiming opens soon. {drop.supply_total} copies reserved for UNATPEPE holders.</>
+                  )}
+                </div>
+                {drop.status === 'active' && (
+                  <div style={{ marginTop: 10 }}>
+                    <Link href={`/drops/${token.token_name}`} style={{
+                      fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px',
+                      color: 'var(--amber)', textDecoration: 'none', borderBottom: '1px solid var(--amber)',
+                    }}>
+                      CLAIM YOUR COPY →
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
 
@@ -316,6 +361,20 @@ export default async function CardPage({ params }) {
                   <span className={styles.metaVal} style={{color:'var(--orange)',fontFamily:"'VT323',monospace",fontSize:'18px',letterSpacing:'0.08em'}}>
                     COUNTERPARTY 2.0
                   </span>
+                </div>
+              )}
+              {token.dispenser_address && (
+                <div className={styles.metaRow}>
+                  <span className={styles.metaKey}>Buy / Trade</span>
+                  <a
+                    href={`https://xchain.io/dispensers/${token.dispenser_address}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className={styles.metaVal}
+                    style={{ color: 'var(--green)', textDecoration: 'none' }}
+                    title={token.dispenser_address}
+                  >
+                    dispenser ↗
+                  </a>
                 </div>
               )}
             </div>

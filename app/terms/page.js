@@ -45,85 +45,54 @@ export default function TermsPage() {
           <h2 className={styles.sectionTitle}>MINIMUM SUPPLY</h2>
           <div className={styles.prose}>
             <p>
-              UNATPEPE currently has <strong>420 registered holders</strong>.
-              Every holder gets exactly 1 copy of every certified card — so the
-              minimum supply must at least equal that number.
-            </p>
-          </div>
-          <div className={styles.formulaBox}>
-            <div className={styles.formulaLabel}>minimum supply rule</div>
-            <div className={styles.formula}>
-              min = registered UNATPEPE holder count
-            </div>
-            <div className={styles.formulaNote}>
-              At 420 holders → minimum supply = 420
-            </div>
-          </div>
-          <div className={styles.prose}>
-            <p>
-              The actual minimum updates as the holder count grows.
-              When you verify your token, UNATRARE checks the live count
-              and shows you the floor before you submit.
+              There is no platform-enforced minimum supply. You choose your supply — any number you&apos;d issue
+              on Counterparty is valid here.
             </p>
             <p>
-              You may choose a higher supply. You may not choose lower.
+              If you opt to offer a UNATPEPE holder drop during submission, we recommend issuing at least enough
+              for your intended allocation. UNATPEPE total supply is fixed at 420.
             </p>
           </div>
         </section>
 
         {/* ── Path A ── */}
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>PATH A — SUPPLY SPLIT (DEFAULT)</h2>
+          <h2 className={styles.sectionTitle}>PATH A — UNATPEPE HOLDER DROP (OPTIONAL)</h2>
           <div className={styles.prose}>
             <p>
-              No upfront cost. In exchange, your certified token&apos;s supply is
-              divided as follows:
+              You can choose to offer UNATPEPE holders a free allocation of your token during submission.
+              This is entirely optional and has no effect on your certification outcome.
+            </p>
+            <p>
+              Choose how many copies to offer (1–9 = private raffle; 10–419 = partial drop; 420+ = full drop).
+              Only verified holders who claim during the drop window receive a copy.
+              Unclaimed copies remain with you.
             </p>
           </div>
 
           <div className={styles.splitTable}>
             <div className={styles.splitRow}>
-              <div className={styles.splitPct} style={{color:'var(--amber-hot)'}}>84%</div>
-              <div className={styles.splitWho}>UNATPEPE Holders</div>
-              <div className={styles.splitNote}>1 token per holder address, guaranteed</div>
+              <div className={styles.splitWho}>Full drop (420+)</div>
+              <div className={styles.splitNote}>Enough for every active UNATPEPE holder. Featured announcement on the platform.</div>
             </div>
             <div className={styles.splitRow}>
-              <div className={styles.splitPct} style={{color:'var(--green-hot)'}}>2%</div>
-              <div className={styles.splitWho}>You (Artist)</div>
-              <div className={styles.splitNote}>your allocation, yours to sell or hold</div>
+              <div className={styles.splitWho}>Partial drop (10–419)</div>
+              <div className={styles.splitNote}>Distributed by raffle among verified claimants up to your chosen quantity.</div>
             </div>
             <div className={styles.splitRow}>
-              <div className={styles.splitPct} style={{color:'var(--amber)'}}>2%</div>
-              <div className={styles.splitWho}>UNATRARE Treasury</div>
-              <div className={styles.splitNote}>funds operations + future distributions</div>
+              <div className={styles.splitWho}>Private raffle (1–9)</div>
+              <div className={styles.splitNote}>One or a few UNATPEPE holders selected randomly. No public announcement.</div>
             </div>
             <div className={styles.splitRow}>
-              <div className={styles.splitPct} style={{color:'var(--text-dim)'}}>11%</div>
-              <div className={styles.splitWho}>Claim Window Reserve</div>
-              <div className={styles.splitNote}>held in reserve until claim window closes</div>
-            </div>
-          </div>
-
-          <div className={styles.exampleBox}>
-            <div className={styles.exampleLabel}>example at 500 supply</div>
-            <div className={styles.exampleGrid}>
-              <span>420 to holders</span>
-              <span>~10 to you</span>
-              <span>~10 to treasury</span>
-              <span>~60 in reserve</span>
+              <div className={styles.splitWho}>Opt out (0)</div>
+              <div className={styles.splitNote}>No allocation offered. Standard listing with no drop.</div>
             </div>
           </div>
 
           <div className={styles.prose}>
             <p>
-              Holder distribution happens after certification. UNATRARE opens a
-              <strong> 30-day claim window</strong> during which registered holders
-              can collect their token.
-            </p>
-            <p>
-              After the window closes: unclaimed tokens from the 11% reserve are announced
-              publicly, then split — 50% to treasury, 50% burned to an unspendable address.
-              The burn is announced when the window opens, not before.
+              Drops open for a <strong>30-day claim window</strong> after certification.
+              After the window closes, unclaimed copies are returned to you.
             </p>
           </div>
         </section>

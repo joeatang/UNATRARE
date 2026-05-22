@@ -17,6 +17,7 @@
 
 import { NextResponse } from 'next/server';
 import { getDb } from '../../../../lib/db';
+import { refreshUnatpepeNodeTier } from '../../../../lib/tapApi.js';
 
 const HOUR_MS                    = 3_600_000;
 const SEVEN_DAYS_MS              = 7 * 24 * HOUR_MS;
@@ -53,7 +54,10 @@ export async function POST(req) {
     ).run(now, pubkey);
 
     const updatedNode = db.prepare('SELECT * FROM nodes WHERE pubkey = ?').get(pubkey);
-
+    // ── UNATPEPE tier re-verification (every 168 beats ≈ weekly) ────────────────
+    if (updatedNode.tap_address && updatedNode.total_heartbeats % 168 === 0) {
+      refreshUnatpepeNodeTier(db, pubkey, updatedNode.tap_address).catch(() => {});
+    }
     // ── Genesis confirmation check ───────────────────────────────────────
     // Skip unless this node has a provisional genesis slot
     if (!updatedNode.genesis_provisional || updatedNode.is_genesis) {

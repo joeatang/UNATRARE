@@ -16,7 +16,8 @@ export async function GET(request, { params }) {
       SELECT
         token_name, status, submitted_at, judged_at,
         judge_score, judge_notes, rejection_reason,
-        art_url, artist_handle, description, series, card_number, supply
+        art_url, artist_handle, description, series, card_number, supply,
+        unatpepe_alloc_qty, dispenser_address
       FROM tokens
       WHERE artist_address = ?
       ORDER BY submitted_at DESC
@@ -42,6 +43,8 @@ export async function GET(request, { params }) {
         cardNumber:       r.card_number,
         supply:           r.supply,
         payUrl:           r.status === 'approved' ? `https://unatrare.wtf/pay/${r.token_name}` : null,
+        unatpepeAllocQty: r.unatpepe_alloc_qty || 0,
+        dispenserAddress: r.dispenser_address || '',
       };
     });
 

@@ -22,7 +22,7 @@ export async function GET() {
       SELECT
         pubkey, btc_address, xcp_address, tap_address,
         registered_at, last_heartbeat, total_heartbeats,
-        is_genesis, genesis_provisional
+        is_genesis, genesis_provisional, is_unatpepe_node
       FROM nodes
       ORDER BY registered_at ASC
     `).all();

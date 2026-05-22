@@ -44,6 +44,7 @@ export async function POST(request) {
     artUrl,
     artHash,
     artMime,
+    dispenserAddress,
   } = body || {};
 
   // ── Required auth fields ─────────────────────────────────────────────
@@ -152,6 +153,20 @@ export async function POST(request) {
     } else {
       return NextResponse.json(
         { ok: false, error: 'Video URL must be empty or start with https://' },
+        { status: 422 }
+      );
+    }
+  }
+
+  if (typeof dispenserAddress === 'string') {
+    const d = dispenserAddress.trim();
+    if (d === '') {
+      updates.dispenser_address = '';
+    } else if (/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(d)) {
+      updates.dispenser_address = d;
+    } else {
+      return NextResponse.json(
+        { ok: false, error: 'Invalid dispenser address — must be a legacy Bitcoin P2PKH address (starts with 1)' },
         { status: 422 }
       );
     }

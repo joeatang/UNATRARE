@@ -74,6 +74,14 @@ export default function NodeGuidePage() {
           an on-chain record that cannot be faked or granted later. Genesis nodes receive 2× reward
           weight for their first year.
         </p>
+        <p className={styles.body}>
+          <strong className={styles.amber}>UNATPEPE holders</strong> who register a node with their TAP wallet address
+          receive permanent <strong className={styles.amber}>1.5× reward weight</strong>.
+          This stacks with GENESIS status (a confirmed Genesis + UNATPEPE node earns 2× + 1.5×).
+          To enable it, set your <code style={{fontFamily:"'Courier New',monospace",fontSize:'0.9em'}}>TAP_ADDRESS</code> in{' '}
+          <code style={{fontFamily:"'Courier New',monospace",fontSize:'0.9em'}}>.env</code> before registering.
+          UNATPEPE balance is verified automatically via the TAP protocol API.
+        </p>
       </Section>
 
       {/* ── Is this safe ── */}
