@@ -60,7 +60,7 @@ export default function LandingPage() {
 
           <h1 className={styles.heroTitle}>
             Rare Pepe Culture on Bitcoin<br />
-            <span>inspires a new Directory on Bitcoin.</span><br />
+            <span>Inspires A New Directory On Bitcoin.</span><br />
             <span className={styles.heroTitleAccent}>UNATRARE DIRECTORY!</span>
           </h1>
 
