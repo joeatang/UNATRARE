@@ -1,0 +1,291 @@
+/* PathCards.module.css — "Choose Your Path" interactive cards on the landing page */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* ─── Primary action row — 2 big cards (Browse + Submit) ─── */
+.primaryRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.primaryCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 32px 28px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s;
+  cursor: pointer;
+}
+
+.primaryCard:hover {
+  border-color: var(--green);
+  background: #111;
+}
+
+/* Submit card uses amber accent */
+.primaryCardSubmit:hover {
+  border-color: var(--amber-hot);
+}
+
+.pcSigil {
+  font-family: var(--font-display);
+  font-size: 40px;
+  color: var(--green);
+  line-height: 1;
+}
+
+.primaryCardSubmit .pcSigil {
+  color: var(--amber);
+}
+
+.pcTitle {
+  font-family: var(--font-card);
+  font-size: 20px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.pcDesc {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  flex: 1;
+}
+
+.pcCta {
+  font-family: var(--font-card);
+  font-size: 14px;
+  letter-spacing: 3px;
+  color: var(--green);
+  margin-top: 4px;
+}
+
+.primaryCardSubmit .pcCta {
+  color: var(--amber);
+}
+
+/* ─── Context path row — 3 audience cards ──────────────── */
+.pathRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.pathCard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-dim);
+  background: var(--surface);
+  text-decoration: none;
+  transition: border-color 0.2s;
+  overflow: hidden;
+}
+
+.pathCard:hover {
+  border-color: var(--border);
+}
+
+/* Node card is a full Link — different hover */
+.pathCardNode {
+  padding: 24px 20px;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.pathCardNode:hover {
+  border-color: var(--amber);
+  background: #110d00;
+}
+
+/* Expandable card header — acts as toggle button */
+.pathHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 24px 20px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.15s;
+}
+
+.pathHeader:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.pathHeaderInner {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.pathSigil {
+  font-family: var(--font-display);
+  font-size: 32px;
+  color: var(--text-dim);
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.pathCardNode .pathSigil {
+  color: var(--amber);
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.pathTitle {
+  font-family: var(--font-card);
+  font-size: 15px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.pathCardNode .pathTitle {
+  color: var(--amber);
+}
+
+.pathDesc {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.pathNodeCta {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--amber);
+  margin-top: 14px;
+}
+
+.pathToggle {
+  font-family: var(--font-display);
+  font-size: 32px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 2px;
+  transition: color 0.15s;
+}
+
+.pathHeader:hover .pathToggle {
+  color: var(--green);
+}
+
+/* ─── Expanded body ──────────────────────────────────────── */
+.pathBody {
+  padding: 0 20px 24px;
+  border-top: 1px solid var(--border-dim);
+  display: flex;
+  flex-direction: column;
+  animation: slideDown 0.18s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.pathBody p {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.75;
+  margin-top: 18px;
+}
+
+/* Callout note — amber left-border, card font */
+.pathBodyNote {
+  font-family: var(--font-card) !important;
+  font-size: 13px !important;
+  letter-spacing: 1px;
+  color: rgba(201, 168, 76, 0.85) !important;
+  border-left: 2px solid var(--amber);
+  padding-left: 12px;
+  margin-top: 16px !important;
+}
+
+/* Next-step link list */
+.pathBodyLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-dim);
+}
+
+.pathBodyLinks a {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--green);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.pathBodyLinks a:hover {
+  color: var(--green-hot);
+}
+
+/* ─── Responsive ─────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .primaryRow {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .pathRow {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .primaryCard {
+    padding: 24px 20px;
+    gap: 12px;
+  }
+
+  .pcTitle { font-size: 18px; }
+  .pcSigil { font-size: 32px; }
+}
+
+@media (max-width: 600px) {
+  .primaryRow {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .primaryCard {
+    padding: 20px 16px;
+    gap: 10px;
+  }
+
+  .pcTitle { font-size: 17px; letter-spacing: 2px; }
+  .pcSigil { font-size: 28px; }
+  .pcDesc  { font-size: 14px; }
+
+  .pathHeader { padding: 20px 16px; }
+  .pathBody   { padding: 0 16px 20px; }
+  .pathBodyLinks { gap: 10px; }
+}
