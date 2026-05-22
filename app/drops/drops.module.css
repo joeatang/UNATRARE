@@ -570,7 +570,7 @@
 
 .bonusBadge {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: var(--amber-hot);
   border: 1px solid var(--amber-hot);

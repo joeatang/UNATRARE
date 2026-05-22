@@ -223,7 +223,7 @@
 }
 .drawerSectionDivider span {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 3px;
   color: var(--text-dim);
   text-transform: uppercase;

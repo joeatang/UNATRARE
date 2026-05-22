@@ -393,7 +393,7 @@
 
 .cardOverlayArtist {
   font-family: var(--font-card);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 1px;
   color: var(--text-dim);
   max-width: 140px;
@@ -404,7 +404,7 @@
 
 .cardOverlayCip {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: var(--text-dim);
   text-decoration: none;
@@ -438,7 +438,7 @@
 
 .cardArtist {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 1px;
   color: var(--text-dim);
   white-space: nowrap;

@@ -253,7 +253,7 @@
   }
 
   .archiveStamp {
-    font-size: 10px;
+    font-size: 12px;
     letter-spacing: 2px;
   }
 
@@ -300,7 +300,7 @@
 /* ── Archive entry stamp ── */
 .archiveStamp {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 4px;
   color: var(--amber);
   border: 1px solid var(--amber);
@@ -344,7 +344,7 @@
 
 .seriesLabel {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -352,7 +352,7 @@
 
 .seriesBadge {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: var(--amber);
   border: 1px solid var(--amber);
@@ -426,7 +426,7 @@
 
 .extLinkType {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 3px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -530,7 +530,7 @@
 
 .dropStatus {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 2px;
   padding: 2px 8px;
   border: 1px solid var(--border);
@@ -582,7 +582,7 @@
 
 .claimBtn {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--amber);
   border: 1px solid var(--amber);

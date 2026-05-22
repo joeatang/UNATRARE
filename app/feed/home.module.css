@@ -896,7 +896,7 @@
 .showcaseName {
   padding: 0 8px 6px;
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   white-space: nowrap;
   overflow: hidden;

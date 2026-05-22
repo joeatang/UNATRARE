@@ -81,7 +81,7 @@
 
 .entryNum {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--amber);
   text-transform: uppercase;
@@ -89,7 +89,7 @@
 
 .entryFiled {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: var(--text-dim);
 }
@@ -158,7 +158,7 @@
 
 .entryBioEmpty {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 2px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -192,7 +192,7 @@
 
 .seriesBadge {
   font-family: var(--font-card);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 1px;
   color: var(--amber);
   border: 1px solid var(--amber);
