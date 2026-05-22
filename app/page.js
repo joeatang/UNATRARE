@@ -59,8 +59,8 @@ export default function LandingPage() {
           <div className={styles.eyebrow}>· bitcoin · counterparty · dmt-nat ·</div>
 
           <h1 className={styles.heroTitle}>
-            Pepe culture never left Bitcoin.<br />
-            <span>UNATRARE is the new directory.</span>
+            Rare Pepe Culture on Bitcoin<br />
+            <span>inspires a new Directory — UNATRARE.</span>
           </h1>
 
           <p className={styles.heroSub}>
