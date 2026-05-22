@@ -59,6 +59,353 @@ function JudgeBreakdown({ breakdown }) {
   );
 }
 
+function formatCountdown(unixSec) {
+  if (!unixSec) return null;
+  const diff = unixSec - Math.floor(Date.now() / 1000);
+  if (diff <= 0) return 'closed';
+  const d = Math.floor(diff / 86400);
+  const h = Math.floor((diff % 86400) / 3600);
+  if (d > 0) return `${d}d ${h}h remaining`;
+  const m = Math.floor((diff % 3600) / 60);
+  return `${h}h ${m}m remaining`;
+}
+
+function formatDate(unixSec) {
+  if (!unixSec) return '—';
+  return new Date(unixSec * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function DropSection({ drop, tokenName, artistAddress }) {
+  const [open, setOpen] = useState(false);
+  const [sig, setSig] = useState('');
+  const [dlState, setDlState] = useState('idle');   // idle | loading | ok | error
+  const [distState, setDistState] = useState('idle');
+  const [err, setErr] = useState('');
+
+  const challenge = `UNATRARE:DROP:${tokenName}`;
+  const canAct = ['active', 'closed'].includes(drop.dropStatus);
+  const isDist = drop.dropStatus === 'distributed';
+
+  const statusColor = {
+    upcoming:    'var(--text-dim)',
+    active:      'var(--green)',
+    closed:      'var(--amber)',
+    distributed: 'var(--green)',
+  }[drop.dropStatus] || 'var(--text-dim)';
+
+  async function handleDownload() {
+    if (!sig.trim()) { setErr('Paste your signature first'); return; }
+    setDlState('loading'); setErr('');
+    try {
+      const res = await fetch('/api/drops/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tokenName, address: artistAddress, signature: sig.trim() }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        setErr(j.error || 'Download failed'); setDlState('error'); return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `drop-${tokenName}.csv`;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+      setDlState('ok');
+    } catch { setErr('Network error'); setDlState('error'); }
+  }
+
+  async function handleMarkDistributed() {
+    if (!sig.trim()) { setErr('Paste your signature first'); return; }
+    setDistState('loading'); setErr('');
+    try {
+      const res = await fetch('/api/drops/mark-distributed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tokenName, address: artistAddress, signature: sig.trim() }),
+      });
+      const j = await res.json();
+      if (j.ok) { setDistState('ok'); }
+      else { setErr(j.error || 'Failed'); setDistState('error'); }
+    } catch { setErr('Network error'); setDistState('error'); }
+  }
+
+  return (
+    <div style={{ borderTop: '1px solid var(--border)', marginTop: 12, paddingTop: 12 }}>
+      <button className={styles.expandBtn} onClick={() => setOpen(o => !o)}>
+        {open ? '▲ hide drop details' : '▼ unatpepe holder drop'}
+      </button>
+      {open && (
+        <div style={{ marginTop: 12 }}>
+          {/* Status row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: statusColor }}>
+              {drop.dropStatus.toUpperCase()}
+            </span>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)' }}>
+              {drop.totalClaims} / {drop.supplyTotal} claimed
+            </span>
+            {drop.dropStatus === 'active' && drop.windowClosesAt && (
+              <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)' }}>
+                · {formatCountdown(drop.windowClosesAt)}
+              </span>
+            )}
+            {drop.dropStatus === 'closed' && drop.windowClosesAt && (
+              <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)' }}>
+                · closed {formatDate(drop.windowClosesAt)}
+              </span>
+            )}
+          </div>
+
+          {/* Active: info only */}
+          {drop.dropStatus === 'active' && (
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6 }}>
+              Claim window is open. Holders are registering their addresses. You&apos;ll be able to download the full list once the window closes.
+            </div>
+          )}
+
+          {/* Distributed: confirmed */}
+          {isDist && (
+            <div style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--green)' }}>
+              ✓ DISTRIBUTION CONFIRMED
+            </div>
+          )}
+
+          {/* Closed: download + mark distributed */}
+          {canAct && !isDist && (
+            <>
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 12 }}>
+                The claim window is closed. Download the verified list of recipient CP addresses, send your token from your Counterparty wallet, then confirm distribution below.
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 4 }}>
+                  SIGN TO AUTHENTICATE
+                </div>
+                <code style={{
+                  display: 'block', padding: '6px 10px', marginBottom: 8,
+                  background: 'var(--bg)', border: '1px solid var(--border)',
+                  fontFamily: "'Courier New', monospace", fontSize: 11, color: 'var(--amber)',
+                  wordBreak: 'break-all', lineHeight: 1.6,
+                }}>
+                  {challenge}
+                </code>
+                <textarea
+                  rows={3}
+                  value={sig}
+                  onChange={e => { setSig(e.target.value); setErr(''); setDlState('idle'); setDistState('idle'); }}
+                  placeholder="Paste BIP-137 signature here..."
+                  style={{
+                    width: '100%', padding: '7px 10px', boxSizing: 'border-box', resize: 'vertical',
+                    background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    color: 'var(--text)', fontFamily: "'Courier New', monospace", fontSize: 11,
+                    outline: 'none',
+                  }}
+                />
+              </div>
+              {err && (
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--red)', marginBottom: 8 }}>
+                  {err}
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {dlState === 'ok' ? (
+                  <span style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--green)' }}>
+                    ✓ CSV DOWNLOADED
+                  </span>
+                ) : (
+                  <button
+                    className={styles.lookupBtn}
+                    onClick={handleDownload}
+                    disabled={dlState === 'loading'}
+                    style={{ fontSize: 11, padding: '6px 14px' }}
+                  >
+                    {dlState === 'loading' ? 'downloading...' : 'download claim list (CSV) →'}
+                  </button>
+                )}
+                {distState === 'ok' ? (
+                  <span style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--green)' }}>
+                    ✓ DISTRIBUTION CONFIRMED
+                  </span>
+                ) : (
+                  <button
+                    className={styles.lookupBtn}
+                    onClick={handleMarkDistributed}
+                    disabled={distState === 'loading'}
+                    style={{ fontSize: 11, padding: '6px 14px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-dim)' }}
+                  >
+                    {distState === 'loading' ? 'confirming...' : 'confirm distribution →'}
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProfileSection({ address, initialProfile }) {
+  const [open, setOpen] = useState(false);
+  const [alias, setAlias] = useState(initialProfile?.alias || '');
+  const [bio, setBio] = useState(initialProfile?.bio || '');
+  const [website, setWebsite] = useState(initialProfile?.website || '');
+  const [twitter, setTwitter] = useState(initialProfile?.twitter_handle || '');
+  const [sig, setSig] = useState('');
+  const [state, setState] = useState('idle');
+  const [errMsg, setErrMsg] = useState('');
+
+  const challenge = `UNATRARE:PROFILE:${address}`;
+  const hasProfile = !!(initialProfile?.alias || initialProfile?.bio);
+
+  async function handleSave() {
+    if (!sig.trim()) { setErrMsg('Paste your signature first'); return; }
+    setState('loading'); setErrMsg('');
+    try {
+      const res = await fetch('/api/update-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          address,
+          signature:    sig.trim(),
+          alias:        alias.trim(),
+          bio:          bio.trim(),
+          website:      website.trim(),
+          twitterHandle: twitter.trim(),
+        }),
+      });
+      const j = await res.json();
+      if (j.ok) { setState('ok'); }
+      else { setErrMsg(j.error || 'Save failed'); setState('error'); }
+    } catch { setErrMsg('Network error'); setState('error'); }
+  }
+
+  const inputStyle = {
+    width: '100%', padding: '7px 10px', boxSizing: 'border-box',
+    background: 'var(--bg-card)', border: '1px solid var(--border)',
+    color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 12,
+    outline: 'none', marginBottom: 10,
+  };
+  const labelStyle = {
+    display: 'block', fontFamily: 'var(--font-card)', fontSize: '8px',
+    letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 4,
+  };
+
+  return (
+    <div style={{ border: '1px solid var(--border)', marginTop: 24 }}>
+      <div
+        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', cursor: 'pointer', userSelect: 'none' }}
+        onClick={() => setOpen(o => !o)}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontFamily: 'var(--font-card)', fontSize: '11px', letterSpacing: '0.1em' }}>
+            YOUR ARTIST PROFILE
+          </span>
+          {hasProfile && (
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--green)' }}>· set</span>
+          )}
+        </div>
+        <span style={{ fontSize: 12, color: 'var(--text-dim)' }}>{open ? '▲' : '▼'}</span>
+      </div>
+      {open && (
+        <div style={{ padding: '0 14px 14px' }}>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 14 }}>
+            This appears on your public artist page at{' '}
+            <a href={`/artist/${address}`} style={{ color: 'var(--amber)', textDecoration: 'none' }}>
+              /artist/{address.slice(0, 10)}…
+            </a>.
+          </div>
+
+          <label style={labelStyle}>DISPLAY NAME</label>
+          <input
+            type="text"
+            value={alias}
+            maxLength={60}
+            onChange={e => { setAlias(e.target.value); setState('idle'); setErrMsg(''); }}
+            placeholder="e.g. JNA, SOFTPWAR, anonymous"
+            style={inputStyle}
+          />
+
+          <label style={labelStyle}>BIO <span style={{ color: 'var(--text-dim)', textTransform: 'none', letterSpacing: 0 }}>({bio.length}/500)</span></label>
+          <textarea
+            rows={4}
+            value={bio}
+            maxLength={500}
+            onChange={e => { setBio(e.target.value); setState('idle'); setErrMsg(''); }}
+            placeholder="Tell the council who you are..."
+            style={{ ...inputStyle, resize: 'vertical', fontFamily: 'var(--font-body)' }}
+          />
+
+          <label style={labelStyle}>WEBSITE</label>
+          <input
+            type="url"
+            value={website}
+            onChange={e => { setWebsite(e.target.value); setState('idle'); setErrMsg(''); }}
+            placeholder="https://..."
+            style={inputStyle}
+          />
+
+          <label style={labelStyle}>X / TWITTER HANDLE</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)' }}>@</span>
+            <input
+              type="text"
+              value={twitter}
+              maxLength={50}
+              onChange={e => { setTwitter(e.target.value.replace(/^@/, '')); setState('idle'); setErrMsg(''); }}
+              placeholder="handle (no @)"
+              style={{ ...inputStyle, marginBottom: 0, flex: 1 }}
+            />
+          </div>
+
+          <label style={labelStyle}>SIGN TO VERIFY</label>
+          <code style={{
+            display: 'block', padding: '6px 10px', marginBottom: 8,
+            background: 'var(--bg)', border: '1px solid var(--border)',
+            fontFamily: "'Courier New', monospace", fontSize: 11, color: 'var(--amber)',
+            wordBreak: 'break-all', lineHeight: 1.6,
+          }}>
+            {challenge}
+          </code>
+          <textarea
+            rows={3}
+            value={sig}
+            onChange={e => { setSig(e.target.value); setState('idle'); setErrMsg(''); }}
+            placeholder="Paste BIP-137 signature here..."
+            style={{
+              width: '100%', padding: '7px 10px', boxSizing: 'border-box', resize: 'vertical',
+              background: 'var(--bg-card)', border: '1px solid var(--border)',
+              color: 'var(--text)', fontFamily: "'Courier New', monospace", fontSize: 11,
+              outline: 'none', marginBottom: 10,
+            }}
+          />
+
+          {errMsg && (
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--red)', marginBottom: 8 }}>
+              {errMsg}
+            </div>
+          )}
+          {state === 'ok' ? (
+            <div style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--green)' }}>
+              ✓ PROFILE SAVED — view at /artist/{address.slice(0, 10)}…
+            </div>
+          ) : (
+            <button
+              className={styles.lookupBtn}
+              onClick={handleSave}
+              disabled={state === 'loading'}
+              style={{ fontSize: 11, padding: '6px 14px' }}
+            >
+              {state === 'loading' ? 'saving...' : 'save profile →'}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function SubmissionCard({ sub, artistAddress }) {
   const [expanded, setExpanded] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
@@ -260,6 +607,11 @@ function SubmissionCard({ sub, artistAddress }) {
           )}
         </div>
       )}
+
+      {/* Drop distribution — approved tokens with an active/closed/distributed drop */}
+      {sub.status === 'approved' && sub.drop && (
+        <DropSection drop={sub.drop} tokenName={sub.tokenName} artistAddress={artistAddress} />
+      )}
     </div>
   );
 }
@@ -366,6 +718,7 @@ export default function StatusPage() {
                       <SubmissionCard key={sub.tokenName} sub={sub} artistAddress={data.address} />
                     ))}
                   </div>
+                  <ProfileSection address={data.address} initialProfile={data.profile} />
                 </>
               )}
             </div>
