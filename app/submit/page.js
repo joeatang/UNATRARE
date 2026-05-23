@@ -93,10 +93,10 @@ function Step0({ onNext, isVault }) {
       <h2 className={styles.stepTitle}>GET Y<span>O</span>UR URL</h2>
       {isVault ? (
         <p className={styles.stepDesc}>
-          Your art is already stored in the Pepe Vault.<br /><br />
+          Your art is already sealed in the Pepe Crypt.<br /><br />
           To appear in wallets when your token is certified, your Counterparty token&apos;s
           description field must contain your <strong>UNATRARE directory URL</strong> —
-          not the Vault JSON URL.<br /><br />
+          not the Crypt JSON URL.<br /><br />
           Enter your token name below to generate it.
           If you&apos;ve already created the token, just enter the name and click Continue.
         </p>
@@ -150,12 +150,12 @@ function Step0({ onNext, isVault }) {
           <div className={styles.warningBox}>
             {isVault ? (
               <>
-                <div className={styles.warningTitle}>◈ vault submission checklist</div>
+                <div className={styles.warningTitle}>◈ crypt submission checklist</div>
                 <div className={styles.warningText}>
                   1. Copy the URL above.<br />
                   2. If your token <strong>already exists</strong>: update its Description field with this URL in Freewallet/Rarepepewallet.<br />
                   3. If your token <strong>doesn&apos;t exist yet</strong>: create it with <strong>name: {result.normalized}</strong>, paste this URL into Description, supply 16–20,016, non-divisible, locked, full supply intact in your wallet.<br />
-                  4. Click Continue — your vault art will be used automatically.
+                  4. Click Continue — your crypt art will be used automatically.
                 </div>
               </>
             ) : (
@@ -366,7 +366,7 @@ function Step2({ data, onNext, onBack }) {
         <div className={styles.stepEyebrow}>Step 3 of 7</div>
         <h2 className={styles.stepTitle}>UPL<span>O</span>AD ART</h2>
         <div style={{ border: '1px solid var(--green)', borderLeft: '3px solid var(--green)', padding: '14px 18px', marginBottom: 24, fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--green)', background: 'rgba(61,158,61,0.04)' }}>
-          ◈ ART LOADED FROM PEPE VAULT — no upload needed
+          ◈ ART LOADED FROM PEPE CRYPT — no upload needed
         </div>
         <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: 24 }}>
           <img src={artUrl} alt={data.tokenName} style={{ maxWidth: 180, maxHeight: 220, border: '1px solid var(--border)', objectFit: 'contain' }} />
@@ -374,7 +374,7 @@ function Step2({ data, onNext, onBack }) {
             <div>TOKEN: <span style={{ color: 'var(--text)' }}>{data.tokenName}</span></div>
             <div>FORMAT: <span style={{ color: 'var(--text)' }}>{data.vaultMime}</span></div>
             <div style={{ marginTop: 8, fontFamily: 'var(--font-body)', fontSize: '12px', letterSpacing: 0, lineHeight: 1.6 }}>
-              This art was already uploaded to the Pepe Vault.<br />
+              This art was already sealed in the Pepe Crypt.<br />
               It will be used for your directory submission.
             </div>
           </div>

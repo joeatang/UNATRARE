@@ -91,7 +91,7 @@ export default function VaultPage() {
       <Nav />
       <main className={styles.page}>
       <div className={styles.header}>
-        <h1 className={styles.title}>PEPE VAULT</h1>
+        <h1 className={styles.title}>PEPE CRYPT</h1>
         <p className={styles.subtitle}>
           Permanent P2P storage for Counterparty art tokens on Bitcoin.
           Upload your art — get a JSON URL for your token description.
@@ -111,18 +111,18 @@ export default function VaultPage() {
         </div>
       )}
 
-      {loading && <div className={styles.loader}>loading vault…</div>}
+      {loading && <div className={styles.loader}>loading crypt…</div>}
 
       {!loading && assets.length === 0 && (
         <div className={styles.empty}>
-          No art vaulted yet.{' '}
+          No art crypted yet.{' '}
           <Link href="/vault/upload" className={styles.emptyLink}>Be the first →</Link>
         </div>
       )}
 
       {!loading && assets.length > 0 && (
         <>
-          <div className={styles.meta}>{total} asset{total !== 1 ? 's' : ''} vaulted</div>
+          <div className={styles.meta}>{total} asset{total !== 1 ? 's' : ''} in the crypt</div>
           <div className={styles.grid}>
             {assets.map(a => <AssetCard key={a.art_hash} asset={a} />)}
           </div>
@@ -150,11 +150,11 @@ export default function VaultPage() {
         <ol className={styles.infoList}>
           <li>Upload your PNG, JPG, GIF, or WebP art.</li>
           <li>Your art is hashed (SHA-256) and stored permanently on the UNATRARE P2P network.</li>
-          <li><strong>Vault only:</strong> paste the JSON URL into your token description — wallets display your art immediately.</li>
+          <li><strong>Crypt only:</strong> paste the JSON URL into your token description — wallets display your art immediately.</li>
           <li><strong>UNATRARE certification:</strong> use <code style={{fontFamily:'var(--font-card)',fontSize:'10px'}}>unatrare.wtf/c/YOURTOKEN.json</code> in your description instead, then click &ldquo;submit to directory&rdquo; on your vault card to go through the AI judging process.</li>
         </ol>
         <p className={styles.infoNote}>
-          The vault JSON URL and the UNATRARE directory URL are different things — only the directory URL earns certification and UNATPEPE holder airdrops.{' '}
+          The Crypt JSON URL and the UNATRARE directory URL are different things — only the directory URL earns certification and UNATPEPE holder airdrops.{' '}
           <Link href="/nodes" className={styles.infoLink}>Run a node →</Link>
         </p>
       </div>

@@ -185,7 +185,7 @@ export default function LandingPage() {
 
           <div className={styles.numberStat}>
             <div className={styles.numberVal}>{stats.vault}</div>
-            <div className={styles.numberLabel}>vault<br />assets</div>
+            <div className={styles.numberLabel}>crypt<br />assets</div>
           </div>
         </div>
 
