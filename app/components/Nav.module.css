@@ -237,6 +237,11 @@
 .drawerSecondaryLink:hover { opacity: 1 !important; }
 
 /* Responsive */
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .nav-links { gap: 18px; }
+  .nav-links a { font-size: 13px; letter-spacing: 2px; }
+}
+
 @media (max-width: 1024px) {
   .nav { padding: env(safe-area-inset-top, 0px) 20px 0; height: calc(56px + env(safe-area-inset-top, 0px)); }
   .nav-links { display: none; }

@@ -23,6 +23,7 @@ export default function Nav() {
         {/* Desktop links */}
         <ul className={styles['nav-links']}>
           <li><Link href="/directory">Directory</Link></li>
+          <li><Link href="/vault">Crypt</Link></li>
           <li><Link href="/archive">Archive</Link></li>
           <li><Link href="/council">Council</Link></li>
           <li><Link href="/nodes">Nodes</Link></li>
