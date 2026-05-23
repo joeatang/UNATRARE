@@ -1056,35 +1056,50 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
                 REPLACE ART IMAGE
               </div>
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', marginBottom: 8, lineHeight: 1.5 }}>
-                  Upload a replacement image (PNG, JPG, GIF, WebP — max 3 MB). Leave blank to keep the current art.
-                </div>
-                {sub.artUrl && artUploadState !== 'ready' && (
-                  <div style={{ marginBottom: 8 }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={sub.artUrl} alt="current art" style={{ height: 64, width: 64, objectFit: 'cover', border: '1px solid var(--border)' }} />
-                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 4 }}>current</div>
+                {sub.status === 'approved' ? (
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                    {sub.artUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={sub.artUrl} alt="certified art" style={{ height: 64, width: 64, objectFit: 'cover', border: '1px solid var(--green)', flexShrink: 0 }} />
+                    )}
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6 }}>
+                      Art is locked after certification. The council judged this specific image — swapping it after approval would undermine the certification.<br />
+                      <span style={{ color: 'var(--text-dim)', fontStyle: 'italic' }}>Need a legitimate correction? Contact support.</span>
+                    </div>
                   </div>
-                )}
-                {artUploadState === 'ready' && artUpload && (
-                  <div style={{ marginBottom: 8 }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={artUpload.url} alt="new art" style={{ height: 64, width: 64, objectFit: 'cover', border: '1px solid var(--green)' }} />
-                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--green)', marginTop: 4 }}>✓ new art ready</div>
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg,image/gif,image/webp"
-                  onChange={handleArtFileChange}
-                  disabled={artUploadState === 'uploading'}
-                  style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)' }}
-                />
-                {artUploadState === 'uploading' && (
-                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--amber)', marginTop: 6 }}>uploading...</div>
-                )}
-                {artUploadErr && (
-                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--red)', marginTop: 6 }}>{artUploadErr}</div>
+                ) : (
+                  <>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', marginBottom: 8, lineHeight: 1.5 }}>
+                      Upload a replacement image (PNG, JPG, GIF, WebP — max 3 MB). Leave blank to keep the current art.
+                    </div>
+                    {sub.artUrl && artUploadState !== 'ready' && (
+                      <div style={{ marginBottom: 8 }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={sub.artUrl} alt="current art" style={{ height: 64, width: 64, objectFit: 'cover', border: '1px solid var(--border)' }} />
+                        <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 4 }}>current</div>
+                      </div>
+                    )}
+                    {artUploadState === 'ready' && artUpload && (
+                      <div style={{ marginBottom: 8 }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={artUpload.url} alt="new art" style={{ height: 64, width: 64, objectFit: 'cover', border: '1px solid var(--green)' }} />
+                        <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--green)', marginTop: 4 }}>✓ new art ready</div>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/gif,image/webp"
+                      onChange={handleArtFileChange}
+                      disabled={artUploadState === 'uploading'}
+                      style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)' }}
+                    />
+                    {artUploadState === 'uploading' && (
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--amber)', marginTop: 6 }}>uploading...</div>
+                    )}
+                    {artUploadErr && (
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--red)', marginTop: 6 }}>{artUploadErr}</div>
+                    )}
+                  </>
                 )}
               </div>
 

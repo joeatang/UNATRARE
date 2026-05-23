@@ -172,6 +172,14 @@ export async function POST(request) {
     }
   }
 
+  // Art replacement — locked once approved (bait-and-switch prevention)
+  if ((artUrl || artHash || artMime) && token.status === 'approved') {
+    return NextResponse.json(
+      { ok: false, error: 'Art cannot be changed after certification — contact support if you have a legitimate correction' },
+      { status: 403 }
+    );
+  }
+
   // Art replacement — artist uploads via /api/upload-art first, then sends the returned URL here
   if (artUrl && typeof artUrl === 'string') {
     const u = artUrl.trim();
