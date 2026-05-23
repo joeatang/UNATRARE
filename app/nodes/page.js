@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Nav from '../components/Nav';
 import styles from './nodes.module.css';
 
@@ -74,6 +74,166 @@ function formatDate(ms) {
 function truncPubkey(pk) {
   if (!pk || pk.length < 16) return pk ?? '—';
   return pk.slice(0, 8) + '…' + pk.slice(-8);
+}
+
+function GenesisClaim() {
+  const [addr, setAddr]         = useState('');
+  const [lookup, setLookup]     = useState(null);   // result of status check
+  const [lookupErr, setLookupErr] = useState('');
+  const [looking, setLooking]   = useState(false);
+  const [xcpAddr, setXcpAddr]   = useState('');
+  const [sig, setSig]           = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [result, setResult]     = useState('');
+  const [err, setErr]           = useState('');
+
+  async function handleLookup(e) {
+    e.preventDefault();
+    setLookup(null); setLookupErr(''); setResult(''); setErr('');
+    setLooking(true);
+    try {
+      const res = await fetch(`/api/nodes/genesis-claim-status?address=${encodeURIComponent(addr.trim())}`);
+      const json = await res.json();
+      setLookup(json);
+      if (json.receiveAddress) setXcpAddr(json.receiveAddress);
+    } catch {
+      setLookupErr('Network error — try again.');
+    } finally {
+      setLooking(false);
+    }
+  }
+
+  async function handleClaim(e) {
+    e.preventDefault();
+    setErr(''); setResult(''); setSubmitting(true);
+    try {
+      const res = await fetch('/api/nodes/claim-genesis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: addr.trim(), xcpReceiveAddress: xcpAddr.trim(), signature: sig.trim() }),
+      });
+      const json = await res.json();
+      if (json.ok) {
+        setResult(`✓ Claim submitted! We'll send 1 RAREUNATPEPE to ${json.receiveAddress}. Check back here to confirm once it's sent.`);
+        setLookup(prev => ({ ...prev, claimSubmitted: true, receiveAddress: json.receiveAddress }));
+      } else {
+        setErr(json.error || 'Submission failed.');
+      }
+    } catch {
+      setErr('Network error — try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className={styles.claimSection}>
+      <h2 className={styles.claimTitle}>GENESIS NODE OPERATORS — CLAIM YOUR RAREUNATPEPE</h2>
+      <p className={styles.claimDesc}>
+        Every confirmed Genesis Node (140+ heartbeats within 7 days) earns 1&nbsp;RAREUNATPEPE.
+        Enter the Bitcoin address you registered your node with to check your status and submit a claim.
+      </p>
+
+      <form onSubmit={handleLookup} className={styles.claimLookupForm}>
+        <input
+          className={styles.claimInput}
+          value={addr}
+          onChange={e => { setAddr(e.target.value); setLookup(null); setResult(''); setErr(''); }}
+          placeholder="Enter your node's BTC address…"
+          maxLength={100}
+        />
+        <button className={styles.claimLookupBtn} type="submit" disabled={!addr.trim() || looking}>
+          {looking ? 'LOOKING UP…' : 'CHECK STATUS'}
+        </button>
+      </form>
+
+      {lookupErr && <p className={styles.claimErr}>{lookupErr}</p>}
+
+      {lookup && !lookup.found && (
+        <p className={styles.claimStatus}>No node found for that address. Make sure you&apos;re using the exact address you passed as <code>--btc-address</code> when starting your node.</p>
+      )}
+
+      {lookup?.isProvisional && !lookup?.isGenesis && (
+        <div className={styles.claimBox}>
+          <p className={styles.claimStatusAmber}>⏳ GENESIS PENDING — your slot is reserved. Keep your node running until you reach 140 heartbeats to confirm.</p>
+        </div>
+      )}
+
+      {lookup?.isGenesis && lookup?.sent && (
+        <div className={styles.claimBox}>
+          <p className={styles.claimStatusGreen}>✓ RAREUNATPEPE SENT — Genesis Slot #{lookup.slotNumber}</p>
+          {lookup.txid && (
+            <p className={styles.claimMeta}>
+              Txid:{' '}
+              <a
+                href={`https://xchain.io/tx/${lookup.txid}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.claimLink}
+              >
+                {lookup.txid.slice(0, 16)}…
+              </a>
+            </p>
+          )}
+        </div>
+      )}
+
+      {lookup?.isGenesis && lookup?.claimSubmitted && !lookup?.sent && (
+        <div className={styles.claimBox}>
+          <p className={styles.claimStatusAmber}>⏳ CLAIM RECEIVED — we'll send 1 RAREUNATPEPE to <code>{lookup.receiveAddress}</code> and mark it here once confirmed. Check back in 24–48 hours.</p>
+        </div>
+      )}
+
+      {lookup?.isGenesis && !lookup?.claimSubmitted && !lookup?.sent && (
+        <div className={styles.claimBox}>
+          <p className={styles.claimStatusGreen}>✓ CONFIRMED GENESIS — Slot #{lookup.slotNumber}</p>
+          <p className={styles.claimInstructions}>
+            You are eligible for 1&nbsp;RAREUNATPEPE. To claim:
+          </p>
+          <ol className={styles.claimSteps}>
+            <li>Open Freewallet (or any Bitcoin wallet that supports BIP-137 message signing).</li>
+            <li>Sign the exact message: <code className={styles.claimChallenge}>UNATRARE:GENESIS:CLAIM</code></li>
+            <li>Sign from the address above — <strong>{addr}</strong></li>
+            <li>Paste the signature and your Counterparty receive address below.</li>
+          </ol>
+          <p className={styles.claimNote}>
+            ⚠ XCP receive address must be a <strong>legacy Bitcoin address (starts with 1 or 3)</strong>. Counterparty does not support bc1 addresses. If your node uses a bc1 address, provide a separate legacy address.
+          </p>
+          <form onSubmit={handleClaim} className={styles.claimForm}>
+            <label className={styles.claimLabel}>
+              Your Counterparty receive address (legacy 1xxx or 3xxx)
+              <input
+                className={styles.claimInput}
+                value={xcpAddr}
+                onChange={e => setXcpAddr(e.target.value)}
+                placeholder="1A1zP1eP5QGefi2…"
+                maxLength={100}
+              />
+            </label>
+            <label className={styles.claimLabel}>
+              BIP-137 signature of &ldquo;UNATRARE:GENESIS:CLAIM&rdquo;
+              <input
+                className={styles.claimInput}
+                value={sig}
+                onChange={e => setSig(e.target.value)}
+                placeholder="H…base64 signature…"
+                maxLength={200}
+              />
+            </label>
+            {err && <p className={styles.claimErr}>{err}</p>}
+            <button
+              className={styles.claimSubmitBtn}
+              type="submit"
+              disabled={submitting || !xcpAddr.trim() || !sig.trim()}
+            >
+              {submitting ? 'SUBMITTING…' : 'SUBMIT CLAIM'}
+            </button>
+          </form>
+          {result && <p className={styles.claimSuccess}>{result}</p>}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function NodesPage() {
@@ -362,6 +522,10 @@ export default function NodesPage() {
           <a className={styles.joinLink} href="/nodes/guide">Full guide with Linux VPS + Raspberry Pi instructions →</a>
         </p>
       </div>
+
+      {/* ── Genesis RAREUNATPEPE claim ─────────────────────────── */}
+      <GenesisClaim />
+
     </main>
     </>
   );

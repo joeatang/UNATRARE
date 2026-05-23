@@ -552,6 +552,152 @@ function StatsBar({ stats }) {
   );
 }
 
+// ── Genesis Grants panel ───────────────────────────────────────
+function GenesisGrantsPanel({ authToken }) {
+  const [open, setOpen] = useState(false);
+  const [grants, setGrants] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [txids, setTxids] = useState({});   // xcp_address → txid input value
+  const [sendStatus, setSendStatus] = useState({});
+
+  async function load() {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/genesis-grants', {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const json = await res.json();
+      if (json.ok) setGrants(json.grants);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { if (open) load(); }, [open]);
+
+  async function markSent(xcpAddress) {
+    const txid = (txids[xcpAddress] || '').trim();
+    if (!txid) return;
+    setSendStatus(s => ({ ...s, [xcpAddress]: 'saving…' }));
+    try {
+      const res = await fetch('/api/admin/genesis-grants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({ xcp_address: xcpAddress, txid }),
+      });
+      const json = await res.json();
+      if (json.ok) {
+        setSendStatus(s => ({ ...s, [xcpAddress]: '✓ marked sent' }));
+        load();
+      } else {
+        setSendStatus(s => ({ ...s, [xcpAddress]: json.error || 'error' }));
+      }
+    } catch {
+      setSendStatus(s => ({ ...s, [xcpAddress]: 'network error' }));
+    }
+  }
+
+  const pending = grants.filter(g => g.rareunatpepe_claim_submitted_at && !g.rareunatpepe_sent_at);
+  const sent    = grants.filter(g => g.rareunatpepe_sent_at);
+  const unclaimed = grants.filter(g => !g.rareunatpepe_claim_submitted_at && !g.rareunatpepe_sent_at);
+
+  return (
+    <div style={{ marginBottom: '2rem', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%', padding: '12px 16px', background: 'var(--bg-2)',
+          border: 'none', borderBottom: open ? '1px solid var(--border)' : 'none',
+          color: 'var(--text)', fontFamily: 'var(--font-card)', fontSize: '10px',
+          letterSpacing: '3px', cursor: 'pointer', textAlign: 'left', display: 'flex',
+          alignItems: 'center', gap: 8,
+        }}
+      >
+        ⬡ GENESIS GRANTS — RAREUNATPEPE
+        {pending.length > 0 && (
+          <span style={{ background: 'var(--amber)', color: '#000', borderRadius: 2, padding: '1px 6px', fontSize: '9px', letterSpacing: '1px' }}>
+            {pending.length} PENDING
+          </span>
+        )}
+        <span style={{ marginLeft: 'auto', opacity: 0.5 }}>{open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <div style={{ padding: 16 }}>
+          {loading && <div style={{ fontSize: 11, color: 'var(--muted)' }}>loading…</div>}
+
+          {!loading && grants.length === 0 && (
+            <div style={{ fontSize: 11, color: 'var(--muted)' }}>No confirmed genesis grants yet.</div>
+          )}
+
+          {pending.length > 0 && (
+            <>
+              <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px', color: 'var(--amber)', marginBottom: 8 }}>
+                PENDING SEND ({pending.length})
+              </div>
+              {pending.map(g => (
+                <div key={g.xcp_address} style={{ border: '1px solid var(--amber)', borderRadius: 3, padding: '10px 12px', marginBottom: 8 }}>
+                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--text)', marginBottom: 4 }}>
+                    Slot #{g.slot_number} · <span style={{ color: 'var(--amber)' }}>SEND TO: {g.rareunatpepe_receive_address || g.xcp_address}</span>
+                  </div>
+                  <div style={{ fontSize: 9, color: 'var(--muted)', marginBottom: 8 }}>
+                    Claimed {g.rareunatpepe_claim_submitted_at ? new Date(g.rareunatpepe_claim_submitted_at).toISOString().slice(0, 10) : '—'}
+                    {' · '}Node btc: {g.btc_address?.slice(0, 14)}…
+                  </div>
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <input
+                      style={{ flex: 1, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 2, padding: '4px 8px', fontFamily: 'monospace', fontSize: 10, color: 'var(--text)' }}
+                      placeholder="Paste txid after sending from Freewallet…"
+                      value={txids[g.xcp_address] || ''}
+                      onChange={e => setTxids(t => ({ ...t, [g.xcp_address]: e.target.value }))}
+                    />
+                    <button
+                      onClick={() => markSent(g.xcp_address)}
+                      disabled={!(txids[g.xcp_address] || '').trim()}
+                      style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '2px', padding: '5px 10px', background: 'var(--accent)', color: '#000', border: 'none', borderRadius: 2, cursor: 'pointer' }}
+                    >
+                      MARK SENT
+                    </button>
+                  </div>
+                  {sendStatus[g.xcp_address] && (
+                    <div style={{ fontSize: 9, color: 'var(--green-hot)', marginTop: 4 }}>{sendStatus[g.xcp_address]}</div>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
+
+          {unclaimed.length > 0 && (
+            <>
+              <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px', color: 'var(--muted)', margin: '12px 0 8px' }}>
+                CONFIRMED — NOT YET CLAIMED ({unclaimed.length})
+              </div>
+              {unclaimed.map(g => (
+                <div key={g.xcp_address} style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'monospace', padding: '4px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                  Slot #{g.slot_number} · {g.xcp_address || g.btc_address}
+                </div>
+              ))}
+            </>
+          )}
+
+          {sent.length > 0 && (
+            <>
+              <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px', color: 'var(--green-hot)', margin: '12px 0 8px' }}>
+                SENT ({sent.length})
+              </div>
+              {sent.map(g => (
+                <div key={g.xcp_address} style={{ fontSize: 9, color: 'var(--muted)', fontFamily: 'monospace', padding: '3px 0' }}>
+                  Slot #{g.slot_number} · {g.rareunatpepe_receive_address || g.xcp_address} · txid: {g.rareunatpepe_txid?.slice(0, 12)}…
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Art Drops management panel ─────────────────────────────────
 function DropsPanel({ authToken }) {
   const [open, setOpen] = useState(false);
@@ -1891,6 +2037,7 @@ export default function AdminPage() {
       <div className={styles.queue}>
         {tab === 'tools' ? (
           <>
+            <GenesisGrantsPanel authToken={authToken} />
             <DropsPanel authToken={authToken} />
             <DemoPanel authToken={authToken} />
             <S0CodesPanel authToken={authToken} />

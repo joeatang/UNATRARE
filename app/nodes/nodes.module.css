@@ -525,3 +525,182 @@
     font-size: 0.7rem;
   }
 }
+
+/* ── Genesis Claim ───────────────────────────────────────────────── */
+.claimSection {
+  max-width: 720px;
+  margin: 4rem auto 3rem;
+  padding: 2rem 1.5rem;
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--accent);
+  background: rgba(255,255,255,0.015);
+}
+
+.claimTitle {
+  font-family: monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin: 0 0 0.75rem;
+}
+
+.claimDesc {
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0 0 1.25rem;
+}
+
+.claimLookupForm {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.claimInput {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.5rem 0.75rem;
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: var(--text);
+  width: 100%;
+}
+.claimInput:focus { outline: 1px solid var(--accent); }
+
+.claimLookupBtn {
+  font-family: monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.claimLookupBtn:hover:not(:disabled) { background: var(--accent); color: #000; }
+.claimLookupBtn:disabled { opacity: 0.4; cursor: default; }
+
+.claimStatus {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.claimBox {
+  margin-top: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: rgba(255,255,255,0.02);
+}
+
+.claimStatusGreen {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: var(--green, #4caf50);
+  margin: 0 0 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+.claimStatusAmber {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: var(--amber-hot, #f59e0b);
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
+.claimMeta {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin: 0.4rem 0 0;
+}
+
+.claimLink {
+  color: var(--accent);
+  text-decoration: none;
+}
+.claimLink:hover { text-decoration: underline; }
+
+.claimInstructions {
+  font-size: 0.78rem;
+  color: var(--text);
+  margin: 0 0 0.6rem;
+}
+
+.claimSteps {
+  font-size: 0.75rem;
+  color: var(--muted);
+  padding-left: 1.2rem;
+  line-height: 1.9;
+  margin: 0 0 1rem;
+}
+
+.claimChallenge {
+  background: rgba(255,255,255,0.06);
+  padding: 0.1em 0.4em;
+  border-radius: 2px;
+  font-size: 0.8em;
+  letter-spacing: 0.05em;
+}
+
+.claimNote {
+  font-size: 0.72rem;
+  color: var(--amber-hot, #f59e0b);
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 3px;
+  padding: 0.6rem 0.75rem;
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+
+.claimForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.claimLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+.claimSubmitBtn {
+  align-self: flex-start;
+  font-family: monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: #000;
+  background: var(--accent);
+  border: none;
+  border-radius: 3px;
+  padding: 0.55rem 1.25rem;
+  cursor: pointer;
+}
+.claimSubmitBtn:hover:not(:disabled) { opacity: 0.85; }
+.claimSubmitBtn:disabled { opacity: 0.4; cursor: default; }
+
+.claimErr {
+  font-size: 0.72rem;
+  color: #ef4444;
+  font-family: monospace;
+  margin: 0;
+}
+
+.claimSuccess {
+  font-size: 0.75rem;
+  color: var(--green, #4caf50);
+  font-family: monospace;
+  margin: 0.5rem 0 0;
+  line-height: 1.5;
+}
