@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '../../../../lib/db';
+import { timingSafeEqual } from 'crypto';
 
 /**
  * GET /api/admin/tg-export
@@ -26,7 +27,12 @@ export async function GET(request) {
   const token      = authHeader.replace(/^Bearer\s+/i, '').trim();
   const adminSecret = process.env.ADMIN_SECRET;
 
-  if (!adminSecret || token !== adminSecret) {
+  if (!adminSecret) {
+    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+  }
+  const aBytes = Buffer.from(token.padEnd(128, '\0').slice(0, 128));
+  const bBytes = Buffer.from(adminSecret.padEnd(128, '\0').slice(0, 128));
+  if (token.length !== adminSecret.length || !timingSafeEqual(aBytes, bBytes)) {
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
   }
 

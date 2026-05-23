@@ -279,10 +279,9 @@ export default async function CardPage({ params }) {
             )}
 
             {token.description && (
-              <div
-                className={styles.description}
-                dangerouslySetInnerHTML={{ __html: token.description }}
-              />
+              <div className={styles.description}>
+                {token.description}
+              </div>
             )}
 
             {/* ── Supplemental media ── */}

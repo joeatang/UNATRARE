@@ -46,12 +46,12 @@ const MAX_SUPPLY = 20_016;
 // ─────────────────────────────────────────────────────────────────
 //  Step 0 — Get Your Metadata URL
 // ─────────────────────────────────────────────────────────────────
-function Step0({ onNext, isVault }) {
-  const [raw, setRaw] = useState('');
-  const [result, setResult] = useState(null);
+function Step0({ data, onNext, isVault }) {
+  const [raw, setRaw] = useState(data?.tokenName || '');
+  const [result, setResult] = useState(() => data?.tokenName ? validateToken(data.tokenName) : null);
   const [copied, setCopied] = useState(false);
-  const [inviteCode, setInviteCode] = useState('');
-  const [showInvite, setShowInvite] = useState(false);
+  const [inviteCode, setInviteCode] = useState(data?.inviteCode || '');
+  const [showInvite, setShowInvite] = useState(!!(data?.inviteCode));
 
   function handleChange(e) {
     const v = e.target.value.toUpperCase().replace(/[^A-Z0-9.]/g, '');
@@ -550,20 +550,24 @@ function Step2({ data, onNext, onBack }) {
 //  Step 3 — Artist Details (optional metadata)
 // ─────────────────────────────────────────────────────────────────
 function Step3({ data, onNext, onBack }) {
-  const [handle, setHandle] = useState('');
-  const [desc, setDesc] = useState('');
-  const [category, setCategory] = useState('');
-  const [subcategory, setSubcategory] = useState('');
-  const [inscription, setInscription] = useState('');
-  const [allocQty, setAllocQty] = useState('');
+  const [handle, setHandle] = useState(data.artistHandle || '');
+  const [desc, setDesc] = useState(data.description || '');
+  const [category, setCategory] = useState(data.category || '');
+  const [subcategory, setSubcategory] = useState(data.subcategory || '');
+  const [inscription, setInscription] = useState(data.ordInscription || '');
+  const [allocQty, setAllocQty] = useState(data.unatpepeAllocQty ? String(data.unatpepeAllocQty) : '');
   const [errMsg, setErrMsg] = useState('');
 
-  const [audioResult, setAudioResult]     = useState(null); // {url, hash, mime}
+  const [audioResult, setAudioResult]     = useState(
+    data.audioUrl ? { url: data.audioUrl, hash: data.audioHash || '', mime: data.audioMime || '' } : null
+  );
   const [audioErr, setAudioErr]           = useState('');
   const [audioUploading, setAudioUploading] = useState(false);
   const audioRef = useRef();
 
-  const [videoResult, setVideoResult]     = useState(null); // {url, hash, mime}
+  const [videoResult, setVideoResult]     = useState(
+    data.videoUrl ? { url: data.videoUrl, hash: data.videoHash || '', mime: data.videoMime || '' } : null
+  );
   const [videoErr, setVideoErr]           = useState('');
   const [videoUploading, setVideoUploading] = useState(false);
   const videoRef = useRef();
@@ -1304,7 +1308,7 @@ function SubmitWizard() {
         </nav>
 
         {/* Step components */}
-        {currentStep === 0 && <Step0 onNext={handleNext} isVault={!!formData.vaultHash} />}
+        {currentStep === 0 && <Step0 data={formData} onNext={handleNext} isVault={!!formData.vaultHash} />}
         {currentStep === 1 && <Step1 data={formData} onNext={handleNext} onBack={handleBack} />}
         {currentStep === 2 && <Step2 data={formData} onNext={handleNext} onBack={handleBack} />}
         {currentStep === 3 && <Step3 data={formData} onNext={handleNext} onBack={handleBack} />}

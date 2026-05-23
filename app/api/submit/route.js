@@ -80,9 +80,9 @@ export async function POST(request) {
   // ── Compute burn TXID (validation deferred to DB check below if gate is active) ──
   const safeBurnTxid = typeof burnTxid === 'string' ? burnTxid.trim().toLowerCase() : '';
 
-  // ── Validate art URL (must be a relative or absolute URL) ───
-  if (!artUrl || artUrl.length < 4) {
-    return NextResponse.json({ ok: false, error: 'Invalid art URL' }, { status: 422 });
+  // ── Validate art URL (must be from this server's upload endpoint) ───
+  if (!artUrl || !artUrl.startsWith('/uploads/')) {
+    return NextResponse.json({ ok: false, error: 'Invalid art URL — upload your art via the submission wizard first' }, { status: 422 });
   }
 
   // ── Write to DB ─────────────────────────────────────────────

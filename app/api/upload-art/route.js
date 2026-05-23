@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import path from 'path';
 import sharp from 'sharp';
 import { storeArt } from '../../../lib/tracBridge.js';
+import { getDb } from '../../../lib/db';
 
 // Uploads are stored in /public/uploads/ — served by Next.js as /uploads/FILENAME
 // This directory persists on the server across restarts.
@@ -79,6 +80,20 @@ export async function POST(request) {
   if (!valid) {
     return NextResponse.json({ ok: false, error: 'Invalid token name' }, { status: 400 });
   }
+
+  // Block uploads that would overwrite a certified token's art on disk.
+  // The file name is deterministic (TOKEN.ext), so an unauthenticated upload
+  // would silently replace the image everyone sees on the card page.
+  try {
+    const db = getDb();
+    const existing = db.prepare('SELECT status FROM tokens WHERE token_name = ?').get(normalized);
+    if (existing?.status === 'approved') {
+      return NextResponse.json(
+        { ok: false, error: 'Art cannot be replaced for a certified token. Use the update panel on your status page.' },
+        { status: 403 }
+      );
+    }
+  } catch { /* DB not ready — non-blocking, proceed */ }
 
   if (!ALLOWED_MIME.has(file.type)) {
     return NextResponse.json({
