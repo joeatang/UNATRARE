@@ -4,7 +4,7 @@ import styles from './about.module.css';
 
 export const metadata = {
   title: 'About — UNATRARE',
-  description: 'What is UNATRARE? A curated directory of rare digital art on Counterparty (Bitcoin).',
+  description: 'UNATRARE is a proof-of-concept for a decentralized P2P pepe art storage network, built on Counterparty and Bitcoin.',
 };
 
 export default function AboutPage() {
@@ -17,20 +17,35 @@ export default function AboutPage() {
           <div className={styles.eyebrow}>WHAT IS THIS</div>
           <h1 className={styles.title}>UNATR<span>A</span>RE</h1>
           <p className={styles.subtitle}>
-            A curated directory of rare digital art on Counterparty — the original Bitcoin token protocol.
+            An experiment in decentralized Pepe art storage — built on Counterparty, preserved by nodes.
           </p>
         </header>
+
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>THE LINEAGE</h2>
+          <div className={styles.prose}>
+            <p>
+              Rare Pepes declared it in 2016. Then Scrilla got kicked out of the telegram for posting
+              Fake Rares — and turned that into an opportunity. One of the dankest collections to
+              follow Rare Pepes. Then Dank Rares doing its thing. Each one a chapter.
+            </p>
+            <p>
+              UNATRARE steps in to honor the directories before it — and to experiment with solving a
+              problem that&apos;s gone under the radar for a while: there&apos;s never been a decentralized
+              P2P pepe art storage network.
+            </p>
+            <p>
+              This is simply an experiment. A proof-of-concept to see if that network can actually be
+              built, can actually exist, and can preserve our precious frogs for life.
+            </p>
+          </div>
+        </section>
 
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>THE PREMISE</h2>
           <div className={styles.prose}>
             <p>
-              Rare Pepes declared it in 2016. Fake Rares declared it with a smirk.
-              UNATRARE declares it with NAT — and the door is open to anyone Bitcoin brought here,
-              regardless of which protocol they came through first.
-            </p>
-            <p>
-              The art is Counterparty. The currency is NAT. The Council is the filter.
+              The art is Counterparty. The Council is the filter. The communities are universal.
               UNATRARE is the only place all three exist at once.
             </p>
             <p>
@@ -49,6 +64,22 @@ export default function AboutPage() {
         </section>
 
         <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>THE NETWORK</h2>
+          <div className={styles.prose}>
+            <p>
+              Certified art is stored across a P2P Hyperdrive network — every node that joins
+              the <code>unatrare-v1</code> swarm holds another copy. No server to pull the plug.
+              A metadata record at <code>unatrare.wtf/c/YOURTOKEN.json</code> is generated on
+              approval — wallet-readable, travels with the token forever.
+            </p>
+            <p>
+              Bitcoin enforces the supply. The node network preserves the art.
+              Anyone can <Link href="/nodes/guide">run a node</Link> and become part of that.
+            </p>
+          </div>
+        </section>
+
+        <section className={styles.section}>
           <h2 className={styles.sectionTitle}>THE COUNCIL</h2>
           <div className={styles.prose}>
             <p>
@@ -58,41 +89,6 @@ export default function AboutPage() {
             </p>
             <p>
               <Link href="/council">Meet the council →</Link>
-            </p>
-          </div>
-        </section>
-
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>THE ARCHIVE</h2>
-          <div className={styles.prose}>
-            <p>
-              Certified art is written to a Hyperdrive — Holepunch stack, same infrastructure as TAP.
-              Every node that joins the <code>unatrare-archive-v1</code> swarm is another copy.
-              No server to pull the plug. A JSON metadata record at{' '}
-              <code>unatrare.wtf/c/YOURTOKEN.json</code> is generated on approval —
-              CIP-25 v2, wallet-readable, travels with the token forever.
-            </p>
-            <p>
-              Bitcoin enforces the supply. The node network preserves the art.
-            </p>
-          </div>
-        </section>
-
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>THE DROPS</h2>
-          <div className={styles.prose}>
-            <p>
-              Certified cards are eligible for UNATRARE drops — council-curated distributions
-              priced in DMT-NAT, open to UNATPEPE holders.
-            </p>
-            <p>
-              NAT as payment isn&apos;t a bridge mechanic. It&apos;s the statement.
-              You&apos;re saying to a Bitcoin-native audience that found this space through DMT:
-              <em> this is yours too.</em> Not by changing the art. By changing who gets access to it.
-            </p>
-            <p>
-              Artists keep 100% of their ask. The third chair at the table —
-              the one nobody knew was missing — is now open.
             </p>
           </div>
         </section>
