@@ -132,10 +132,10 @@ export default function LandingPage() {
         </section>
 
         {/* ─────────────────────────────────────────────────────
-            PEPE CRYPT
+            PEPE VAULT
             ───────────────────────────────────────────────────── */}
         <section className={styles.crypt}>
-          <div className={styles.cryptEyebrow}>· PEPE CRYPT ·</div>
+          <div className={styles.cryptEyebrow}>· PEPE VAULT ·</div>
 
           <h2 className={styles.cryptTitle}>
             Permanent art storage for your Counterparty token.
@@ -173,7 +173,7 @@ export default function LandingPage() {
 
           <div className={styles.cryptCtas}>
             <Link href="/vault" className={styles.cryptCtaPrimary}>
-              Explore the Crypt →
+              Explore the Vault →
             </Link>
             <Link href="/vault/upload" className={styles.cryptCtaSecondary}>
               Seal your art →

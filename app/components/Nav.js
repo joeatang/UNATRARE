@@ -23,7 +23,7 @@ export default function Nav() {
         {/* Desktop links */}
         <ul className={styles['nav-links']}>
           <li><Link href="/directory">Directory</Link></li>
-          <li><Link href="/vault">Crypt</Link></li>
+          <li><Link href="/vault">Vault</Link></li>
           <li><Link href="/archive">Archive</Link></li>
           <li><Link href="/council">Council</Link></li>
           <li><Link href="/nodes">Nodes</Link></li>
@@ -74,7 +74,7 @@ export default function Nav() {
           <li><Link href="/register" className={styles['nav-register']}>✦ UNATPEPE</Link></li>
           <li className={styles.drawerSectionDivider}><span>more</span></li>
           <li><Link href="/feed" className={styles.drawerSecondaryLink}>Feed</Link></li>
-          <li><Link href="/vault" className={styles.drawerSecondaryLink}>Crypt</Link></li>
+          <li><Link href="/vault" className={styles.drawerSecondaryLink}>Vault</Link></li>
           <li><Link href="/artists" className={styles.drawerSecondaryLink}>Artists</Link></li>
           <li><Link href="/about" className={styles.drawerSecondaryLink}>About</Link></li>
           <li><Link href="/wallets" className={styles.drawerSecondaryLink}>Wallets</Link></li>

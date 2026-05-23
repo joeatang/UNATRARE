@@ -156,10 +156,10 @@ export default function VaultUploadPage() {
       <Nav />
       <main className={styles.page}>
       <div className={styles.nav}>
-        <Link href="/vault" className={styles.back}>← PEPE CRYPT</Link>
+        <Link href="/vault" className={styles.back}>← PEPE VAULT</Link>
       </div>
 
-      <h1 className={styles.title}>ENTER THE CRYPT</h1>
+      <h1 className={styles.title}>SEAL YOUR ART</h1>
       <p className={styles.subtitle}>
         Upload art for your Counterparty token. Get a permanent JSON URL for the token description.
       </p>
@@ -177,7 +177,7 @@ export default function VaultUploadPage() {
 
       {status === 'done' && result?.ok ? (
         <div className={styles.success}>
-          <div className={styles.successTitle}>✓ SEALED IN THE CRYPT</div>
+          <div className={styles.successTitle}>✓ SEALED IN THE VAULT</div>
           <div className={styles.successGrid}>
             <div className={styles.successRow}>
               <span className={styles.successLabel}>JSON URL</span>
@@ -217,7 +217,7 @@ export default function VaultUploadPage() {
           <Link href="/vault" style={{ display:'block', textAlign:'center', marginTop:12,
             fontFamily:'var(--font-card)', fontSize:'11px', letterSpacing:'3px',
             color:'var(--text-dim)', textDecoration:'none' }}>
-            ← back to the crypt
+            ← back to the vault
           </Link>
         </div>
       ) : (
@@ -298,7 +298,7 @@ export default function VaultUploadPage() {
                 maxLength={100}
                 required
               />
-              <span className={styles.hint}>Your Counterparty/Bitcoin address — shown on your crypt card for provenance</span>
+              <span className={styles.hint}>Your Counterparty/Bitcoin address — shown on your vault card for provenance</span>
             </label>
 
             <label className={styles.field}>
@@ -432,7 +432,7 @@ export default function VaultUploadPage() {
                       </div>
                     )}
                     <div className={styles.cardFooter}>
-                      <span className={styles.cardBadge}>◈ PEPE CRYPT</span>
+                      <span className={styles.cardBadge}>◈ PEPE VAULT</span>
                     </div>
                   </div>
                 </div>
@@ -455,7 +455,7 @@ export default function VaultUploadPage() {
           </div>
 
           <button className={styles.submitBtn} type="submit" disabled={status === 'uploading'}>
-            {status === 'uploading' ? 'UPLOADING…' : 'ENTER THE CRYPT'}
+            {status === 'uploading' ? 'UPLOADING…' : 'SEAL YOUR ART'}
           </button>
         </form>
       )}

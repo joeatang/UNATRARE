@@ -1,7 +1,7 @@
 /**
  * POST /api/vault/update
  *
- * Update metadata (and optionally replace art) for a PEPE CRYPT vault entry.
+ * Update metadata (and optionally replace art) for a PEPE VAULT asset.
  * Auth: BIP-137 signature over "UNATRARE:VAULT:UPDATE:<ART_HASH>"
  * using the owner_xcp or owner_btc address stored at upload time.
  *

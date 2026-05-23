@@ -323,13 +323,13 @@ export default function VaultManagePage() {
       <Nav />
       <main className={styles.page}>
         <div className={styles.header}>
-          <h1 className={styles.title}>MANAGE CRYPT ENTRIES</h1>
+          <h1 className={styles.title}>MANAGE VAULT ENTRIES</h1>
           <p className={styles.subtitle}>
-            Update the details on your PEPE CRYPT vault assets.
+            Update the details on your PEPE VAULT assets.
             Enter the Bitcoin or XCP address you used when uploading.
           </p>
           <Link href="/vault" className={styles.uploadBtn} style={{ background: 'transparent', border: '1px solid rgba(245,166,35,0.4)', color: 'var(--amber)' }}>
-            ← back to crypt
+            ← back to vault
           </Link>
         </div>
 
@@ -372,7 +372,7 @@ export default function VaultManagePage() {
         {/* Results */}
         {assets !== null && assets.length === 0 && (
           <div className={styles.empty}>
-            No crypt entries found for that address.{' '}
+            No vault entries found for that address.{' '}
             <Link href="/vault/upload" className={styles.emptyLink}>Upload art →</Link>
           </div>
         )}

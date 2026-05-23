@@ -380,12 +380,12 @@ export default function FeedPage() {
           </div>
         </section>
 
-        {/* ── PEPE CRYPT ── */}
+        {/* ── PEPE VAULT ── */}
         {vaultCount > 0 && (
           <section className={styles.vaultBanner}>
             <div className={styles.vaultBannerInner}>
               <div className={styles.vaultBannerLeft}>
-                <div className={styles.vaultBannerEyebrow}>· pepe crypt ·</div>
+                <div className={styles.vaultBannerEyebrow}>· pepe vault ·</div>
                 <div className={styles.vaultBannerTitle}>
                   COUNTERPARTY ART, STORED ON THE UNATRARE NETWORK
                 </div>
@@ -395,10 +395,10 @@ export default function FeedPage() {
                 </div>
                 <div className={styles.vaultBannerStats}>
                   <span className={styles.vaultBannerCount}>{vaultCount}</span>
-                  {vaultCount === 1 ? 'Counterparty token sealed in the crypt' : 'Counterparty tokens sealed in the crypt'}
+                  {vaultCount === 1 ? 'Counterparty token sealed in the vault' : 'Counterparty tokens sealed in the vault'}
                 </div>
                 <Link href="/vault" className={styles.vaultBannerCta}>
-                  explore the crypt →
+                  explore the vault →
                 </Link>
               </div>
               {vaultRecent.length > 0 && (
