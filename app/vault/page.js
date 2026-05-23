@@ -198,13 +198,35 @@ function AssetCard({ asset }) {
   const ext    = MIME_EXT[asset.art_mime] ?? asset.art_mime?.split('/')[1]?.replace('jpeg', 'jpg') ?? 'png';
   const artUrl = `/uploads/vault/${asset.art_hash}.${ext}`;
   const jsonUrl = `/api/vault/json/${asset.art_hash}`;
-  const [copied, setCopied] = useState(false);
+  const [copied,         setCopied]         = useState(false);
+  const [editOpen,       setEditOpen]       = useState(false);
+  const [ownerInput,     setOwnerInput]     = useState('');
+  const [ownerConfirmed, setOwnerConfirmed] = useState('');
+  const [addrErr,        setAddrErr]        = useState('');
 
   function copyJson() {
     navigator.clipboard.writeText(`${BASE}${jsonUrl}`).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   }
+
+  function toggleEdit() {
+    setEditOpen(o => !o);
+    if (editOpen) { setOwnerConfirmed(''); setOwnerInput(''); setAddrErr(''); }
+  }
+
+  function handleConfirmAddr() {
+    const addr = ownerInput.trim();
+    if (!ADDR_RE.test(addr)) { setAddrErr('Enter a valid Bitcoin address (starts with 1)'); return; }
+    setAddrErr('');
+    setOwnerConfirmed(addr);
+  }
+
+  const inputStyle = {
+    width: '100%', padding: '6px 8px', boxSizing: 'border-box',
+    background: '#080808', border: '1px solid #1e1e1e',
+    color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 11, outline: 'none',
+  };
 
   const submitHref = `/submit?vault_hash=${asset.art_hash}&vault_mime=${encodeURIComponent(asset.art_mime || 'image/png')}`;
 
@@ -234,6 +256,39 @@ function AssetCard({ asset }) {
         <Link href={submitHref} className={styles.submitDirBtn}>
           submit to directory →
         </Link>
+        <button onClick={toggleEdit}
+          style={{ display: 'block', width: '100%', marginTop: '0.4rem',
+            fontFamily: 'monospace', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase',
+            color: editOpen ? 'var(--text-dim)' : 'var(--amber)',
+            background: 'transparent', border: `1px solid ${editOpen ? '#1e1e1e' : 'rgba(168,144,96,0.35)'}`,
+            borderRadius: 3, padding: '0.3rem 0.5rem', cursor: 'pointer' }}>
+          {editOpen ? '▲ close edit' : '▼ edit this entry'}
+        </button>
+
+        {editOpen && (
+          <div style={{ marginTop: 10, borderTop: '1px solid #1e1e1e', paddingTop: 10 }}>
+            {ownerConfirmed ? (
+              <EditPanel asset={asset} ownerAddress={ownerConfirmed} onSaved={() => {}} />
+            ) : (
+              <>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', marginBottom: 6, lineHeight: 1.5 }}>
+                  Enter the Bitcoin/XCP address you used when uploading:
+                </div>
+                <input type="text" value={ownerInput}
+                  onChange={e => { setOwnerInput(e.target.value); setAddrErr(''); }}
+                  onKeyDown={e => e.key === 'Enter' && handleConfirmAddr()}
+                  placeholder="1BTC…" style={inputStyle} />
+                {addrErr && <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: '#e05050', marginTop: 4 }}>{addrErr}</div>}
+                <button onClick={handleConfirmAddr}
+                  style={{ marginTop: 8, fontFamily: 'monospace', fontSize: '0.65rem', letterSpacing: '0.1em',
+                    textTransform: 'uppercase', color: '#0a0a0a', background: 'var(--amber-hot)',
+                    border: 'none', borderRadius: 3, padding: '0.35rem 0.8rem', cursor: 'pointer' }}>
+                  confirm →
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
