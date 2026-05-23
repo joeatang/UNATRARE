@@ -813,14 +813,54 @@ function DropSetup({ tokenName, artistAddress, onCreated }) {
 function SubmissionCard({ sub, artistAddress, onRefresh }) {
   const [expanded, setExpanded] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
-  const [dispenser, setDispenser] = useState(sub.dispenserAddress || '');
-  const [manageSig, setManageSig] = useState('');
+  // editable fields
+  const [dispenser,    setDispenser]    = useState(sub.dispenserAddress || '');
+  const [displayTitle, setDisplayTitle] = useState(sub.displayTitle || '');
+  const [artistHandle, setArtistHandle] = useState(sub.artistHandle || '');
+  const [description,  setDescription]  = useState(sub.description || '');
+  const [audioUrl,     setAudioUrl]     = useState(sub.audioUrl || '');
+  const [videoUrl,     setVideoUrl]     = useState(sub.videoUrl || '');
+  // art replacement
+  const [artUpload,      setArtUpload]      = useState(null); // { url, hash, mime }
+  const [artUploadState, setArtUploadState] = useState('idle'); // idle|uploading|ready|error
+  const [artUploadErr,   setArtUploadErr]   = useState('');
+  // form state
+  const [manageSig,   setManageSig]   = useState('');
   const [manageState, setManageState] = useState('idle'); // idle | loading | ok | error
-  const [manageErr, setManageErr] = useState('');
+  const [manageErr,   setManageErr]   = useState('');
   const meta = STATUS_META[sub.status] || STATUS_META.pending;
 
   const DISPENSER_RE = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
   const challenge = `UNATRARE:UPDATE:${sub.tokenName}`;
+
+  function resetManage() {
+    setManageErr(''); setManageState('idle');
+  }
+
+  async function handleArtFileChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setArtUploadState('uploading');
+    setArtUploadErr('');
+    setArtUpload(null);
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('tokenName', sub.tokenName);
+    try {
+      const res = await fetch('/api/upload-art', { method: 'POST', body: fd });
+      const j = await res.json();
+      if (j.ok) {
+        setArtUpload({ url: j.url, hash: j.hash, mime: file.type });
+        setArtUploadState('ready');
+      } else {
+        setArtUploadErr(j.error || 'Upload failed');
+        setArtUploadState('error');
+      }
+    } catch {
+      setArtUploadErr('Network error during upload');
+      setArtUploadState('error');
+    }
+  }
 
   async function handleManageSubmit() {
     if (dispenser && !DISPENSER_RE.test(dispenser)) {
@@ -834,15 +874,26 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
     setManageState('loading');
     setManageErr('');
     try {
+      const payload = {
+        tokenName:        sub.tokenName,
+        artistAddress:    artistAddress,
+        signature:        manageSig.trim(),
+        dispenserAddress: dispenser.trim(),
+        displayTitle:     displayTitle.trim(),
+        artistHandle:     artistHandle.trim(),
+        description:      description.trim(),
+        audioUrl:         audioUrl.trim(),
+        videoUrl:         videoUrl.trim(),
+      };
+      if (artUpload) {
+        payload.artUrl  = artUpload.url;
+        payload.artHash = artUpload.hash;
+        payload.artMime = artUpload.mime;
+      }
       const res = await fetch('/api/update-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tokenName:        sub.tokenName,
-          artistAddress:    artistAddress,
-          signature:        manageSig.trim(),
-          dispenserAddress: dispenser.trim(),
-        }),
+        body: JSON.stringify(payload),
       });
       const json = await res.json();
       if (json.ok) {
@@ -924,12 +975,12 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
       )}
       {expanded && <JudgeBreakdown breakdown={sub.judgeBreakdown} />}
 
-      {/* Manage listing — approved tokens only */}
-      {sub.status === 'approved' && (
+      {/* Manage listing — pending and approved tokens */}
+      {(sub.status === 'approved' || sub.status === 'pending') && (
         <div style={{ borderTop: '1px solid var(--border)', marginTop: 12, paddingTop: 12 }}>
           <button
             className={styles.expandBtn}
-            onClick={() => { setManageOpen(o => !o); setManageErr(''); setManageState('idle'); }}
+            onClick={() => { setManageOpen(o => !o); resetManage(); }}
           >
             {manageOpen ? '▲ hide listing settings' : '▼ manage your listing'}
           </button>
@@ -940,18 +991,21 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
                   UNATPEPE drop: <strong>{sub.unatpepeAllocQty}</strong> copies offered to holders
                 </div>
               )}
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 6 }}>
-                  DISPENSER ADDRESS
-                </div>
-                <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', marginBottom: 8, lineHeight: 1.5 }}>
-                  Add your Counterparty dispenser address to show a secondary market link on your card page.
+
+              {/* ── Art details ───────────────────────────────────────── */}
+              <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 8 }}>
+                ART DETAILS
+              </div>
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: 4 }}>
+                  DISPLAY TITLE
                 </div>
                 <input
                   type="text"
-                  value={dispenser}
-                  onChange={e => { setDispenser(e.target.value.trim()); setManageErr(''); setManageState('idle'); }}
-                  placeholder="1YourDispenserAddress... (leave blank to remove)"
+                  value={displayTitle}
+                  onChange={e => { setDisplayTitle(e.target.value); resetManage(); }}
+                  placeholder={sub.tokenName}
+                  maxLength={128}
                   style={{
                     width: '100%', padding: '7px 10px', boxSizing: 'border-box',
                     background: 'var(--bg-card)', border: '1px solid var(--border)',
@@ -960,6 +1014,144 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
                   }}
                 />
               </div>
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: 4 }}>
+                  ARTIST HANDLE
+                </div>
+                <input
+                  type="text"
+                  value={artistHandle}
+                  onChange={e => { setArtistHandle(e.target.value); resetManage(); }}
+                  placeholder="@handle (optional)"
+                  maxLength={64}
+                  style={{
+                    width: '100%', padding: '7px 10px', boxSizing: 'border-box',
+                    background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 12,
+                    outline: 'none',
+                  }}
+                />
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: 4 }}>
+                  DESCRIPTION
+                </div>
+                <textarea
+                  rows={4}
+                  value={description}
+                  onChange={e => { setDescription(e.target.value); resetManage(); }}
+                  placeholder="Short description of the art and its significance..."
+                  maxLength={2000}
+                  style={{
+                    width: '100%', padding: '7px 10px', boxSizing: 'border-box', resize: 'vertical',
+                    background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 12,
+                    outline: 'none',
+                  }}
+                />
+              </div>
+
+              {/* ── Replace art image ─────────────────────────────────── */}
+              <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 8 }}>
+                REPLACE ART IMAGE
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', marginBottom: 8, lineHeight: 1.5 }}>
+                  Upload a replacement image (PNG, JPG, GIF, WebP — max 3 MB). Leave blank to keep the current art.
+                </div>
+                {sub.artUrl && artUploadState !== 'ready' && (
+                  <div style={{ marginBottom: 8 }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={sub.artUrl} alt="current art" style={{ height: 64, width: 64, objectFit: 'cover', border: '1px solid var(--border)' }} />
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 4 }}>current</div>
+                  </div>
+                )}
+                {artUploadState === 'ready' && artUpload && (
+                  <div style={{ marginBottom: 8 }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={artUpload.url} alt="new art" style={{ height: 64, width: 64, objectFit: 'cover', border: '1px solid var(--green)' }} />
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--green)', marginTop: 4 }}>✓ new art ready</div>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/gif,image/webp"
+                  onChange={handleArtFileChange}
+                  disabled={artUploadState === 'uploading'}
+                  style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)' }}
+                />
+                {artUploadState === 'uploading' && (
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--amber)', marginTop: 6 }}>uploading...</div>
+                )}
+                {artUploadErr && (
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--red)', marginTop: 6 }}>{artUploadErr}</div>
+                )}
+              </div>
+
+              {/* ── Media links ───────────────────────────────────────── */}
+              <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 8 }}>
+                MEDIA LINKS
+              </div>
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: 4 }}>
+                  AUDIO URL
+                </div>
+                <input
+                  type="url"
+                  value={audioUrl}
+                  onChange={e => { setAudioUrl(e.target.value); resetManage(); }}
+                  placeholder="https://arweave.net/... (leave blank to remove)"
+                  style={{
+                    width: '100%', padding: '7px 10px', boxSizing: 'border-box',
+                    background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 12,
+                    outline: 'none',
+                  }}
+                />
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: 4 }}>
+                  VIDEO URL
+                </div>
+                <input
+                  type="url"
+                  value={videoUrl}
+                  onChange={e => { setVideoUrl(e.target.value); resetManage(); }}
+                  placeholder="https://arweave.net/... (leave blank to remove)"
+                  style={{
+                    width: '100%', padding: '7px 10px', boxSizing: 'border-box',
+                    background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 12,
+                    outline: 'none',
+                  }}
+                />
+              </div>
+
+              {/* ── Dispenser address (approved only) ────────────────── */}
+              {sub.status === 'approved' && (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 6 }}>
+                    DISPENSER ADDRESS
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', marginBottom: 8, lineHeight: 1.5 }}>
+                    Add your Counterparty dispenser address to show a secondary market link on your card page.
+                  </div>
+                  <input
+                    type="text"
+                    value={dispenser}
+                    onChange={e => { setDispenser(e.target.value.trim()); resetManage(); }}
+                    placeholder="1YourDispenserAddress... (leave blank to remove)"
+                    style={{
+                      width: '100%', padding: '7px 10px', boxSizing: 'border-box',
+                      background: 'var(--bg-card)', border: '1px solid var(--border)',
+                      color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 12,
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* ── Signature ─────────────────────────────────────────── */}
               <div style={{ marginBottom: 12 }}>
                 <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 6 }}>
                   SIGN TO VERIFY OWNERSHIP
@@ -978,7 +1170,7 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
                 <textarea
                   rows={3}
                   value={manageSig}
-                  onChange={e => { setManageSig(e.target.value); setManageErr(''); setManageState('idle'); }}
+                  onChange={e => { setManageSig(e.target.value); resetManage(); }}
                   placeholder="Paste BIP-137 signature here..."
                   style={{
                     width: '100%', padding: '7px 10px', boxSizing: 'border-box', resize: 'vertical',
@@ -995,13 +1187,13 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
               )}
               {manageState === 'ok' ? (
                 <div style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--green)' }}>
-                  ✓ LISTING UPDATED — refresh /card/{sub.tokenName} to confirm
+                  ✓ UPDATED — changes saved
                 </div>
               ) : (
                 <button
                   className={styles.lookupBtn}
                   onClick={handleManageSubmit}
-                  disabled={manageState === 'loading'}
+                  disabled={manageState === 'loading' || artUploadState === 'uploading'}
                   style={{ fontSize: 11, padding: '6px 14px' }}
                 >
                   {manageState === 'loading' ? 'saving...' : 'save changes →'}

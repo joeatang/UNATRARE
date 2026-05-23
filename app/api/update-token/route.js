@@ -78,9 +78,9 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, error: 'Token not found' }, { status: 404 });
   }
 
-  if (token.status !== 'approved') {
+  if (!['approved', 'pending'].includes(token.status)) {
     return NextResponse.json(
-      { ok: false, error: 'Only approved tokens can be updated' },
+      { ok: false, error: 'Only pending or approved tokens can be updated' },
       { status: 400 }
     );
   }

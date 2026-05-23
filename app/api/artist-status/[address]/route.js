@@ -16,7 +16,9 @@ export async function GET(request, { params }) {
       SELECT
         token_name, status, submitted_at, judged_at,
         judge_score, judge_notes, rejection_reason,
-        art_url, artist_handle, description, series, card_number, supply,
+        art_url, artist_handle, display_title, description,
+        audio_url, video_url, category, subcategory,
+        series, card_number, supply,
         unatpepe_alloc_qty, dispenser_address
       FROM tokens
       WHERE artist_address = ?
@@ -60,7 +62,12 @@ export async function GET(request, { params }) {
         rejectionReason:  r.rejection_reason || null,
         artUrl:           r.art_url,
         artistHandle:     r.artist_handle,
+        displayTitle:     r.display_title || '',
         description:      r.description,
+        audioUrl:         r.audio_url || '',
+        videoUrl:         r.video_url || '',
+        category:         r.category || '',
+        subcategory:      r.subcategory || '',
         series:           r.series,
         cardNumber:       r.card_number,
         supply:           r.supply,
