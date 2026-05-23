@@ -514,7 +514,188 @@ function ProfileSection({ address, initialProfile }) {
   );
 }
 
-function SubmissionCard({ sub, artistAddress }) {
+function hoursLabel(h) {
+  const n = parseInt(h, 10);
+  if (isNaN(n) || n < 1) return '';
+  if (n < 48) return `${n} hour${n !== 1 ? 's' : ''}`;
+  const days = Math.round(n / 24);
+  if (days < 14) return `≈ ${days} day${days !== 1 ? 's' : ''}`;
+  const weeks = Math.round(days / 7);
+  return `≈ ${weeks} week${weeks !== 1 ? 's' : ''}`;
+}
+
+function DropSetup({ tokenName, artistAddress, onCreated }) {
+  const [open, setOpen]     = useState(false);
+  const [supply, setSupply] = useState('100');
+  const [hours, setHours]   = useState('168');
+  const [sig, setSig]       = useState('');
+  const [state, setState]   = useState('idle'); // idle | loading | ok | error
+  const [err, setErr]       = useState('');
+
+  const challenge = `UNATRARE:DROP:CREATE:${tokenName}`;
+
+  async function handleCreate() {
+    const supplyNum = parseInt(supply, 10);
+    const hoursNum  = parseInt(hours, 10);
+    if (isNaN(supplyNum) || supplyNum < 10 || supplyNum > 2016) {
+      setErr('Supply must be between 10 and 2016'); return;
+    }
+    if (isNaN(hoursNum) || hoursNum < 24 || hoursNum > 720) {
+      setErr('Window must be between 24 and 720 hours'); return;
+    }
+    if (!sig.trim()) { setErr('Paste your signature first'); return; }
+    setState('loading'); setErr('');
+    try {
+      const res = await fetch('/api/drops/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tokenName,
+          address:     artistAddress,
+          signature:   sig.trim(),
+          supplyTotal: supplyNum,
+          windowHours: hoursNum,
+        }),
+      });
+      const j = await res.json();
+      if (j.ok) {
+        setState('ok');
+        setTimeout(() => onCreated(), 1500);
+      } else {
+        setErr(j.error || 'Failed to activate drop');
+        setState('error');
+      }
+    } catch {
+      setErr('Network error — please try again');
+      setState('error');
+    }
+  }
+
+  return (
+    <div style={{ borderTop: '1px solid var(--border)', marginTop: 12, paddingTop: 12 }}>
+      <button className={styles.expandBtn} onClick={() => setOpen(o => !o)}>
+        {open ? '▲ hide drop setup' : '▼ set up unatpepe holder drop'}
+      </button>
+      {open && (
+        <div style={{ marginTop: 12 }}>
+          {state === 'ok' ? (
+            <div style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--green)' }}>
+              ✓ DROP ACTIVATED — reloading...
+            </div>
+          ) : (
+            <>
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 16 }}>
+                Offer copies of <strong>{tokenName}</strong> to UNATPEPE holders.
+                Each UNATPEPE address gets one claim. You distribute the tokens yourself
+                after the window closes — or request UNATRARE to handle it.
+              </div>
+
+              {/* Supply + Window inputs */}
+              <div style={{ display: 'flex', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: 120 }}>
+                  <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 4 }}>
+                    COPIES TO OFFER
+                  </div>
+                  <input
+                    type="number"
+                    min={10}
+                    max={2016}
+                    value={supply}
+                    onChange={e => { setSupply(e.target.value); setErr(''); setState('idle'); }}
+                    style={{
+                      width: '100%', padding: '7px 10px', boxSizing: 'border-box',
+                      background: 'var(--bg-card)', border: '1px solid var(--border)',
+                      color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 13,
+                      outline: 'none',
+                    }}
+                  />
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 3 }}>
+                    10 – 2016 · one claim per UNATPEPE address
+                  </div>
+                </div>
+                <div style={{ flex: 1, minWidth: 120 }}>
+                  <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 4 }}>
+                    CLAIM WINDOW (hours)
+                  </div>
+                  <input
+                    type="number"
+                    min={24}
+                    max={720}
+                    value={hours}
+                    onChange={e => { setHours(e.target.value); setErr(''); setState('idle'); }}
+                    style={{
+                      width: '100%', padding: '7px 10px', boxSizing: 'border-box',
+                      background: 'var(--bg-card)', border: '1px solid var(--border)',
+                      color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 13,
+                      outline: 'none',
+                    }}
+                  />
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 3 }}>
+                    {hoursLabel(hours)} · min 24h · max 720h (30 days)
+                  </div>
+                </div>
+              </div>
+
+              {/* Challenge string + signature */}
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 4 }}>
+                  SIGN TO ACTIVATE
+                </div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', marginBottom: 6, lineHeight: 1.5 }}>
+                  Open the wallet holding <strong>{tokenName}</strong> and sign this message
+                  (address: {artistAddress.slice(0, 8)}…{artistAddress.slice(-6)})
+                </div>
+                <code style={{
+                  display: 'block', padding: '6px 10px', marginBottom: 8,
+                  background: 'var(--bg)', border: '1px solid var(--border)',
+                  fontFamily: "'Courier New', monospace", fontSize: 11, color: 'var(--amber)',
+                  wordBreak: 'break-all', lineHeight: 1.6,
+                }}>
+                  {challenge}
+                </code>
+                <textarea
+                  rows={3}
+                  value={sig}
+                  onChange={e => { setSig(e.target.value); setErr(''); setState('idle'); }}
+                  placeholder="Paste BIP-137 signature here..."
+                  style={{
+                    width: '100%', padding: '7px 10px', boxSizing: 'border-box', resize: 'vertical',
+                    background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    color: 'var(--text)', fontFamily: "'Courier New', monospace", fontSize: 11,
+                    outline: 'none',
+                  }}
+                />
+              </div>
+
+              {err && (
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--red)', marginBottom: 8 }}>
+                  {err}
+                </div>
+              )}
+
+              <button
+                className={styles.lookupBtn}
+                onClick={handleCreate}
+                disabled={state === 'loading'}
+                style={{ fontSize: 11, padding: '6px 14px' }}
+              >
+                {state === 'loading' ? 'activating...' : 'activate drop →'}
+              </button>
+
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 10, lineHeight: 1.6 }}>
+                Once active, UNATPEPE holders can claim on the /drop page. After the window
+                closes, download the claim list and send {tokenName} from your Counterparty
+                wallet — or choose &ldquo;UNATRARE sends&rdquo; in the drop management panel.
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SubmissionCard({ sub, artistAddress, onRefresh }) {
   const [expanded, setExpanded] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [dispenser, setDispenser] = useState(sub.dispenserAddress || '');
@@ -720,6 +901,11 @@ function SubmissionCard({ sub, artistAddress }) {
       {sub.status === 'approved' && sub.drop && (
         <DropSection drop={sub.drop} tokenName={sub.tokenName} artistAddress={artistAddress} />
       )}
+
+      {/* Drop setup — approved tokens with no drop yet */}
+      {sub.status === 'approved' && !sub.drop && (
+        <DropSetup tokenName={sub.tokenName} artistAddress={artistAddress} onCreated={onRefresh} />
+      )}
     </div>
   );
 }
@@ -823,7 +1009,7 @@ export default function StatusPage() {
                   </div>
                   <div className={styles.cardList}>
                     {data.submissions.map(sub => (
-                      <SubmissionCard key={sub.tokenName} sub={sub} artistAddress={data.address} />
+                      <SubmissionCard key={sub.tokenName} sub={sub} artistAddress={data.address} onRefresh={handleLookup} />
                     ))}
                   </div>
                   <ProfileSection address={data.address} initialProfile={data.profile} />
