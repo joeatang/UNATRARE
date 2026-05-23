@@ -5,11 +5,41 @@ import { judgeToken } from '../../../lib/judge.js';
 import { verifyBitcoinMessage } from '../../../lib/btcVerify.mjs';
 
 const ADDR_RE   = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
+
+// In-memory IP rate limiter — resets on server restart (acceptable for soft limit).
+// Protects the AI judge council (8 Anthropic/Groq calls per submission) from abuse.
+const IP_SUBMIT_LIMIT  = 5;
+const IP_LIMIT_WINDOW  = 24 * 60 * 60 * 1000; // 24 h in ms
+const ipSubmissions    = new Map();
+
+function checkIpLimit(ip) {
+  if (!ip || ip === 'unknown') return { allowed: true };
+  const now = Date.now();
+  const recent = (ipSubmissions.get(ip) || []).filter(t => now - t < IP_LIMIT_WINDOW);
+  if (recent.length >= IP_SUBMIT_LIMIT) {
+    return { allowed: false, resetIn: Math.ceil((recent[0] + IP_LIMIT_WINDOW - now) / 60000) };
+  }
+  recent.push(now);
+  ipSubmissions.set(ip, recent);
+  return { allowed: true };
+}
 const BASE64_RE = /^[A-Za-z0-9+/=]{87,88}$/; // 65 bytes base64, may end with =
 const TXID_RE   = /^[0-9a-fA-F]{64}$/;
 const BURN_ADDRESS = '1CounterpartyXXXXXXXXXXXXXXXUWLpVr';
 
 export async function POST(request) {
+  // ── IP rate limit ───────────────────────────────────────────
+  const ip = request.headers.get('x-real-ip')
+    || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || 'unknown';
+  const ipCheck = checkIpLimit(ip);
+  if (!ipCheck.allowed) {
+    return NextResponse.json(
+      { ok: false, error: `Too many submissions — max ${IP_SUBMIT_LIMIT} per 24 h per IP. Try again in ${ipCheck.resetIn} min.` },
+      { status: 429 }
+    );
+  }
+
   let body;
   try { body = await request.json(); }
   catch { return NextResponse.json({ ok: false, error: 'Invalid JSON' }, { status: 400 }); }

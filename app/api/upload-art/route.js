@@ -16,6 +16,24 @@ import { getDb } from '../../../lib/db';
 // process.cwd() is always the Next.js project root in both dev and production
 const UPLOAD_DIR = path.resolve(process.cwd(), 'public', 'uploads');
 
+// In-memory IP rate limiter — resets on server restart (acceptable for soft limit).
+// Prevents disk exhaustion from unauthenticated bulk uploads.
+const IP_UPLOAD_LIMIT  = 20;
+const IP_UPLOAD_WINDOW = 24 * 60 * 60 * 1000; // 24 h in ms
+const ipUploads        = new Map();
+
+function checkUploadIpLimit(ip) {
+  if (!ip || ip === 'unknown') return { allowed: true };
+  const now = Date.now();
+  const recent = (ipUploads.get(ip) || []).filter(t => now - t < IP_UPLOAD_WINDOW);
+  if (recent.length >= IP_UPLOAD_LIMIT) {
+    return { allowed: false, resetIn: Math.ceil((recent[0] + IP_UPLOAD_WINDOW - now) / 60000) };
+  }
+  recent.push(now);
+  ipUploads.set(ip, recent);
+  return { allowed: true };
+}
+
 const AUDIO_MIME = new Set(['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/mp4']);
 const VIDEO_MIME = new Set(['video/mp4', 'video/webm']);
 const ALLOWED_MIME = new Set([
@@ -58,6 +76,18 @@ function getMaxBytes(mime) {
 const THUMBABLE_MIME = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
 
 export async function POST(request) {
+  // ── IP rate limit ───────────────────────────────────────────
+  const ip = request.headers.get('x-real-ip')
+    || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || 'unknown';
+  const ipCheck = checkUploadIpLimit(ip);
+  if (!ipCheck.allowed) {
+    return NextResponse.json(
+      { ok: false, error: `Too many uploads — max ${IP_UPLOAD_LIMIT} per 24 h per IP. Try again in ${ipCheck.resetIn} min.` },
+      { status: 429 }
+    );
+  }
+
   let formData;
   try {
     formData = await request.formData();
