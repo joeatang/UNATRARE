@@ -525,12 +525,13 @@ function hoursLabel(h) {
 }
 
 function DropSetup({ tokenName, artistAddress, onCreated }) {
-  const [open, setOpen]     = useState(false);
-  const [supply, setSupply] = useState('100');
-  const [hours, setHours]   = useState('168');
-  const [sig, setSig]       = useState('');
-  const [state, setState]   = useState('idle'); // idle | loading | ok | error
-  const [err, setErr]       = useState('');
+  const [open, setOpen]         = useState(false);
+  const [distMode, setDistMode] = useState('unatpepe'); // 'unatpepe' | 'open'
+  const [supply, setSupply]     = useState('100');
+  const [hours, setHours]       = useState('168');
+  const [sig, setSig]           = useState('');
+  const [state, setState]       = useState('idle'); // idle | loading | ok | error
+  const [err, setErr]           = useState('');
 
   const challenge = `UNATRARE:DROP:CREATE:${tokenName}`;
 
@@ -574,7 +575,7 @@ function DropSetup({ tokenName, artistAddress, onCreated }) {
   return (
     <div style={{ borderTop: '1px solid var(--border)', marginTop: 12, paddingTop: 12 }}>
       <button className={styles.expandBtn} onClick={() => setOpen(o => !o)}>
-        {open ? '▲ hide drop setup' : '▼ set up unatpepe holder drop'}
+        {open ? '▲ hide drop setup' : '▼ set up drop'}
       </button>
       {open && (
         <div style={{ marginTop: 12 }}>
@@ -584,109 +585,223 @@ function DropSetup({ tokenName, artistAddress, onCreated }) {
             </div>
           ) : (
             <>
-              <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 16 }}>
-                Offer copies of <strong>{tokenName}</strong> to UNATPEPE holders.
-                Each UNATPEPE address gets one claim. You distribute the tokens yourself
-                after the window closes — or request UNATRARE to handle it.
-              </div>
-
-              {/* Supply + Window inputs */}
-              <div style={{ display: 'flex', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
-                <div style={{ flex: 1, minWidth: 120 }}>
-                  <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 4 }}>
-                    COPIES TO OFFER
-                  </div>
+              {/* Distribution type selector */}
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 8 }}>
+                  DISTRIBUTION TYPE
+                </div>
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', marginBottom: 10 }}>
                   <input
-                    type="number"
-                    min={10}
-                    max={2016}
-                    value={supply}
-                    onChange={e => { setSupply(e.target.value); setErr(''); setState('idle'); }}
-                    style={{
-                      width: '100%', padding: '7px 10px', boxSizing: 'border-box',
-                      background: 'var(--bg-card)', border: '1px solid var(--border)',
-                      color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 13,
-                      outline: 'none',
-                    }}
+                    type="radio"
+                    name={`distMode-${tokenName}`}
+                    value="unatpepe"
+                    checked={distMode === 'unatpepe'}
+                    onChange={() => { setDistMode('unatpepe'); setErr(''); setState('idle'); }}
+                    style={{ marginTop: 2, accentColor: 'var(--amber)' }}
                   />
-                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 3 }}>
-                    10 – 2016 · one claim per UNATPEPE address
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--text)' }}>
+                      UNATPEPE HOLDERS
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', lineHeight: 1.5, marginTop: 2 }}>
+                      Open a gated claim window — one free copy per UNATPEPE address. UNATRARE manages the queue.
+                    </div>
                   </div>
-                </div>
-                <div style={{ flex: 1, minWidth: 120 }}>
-                  <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 4 }}>
-                    CLAIM WINDOW (hours)
-                  </div>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
                   <input
-                    type="number"
-                    min={24}
-                    max={720}
-                    value={hours}
-                    onChange={e => { setHours(e.target.value); setErr(''); setState('idle'); }}
-                    style={{
-                      width: '100%', padding: '7px 10px', boxSizing: 'border-box',
-                      background: 'var(--bg-card)', border: '1px solid var(--border)',
-                      color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 13,
-                      outline: 'none',
-                    }}
+                    type="radio"
+                    name={`distMode-${tokenName}`}
+                    value="open"
+                    checked={distMode === 'open'}
+                    onChange={() => { setDistMode('open'); setErr(''); setState('idle'); }}
+                    style={{ marginTop: 2, accentColor: 'var(--amber)' }}
                   />
-                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 3 }}>
-                    {hoursLabel(hours)} · min 24h · max 720h (30 days)
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--text)' }}>
+                      OPEN DISTRIBUTION
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', lineHeight: 1.5, marginTop: 2 }}>
+                      Set up a Counterparty dispenser — anyone can buy or claim directly on-chain. You manage it yourself.
+                    </div>
                   </div>
-                </div>
+                </label>
               </div>
 
-              {/* Challenge string + signature */}
-              <div style={{ marginBottom: 10 }}>
-                <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 4 }}>
-                  SIGN TO ACTIVATE
-                </div>
-                <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', marginBottom: 6, lineHeight: 1.5 }}>
-                  Open the wallet holding <strong>{tokenName}</strong> and sign this message
-                  (address: {artistAddress.slice(0, 8)}…{artistAddress.slice(-6)})
-                </div>
-                <code style={{
-                  display: 'block', padding: '6px 10px', marginBottom: 8,
-                  background: 'var(--bg)', border: '1px solid var(--border)',
-                  fontFamily: "'Courier New', monospace", fontSize: 11, color: 'var(--amber)',
-                  wordBreak: 'break-all', lineHeight: 1.6,
-                }}>
-                  {challenge}
-                </code>
-                <textarea
-                  rows={3}
-                  value={sig}
-                  onChange={e => { setSig(e.target.value); setErr(''); setState('idle'); }}
-                  placeholder="Paste BIP-137 signature here..."
-                  style={{
-                    width: '100%', padding: '7px 10px', boxSizing: 'border-box', resize: 'vertical',
-                    background: 'var(--bg-card)', border: '1px solid var(--border)',
-                    color: 'var(--text)', fontFamily: "'Courier New', monospace", fontSize: 11,
-                    outline: 'none',
-                  }}
-                />
-              </div>
+              {/* ── UNATPEPE-gated path ─────────────────────────────── */}
+              {distMode === 'unatpepe' && (
+                <>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 16 }}>
+                    Offer copies of <strong>{tokenName}</strong> to UNATPEPE holders.
+                    Each UNATPEPE address gets one claim. You distribute the tokens yourself
+                    after the window closes — or request UNATRARE to handle it.
+                  </div>
 
-              {err && (
-                <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--red)', marginBottom: 8 }}>
-                  {err}
-                </div>
+                  {/* Supply + Window inputs */}
+                  <div style={{ display: 'flex', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: 120 }}>
+                      <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 4 }}>
+                        COPIES TO OFFER
+                      </div>
+                      <input
+                        type="number"
+                        min={10}
+                        max={2016}
+                        value={supply}
+                        onChange={e => { setSupply(e.target.value); setErr(''); setState('idle'); }}
+                        style={{
+                          width: '100%', padding: '7px 10px', boxSizing: 'border-box',
+                          background: 'var(--bg-card)', border: '1px solid var(--border)',
+                          color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 13,
+                          outline: 'none',
+                        }}
+                      />
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 3 }}>
+                        10 – 2016 · one claim per UNATPEPE address
+                      </div>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 120 }}>
+                      <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 4 }}>
+                        CLAIM WINDOW (hours)
+                      </div>
+                      <input
+                        type="number"
+                        min={24}
+                        max={720}
+                        value={hours}
+                        onChange={e => { setHours(e.target.value); setErr(''); setState('idle'); }}
+                        style={{
+                          width: '100%', padding: '7px 10px', boxSizing: 'border-box',
+                          background: 'var(--bg-card)', border: '1px solid var(--border)',
+                          color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 13,
+                          outline: 'none',
+                        }}
+                      />
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 3 }}>
+                        {hoursLabel(hours)} · min 24h · max 720h (30 days)
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Challenge string + signature */}
+                  <div style={{ marginBottom: 10 }}>
+                    <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 4 }}>
+                      SIGN TO ACTIVATE
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', marginBottom: 6, lineHeight: 1.5 }}>
+                      Open the wallet holding <strong>{tokenName}</strong> and sign this message
+                      (address: {artistAddress.slice(0, 8)}…{artistAddress.slice(-6)})
+                    </div>
+                    <code style={{
+                      display: 'block', padding: '6px 10px', marginBottom: 8,
+                      background: 'var(--bg)', border: '1px solid var(--border)',
+                      fontFamily: "'Courier New', monospace", fontSize: 11, color: 'var(--amber)',
+                      wordBreak: 'break-all', lineHeight: 1.6,
+                    }}>
+                      {challenge}
+                    </code>
+                    <textarea
+                      rows={3}
+                      value={sig}
+                      onChange={e => { setSig(e.target.value); setErr(''); setState('idle'); }}
+                      placeholder="Paste BIP-137 signature here..."
+                      style={{
+                        width: '100%', padding: '7px 10px', boxSizing: 'border-box', resize: 'vertical',
+                        background: 'var(--bg-card)', border: '1px solid var(--border)',
+                        color: 'var(--text)', fontFamily: "'Courier New', monospace", fontSize: 11,
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+
+                  {err && (
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--red)', marginBottom: 8 }}>
+                      {err}
+                    </div>
+                  )}
+
+                  <button
+                    className={styles.lookupBtn}
+                    onClick={handleCreate}
+                    disabled={state === 'loading'}
+                    style={{ fontSize: 11, padding: '6px 14px' }}
+                  >
+                    {state === 'loading' ? 'activating...' : 'activate drop →'}
+                  </button>
+
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 10, lineHeight: 1.6 }}>
+                    Once active, UNATPEPE holders can claim on the /drops page. After the window
+                    closes, download the claim list and send {tokenName} from your Counterparty
+                    wallet — or choose &ldquo;UNATRARE sends&rdquo; in the drop management panel.
+                  </div>
+                </>
               )}
 
-              <button
-                className={styles.lookupBtn}
-                onClick={handleCreate}
-                disabled={state === 'loading'}
-                style={{ fontSize: 11, padding: '6px 14px' }}
-              >
-                {state === 'loading' ? 'activating...' : 'activate drop →'}
-              </button>
+              {/* ── Open distribution path ──────────────────────────── */}
+              {distMode === 'open' && (
+                <div style={{ marginTop: 4 }}>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.7, marginBottom: 16 }}>
+                    A <strong>Counterparty dispenser</strong> lets anyone buy or claim <strong>{tokenName}</strong> directly
+                    on-chain by sending BTC to your dispenser address. You set the price and quantity — no UNATRARE involvement.
+                  </div>
 
-              <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 10, lineHeight: 1.6 }}>
-                Once active, UNATPEPE holders can claim on the /drop page. After the window
-                closes, download the claim list and send {tokenName} from your Counterparty
-                wallet — or choose &ldquo;UNATRARE sends&rdquo; in the drop management panel.
-              </div>
+                  <div style={{
+                    border: '1px solid var(--border)', padding: '14px 16px', marginBottom: 16,
+                    background: 'var(--bg-card)',
+                  }}>
+                    <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px', color: 'var(--amber)', marginBottom: 10 }}>
+                      HOW TO SET UP A DISPENSER
+                    </div>
+                    <ol style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 2, paddingLeft: 18, margin: 0 }}>
+                      <li>Open <strong>Freewallet</strong> → go to your token <strong>{tokenName}</strong></li>
+                      <li>Tap <strong>Create Dispenser</strong> (or in Electrum: Counterparty → Dispensers)</li>
+                      <li>Set price per unit (in BTC), quantity to dispense, and escrow amount</li>
+                      <li>Broadcast — your dispenser address is live once confirmed</li>
+                      <li>Share the dispenser address so buyers can send BTC to receive your token</li>
+                    </ol>
+                  </div>
+
+                  <div style={{
+                    border: '1px solid var(--border)', padding: '10px 16px', marginBottom: 16,
+                    background: 'var(--bg-card)',
+                  }}>
+                    <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 6 }}>
+                      TIP — ADD YOUR DISPENSER TO YOUR LISTING
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6 }}>
+                      Once your dispenser is set up, use <strong>manage your listing</strong> above to add the
+                      dispenser address — it will appear as a &ldquo;buy&rdquo; button on your card page.
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    <a
+                      href="https://docs.counterparty.io/docs/basics/dispensers/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px',
+                        color: 'var(--text-dim)', border: '1px solid var(--border)',
+                        padding: '6px 12px', textDecoration: 'none',
+                      }}
+                    >
+                      counterparty dispenser docs →
+                    </a>
+                    <a
+                      href="https://freewallet.io"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px',
+                        color: 'var(--text-dim)', border: '1px solid var(--border)',
+                        padding: '6px 12px', textDecoration: 'none',
+                      }}
+                    >
+                      freewallet.io →
+                    </a>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
