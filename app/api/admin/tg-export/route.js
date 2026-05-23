@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '../../../../lib/db';
-import { timingSafeEqual } from 'crypto';
+import { verifyAdminToken } from '../auth/route.js';
 
 /**
  * GET /api/admin/tg-export
@@ -23,16 +23,7 @@ function csvEscape(val) {
 
 export async function GET(request) {
   // ── Auth ──────────────────────────────────────────────────────
-  const authHeader = request.headers.get('authorization') || '';
-  const token      = authHeader.replace(/^Bearer\s+/i, '').trim();
-  const adminSecret = process.env.ADMIN_SECRET;
-
-  if (!adminSecret) {
-    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
-  }
-  const aBytes = Buffer.from(token.padEnd(128, '\0').slice(0, 128));
-  const bBytes = Buffer.from(adminSecret.padEnd(128, '\0').slice(0, 128));
-  if (token.length !== adminSecret.length || !timingSafeEqual(aBytes, bBytes)) {
+  if (!verifyAdminToken(request)) {
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
   }
 

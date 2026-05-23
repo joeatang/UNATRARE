@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { validateTokenName } from '../../../lib/tokenValidator';
 import { getDb } from '../../../lib/db';
+import { verifyBitcoinMessage } from '../../../lib/btcVerify.mjs';
+
+const BASE64_RE = /^[A-Za-z0-9+/=]{87,88}$/;
+const ADDR_RE   = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
 
 /**
  * POST /api/confirm-payment
@@ -156,10 +160,20 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { tokenName, txid, currency } = body || {};
+  const { tokenName, txid, currency, artistAddress, signature } = body || {};
 
   if (!tokenName || !txid || !currency) {
     return NextResponse.json({ ok: false, error: 'Missing tokenName, txid, or currency' }, { status: 400 });
+  }
+
+  // ── Artist auth: BIP-137 signature required to prevent txid theft ──────────
+  // Without this, an attacker could watch the payment address on-chain, grab a
+  // valid payment txid, and attach it to their own token before the real payer.
+  if (!artistAddress || !ADDR_RE.test(artistAddress)) {
+    return NextResponse.json({ ok: false, error: 'artistAddress required — must be a legacy Bitcoin address (starts with 1)' }, { status: 400 });
+  }
+  if (!signature || !BASE64_RE.test(signature)) {
+    return NextResponse.json({ ok: false, error: 'BIP-137 signature required — sign "UNATRARE:PAYMENT:<TXID>" with your submission wallet' }, { status: 400 });
   }
 
   const { valid, normalized } = validateTokenName(tokenName);
@@ -181,7 +195,7 @@ export async function POST(request) {
     }, { status: 422 });
   }
 
-  // ── Replay protection ─────────────────────────────────────────
+  // ── Replay protection + artist address verification ────────────────────────
   try {
     const db = getDb();
     const existing = db.prepare("SELECT token_name FROM tokens WHERE payment_txid = ?").get(txid);
@@ -203,8 +217,8 @@ export async function POST(request) {
       }, { status: 422 });
     }
 
-    // Check token exists and is approved
-    const token = db.prepare("SELECT status FROM tokens WHERE token_name = ?").get(normalized);
+    // Check token exists and is approved, and artistAddress matches
+    const token = db.prepare("SELECT status, artist_address FROM tokens WHERE token_name = ?").get(normalized);
     if (!token) {
       return NextResponse.json({ ok: false, error: 'Token not found' }, { status: 404 });
     }
@@ -214,8 +228,29 @@ export async function POST(request) {
         error: 'Token must be approved before payment can be confirmed',
       }, { status: 422 });
     }
+    const storedAddress = (token.artist_address || '').trim();
+    if (storedAddress && artistAddress !== storedAddress) {
+      return NextResponse.json({
+        ok: false,
+        error: 'Address does not match the artist address on record for this token',
+      }, { status: 403 });
+    }
   } catch {
     // DB not yet initialised (first run) — skip replay check
+  }
+
+  // ── Verify BIP-137 signature ─────────────────────────────────────────────
+  const challenge = `UNATRARE:PAYMENT:${txid.toLowerCase()}`;
+  const sigCandidates = [challenge, `${challenge}\r\n`, `${challenge}\n`, `${challenge}\r`];
+  let sigOk = false;
+  for (const c of sigCandidates) {
+    if (verifyBitcoinMessage(artistAddress, c, signature).ok) { sigOk = true; break; }
+  }
+  if (!sigOk) {
+    return NextResponse.json({
+      ok: false,
+      error: `Signature verification failed. Sign the exact message "${challenge}" with your submission wallet.`,
+    }, { status: 422 });
   }
 
   // ── On-chain verification ──────────────────────────────────────

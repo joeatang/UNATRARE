@@ -30,6 +30,23 @@ const UPLOAD_DIR = path.resolve(process.cwd(), 'public', 'uploads', 'vault');
 // Post-promo: revisit with tiered pricing (e.g. base fee ≤5MB, 2x fee ≤25MB).
 const MAX_BYTES  = 25 * 1024 * 1024; // 25MB cap during promo
 
+// In-memory IP rate limiter — prevents disk exhaustion from bulk uploads.
+const IP_VAULT_LIMIT  = 10;
+const IP_VAULT_WINDOW = 24 * 60 * 60 * 1000; // 24h
+const ipVaultUploads  = new Map();
+
+function checkVaultIpLimit(ip) {
+  if (!ip || ip === 'unknown') return { allowed: true };
+  const now = Date.now();
+  const recent = (ipVaultUploads.get(ip) || []).filter(t => now - t < IP_VAULT_WINDOW);
+  if (recent.length >= IP_VAULT_LIMIT) {
+    return { allowed: false, resetIn: Math.ceil((recent[0] + IP_VAULT_WINDOW - now) / 60000) };
+  }
+  recent.push(now);
+  ipVaultUploads.set(ip, recent);
+  return { allowed: true };
+}
+
 const THUMBABLE_MIME = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
 
 const ALLOWED_MIME = new Set([
@@ -68,6 +85,18 @@ export async function GET() {
 }
 
 export async function POST(req) {
+  // ── IP rate limit ─────────────────────────────────────────────────────────
+  const ip = req.headers.get('x-real-ip')
+    || req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || 'unknown';
+  const ipCheck = checkVaultIpLimit(ip);
+  if (!ipCheck.allowed) {
+    return NextResponse.json(
+      { ok: false, error: `Too many uploads — max ${IP_VAULT_LIMIT} per 24 h per IP. Try again in ${ipCheck.resetIn} min.` },
+      { status: 429 }
+    );
+  }
+
   let formData;
   try {
     formData = await req.formData();
