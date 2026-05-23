@@ -973,6 +973,9 @@ function StepBurn({ data, onNext, onBack, burnRequired }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [burnRequired]);
 
+  // Don't render until config is known (prevents flash of burn UI when gate is off)
+  if (burnRequired === null || burnRequired === false) return null;
+
   function copyBurnAddr() {
     navigator.clipboard?.writeText(SOFTPWAR_BURN_ADDR).then(() => {
       setCopied(true);
