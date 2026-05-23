@@ -552,6 +552,72 @@ function StatsBar({ stats }) {
   );
 }
 
+// ── Telegram Registrations panel ──────────────────────────────
+function TelegramRegistrationsPanel({ authToken }) {
+  const [open,  setOpen]  = useState(false);
+  const [count, setCount] = useState(null);
+  const [rows,  setRows]  = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  async function load() {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/community-register/count');
+      const j   = await res.json();
+      if (j.count !== undefined) setCount(j.count);
+    } catch {}
+    setLoading(false);
+  }
+
+  useEffect(() => { if (open) load(); }, [open]);
+
+  async function handleExport() {
+    const res = await fetch('/api/admin/tg-export', {
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    if (!res.ok) { alert('Export failed — check admin token'); return; }
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `tg-registrations-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <div style={{ borderBottom: '1px solid var(--border)', marginBottom: 0 }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ width: '100%', textAlign: 'left', padding: '14px 20px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '3px', color: 'var(--text-dim)' }}
+      >
+        {open ? '▲' : '▼'} TELEGRAM REGISTRATIONS {count !== null ? `· ${count}` : ''}
+      </button>
+      {open && (
+        <div style={{ padding: '0 20px 20px' }}>
+          {loading && <div style={{ color: 'var(--text-dim)', fontSize: 11 }}>loading...</div>}
+          {!loading && count !== null && (
+            <div style={{ marginBottom: 16 }}>
+              <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--text)' }}>
+                <strong>{count}</strong> registered for SOFTPWAR · RAREUNATPEPE
+              </span>
+            </div>
+          )}
+          <button
+            onClick={handleExport}
+            style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', padding: '7px 14px', background: 'var(--surface)', color: 'var(--amber)', border: '1px solid var(--amber)', cursor: 'pointer' }}
+          >
+            export CSV →
+          </button>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 10, lineHeight: 1.6 }}>
+            CSV includes: telegram_id, username, cp_address, registered_at, updated_at
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Genesis Grants panel ───────────────────────────────────────
 function GenesisGrantsPanel({ authToken }) {
   const [open, setOpen] = useState(false);
@@ -2119,6 +2185,7 @@ export default function AdminPage() {
       <div className={styles.queue}>
         {tab === 'tools' ? (
           <>
+            <TelegramRegistrationsPanel authToken={authToken} />
             <GenesisGrantsPanel authToken={authToken} />
             <DropsPanel authToken={authToken} />
             <DemoPanel authToken={authToken} />
