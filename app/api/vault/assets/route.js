@@ -9,18 +9,35 @@ import { getDb } from '../../../../lib/db';
 
 export const dynamic = 'force-dynamic';
 
+const ADDR_RE = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
+
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const page  = Math.max(1, parseInt(searchParams.get('page')  || '1', 10));
     const limit = Math.min(96, Math.max(1, parseInt(searchParams.get('limit') || '24', 10)));
     const offset = (page - 1) * limit;
+    const owner = (searchParams.get('owner') || '').trim();
 
-    const db     = getDb();
-    const total  = db.prepare('SELECT COUNT(*) as n FROM vault_assets').get().n;
-    const assets = db.prepare(
-      'SELECT id, art_hash, token_name, asset_name, description, art_mime, owner_xcp, uploaded_at, is_promo FROM vault_assets ORDER BY uploaded_at DESC LIMIT ? OFFSET ?'
-    ).all(limit, offset);
+    // Validate owner address if provided (prevents SQL injection via regex, parameterised anyway)
+    if (owner && !ADDR_RE.test(owner)) {
+      return NextResponse.json({ ok: false, error: 'Invalid owner address' }, { status: 422 });
+    }
+
+    const db = getDb();
+
+    let total, assets;
+    if (owner) {
+      total  = db.prepare('SELECT COUNT(*) as n FROM vault_assets WHERE owner_xcp = ? OR owner_btc = ?').get(owner, owner).n;
+      assets = db.prepare(
+        'SELECT id, art_hash, token_name, asset_name, description, art_mime, art_url, owner_xcp, owner_btc, twitter, telegram, artist_handle, uploaded_at, is_promo FROM vault_assets WHERE owner_xcp = ? OR owner_btc = ? ORDER BY uploaded_at DESC LIMIT ? OFFSET ?'
+      ).all(owner, owner, limit, offset);
+    } else {
+      total  = db.prepare('SELECT COUNT(*) as n FROM vault_assets').get().n;
+      assets = db.prepare(
+        'SELECT id, art_hash, token_name, asset_name, description, art_mime, owner_xcp, uploaded_at, is_promo FROM vault_assets ORDER BY uploaded_at DESC LIMIT ? OFFSET ?'
+      ).all(limit, offset);
+    }
 
     // Get promo status
     const promoActive = db.prepare("SELECT value FROM vault_config WHERE key = 'promo_active'").get()?.value === '1';

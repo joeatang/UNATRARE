@@ -96,7 +96,12 @@ export default function VaultPage() {
           Permanent P2P storage for Counterparty art tokens on Bitcoin.
           Upload your art — get a JSON URL for your token description.
         </p>
-        <Link href="/vault/upload" className={styles.uploadBtn}>+ UPLOAD YOUR ART</Link>
+        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+          <Link href="/vault/upload" className={styles.uploadBtn}>+ UPLOAD YOUR ART</Link>
+          <Link href="/vault/manage" className={styles.uploadBtn} style={{ background: 'transparent', border: '1px solid rgba(245,166,35,0.4)', color: 'var(--amber)' }}>
+            edit my entries →
+          </Link>
+        </div>
       </div>
 
       {promo?.active && (
