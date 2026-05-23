@@ -397,6 +397,9 @@ export default async function CardPage({ params }) {
               <Link href={`/update/${token.token_name}`} className={styles.actionBtnSecondary}>
                 artist: update card →
               </Link>
+              <Link href={`/status?token=${token.token_name}`} className={styles.actionBtnSecondary}>
+                artist: manage drop →
+              </Link>
             </div>
 
             <div className={styles.backRow}>
