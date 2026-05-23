@@ -74,8 +74,8 @@ export default function LandingPage() {
           </h1>
 
           <p className={styles.heroSub}>
-            The curated meme-art directory for Counterparty art on Bitcoin.<br />
-            Eight Pepe AI scientists decide what gets listed — permanently.
+            A curated Pepe art directory &amp; permanent P2P art storage for your Counterparty tokens on Bitcoin.<br />
+            Eight Pepe AI scientists decide what gets listed!
           </p>
 
           <div className={styles.heroCtas}>
@@ -100,17 +100,14 @@ export default function LandingPage() {
 
           <div className={styles.thesisBody}>
             <p>
-              UNATRARE is not just a gallery. It is a cultural routing layer for Bitcoin meme art.
+              Counterparty brought a lot to the table in 2014. The original Rare Pepe movement launched on it in 2016 — the first time meme art was issued directly on Bitcoin as a token.
             </p>
             <p>
-              Counterparty brought the original Rare Pepe movement on-chain in 2016. Tokens
-              issued here are permanent — supply caps enforced by Bitcoin consensus, not the
-              artist&apos;s word. Nobody mints more. Not the artist, not UNATRARE, not anyone.
-              When a token is issued on Counterparty, it exists as long as Bitcoin exists.
+              XCP tokens issued on Counterparty are permanent. Supply caps are enforced by Bitcoin consensus — not promises. Nobody mints more. Not the artist, not UNATRARE, not anyone. When a token is issued on Counterparty, it exists as long as Bitcoin exists.
             </p>
             <p>
-              TAP, DMT, and UNATPEPE opened new ways to read Bitcoin itself as creative material.
-              UNATRARE connects those worlds through curation, community, and a node-powered
+              TAP, DMT, and the Trac Network opened new ways to read Bitcoin itself as creative material.
+              UNATRARE&apos;s mission is to connect those worlds through curation, community, and a node-powered
               archive that no one can pull the plug on.
             </p>
           </div>
@@ -146,9 +143,8 @@ export default function LandingPage() {
 
           <p className={styles.cryptSub}>
             Upload your art once. Get a permanent JSON URL. Paste it into your
-            Counterparty token — every wallet and explorer reads it
-            automatically. No server. No Arweave. Sealed on the UNATRARE
-            network by node operators.
+            Counterparty token — every wallet and explorer reads it automatically.
+            No server. No Arweave. Sealed by node operators on the UNATRARE network.
           </p>
 
           <div className={styles.cryptMeta}>
