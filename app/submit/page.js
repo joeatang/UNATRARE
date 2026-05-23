@@ -107,6 +107,10 @@ function Step0({ onNext, isVault }) {
           Then go to Counterparty and paste it into the <strong>description field</strong> of your token.
           <br /><br />
           <strong>If you create the token before getting this URL, your art will not be visible in wallets.</strong>
+          <br /><br />
+          <span style={{fontFamily:'var(--font-card)',fontSize:'9px',letterSpacing:'2px',color:'var(--text-dim)'}}>
+            first time? <Link href="/rules" style={{color:'var(--amber)',textDecoration:'none'}}>read submission rules →</Link>
+          </span>
         </p>
       )}
 
@@ -164,11 +168,13 @@ function Step0({ onNext, isVault }) {
                 <div className={styles.warningText}>
                   1. Copy the URL above.<br />
                   2. Go to Counterparty (Freewallet, Rarepepewallet, etc.).<br />
-                  3. Create your token with <strong>name exactly: {result.normalized}</strong><br />
+                  3. Create your token with <strong>name exactly: {result.normalized}</strong>.<br />
                   4. Paste the URL into the <strong>Description</strong> field.<br />
-                  5. Set supply between <strong>16 and 20,016</strong>. Non-divisible. Locked.<br />
-                  6. <strong>Do not distribute any supply</strong> before submitting — your full issuance must remain in your wallet.<br />
-                  7. Return here and click Continue to submit your art.
+                  5. Set supply between <strong>16 and 20,016</strong>. <strong>Non-divisible. Locked.</strong><br />
+                  &nbsp;&nbsp;&nbsp;<span style={{color:'var(--amber)'}}>⚠ Counterparty defaults to Divisible — change this immediately or you&apos;ll need a new token name.</span><br />
+                  6. <strong>Do not sell or distribute any supply</strong> before submitting. Distributing before approval voids your submission.<br />
+                  7. <strong>Do not burn any tokens.</strong> Burning forfeits your submission and ability to resubmit.<br />
+                  8. Return here and click Continue to submit your art.
                 </div>
               </>
             )}
@@ -452,8 +458,9 @@ function Step2({ data, onNext, onBack }) {
       <h2 className={styles.stepTitle}>UPL<span>O</span>AD ART</h2>
       <p className={styles.stepDesc}>
         Upload the art for <strong>{data.tokenName}</strong>.<br />
-        PNG, JPG, GIF, WebP, SVG, or HTML. Max 3 MB.<br />
-        Recommended: 400×560px (trading card ratio) or square.<br />
+        <strong>Required format: 400×560px</strong> (portrait trading card ratio).<br />
+        PNG preferred · GIF (animated OK, keep under 3 MB) · JPG · WebP · SVG. Hard max 10 MB.<br />
+        No websites, QR codes, or promotional text in the image.<br />
         A wallet-optimised thumbnail is generated automatically — full art displays in UNATRARE and wallets that support it.
       </p>
 

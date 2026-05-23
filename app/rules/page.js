@@ -152,7 +152,7 @@ export default function RulesPage() {
                 </li>
                 <li className={styles.rulesItem}>
                   <span className={styles.rulesNum}>4</span>
-                  <span className={styles.rulesText}><strong>Wait for judgment</strong> — the Pepe Council reviews your submission. Allow 2&ndash;5 days. If certified, your card goes live in the directory and wallets automatically. Then you can distribute.</span>
+                  <span className={styles.rulesText}><strong>Wait for judgment</strong> — the Pepe Council reviews your submission. Allow a few days. If certified, your card goes live in the directory and wallets automatically. Then you can distribute. No need to follow up &mdash; you&apos;ll know when it&apos;s done.</span>
                 </li>
               </ol>
             </div>
@@ -171,15 +171,19 @@ export default function RulesPage() {
                 </li>
                 <li className={styles.rulesItem}>
                   <span className={styles.rulesNum}>2</span>
-                  <span className={styles.rulesText}><strong>Supply: 16&ndash;20,016. Non-divisible. Locked.</strong> The token must be locked before you submit — no future minting, ever.</span>
+                  <span className={styles.rulesText}><strong>Supply: 16&ndash;20,016. Non-divisible. Locked.</strong> The token must be locked before you submit &mdash; no future minting, ever. <strong>Watch out:</strong> Counterparty defaults to divisible when you first create an asset. Change this immediately or you&apos;ll need to reissue under a different name.</span>
                 </li>
                 <li className={styles.rulesItem}>
                   <span className={styles.rulesNum}>3</span>
-                  <span className={styles.rulesText}><strong>Do NOT distribute before approval.</strong> Don&apos;t send, sell, or share your tokens to anyone until you&apos;re certified. Your full supply must be in the issuing address at submission.</span>
+                  <span className={styles.rulesText}><strong>Do NOT sell, send, or distribute before approval.</strong> Your full supply must be in your issuing wallet at submission. Distributing tokens before certification voids your submission &mdash; no exceptions.</span>
                 </li>
                 <li className={styles.rulesItem}>
                   <span className={styles.rulesNum}>4</span>
-                  <span className={styles.rulesText}><strong>Original work only.</strong> No copying existing Pepes. Our scientists check. Referencing and remixing is fine — straight copies are not.</span>
+                  <span className={styles.rulesText}><strong>Do not burn any of your original supply. Ever.</strong> Burning tokens &mdash; before or after approval &mdash; forfeits your submission and your ability to resubmit. Every token you issued must remain in circulation.</span>
+                </li>
+                <li className={styles.rulesItem}>
+                  <span className={styles.rulesNum}>5</span>
+                  <span className={styles.rulesText}><strong>Original work only.</strong> No copying existing Pepes. Our scientists check. Referencing and remixing is fine &mdash; straight copies are not.</span>
                 </li>
                 <li className={styles.rulesItem}>
                   <span className={styles.rulesNum}>5</span>
