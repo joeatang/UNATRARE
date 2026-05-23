@@ -38,9 +38,18 @@ function getLandingStats() {
     const archived = db.prepare(
       "SELECT COUNT(*) as n FROM archived_tokens WHERE fetch_status='fetched'"
     ).get().n;
-    return { certified, nodes, vault, archived };
+    const promoUsed = db.prepare(
+      "SELECT COUNT(*) as n FROM vault_assets WHERE is_promo = 1"
+    ).get().n;
+    const promoMax = parseInt(
+      db.prepare("SELECT value FROM vault_config WHERE key = 'promo_max_uploads'").get()?.value ?? '500'
+    );
+    const cryptThumbs = db.prepare(
+      'SELECT art_hash, art_mime FROM vault_assets ORDER BY uploaded_at DESC LIMIT 4'
+    ).all();
+    return { certified, nodes, vault, archived, promoUsed, promoMax, cryptThumbs };
   } catch {
-    return { certified: 0, nodes: 0, vault: 0, archived: 0 };
+    return { certified: 0, nodes: 0, vault: 0, archived: 0, promoUsed: 0, promoMax: 500, cryptThumbs: [] };
   }
 }
 
@@ -123,6 +132,57 @@ export default function LandingPage() {
             Where are you coming from?
           </p>
           <PathCards />
+        </section>
+
+        {/* ─────────────────────────────────────────────────────
+            PEPE CRYPT
+            ───────────────────────────────────────────────────── */}
+        <section className={styles.crypt}>
+          <div className={styles.cryptEyebrow}>· PEPE CRYPT ·</div>
+
+          <h2 className={styles.cryptTitle}>
+            Permanent art storage for your Counterparty token.
+          </h2>
+
+          <p className={styles.cryptSub}>
+            Upload your art once. Get a permanent JSON URL. Paste it into your
+            Counterparty token — every wallet and explorer reads it
+            automatically. No server. No Arweave. Sealed on the UNATRARE
+            network by node operators.
+          </p>
+
+          <div className={styles.cryptMeta}>
+            <span className={styles.cryptCount}>{stats.vault}</span>
+            {' '}assets sealed
+            {stats.promoUsed < stats.promoMax && (
+              <span className={styles.cryptPromo}>
+                {' '}· FREE PROMO · {stats.promoMax - stats.promoUsed} of {stats.promoMax} slots remaining
+              </span>
+            )}
+          </div>
+
+          {stats.cryptThumbs.length > 0 && (
+            <div className={styles.cryptThumbs}>
+              {stats.cryptThumbs.map(a => {
+                const ext = a.art_mime === 'image/jpeg' ? 'jpg'
+                  : a.art_mime?.split('/')[1]?.replace('jpeg', 'jpg') ?? 'png';
+                return (
+                  <div key={a.art_hash} className={styles.cryptThumb}>
+                    <img src={`/uploads/vault/${a.art_hash}.${ext}`} alt="" />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div className={styles.cryptCtas}>
+            <Link href="/vault" className={styles.cryptCtaPrimary}>
+              Explore the Crypt →
+            </Link>
+            <Link href="/vault/upload" className={styles.cryptCtaSecondary}>
+              Seal your art →
+            </Link>
+          </div>
         </section>
 
         {/* ─────────────────────────────────────────────────────
