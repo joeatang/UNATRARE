@@ -142,7 +142,7 @@ export default function SoftpwarPage() {
       <>
         <Nav />
         <main style={S.page}>
-          <div style={S.eyebrow}>COMMUNITY REGISTRATION</div>
+          <div style={S.eyebrow}>LIMITED REGISTRATION</div>
           <h1 style={S.title}>
             {result.alreadyRegistered && result.addressChanged ? <>UPDAT<span style={{ color: 'var(--amber)' }}>E</span>D</> : result.alreadyRegistered ? <>ALREA<span style={{ color: 'var(--amber)' }}>D</span>Y IN</> : <>REGIST<span style={{ color: 'var(--amber)' }}>E</span>RED</>}
           </h1>
@@ -168,13 +168,14 @@ export default function SoftpwarPage() {
           <div style={{ ...S.infoBox, marginTop: 20 }}>
             <div style={S.infoTitle}>WHAT HAPPENS NEXT</div>
             <div style={S.infoBody}>
-              When SOFTPWAR and RAREUNATPEPE distribution runs, your Counterparty address
-              will receive an allocation. Distribution date will be announced in the{' '}
-              <a href="https://t.me/unatrare" target="_blank" rel="noopener noreferrer"
-                style={{ color: 'var(--amber)' }}>UNATRARE Telegram</a>.
+              Your address is locked in. When this registration window closes, SOFTPWAR
+              and RAREUNATPEPE will be distributed to everyone on the list.
               <br /><br />
-              You can update your address at any time by coming back and re-authorizing
-              with Telegram.
+              Watch the{' '}
+              <a href="https://t.me/unatrare" target="_blank" rel="noopener noreferrer"
+                style={{ color: 'var(--amber)' }}>UNATRARE Telegram</a>{' '}
+              for the distribution announcement. You can update your address before the
+              window closes by coming back and re-authorizing.
             </div>
           </div>
 
@@ -207,11 +208,11 @@ export default function SoftpwarPage() {
       <main style={S.page}>
 
         {/* Header */}
-        <div style={S.eyebrow}>COMMUNITY REGISTRATION</div>
+        <div style={S.eyebrow}>LIMITED REGISTRATION</div>
         <h1 style={S.title}>
           SOFT<span style={{ color: 'var(--amber)' }}>P</span>WAR
         </h1>
-        <div style={S.subtitle}>RAREUNATPEPE</div>
+        <div style={S.subtitle}>+ RAREUNATPEPE · EARLY SUPPORTER CAMPAIGN</div>
 
         <RegCount count={regCount} />
 
@@ -219,14 +220,24 @@ export default function SoftpwarPage() {
         <div style={S.infoBox}>
           <div style={S.infoTitle}>WHAT IS THIS</div>
           <div style={S.infoBody}>
-            <strong style={{ color: 'var(--text)' }}>SOFTPWAR</strong> is a Counterparty cultural token —
-            2009 supply, issued to the community that built the early Rare Pepe / Counterparty scene.
+            <strong style={{ color: 'var(--text)' }}>SOFTPWAR</strong> is the official burn token for the
+            UNATRARE directory. 2,009 supply. Issued to the community supporting the project early,
+            burned with submissions, and distributed through dispensers as they open.
             <br /><br />
-            <strong style={{ color: 'var(--text)' }}>RAREUNATPEPE</strong> is a bonus token for UNATRARE
-            supporters — issued alongside SOFTPWAR to community members in this campaign.
+            <strong style={{ color: 'var(--text)' }}>RAREUNATPEPE</strong> is the official Series 1 card
+            for UNATRARE — a bonus token issued alongside SOFTPWAR to supporters in this campaign.
+            Genesis node operators will also be eligible to claim it.
             <br /><br />
+            This window is limited. If you found this, you&rsquo;re early.
+          </div>
+        </div>
+
+        <div style={{ ...S.infoBox, borderColor: 'var(--amber)', marginTop: 0 }}>
+          <div style={{ ...S.infoTitle, color: 'var(--text-dim)' }}>HOW IT WORKS</div>
+          <div style={S.infoBody}>
             Register your Counterparty address below. One allocation per Telegram account.
-            Distribution runs after the campaign closes.
+            Distribution runs after this registration window closes — tokens are sent directly
+            to the address you provide.
           </div>
         </div>
 
@@ -287,11 +298,12 @@ export default function SoftpwarPage() {
 
         {/* Fine print */}
         <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', lineHeight: 1.7 }}>
-          One allocation per Telegram account. Distribution date TBD — announced in the{' '}
+          One allocation per Telegram account. This window is open for a limited time — distribution
+          runs after it closes. Announcement in the{' '}
           <a href="https://t.me/unatrare" target="_blank" rel="noopener noreferrer"
             style={{ color: 'var(--text-dim)' }}>UNATRARE Telegram</a>.
-          Your Counterparty address is stored with your Telegram ID only — no other personal data is kept.
-          You can update your address at any time by re-registering.
+          Your Counterparty address and Telegram ID are stored — no other data is kept.
+          You can update your address before the window closes by re-registering.
         </div>
 
       </main>
