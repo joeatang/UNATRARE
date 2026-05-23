@@ -708,6 +708,9 @@ function DropsPanel({ authToken }) {
   const [natAddr, setNatAddr] = useState('');
   const [actionMsg, setActionMsg] = useState('');
   const [bundleInputs, setBundleInputs] = useState({});
+  const [bonusInputs, setBonusInputs] = useState({});  // drop.id → { token, qty }
+  const [showCreate, setShowCreate] = useState(false);
+  const [createForm, setCreateForm] = useState({ token_name: '', title: '', artist_handle: '', description: '', claim_type: 'cultural', supply_total: '', series: '0' });
 
   async function fetchDrops() {
     setLoading(true);
@@ -815,6 +818,44 @@ function DropsPanel({ authToken }) {
                     {dropClaims.length > 0 && <button onClick={() => exportCsv(drop.id, drop.token_name)} style={dBtn('var(--text-dim)')}>↓ CSV</button>}
                   </div>
                 )}
+                {/* Bonus token config row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap', padding: '8px 0', borderBottom: '1px solid var(--border-dim)' }}>
+                  <span style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--text-dim)', minWidth: 60 }}>BONUS:</span>
+                  {drop.bonus_token ? (
+                    <>
+                      <span style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: '#a78bfa', fontWeight: 700 }}>{drop.bonus_token}</span>
+                      <span style={{ fontFamily: 'var(--font-card)', fontSize: '9px', color: drop.bonus_remaining > 0 ? 'var(--green)' : '#ef4444' }}>
+                        {drop.bonus_remaining > 0 ? `${drop.bonus_remaining} remaining` : '⚠ SUPPLY = 0 — nobody gets bonus'}
+                      </span>
+                    </>
+                  ) : (
+                    <span style={{ fontFamily: 'var(--font-card)', fontSize: '9px', color: 'var(--text-dim)' }}>none set</span>
+                  )}
+                  <input
+                    type="text"
+                    placeholder="token (e.g. RAREUNATPEPE)"
+                    value={(bonusInputs[drop.id] || {}).token ?? (drop.bonus_token || '')}
+                    onChange={e => setBonusInputs(b => ({ ...b, [drop.id]: { ...b[drop.id], token: e.target.value.toUpperCase() } }))}
+                    style={dInput(160)}
+                  />
+                  <input
+                    type="number"
+                    placeholder="qty"
+                    value={(bonusInputs[drop.id] || {}).qty ?? ''}
+                    onChange={e => setBonusInputs(b => ({ ...b, [drop.id]: { ...b[drop.id], qty: e.target.value } }))}
+                    style={dInput(70)}
+                    min="0"
+                  />
+                  <button
+                    onClick={() => {
+                      const inp = bonusInputs[drop.id] || {};
+                      doAction({ action: 'set_bonus', drop_id: drop.id, bonus_token: inp.token ?? drop.bonus_token ?? '', bonus_remaining: Number(inp.qty ?? 0) });
+                      setBonusInputs(b => ({ ...b, [drop.id]: {} }));
+                    }}
+                    style={dBtn('#a78bfa')}
+                  >⬡ set bonus</button>
+                </div>
+
                 {/* Bundle config row */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap', padding: '8px 0', borderBottom: '1px solid var(--border-dim)' }}>
                   {drop.bundle_token ? (
@@ -914,6 +955,47 @@ function DropsPanel({ authToken }) {
           <button onClick={fetchDrops} disabled={loading} style={{ ...dBtn('var(--text-dim)'), marginTop: 8 }}>
             {loading ? '...' : '↻ refresh'}
           </button>
+
+          {/* ── Create new drop form ── */}
+          <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+            <button
+              onClick={() => setShowCreate(c => !c)}
+              style={{ ...dBtn('var(--text-dim)'), marginBottom: showCreate ? 12 : 0 }}
+            >+ CREATE NEW DROP</button>
+            {showCreate && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <input style={dInput(140)} placeholder="TOKEN NAME" value={createForm.token_name} onChange={e => setCreateForm(f => ({ ...f, token_name: e.target.value.toUpperCase() }))} />
+                  <input style={dInput(180)} placeholder="Title / display name" value={createForm.title} onChange={e => setCreateForm(f => ({ ...f, title: e.target.value }))} />
+                  <input style={dInput(100)} placeholder="artist handle" value={createForm.artist_handle} onChange={e => setCreateForm(f => ({ ...f, artist_handle: e.target.value }))} />
+                </div>
+                <textarea
+                  style={{ ...dInput(500), height: 60, resize: 'vertical', fontFamily: 'var(--font-body)', fontSize: 11 }}
+                  placeholder="Description"
+                  value={createForm.description}
+                  onChange={e => setCreateForm(f => ({ ...f, description: e.target.value }))}
+                />
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <select style={{ ...dInput(120), cursor: 'pointer' }} value={createForm.claim_type} onChange={e => setCreateForm(f => ({ ...f, claim_type: e.target.value }))}>
+                    <option value="cultural">cultural (free)</option>
+                    <option value="support">support (paid NAT)</option>
+                  </select>
+                  <input style={dInput(80)} type="number" placeholder="supply" value={createForm.supply_total} onChange={e => setCreateForm(f => ({ ...f, supply_total: e.target.value }))} min="1" />
+                  <span style={{ fontFamily: 'var(--font-card)', fontSize: '9px', color: 'var(--text-dim)' }}>series</span>
+                  <input style={dInput(50)} type="number" placeholder="0" value={createForm.series} onChange={e => setCreateForm(f => ({ ...f, series: e.target.value }))} min="0" />
+                  <button
+                    onClick={async () => {
+                      if (!createForm.token_name || !createForm.supply_total) { setActionMsg('✗ token_name and supply required'); return; }
+                      await doAction({ action: 'create', ...createForm, supply_total: Number(createForm.supply_total), series: Number(createForm.series || 0) });
+                      setCreateForm({ token_name: '', title: '', artist_handle: '', description: '', claim_type: 'cultural', supply_total: '', series: '0' });
+                      setShowCreate(false);
+                    }}
+                    style={dBtn('var(--amber-hot)')}
+                  >+ CREATE</button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
