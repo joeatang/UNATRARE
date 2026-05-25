@@ -596,8 +596,10 @@ function Step3({ data, onNext, onBack }) {
   async function handleVideoUpload(e) {
     const f = e.target.files?.[0];
     if (!f) return;
-    const VIDEO_OK = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v'];
-    if (!VIDEO_OK.includes(f.type)) { setVideoErr('Must be MP4 or WebM'); return; }
+    const ext = f.name.split('.').pop().toLowerCase();
+    const VIDEO_OK_EXT = ['mp4', 'webm', 'mov', 'm4v'];
+    if (!f.type.startsWith('video/') && !VIDEO_OK_EXT.includes(ext)) { setVideoErr('Must be MP4, WebM, or MOV'); return; }
+    const normalizedMime = ['video/quicktime','video/x-m4v'].includes(f.type) || ext === 'mov' || ext === 'm4v' ? 'video/mp4' : (f.type || 'video/mp4');
     if (f.size > 25 * 1024 * 1024) { setVideoErr('Video must be under 25 MB'); return; }
     setVideoUploading(true); setVideoErr('');
     try {
@@ -606,7 +608,7 @@ function Step3({ data, onNext, onBack }) {
       form.append('tokenName', data.tokenName);
       const res  = await fetch('/api/upload-art', { method: 'POST', body: form });
       const json = await res.json();
-      if (json.ok) setVideoResult({ url: json.url, hash: json.hash || '', mime: (f.type === 'video/quicktime' || f.type === 'video/x-m4v') ? 'video/mp4' : f.type });
+      if (json.ok) setVideoResult({ url: json.url, hash: json.hash || '', mime: normalizedMime });
       else         setVideoErr(json.error || 'Upload failed');
     } catch { setVideoErr('Network error — please try again'); }
     setVideoUploading(false);
@@ -776,7 +778,7 @@ function Step3({ data, onNext, onBack }) {
             <span style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px', color:'var(--green)'}}>✓ uploaded</span>
           )}
         </div>
-        <input ref={videoRef} type="file" accept="video/*"
+        <input ref={videoRef} type="file"
           style={{display:'none'}} onChange={handleVideoUpload} />
         {videoErr && <div className={styles.inputError}>{videoErr}</div>}
         {videoResult && (

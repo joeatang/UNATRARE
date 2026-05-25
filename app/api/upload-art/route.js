@@ -62,6 +62,20 @@ const MIME_EXT = {
   'video/x-m4v':     'm4v',
 };
 
+// Extension → normalised MIME fallback (for browsers that report wrong/empty MIME types)
+const EXT_MIME_FALLBACK = {
+  mp4: 'video/mp4', m4v: 'video/x-m4v', mov: 'video/quicktime', webm: 'video/webm',
+  mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg', flac: 'audio/flac', m4a: 'audio/mp4',
+  png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp',
+  svg: 'image/svg+xml', html: 'text/html',
+};
+
+function resolveFileMime(reportedType, filename) {
+  if (ALLOWED_MIME.has(reportedType)) return reportedType;
+  const ext = (filename || '').split('.').pop().toLowerCase();
+  return EXT_MIME_FALLBACK[ext] || reportedType;
+}
+
 // Per-type size limits
 const MAX_BYTES_IMAGE = 15 * 1024 * 1024; // 15 MB
 const MAX_BYTES_AUDIO = 15 * 1024 * 1024; // 15 MB
@@ -132,7 +146,8 @@ export async function POST(request) {
     }
   } catch { /* DB not ready — non-blocking, proceed */ }
 
-  if (!ALLOWED_MIME.has(file.type)) {
+  const effectiveMime = resolveFileMime(file.type, file.name);
+  if (!ALLOWED_MIME.has(effectiveMime)) {
     return NextResponse.json({
       ok: false,
       error: 'Unsupported file type',
@@ -140,8 +155,8 @@ export async function POST(request) {
   }
 
   const bytes     = await file.arrayBuffer();
-  const mediaType = getMediaType(file.type);
-  const maxBytes  = getMaxBytes(file.type);
+  const mediaType = getMediaType(effectiveMime);
+  const maxBytes  = getMaxBytes(effectiveMime);
   if (bytes.byteLength > maxBytes) {
     const limitLabel = mediaType === 'audio' ? '15 MB' : mediaType === 'video' ? '25 MB' : '15 MB';
     return NextResponse.json({
@@ -152,7 +167,7 @@ export async function POST(request) {
 
   const buf    = Buffer.from(bytes);
   const hash   = createHash('sha256').update(buf).digest('hex');
-  const ext    = MIME_EXT[file.type] || file.type.split('/')[1].replace('jpeg', 'jpg');
+  const ext    = MIME_EXT[effectiveMime] || effectiveMime.split('/')[1].replace('jpeg', 'jpg');
   // Audio/video get a _audio/_video suffix so they don't collide with the image file
   const suffix = mediaType === 'audio' ? '_audio' : mediaType === 'video' ? '_video' : '';
   const filename = `${normalized}${suffix}.${ext}`;
@@ -166,7 +181,7 @@ export async function POST(request) {
     // art file there causes timeouts for anything over ~200 KB.
     // We extract the first frame for animated GIFs so sharp doesn't decode all frames.
     let icon_url = null;
-    if (THUMBABLE_MIME.has(file.type)) {
+    if (THUMBABLE_MIME.has(effectiveMime)) {
       try {
         const iconBuf = await sharp(buf, { pages: 1 })
           .resize(48, 48, { fit: 'cover', position: 'centre' })
@@ -182,7 +197,7 @@ export async function POST(request) {
     }
 
     // Fire-and-forget: also store in Hyperdrive for P2P redundancy
-    storeArt(hash, buf.toString('base64'), file.type).catch(() => {});
+    storeArt(hash, buf.toString('base64'), effectiveMime).catch(() => {});
 
     // Public URL — served by Next.js static file serving
     const url = `/uploads/${filename}`;
