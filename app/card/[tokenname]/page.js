@@ -182,10 +182,18 @@ export default async function CardPage({ params }) {
               </div>
               <div className={`${styles.cardArt} ${styles.cardArtWrap}${token.council_certified === 1 ? ' ' + styles.cardArtCertified : ''}`}>
                 {token.revealed_at && artDisplayUrl ? (
-                  <img
-                    src={artDisplayUrl}
-                    alt={token.display_title || token.token_name}
-                  />
+                  token.art_mime?.startsWith('video/') ? (
+                    <video
+                      src={artDisplayUrl}
+                      autoPlay muted loop playsInline
+                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    />
+                  ) : (
+                    <img
+                      src={artDisplayUrl}
+                      alt={token.display_title || token.token_name}
+                    />
+                  )
                 ) : !token.revealed_at ? (
                   /* Mystery pack — art not yet dropped */
                   <div className={styles.artPlaceholder} style={{

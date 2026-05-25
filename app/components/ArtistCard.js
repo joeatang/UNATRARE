@@ -70,13 +70,21 @@ export default function ArtistCard({ token }) {
       {/* Art area */}
       <div className={styles.artFrame}>
         {art_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={art_url}
-            alt={token_name}
-            className={styles.artImg}
-            loading="lazy"
-          />
+          art_mime?.startsWith('video/') ? (
+            <video
+              src={art_url}
+              autoPlay muted loop playsInline
+              className={styles.artImg}
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={art_url}
+              alt={token_name}
+              className={styles.artImg}
+              loading="lazy"
+            />
+          )
         ) : (
           <div className={styles.artPlaceholder}>
             <div className={styles.pepeSilhouette}>
