@@ -596,7 +596,7 @@ function Step3({ data, onNext, onBack }) {
   async function handleVideoUpload(e) {
     const f = e.target.files?.[0];
     if (!f) return;
-    const VIDEO_OK = ['video/mp4', 'video/webm'];
+    const VIDEO_OK = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v'];
     if (!VIDEO_OK.includes(f.type)) { setVideoErr('Must be MP4 or WebM'); return; }
     if (f.size > 25 * 1024 * 1024) { setVideoErr('Video must be under 25 MB'); return; }
     setVideoUploading(true); setVideoErr('');
@@ -776,7 +776,7 @@ function Step3({ data, onNext, onBack }) {
             <span style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px', color:'var(--green)'}}>✓ uploaded</span>
           )}
         </div>
-        <input ref={videoRef} type="file" accept="video/mp4,video/webm"
+        <input ref={videoRef} type="file" accept="video/mp4,video/webm,video/quicktime,.mp4,.m4v"
           style={{display:'none'}} onChange={handleVideoUpload} />
         {videoErr && <div className={styles.inputError}>{videoErr}</div>}
         {videoResult && (
