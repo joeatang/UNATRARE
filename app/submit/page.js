@@ -776,7 +776,7 @@ function Step3({ data, onNext, onBack }) {
             <span style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px', color:'var(--green)'}}>✓ uploaded</span>
           )}
         </div>
-        <input ref={videoRef} type="file" accept="video/mp4,video/webm,video/quicktime,.mp4,.m4v"
+        <input ref={videoRef} type="file" accept="video/*"
           style={{display:'none'}} onChange={handleVideoUpload} />
         {videoErr && <div className={styles.inputError}>{videoErr}</div>}
         {videoResult && (
