@@ -64,6 +64,9 @@ function TokenRow({ token, authToken, onAction }) {
   const [announceCopied, setAnnounceCopied] = useState(false);
   const [dirHidden, setDirHidden] = useState(!!token.directory_hidden);
   const [stamped, setStamped] = useState(!!token.council_certified);
+  const [localCoverUrl, setLocalCoverUrl] = useState(token.art_cover_url || '');
+  const [coverUploading, setCoverUploading] = useState(false);
+  const [coverMsg, setCoverMsg] = useState('');
 
   async function act(action) {
     setLoading(action);
@@ -190,6 +193,54 @@ function TokenRow({ token, authToken, onAction }) {
               {token.art_mime?.startsWith('video/')
                 ? <video src={token.art_url} autoPlay muted loop playsInline className={styles.detailImg} style={{maxWidth:'100%',display:'block'}} />
                 : <img src={token.art_url} alt={token.token_name} className={styles.detailImg} />}
+            </div>
+          )}
+
+          {token.art_mime?.startsWith('video/') && (
+            <div style={{marginBottom:16, padding:'12px', border:'1px solid var(--amber)', background:'rgba(255,180,0,0.05)'}}>
+              <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'3px', color:'var(--amber)', marginBottom:8}}>COVER IMAGE (wallet thumbnail + AI judge)</div>
+              {localCoverUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={localCoverUrl} alt="cover" style={{width:80, height:80, objectFit:'cover', display:'block', marginBottom:8, border:'1px solid var(--border)'}} />
+              )}
+              <label style={{display:'inline-block', padding:'6px 12px', border:'1px solid var(--border)', cursor:'pointer', fontFamily:'var(--font-card)', fontSize:'10px', letterSpacing:'2px', color:'var(--text)'}}>
+                {coverUploading ? 'uploading...' : localCoverUrl ? '↺ replace cover' : '+ upload cover'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{display:'none'}}
+                  disabled={coverUploading}
+                  onChange={async e => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setCoverUploading(true);
+                    setCoverMsg('');
+                    try {
+                      const fd = new FormData();
+                      fd.append('file', file);
+                      fd.append('tokenName', token.token_name);
+                      const up = await fetch('/api/upload-art', { method: 'POST', body: fd });
+                      const upJson = await up.json();
+                      if (!upJson.ok) throw new Error(upJson.error || 'upload failed');
+                      const res = await fetch('/api/admin/action', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+                        body: JSON.stringify({ tokenName: token.token_name, action: 'set_cover', coverUrl: upJson.url }),
+                      });
+                      const json = await res.json();
+                      if (!json.ok) throw new Error(json.error || 'set_cover failed');
+                      setLocalCoverUrl(upJson.url);
+                      setCoverMsg('✓ cover saved — re-judge to score visually');
+                    } catch (err) {
+                      setCoverMsg('✗ ' + err.message);
+                    } finally {
+                      setCoverUploading(false);
+                      e.target.value = '';
+                    }
+                  }}
+                />
+              </label>
+              {coverMsg && <div style={{marginTop:6, fontFamily:'var(--font-body)', fontSize:'11px', color: coverMsg.startsWith('✓') ? 'var(--green)' : 'var(--red)'}}>{coverMsg}</div>}
             </div>
           )}
           <div className={styles.detailMeta}>

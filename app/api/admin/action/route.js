@@ -52,7 +52,7 @@ export async function POST(request) {
     return NextResponse.json({ error: 'invalid JSON' }, { status: 400 });
   }
 
-  const { tokenName, action, note, series: seriesOverride } = body;
+  const { tokenName, action, note, series: seriesOverride, coverUrl } = body;
 
   if (!tokenName || typeof tokenName !== 'string') {
     return NextResponse.json({ error: 'tokenName required' }, { status: 400 });
@@ -61,7 +61,7 @@ export async function POST(request) {
   const name = tokenName.toUpperCase().trim();
   const actions = ['approve', 'reject', 'judge', 'rejudge', 'genesis', 'purge', 'reveal',
                    'hide_from_directory', 'show_in_directory',
-                   'certify_stamp', 'decertify_stamp'];
+                   'certify_stamp', 'decertify_stamp', 'set_cover'];
   if (!actions.includes(action)) {
     return NextResponse.json({ error: 'invalid action' }, { status: 400 });
   }
@@ -100,6 +100,14 @@ export async function POST(request) {
     if (action === 'show_in_directory') {
       db.prepare('UPDATE tokens SET directory_hidden=0 WHERE token_name=?').run(name);
       return NextResponse.json({ ok: true, action: 'shown_in_directory' });
+    }
+
+    if (action === 'set_cover') {
+      if (!coverUrl || typeof coverUrl !== 'string' || !coverUrl.startsWith('/uploads/')) {
+        return NextResponse.json({ error: 'coverUrl must be an /uploads/ path' }, { status: 422 });
+      }
+      db.prepare('UPDATE tokens SET art_cover_url = ? WHERE token_name = ?').run(coverUrl.slice(0, 500), name);
+      return NextResponse.json({ ok: true, art_cover_url: coverUrl });
     }
 
     if (action === 'judge') {
