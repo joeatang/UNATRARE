@@ -342,8 +342,10 @@ function CardThumb({ token, artUrl }) {
     <Link href={`/card/${token.token_name}`} className={styles.card}>
       <div className={styles.cardArt}>
         {showArt ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={artUrl} alt={token.token_name} className={styles.cardImg} />
+          token.art_mime?.startsWith('video/')
+            ? <video src={artUrl} autoPlay muted loop playsInline className={styles.cardImg} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}} />
+            // eslint-disable-next-line @next/next/no-img-element
+            : <img src={artUrl} alt={token.token_name} className={styles.cardImg} />
         ) : (
           <div className={styles.cardImgPlaceholder} />
         )}

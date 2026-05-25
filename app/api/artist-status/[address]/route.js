@@ -16,7 +16,7 @@ export async function GET(request, { params }) {
       SELECT
         token_name, status, submitted_at, judged_at,
         judge_score, judge_notes, rejection_reason,
-        art_url, artist_handle, display_title, description,
+        art_url, art_mime, art_cover_url, artist_handle, display_title, description,
         audio_url, video_url, category, subcategory,
         series, card_number, supply,
         unatpepe_alloc_qty, dispenser_address
@@ -61,6 +61,8 @@ export async function GET(request, { params }) {
         judgeBreakdown,
         rejectionReason:  r.rejection_reason || null,
         artUrl:           r.art_url,
+        artMime:          r.art_mime || '',
+        artCoverUrl:      r.art_cover_url || '',
         artistHandle:     r.artist_handle,
         displayTitle:     r.display_title || '',
         description:      r.description,

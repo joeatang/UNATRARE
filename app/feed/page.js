@@ -263,7 +263,9 @@ export default function FeedPage() {
                   <div className={feedStyles.verdictLeft}>
                     <div className={feedStyles.thumb}>
                       {(isApproved && isRevealed && artUrl) ? (
-                        <img src={artUrl} alt={token.token_name} className={feedStyles.thumbImg} />
+                        token.art_mime?.startsWith('video/')
+                          ? <video src={artUrl} autoPlay muted loop playsInline className={feedStyles.thumbImg} style={{objectFit:'cover',width:'100%',height:'100%'}} />
+                          : <img src={artUrl} alt={token.token_name} className={feedStyles.thumbImg} />
                       ) : (
                         <div className={feedStyles.thumbPlaceholder}>{isApproved ? '🔒' : '✗'}</div>
                       )}

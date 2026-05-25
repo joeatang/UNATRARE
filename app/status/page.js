@@ -917,7 +917,11 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
           {sub.artUrl && (
             <div className={styles.thumb}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={sub.artUrl} alt={sub.tokenName} className={styles.thumbImg} />
+              {sub.artMime?.startsWith('video/')
+                ? (sub.artCoverUrl
+                  ? <img src={sub.artCoverUrl} alt={sub.tokenName} className={styles.thumbImg} />
+                  : <div className={styles.thumbImg} style={{display:'flex',alignItems:'center',justifyContent:'center',background:'var(--surface)',fontSize:18}}>▶</div>)
+                : <img src={sub.artUrl} alt={sub.tokenName} className={styles.thumbImg} />}
             </div>
           )}
           <div>
@@ -1060,8 +1064,13 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
                 {sub.status === 'approved' ? (
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
                     {sub.artUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={sub.artUrl} alt="certified art" style={{ height: 64, width: 64, objectFit: 'cover', border: '1px solid var(--green)', flexShrink: 0 }} />
+                      sub.artMime?.startsWith('video/')
+                        ? (sub.artCoverUrl
+                          // eslint-disable-next-line @next/next/no-img-element
+                          ? <img src={sub.artCoverUrl} alt="certified art" style={{ height: 64, width: 64, objectFit: 'cover', border: '1px solid var(--green)', flexShrink: 0 }} />
+                          : <div style={{ height: 64, width: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--green)', background: 'var(--surface)', fontSize: 22, flexShrink: 0 }}>▶</div>)
+                        // eslint-disable-next-line @next/next/no-img-element
+                        : <img src={sub.artUrl} alt="certified art" style={{ height: 64, width: 64, objectFit: 'cover', border: '1px solid var(--green)', flexShrink: 0 }} />
                     )}
                     <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6 }}>
                       Art is locked after certification. The council judged this specific image — swapping it after approval would undermine the certification.<br />
@@ -1075,8 +1084,13 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
                     </div>
                     {sub.artUrl && artUploadState !== 'ready' && (
                       <div style={{ marginBottom: 8 }}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={sub.artUrl} alt="current art" style={{ height: 64, width: 64, objectFit: 'cover', border: '1px solid var(--border)' }} />
+                        {sub.artMime?.startsWith('video/')
+                          ? (sub.artCoverUrl
+                            // eslint-disable-next-line @next/next/no-img-element
+                            ? <img src={sub.artCoverUrl} alt="current art" style={{ height: 64, width: 64, objectFit: 'cover', border: '1px solid var(--border)' }} />
+                            : <div style={{ height: 64, width: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', background: 'var(--surface)', fontSize: 22 }}>▶</div>)
+                          // eslint-disable-next-line @next/next/no-img-element
+                          : <img src={sub.artUrl} alt="current art" style={{ height: 64, width: 64, objectFit: 'cover', border: '1px solid var(--border)' }} />}
                         <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 4 }}>current</div>
                       </div>
                     )}

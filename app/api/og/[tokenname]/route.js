@@ -32,7 +32,12 @@ export async function GET(request, { params }) {
   // Always use absolute URLs — ImageResponse fetches them at render time
   let artUrl = null;
   if (isRevealed) {
-    if (token.art_hash) {
+    if (token.art_mime?.startsWith('video/') && token.art_cover_url) {
+      // Use cover image for OG — ImageResponse cannot render video
+      artUrl = token.art_cover_url.startsWith('http')
+        ? token.art_cover_url
+        : `${SITE_URL}${token.art_cover_url}`;
+    } else if (token.art_hash) {
       artUrl = `${SITE_URL}/art/${token.art_hash}`;
     } else if (token.art_url) {
       artUrl = token.art_url.startsWith('http') ? token.art_url : `${SITE_URL}${token.art_url}`;

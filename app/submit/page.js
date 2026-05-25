@@ -363,6 +363,17 @@ function Step2({ data, onNext, onBack }) {
   const [useVault, setUseVault] = useState(true);
   const fileRef = useRef();
 
+  // ── Video cover image state ───────────────────────────────────
+  const [isVideo, setIsVideo] = useState(false);
+  const [uploadedArt, setUploadedArt] = useState(null); // { url, hash, mime } — set after primary art upload
+  const [coverPreview, setCoverPreview] = useState(null);
+  const [coverUploading, setCoverUploading] = useState(false);
+  const [coverErrMsg, setCoverErrMsg] = useState('');
+  const [coverResult, setCoverResult] = useState(null); // { url, hash }
+  const videoRef = useRef();
+  const coverFileRef = useRef();
+  const canvasRef = useRef();
+
   // ── Vault bypass: art already stored ─────────────────────────
   if (data.vaultHash && data.vaultMime && useVault) {
     const ext = ({ 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp', 'image/svg+xml': 'svg' })[data.vaultMime] ?? 'png';
@@ -407,25 +418,84 @@ function Step2({ data, onNext, onBack }) {
     const allowedImages = ['image/png','image/jpeg','image/gif','image/webp','image/svg+xml','text/html'];
     const allowedVideo  = ['video/mp4','video/webm','video/quicktime','video/x-m4v'];
     const ext = f.name.split('.').pop().toLowerCase();
-    const isVideo = allowedVideo.includes(f.type) || f.type.startsWith('video/') || ['mp4','webm','mov','m4v'].includes(ext);
-    if (!allowedImages.includes(f.type) && !isVideo) {
+    const vid = allowedVideo.includes(f.type) || f.type.startsWith('video/') || ['mp4','webm','mov','m4v'].includes(ext);
+    if (!allowedImages.includes(f.type) && !vid) {
       setErrMsg('File must be PNG, JPG, GIF, WebP, SVG, HTML, MP4, or WebM');
       return;
     }
-    const maxSize = isVideo ? 25 * 1024 * 1024 : 15 * 1024 * 1024;
-    const maxLabel = isVideo ? '25 MB' : '15 MB';
+    const maxSize = vid ? 25 * 1024 * 1024 : 15 * 1024 * 1024;
+    const maxLabel = vid ? '25 MB' : '15 MB';
     if (f.size > maxSize) {
-      setErrMsg(`File too large (${(f.size/1024/1024).toFixed(1)} MB) — ${isVideo ? 'video' : 'image'} max is ${maxLabel}.`);
+      setErrMsg(`File too large (${(f.size/1024/1024).toFixed(1)} MB) — ${vid ? 'video' : 'image'} max is ${maxLabel}.`);
       return;
     }
-    // Soft warning — not a block
     if (f.size > 5 * 1024 * 1024) {
       setErrMsg(`⚠️ Large file (${(f.size/1024/1024).toFixed(1)} MB) — images over 5 MB may load slowly in some wallets. Consider compressing if possible.`);
     } else {
       setErrMsg('');
     }
+    setIsVideo(vid);
     setFile(f);
     setPreview(URL.createObjectURL(f));
+    // Reset any previous cover state if user swaps files
+    setUploadedArt(null);
+    setCoverPreview(null);
+    setCoverResult(null);
+    setCoverErrMsg('');
+  }
+
+  // Canvas capture: draw current video frame to canvas → jpeg blob → auto-upload
+  function captureVideoFrame() {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || video.readyState < 2) return;
+    canvas.width  = video.videoWidth  || 400;
+    canvas.height = video.videoHeight || 560;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(blob => {
+      if (!blob) return;
+      const f = new File([blob], `${data.tokenName}_cover.jpg`, { type: 'image/jpeg' });
+      setCoverPreview(URL.createObjectURL(f));
+      uploadCover(f);
+    }, 'image/jpeg', 0.92);
+  }
+
+  async function uploadCover(f) {
+    setCoverUploading(true);
+    setCoverErrMsg('');
+    try {
+      const form = new FormData();
+      form.append('file', f);
+      form.append('tokenName', data.tokenName);
+      const res  = await fetch('/api/upload-art', { method: 'POST', body: form });
+      const text = await res.text();
+      let json;
+      try { json = JSON.parse(text); } catch {
+        setCoverErrMsg(`Cover upload failed (HTTP ${res.status})`);
+        setCoverUploading(false);
+        return;
+      }
+      if (json.ok) {
+        setCoverResult({ url: json.url, hash: json.hash || '' });
+      } else {
+        setCoverErrMsg(json.error || 'Cover upload failed');
+      }
+    } catch {
+      setCoverErrMsg('Network error — please try again');
+    }
+    setCoverUploading(false);
+  }
+
+  function handleCoverFile(e) {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    const allowed = ['image/png','image/jpeg','image/gif','image/webp'];
+    if (!allowed.includes(f.type)) { setCoverErrMsg('Cover must be PNG, JPG, GIF, or WebP'); return; }
+    if (f.size > 10 * 1024 * 1024) { setCoverErrMsg('Cover image max is 10 MB'); return; }
+    setCoverErrMsg('');
+    setCoverResult(null);
+    setCoverPreview(URL.createObjectURL(f));
+    uploadCover(f);
   }
 
   async function handleUpload() {
@@ -437,7 +507,6 @@ function Step2({ data, onNext, onBack }) {
       form.append('file', file);
       form.append('tokenName', data.tokenName);
       const res = await fetch('/api/upload-art', { method: 'POST', body: form });
-      // Read body as text first so we can handle non-JSON error pages gracefully
       const text = await res.text();
       let json;
       try { json = JSON.parse(text); } catch {
@@ -447,7 +516,13 @@ function Step2({ data, onNext, onBack }) {
       }
       if (json.ok) {
         const normalizedArtMime = ['video/quicktime','video/x-m4v'].includes(file.type) ? 'video/mp4' : file.type;
-        onNext({ ...data, artUrl: json.url, artMime: normalizedArtMime, artHash: json.hash || '' });
+        if (!isVideo) {
+          onNext({ ...data, artUrl: json.url, artMime: normalizedArtMime, artHash: json.hash || '' });
+        } else {
+          // Video: store art result and show cover image section
+          setUploadedArt({ url: json.url, mime: normalizedArtMime, hash: json.hash || '' });
+          setUploading(false);
+        }
       } else {
         setErrMsg(json.error || 'Upload failed');
         setUploading(false);
@@ -456,6 +531,113 @@ function Step2({ data, onNext, onBack }) {
       setErrMsg('Network error — please try again');
       setUploading(false);
     }
+  }
+
+  // ── Cover image phase (after video is uploaded) ───────────────
+  if (uploadedArt && isVideo) {
+    return (
+      <div className={styles.stepBox}>
+        <div className={styles.stepEyebrow}>Step 3 of 7</div>
+        <h2 className={styles.stepTitle}>COVER IM<span>A</span>GE</h2>
+
+        {/* Explanation banner */}
+        <div style={{ border: '1px solid var(--amber)', borderLeft: '3px solid var(--amber)', padding: '14px 18px', marginBottom: 24, background: 'rgba(201,168,76,0.04)' }}>
+          <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px', color: 'var(--amber)', marginBottom: 8 }}>
+            ◈ COUNCIL REVIEW IMAGE + WALLET THUMBNAIL
+          </div>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.65 }}>
+            Video art requires a cover image. The <strong style={{ color: 'var(--text)' }}>AI Council judges your art from this image</strong>, and it becomes your card&apos;s thumbnail in Freewallet and XChain.<br />
+            Choose your most iconic frame — this is what the council and collectors see first.
+          </div>
+        </div>
+
+        {/* Hidden video + canvas for frame capture */}
+        <video
+          ref={videoRef}
+          src={preview}
+          style={{ display: 'none' }}
+          muted
+          playsInline
+          onLoadedData={captureVideoFrame}
+        />
+        <canvas ref={canvasRef} style={{ display: 'none' }} />
+
+        {/* Two-column: cover preview + actions */}
+        <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: 24 }}>
+
+          {/* Cover image preview box */}
+          <div style={{ flexShrink: 0, width: 120 }}>
+            <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 8 }}>
+              COVER PREVIEW
+            </div>
+            <div style={{ width: 120, height: 120, border: '1px solid var(--border)', background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+              {coverPreview
+                ? <img src={coverPreview} alt="cover" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                : <span style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--text-dim)' }}>capturing…</span>
+              }
+            </div>
+            {coverResult && !coverUploading && (
+              <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--green)', marginTop: 6 }}>✓ ready</div>
+            )}
+            {coverUploading && (
+              <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--amber)', marginTop: 6 }}>uploading…</div>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 16 }}>
+              A frame was captured automatically from your video. If it&apos;s not the right moment, use the buttons below.
+            </div>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
+              <button
+                type="button"
+                className={styles.backBtn}
+                style={{ margin: 0 }}
+                onClick={captureVideoFrame}
+                disabled={coverUploading}
+              >
+                recapture frame
+              </button>
+              <button
+                type="button"
+                className={styles.backBtn}
+                style={{ margin: 0 }}
+                onClick={() => coverFileRef.current?.click()}
+                disabled={coverUploading}
+              >
+                upload your own
+              </button>
+            </div>
+            <input
+              ref={coverFileRef}
+              type="file"
+              accept="image/png,image/jpeg,image/gif,image/webp"
+              style={{ display: 'none' }}
+              onChange={handleCoverFile}
+            />
+            {coverErrMsg && (
+              <div className={styles.inputError}>{coverErrMsg}</div>
+            )}
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', lineHeight: 1.5 }}>
+              PNG, JPG, GIF, or WebP · max 10 MB · square crop recommended
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <button className={styles.backBtn} onClick={() => { setUploadedArt(null); setCoverResult(null); setCoverPreview(null); }}>← back</button>
+          <button
+            className={styles.nextBtn}
+            onClick={() => onNext({ ...data, artUrl: uploadedArt.url, artMime: uploadedArt.mime, artHash: uploadedArt.hash, coverUrl: coverResult.url, coverHash: coverResult.hash })}
+            disabled={!coverResult || coverUploading}
+            style={(!coverResult || coverUploading) ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
+          >
+            continue →
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -1128,6 +1310,7 @@ function Step5({ data }) {
             videoHash:      data.videoHash      || '',
             unatpepeAllocQty: data.unatpepeAllocQty || 0,
             burnTxid:         data.burnTxid         || '',
+            coverUrl:         data.coverUrl         || '',
           }),
         });
         const json = await res.json();

@@ -126,7 +126,9 @@ function TokenRow({ token, authToken, onAction }) {
       <div className={styles.rowMain} onClick={() => setExpanded(v => !v)}>
         <div className={styles.rowArt} style={{position:'relative'}}>
           {token.art_url ? (
-            <img src={token.art_url} alt={token.token_name} className={styles.rowThumb} />
+            token.art_mime?.startsWith('video/')
+              ? <video src={token.art_url} autoPlay muted loop playsInline className={styles.rowThumb} style={{objectFit:'cover',display:'block'}} />
+              : <img src={token.art_url} alt={token.token_name} className={styles.rowThumb} />
           ) : (
             <div className={styles.rowThumbEmpty} />
           )}
@@ -185,7 +187,9 @@ function TokenRow({ token, authToken, onAction }) {
         <div className={styles.rowDetail}>
           {token.art_url && (
             <div className={styles.detailArt}>
-              <img src={token.art_url} alt={token.token_name} className={styles.detailImg} />
+              {token.art_mime?.startsWith('video/')
+                ? <video src={token.art_url} autoPlay muted loop playsInline className={styles.detailImg} style={{maxWidth:'100%',display:'block'}} />
+                : <img src={token.art_url} alt={token.token_name} className={styles.detailImg} />}
             </div>
           )}
           <div className={styles.detailMeta}>
@@ -1248,7 +1252,9 @@ function DemoPanel({ authToken }) {
                   borderBottom: '1px solid var(--border-dim)',
                 }}>
                   {d.art_url && (
-                    <img src={d.art_url} alt="" style={{ width: 36, height: 36, objectFit: 'cover', border: '1px solid var(--border)' }} />
+                    d.art_mime?.startsWith('video/')
+                      ? <video src={d.art_url} autoPlay muted loop playsInline style={{ width: 36, height: 36, objectFit: 'cover', border: '1px solid var(--border)' }} />
+                      : <img src={d.art_url} alt="" style={{ width: 36, height: 36, objectFit: 'cover', border: '1px solid var(--border)' }} />
                   )}
                   <div style={{ flex: 1 }}>
                     <div style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', color: 'var(--amber)' }}>{d.token_name}</div>
