@@ -35,7 +35,12 @@ function checkUploadIpLimit(ip) {
 }
 
 const AUDIO_MIME = new Set(['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/mp4']);
-const VIDEO_MIME = new Set(['video/mp4', 'video/webm']);
+const VIDEO_MIME = new Set([
+  'video/mp4',
+  'video/webm',
+  'video/quicktime', // macOS/iOS often reports MP4 files with this MIME type
+  'video/x-m4v',     // M4V files (common on Apple devices)
+]);
 const ALLOWED_MIME = new Set([
   'image/png', 'image/jpeg', 'image/gif', 'image/webp',
   'image/svg+xml', 'text/html',
@@ -44,15 +49,17 @@ const ALLOWED_MIME = new Set([
 
 // Extension map for MIME types that need explicit mapping
 const MIME_EXT = {
-  'image/svg+xml': 'svg',
-  'text/html':     'html',
-  'audio/mpeg':    'mp3',
-  'audio/wav':     'wav',
-  'audio/ogg':     'ogg',
-  'audio/flac':    'flac',
-  'audio/mp4':     'm4a',
-  'video/mp4':     'mp4',
-  'video/webm':    'webm',
+  'image/svg+xml':   'svg',
+  'text/html':       'html',
+  'audio/mpeg':      'mp3',
+  'audio/wav':       'wav',
+  'audio/ogg':       'ogg',
+  'audio/flac':      'flac',
+  'audio/mp4':       'm4a',
+  'video/mp4':       'mp4',
+  'video/webm':      'webm',
+  'video/quicktime': 'mp4', // normalise to .mp4 extension
+  'video/x-m4v':     'm4v',
 };
 
 // Per-type size limits
