@@ -404,13 +404,18 @@ function Step2({ data, onNext, onBack }) {
   function handleFile(e) {
     const f = e.target.files?.[0];
     if (!f) return;
-    const allowed = ['image/png','image/jpeg','image/gif','image/webp','image/svg+xml','text/html'];
-    if (!allowed.includes(f.type)) {
-      setErrMsg('File must be PNG, JPG, GIF, WebP, SVG, or HTML');
+    const allowedImages = ['image/png','image/jpeg','image/gif','image/webp','image/svg+xml','text/html'];
+    const allowedVideo  = ['video/mp4','video/webm','video/quicktime','video/x-m4v'];
+    const ext = f.name.split('.').pop().toLowerCase();
+    const isVideo = allowedVideo.includes(f.type) || f.type.startsWith('video/') || ['mp4','webm','mov','m4v'].includes(ext);
+    if (!allowedImages.includes(f.type) && !isVideo) {
+      setErrMsg('File must be PNG, JPG, GIF, WebP, SVG, HTML, MP4, or WebM');
       return;
     }
-    if (f.size > 15 * 1024 * 1024) {
-      setErrMsg(`File too large (${(f.size/1024/1024).toFixed(1)} MB) — image max is 15 MB. Compress your file or export at a lower resolution.`);
+    const maxSize = isVideo ? 25 * 1024 * 1024 : 15 * 1024 * 1024;
+    const maxLabel = isVideo ? '25 MB' : '15 MB';
+    if (f.size > maxSize) {
+      setErrMsg(`File too large (${(f.size/1024/1024).toFixed(1)} MB) — ${isVideo ? 'video' : 'image'} max is ${maxLabel}.`);
       return;
     }
     // Soft warning — not a block
@@ -441,7 +446,8 @@ function Step2({ data, onNext, onBack }) {
         return;
       }
       if (json.ok) {
-        onNext({ ...data, artUrl: json.url, artMime: file.type, artHash: json.hash || '' });
+        const normalizedArtMime = ['video/quicktime','video/x-m4v'].includes(file.type) ? 'video/mp4' : file.type;
+        onNext({ ...data, artUrl: json.url, artMime: normalizedArtMime, artHash: json.hash || '' });
       } else {
         setErrMsg(json.error || 'Upload failed');
         setUploading(false);
@@ -459,7 +465,7 @@ function Step2({ data, onNext, onBack }) {
       <p className={styles.stepDesc}>
         Upload the art for <strong>{data.tokenName}</strong>.<br />
         <strong>Required format: 400×560px</strong> (portrait trading card ratio).<br />
-        PNG preferred · GIF (animated OK) · JPG · WebP · SVG · HTML. Max 15 MB. For MP4 video, use the optional Video section in the next step.<br />
+        PNG preferred · GIF (animated OK) · JPG · WebP · SVG · HTML · MP4 · WebM. Images max 15 MB, video max 25 MB.<br />
         No websites, QR codes, or promotional text in the image.<br />
         A wallet-optimised thumbnail is generated automatically — full art displays in UNATRARE and wallets that support it.
       </p>
@@ -479,7 +485,7 @@ function Step2({ data, onNext, onBack }) {
               {file ? file.name : 'click to select file'}
             </span>
           </div>
-          <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,text/html"
+          <input ref={fileRef} type="file"
             style={{display:'none'}} onChange={handleFile} />
 
           {errMsg && (
@@ -523,8 +529,11 @@ function Step2({ data, onNext, onBack }) {
               {/* Art area — 5:7 ratio */}
               <div style={{width:'100%', aspectRatio:'5/7', overflow:'hidden',
                 background:'var(--bg)', display:'flex', alignItems:'center', justifyContent:'center'}}>
-                <img src={preview} alt="preview"
-                  style={{width:'100%', height:'100%', objectFit:'contain', display:'block'}} />
+                {file && (file.type.startsWith('video/') || ['mp4','webm','mov','m4v'].includes(file.name.split('.').pop().toLowerCase()))
+                  ? <video src={preview} autoPlay muted loop playsInline
+                      style={{width:'100%', height:'100%', objectFit:'contain', display:'block'}} />
+                  : <img src={preview} alt="preview"
+                      style={{width:'100%', height:'100%', objectFit:'contain', display:'block'}} />}
               </div>
               {/* Footer */}
               <div style={{padding:'6px 8px', borderTop:'1px solid var(--border-dim)'}}>
