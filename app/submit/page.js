@@ -606,7 +606,7 @@ function Step3({ data, onNext, onBack }) {
       form.append('tokenName', data.tokenName);
       const res  = await fetch('/api/upload-art', { method: 'POST', body: form });
       const json = await res.json();
-      if (json.ok) setVideoResult({ url: json.url, hash: json.hash || '', mime: f.type });
+      if (json.ok) setVideoResult({ url: json.url, hash: json.hash || '', mime: (f.type === 'video/quicktime' || f.type === 'video/x-m4v') ? 'video/mp4' : f.type });
       else         setVideoErr(json.error || 'Upload failed');
     } catch { setVideoErr('Network error — please try again'); }
     setVideoUploading(false);
