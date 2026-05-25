@@ -840,6 +840,7 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
   async function handleArtFileChange(e) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > 15 * 1024 * 1024) { setArtUploadErr('File too large — image max is 15 MB'); setArtUploadState('error'); return; }
     setArtUploadState('uploading');
     setArtUploadErr('');
     setArtUpload(null);
@@ -1070,7 +1071,7 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
                 ) : (
                   <>
                     <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', marginBottom: 8, lineHeight: 1.5 }}>
-                      Upload a replacement image (PNG, JPG, GIF, WebP — max 3 MB). Leave blank to keep the current art.
+                      Upload a replacement image (PNG, JPG, GIF, WebP — max 15 MB). Leave blank to keep the current art.
                     </div>
                     {sub.artUrl && artUploadState !== 'ready' && (
                       <div style={{ marginBottom: 8 }}>

@@ -409,13 +409,13 @@ function Step2({ data, onNext, onBack }) {
       setErrMsg('File must be PNG, JPG, GIF, WebP, SVG, or HTML');
       return;
     }
-    if (f.size > 3 * 1024 * 1024) {
-      setErrMsg(`File too large (${(f.size/1024/1024).toFixed(1)} MB) — image max is 3 MB. Compress your file or export at a lower resolution.`);
+    if (f.size > 15 * 1024 * 1024) {
+      setErrMsg(`File too large (${(f.size/1024/1024).toFixed(1)} MB) — image max is 15 MB. Compress your file or export at a lower resolution.`);
       return;
     }
     // Soft warning — not a block
-    if (f.size > 1 * 1024 * 1024) {
-      setErrMsg(`⚠️ Large file (${(f.size/1024/1024).toFixed(1)} MB) — images over 1 MB load slowly in wallets. Consider compressing before uploading.`);
+    if (f.size > 5 * 1024 * 1024) {
+      setErrMsg(`⚠️ Large file (${(f.size/1024/1024).toFixed(1)} MB) — images over 5 MB may load slowly in some wallets. Consider compressing if possible.`);
     } else {
       setErrMsg('');
     }
@@ -459,7 +459,7 @@ function Step2({ data, onNext, onBack }) {
       <p className={styles.stepDesc}>
         Upload the art for <strong>{data.tokenName}</strong>.<br />
         <strong>Required format: 400×560px</strong> (portrait trading card ratio).<br />
-        PNG preferred · GIF (animated OK) · JPG · WebP · SVG · HTML. Max 3 MB. For MP4 video, use the optional Video section in the next step.<br />
+        PNG preferred · GIF (animated OK) · JPG · WebP · SVG · HTML. Max 15 MB. For MP4 video, use the optional Video section in the next step.<br />
         No websites, QR codes, or promotional text in the image.<br />
         A wallet-optimised thumbnail is generated automatically — full art displays in UNATRARE and wallets that support it.
       </p>

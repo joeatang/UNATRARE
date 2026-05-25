@@ -10,7 +10,7 @@ import { getDb } from '../../../lib/db';
 // Uploads are stored in /public/uploads/ — served by Next.js as /uploads/FILENAME
 // This directory persists on the server across restarts.
 // Allowed: PNG, JPG, GIF, WebP, SVG, HTML (images); MP3/WAV/OGG/FLAC (audio); MP4/WebM (video).
-// Size limits: images 3 MB, audio 15 MB, video 25 MB.
+// Size limits: images 15 MB, audio 15 MB, video 25 MB.
 // A 48x48 PNG icon thumbnail is generated for raster images only (wallet `image` field).
 
 // process.cwd() is always the Next.js project root in both dev and production
@@ -63,7 +63,7 @@ const MIME_EXT = {
 };
 
 // Per-type size limits
-const MAX_BYTES_IMAGE = 3  * 1024 * 1024; //  3 MB
+const MAX_BYTES_IMAGE = 15 * 1024 * 1024; // 15 MB
 const MAX_BYTES_AUDIO = 15 * 1024 * 1024; // 15 MB
 const MAX_BYTES_VIDEO = 25 * 1024 * 1024; // 25 MB
 
@@ -143,7 +143,7 @@ export async function POST(request) {
   const mediaType = getMediaType(file.type);
   const maxBytes  = getMaxBytes(file.type);
   if (bytes.byteLength > maxBytes) {
-    const limitLabel = mediaType === 'audio' ? '15 MB' : mediaType === 'video' ? '25 MB' : '3 MB';
+    const limitLabel = mediaType === 'audio' ? '15 MB' : mediaType === 'video' ? '25 MB' : '15 MB';
     return NextResponse.json({
       ok: false,
       error: `File too large (${(bytes.byteLength / 1024 / 1024).toFixed(1)} MB). Max for ${mediaType} is ${limitLabel}.`,

@@ -195,7 +195,7 @@ export default function RulesPage() {
                 </li>
                 <li className={styles.rulesItem}>
                   <span className={styles.rulesNum}>7</span>
-                  <span className={styles.rulesText}><strong>Art must be complete and intentional.</strong> 400&times;560px recommended (portrait, trading card ratio). PNG · GIF · JPEG · WebP. Max 10 MB. No placeholders, no drafts.</span>
+                  <span className={styles.rulesText}><strong>Art must be complete and intentional.</strong> 400&times;560px recommended (portrait, trading card ratio). PNG · GIF · JPEG · WebP. Max 15 MB. No placeholders, no drafts.</span>
                 </li>
                 <li className={styles.rulesItem}>
                   <span className={styles.rulesNum}>8</span>

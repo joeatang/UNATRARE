@@ -315,7 +315,9 @@ export default function UpdateForm({ initialData }) {
               accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,text/html"
               onChange={e => {
                 const f = e.target.files?.[0];
-                if (f) { setArtFile(f); handleUploadArt(f); }
+                if (!f) return;
+                if (f.size > 15 * 1024 * 1024) { setArtErr('File too large — image max is 15 MB'); return; }
+                setArtFile(f); handleUploadArt(f);
               }}
             />
             <button
@@ -326,7 +328,7 @@ export default function UpdateForm({ initialData }) {
             >
               {artUploading ? 'uploading…' : newArt ? 'replace again' : 'choose file'}
             </button>
-            <div className={styles.hint}>PNG, JPG, GIF, WebP, SVG or HTML · max 3 MB</div>
+            <div className={styles.hint}>PNG, JPG, GIF, WebP, SVG or HTML · max 15 MB</div>
           </div>
         </section>
 
