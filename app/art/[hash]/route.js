@@ -26,7 +26,7 @@ export async function GET(_request, { params }) {
   // Wallets require URLs to end in a known image extension — the extension is
   // purely cosmetic; content is always served from the DB record's art_mime.
   const rawHash = (await params).hash || '';
-  const hash = rawHash.replace(/\.(jpg|jpeg|png|gif|webp|svg)$/i, '');
+  const hash = rawHash.replace(/\.(jpg|jpeg|png|gif|webp|svg|mp4|webm|mov|m4v)$/i, '');
 
   if (!hash || !/^[0-9a-f]{64}$/i.test(hash)) {
     return new NextResponse('Not found', { status: 404 });
