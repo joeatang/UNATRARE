@@ -551,19 +551,39 @@ function Step2({ data, onNext, onBack }) {
           </div>
         </div>
 
-        {/* Hidden video + canvas for frame capture */}
-        <video
-          ref={videoRef}
-          src={preview}
-          style={{ display: 'none' }}
-          muted
-          playsInline
-          onLoadedData={captureVideoFrame}
-        />
+        {/* Canvas for frame capture (hidden) */}
         <canvas ref={canvasRef} style={{ display: 'none' }} />
 
-        {/* Two-column: cover preview + actions */}
+        {/* Three-column: video card frame + cover thumbnail + actions */}
         <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: 24 }}>
+
+          {/* Card frame with video playing */}
+          <div style={{ flexShrink: 0, width: 160 }}>
+            <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 8 }}>
+              VIDEO PREVIEW
+            </div>
+            <div style={{ border: '1px solid var(--amber)', background: 'var(--surface)' }}>
+              <div style={{ height: 22, borderBottom: '1px solid var(--amber)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                <span style={{ fontFamily: 'var(--font-card)', fontSize: '7px', letterSpacing: '2px', color: 'var(--amber)' }}>UNATRARE</span>
+                <span style={{ color: 'var(--text-dim)', fontSize: '8px' }}>·</span>
+                <span style={{ fontFamily: 'var(--font-card)', fontSize: '7px', letterSpacing: '2px', color: 'var(--amber)' }}>PENDING</span>
+              </div>
+              <div style={{ width: '100%', aspectRatio: '5/7', overflow: 'hidden', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <video
+                  ref={videoRef}
+                  src={preview}
+                  autoPlay muted loop playsInline
+                  onLoadedData={captureVideoFrame}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                />
+              </div>
+              <div style={{ padding: '6px 8px', borderTop: '1px solid var(--border-dim)' }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '1px', color: 'var(--text)', textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {data.tokenName}
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Cover image preview box */}
           <div style={{ flexShrink: 0, width: 120 }}>
@@ -587,7 +607,7 @@ function Step2({ data, onNext, onBack }) {
           {/* Actions */}
           <div style={{ flex: 1, minWidth: 200 }}>
             <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 16 }}>
-              A frame was captured automatically from your video. If it&apos;s not the right moment, use the buttons below.
+              A frame was captured automatically. Watch the video on the left — click <strong style={{ color: 'var(--text)' }}>capture frame</strong> at any moment to use that frame as the cover.
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
               <button
@@ -597,7 +617,7 @@ function Step2({ data, onNext, onBack }) {
                 onClick={captureVideoFrame}
                 disabled={coverUploading}
               >
-                recapture frame
+                capture frame
               </button>
               <button
                 type="button"
