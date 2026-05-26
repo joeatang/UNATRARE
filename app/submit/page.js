@@ -445,13 +445,22 @@ function Step2({ data, onNext, onBack }) {
   }
 
   // Canvas capture: draw current video frame to canvas → jpeg blob → auto-upload
+  // Always capture at 400×560 (5:7 card ratio) using cover-crop so the image
+  // fills the card frame regardless of the source video's aspect ratio.
   function captureVideoFrame() {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas || video.readyState < 2) return;
-    canvas.width  = video.videoWidth  || 400;
-    canvas.height = video.videoHeight || 560;
-    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    const CARD_W = 400, CARD_H = 560;
+    canvas.width  = CARD_W;
+    canvas.height = CARD_H;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, CARD_W, CARD_H);
+    const vw = video.videoWidth  || CARD_W;
+    const vh = video.videoHeight || CARD_H;
+    const scale = Math.max(CARD_W / vw, CARD_H / vh); // cover-crop
+    const sw = vw * scale, sh = vh * scale;
+    ctx.drawImage(video, (CARD_W - sw) / 2, (CARD_H - sh) / 2, sw, sh);
     canvas.toBlob(blob => {
       if (!blob) return;
       const f = new File([blob], `${data.tokenName}_cover.jpg`, { type: 'image/jpeg' });
