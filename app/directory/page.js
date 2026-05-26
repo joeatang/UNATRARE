@@ -158,11 +158,17 @@ export default function DirectoryPage({ searchParams }) {
                   >
                     <div className={styles.cardArt}>
                       {token.revealed_at && token.art_url ? (
-                        <img
-                          src={token.art_url}
-                          alt={token.display_title || token.token_name}
-                          loading="lazy"
-                        />
+                        token.art_mime?.startsWith('video/') ? (
+                          token.art_cover_url
+                            ? <img src={token.art_cover_url} alt={token.display_title || token.token_name} loading="lazy" />
+                            : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)', fontSize: 28 }}>▶</div>
+                        ) : (
+                          <img
+                            src={token.art_url}
+                            alt={token.display_title || token.token_name}
+                            loading="lazy"
+                          />
+                        )
                       ) : !token.revealed_at ? (
                         /* Mystery pack — drop pending */
                         <div style={{
