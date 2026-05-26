@@ -134,10 +134,19 @@ export default async function CardPage({ params }) {
   const tweetUrl = `https://twitter.com/intent/tweet?text=${shareText}`;
 
   // Prefer permanent hash-based art URL
-  const artDisplayUrl = token.art_hash
-    ? `https://unatrare.wtf/art/${token.art_hash}`
-    : token.art_url?.startsWith('http') ? token.art_url
-    : token.art_url ? `https://unatrare.wtf${token.art_url}` : null;
+  // For video, use the direct /uploads/ path — browsers need HTTP range requests
+  // for video playback, and nginx handles that natively for /uploads/.
+  const isVideoArt = token.art_mime?.startsWith('video/');
+  const artDisplayUrl = isVideoArt
+    ? (token.art_url?.startsWith('http') ? token.art_url : token.art_url ? `https://unatrare.wtf${token.art_url}` : null)
+    : token.art_hash
+      ? `https://unatrare.wtf/art/${token.art_hash}`
+      : token.art_url?.startsWith('http') ? token.art_url
+      : token.art_url ? `https://unatrare.wtf${token.art_url}` : null;
+
+  const artCoverUrl = token.art_cover_url?.startsWith('http')
+    ? token.art_cover_url
+    : token.art_cover_url ? `https://unatrare.wtf${token.art_cover_url}` : null;
 
   const audioDisplayUrl = token.audio_url?.startsWith('http')
     ? token.audio_url
@@ -185,6 +194,7 @@ export default async function CardPage({ params }) {
                   token.art_mime?.startsWith('video/') ? (
                     <video
                       src={artDisplayUrl}
+                      poster={artCoverUrl || undefined}
                       autoPlay muted loop playsInline
                       style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                     />

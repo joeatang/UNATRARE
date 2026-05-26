@@ -42,6 +42,17 @@ export async function GET(_request, { params }) {
 
   // ── Fast path: local disk ──────────────────────────────────────────────
   if (token?.art_url) {
+    // Video files require HTTP range requests for browser playback.
+    // Redirect to the nginx-served /uploads/ path which handles range requests natively.
+    if (token.art_mime?.startsWith('video/')) {
+      const directUrl = token.art_url.startsWith('http')
+        ? token.art_url
+        : `https://unatrare.wtf${token.art_url}`;
+      return NextResponse.redirect(directUrl, {
+        status: 302,
+        headers: { 'Cache-Control': 'no-store' },
+      });
+    }
     const filename = token.art_url.replace(/^\/uploads\//, '');
     const filePath = path.join(UPLOAD_DIR, filename);
     try {
