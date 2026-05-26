@@ -6,6 +6,7 @@ import path from 'path';
 import sharp from 'sharp';
 import { storeArt } from '../../../lib/tracBridge.js';
 import { getDb } from '../../../lib/db';
+import { verifyAdminToken } from '../admin/auth/route';
 
 // Uploads are stored in /public/uploads/ — served by Next.js as /uploads/FILENAME
 // This directory persists on the server across restarts.
@@ -135,10 +136,11 @@ export async function POST(request) {
   // Block uploads that would overwrite a certified token's art on disk.
   // The file name is deterministic (TOKEN.ext), so an unauthenticated upload
   // would silently replace the image everyone sees on the card page.
+  // Admin bypass: authenticated admins can replace cover images for certified tokens.
   try {
     const db = getDb();
     const existing = db.prepare('SELECT status FROM tokens WHERE token_name = ?').get(normalized);
-    if (existing?.status === 'approved') {
+    if (existing?.status === 'approved' && !verifyAdminToken(request)) {
       return NextResponse.json(
         { ok: false, error: 'Art cannot be replaced for a certified token. Use the update panel on your status page.' },
         { status: 403 }

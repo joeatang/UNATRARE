@@ -219,7 +219,7 @@ function TokenRow({ token, authToken, onAction }) {
                       const fd = new FormData();
                       fd.append('file', file);
                       fd.append('tokenName', token.token_name);
-                      const up = await fetch('/api/upload-art', { method: 'POST', body: fd });
+                      const up = await fetch('/api/upload-art', { method: 'POST', body: fd, headers: { Authorization: `Bearer ${authToken}` } });
                       const upJson = await up.json();
                       if (!upJson.ok) throw new Error(upJson.error || 'upload failed');
                       const res = await fetch('/api/admin/action', {
