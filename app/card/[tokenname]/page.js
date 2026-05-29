@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Nav from '../../components/Nav';
 import RarityBar from '../../components/RarityBar';
+import SalutePanel from '../../components/SalutePanel';
 import styles from './card.module.css';
 import { getDb } from '../../../lib/db';
 
@@ -418,6 +419,8 @@ export default async function CardPage({ params }) {
                 artist: manage drop →
               </Link>
             </div>
+
+            <SalutePanel cardName={token.token_name} />
 
             <div className={styles.backRow}>
               <Link href="/directory" className={styles.backLink}>← back to directory</Link>
