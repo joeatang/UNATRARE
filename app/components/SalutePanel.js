@@ -177,6 +177,7 @@ export default function SalutePanel({ cardName }) {
   const [cpAddr,     setCpAddr]     = useState('');
   const [burnErr,    setBurnErr]    = useState('');
   const [burnResult, setBurnResult] = useState(null); // { displayAmount, rank }
+  const [burnSig,    setBurnSig]    = useState('');   // tx sig — for explorer link + timeout errors
 
   // ── Manual TxID fallback ─────────────────────────────────────────────────
   const [showManual,   setShowManual]   = useState(false);
@@ -239,7 +240,16 @@ export default function SalutePanel({ cardName }) {
     setBurnAmount('');
     setBurnErr('');
     setBurnResult(null);
+    setBurnSig('');
     setPhase('idle');
+  }
+
+  function burnAgain() {
+    setBurnAmount('');
+    setBurnErr('');
+    setBurnResult(null);
+    setBurnSig('');
+    setPhase('ready');
   }
 
   // ── Set % quick-select ───────────────────────────────────────────────────
@@ -261,6 +271,7 @@ export default function SalutePanel({ cardName }) {
     if (rawAmt > cashAcct.rawBalance) { setBurnErr('Amount exceeds your $CASH balance.'); return; }
 
     setPhase('burning');
+    let localSig = ''; // preserve for error messages if confirmation times out
     try {
       // Build transaction
       const { blockhash, lastValidBlockHeight } = await rpc('getLatestBlockhash', [{ commitment: 'confirmed' }])
@@ -274,6 +285,8 @@ export default function SalutePanel({ cardName }) {
       const sendResult = await connected.provider.signAndSendTransaction(tx);
       const sig = typeof sendResult === 'string' ? sendResult : sendResult?.signature;
       if (!sig) throw new Error('wallet did not return a transaction signature');
+      localSig = sig;
+      setBurnSig(sig);
 
       setPhase('confirming');
       await waitConfirmed(sig);
@@ -298,7 +311,12 @@ export default function SalutePanel({ cardName }) {
       getCashAccount(connected.pubkey).then(a => { if (a) setCashAcct(a); });
       fetchLb();
     } catch (e) {
-      setBurnErr(e.message || 'burn failed');
+      const isTimeout = e.message?.includes('Confirmation timeout');
+      setBurnErr(
+        isTimeout && localSig
+          ? `Confirmation timed out — your burn may still confirm. Check: solscan.io/tx/${localSig}`
+          : (e.message || 'burn failed')
+      );
       setPhase('ready');
     }
   }
@@ -439,6 +457,21 @@ export default function SalutePanel({ cardName }) {
         {/* ══ Native burn section ════════════════════════════════════════════ */}
         <div style={S.sectionDivider} />
 
+        <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 14 }}>
+          Burn $CASH (Solana) to honor this card. Top burner earns the card drop — the artist distributes supply directly to leaderboard wallets.
+        </div>
+
+        {/* Connected wallet bar — stays visible through signing + confirmation */}
+        {connected && (
+          <div style={S.connBar}>
+            <span style={S.connAddr}>
+              {connected.id === 'phantom' ? '👻' : connected.id === 'solflare' ? '🌟' : '💳'}
+              {' '}{connected.name} · {truncWallet(connected.pubkey)}
+            </span>
+            <button style={S.disconnBtn} onClick={disconnect}>DISCONNECT</button>
+          </div>
+        )}
+
         {/* Status spinner while busy */}
         {isBusy && (
           <div style={S.statusMsg}>{statusMessages[phase]}</div>
@@ -477,19 +510,9 @@ export default function SalutePanel({ cardName }) {
           </div>
         )}
 
-        {/* Connected + ready / success: show burn UI */}
-        {!isBusy && connected && (phase === 'ready' || phase === 'success') && (
+        {/* Connected + ready: burn form */}
+        {!isBusy && connected && phase === 'ready' && (
           <div>
-            {/* Connected wallet bar */}
-            <div style={S.connBar}>
-              <span style={S.connAddr}>
-                {connected.id === 'phantom' ? '👻' : connected.id === 'solflare' ? '🌟' : '💳'}
-                {' '}{connected.name} · {truncWallet(connected.pubkey)}
-              </span>
-              <button style={S.disconnBtn} onClick={disconnect}>DISCONNECT</button>
-            </div>
-
-            {/* Balance */}
             {cashAcct ? (
               <div style={S.balRow}>
                 <span style={S.balLabel}>$CASH BALANCE</span>
@@ -509,8 +532,8 @@ export default function SalutePanel({ cardName }) {
                   step="1"
                   value={burnAmount}
                   onChange={e => setBurnAmount(e.target.value)}
+                  onKeyDown={e => ['e','E','+','-'].includes(e.key) && e.preventDefault()}
                   placeholder="e.g. 500000"
-                  disabled={phase === 'success'}
                 />
                 <div style={S.pctRow}>
                   {[10, 25, 50, 100].map(pct => (
@@ -520,24 +543,24 @@ export default function SalutePanel({ cardName }) {
                   ))}
                 </div>
 
-                <label style={S.label}>COUNTERPARTY ADDRESS (optional)</label>
+                <label style={S.label}>BITCOIN (COUNTERPARTY) ADDRESS <span style={{ opacity: 0.5, fontWeight: 400 }}>optional</span></label>
                 <input
                   style={S.input}
                   value={cpAddr}
                   onChange={e => setCpAddr(e.target.value)}
-                  placeholder="1YourBitcoinAddress — for art drop eligibility"
+                  placeholder="1YourBitcoinAddress — needed to receive card drops"
                   autoComplete="off"
                 />
                 <div style={{ ...S.hint, marginBottom: 0 }}>
-                  Provide your Counterparty address to be eligible for card drops awarded to top saluters.
+                  Your Counterparty wallet address (starts with 1 or 3). Required if you want to receive the Rare Pepe card drop awarded to top saluters.
                 </div>
 
                 {burnErr && <div style={S.error}>{burnErr}</div>}
 
                 <button
-                  style={{ ...S.burnBtn, ...((!burnAmount || parseFloat(burnAmount) <= 0 || phase === 'success') ? S.burnBtnOff : {}) }}
+                  style={{ ...S.burnBtn, ...(!burnAmount || parseFloat(burnAmount) <= 0 ? S.burnBtnOff : {}) }}
                   onClick={executeBurn}
-                  disabled={!burnAmount || parseFloat(burnAmount) <= 0 || phase === 'success'}
+                  disabled={!burnAmount || parseFloat(burnAmount) <= 0}
                 >
                   🔥 BURN $CASH
                 </button>
@@ -553,7 +576,34 @@ export default function SalutePanel({ cardName }) {
           </div>
         )}
 
-        {/* Error after burn attempt that left phase as ready already shown inline */}
+        {/* Connected + success: confirmed result + explorer link + burn again */}
+        {!isBusy && connected && phase === 'success' && burnResult && (
+          <div>
+            <div style={{ fontFamily: 'var(--font-card)', fontSize: '11px', letterSpacing: '2px', color: 'var(--green)', marginBottom: 6 }}>
+              🔥 {fmt(burnResult.displayAmount)} $CASH BURNED · RANK #{burnResult.rank}
+            </div>
+            {burnSig && (
+              <div style={{ marginBottom: 10 }}>
+                <a
+                  href={`https://solscan.io/tx/${burnSig}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--amber)', textDecoration: 'none' }}
+                >
+                  view transaction on Solscan ↗
+                </a>
+              </div>
+            )}
+            <div style={{ ...S.hint, marginBottom: 12 }}>
+              Your position is live on the leaderboard. When this card&#39;s burn window closes, the artist sends supply to top wallets via Counterparty — to the Bitcoin address on record.
+            </div>
+            <button style={{ ...S.pctBtn, padding: '8px 16px' }} onClick={burnAgain}>
+              BURN MORE
+            </button>
+          </div>
+        )}
+
+        {/* Error shown when phase is idle after wallet rejection or connection failure */}
         {burnErr && phase === 'idle' && (
           <div style={S.error}>{burnErr}</div>
         )}

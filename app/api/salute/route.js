@@ -140,23 +140,35 @@ export async function POST(request) {
 
 // ── Solana on-chain burn verification (plain fetch — no npm packages) ─────
 async function verifySolanaBurn(txSig, expectedWallet) {
-  const res = await fetch(SOLANA_RPC, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      id:      1,
-      method:  'getTransaction',
-      params:  [txSig, { encoding: 'jsonParsed', commitment: 'confirmed', maxSupportedTransactionVersion: 0 }],
-    }),
-  });
+  const abort = new AbortController();
+  const timer = setTimeout(() => abort.abort(), 15_000);
+  let res;
+  try {
+    res = await fetch(SOLANA_RPC, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id:      1,
+        method:  'getTransaction',
+        params:  [txSig, { encoding: 'jsonParsed', commitment: 'confirmed', maxSupportedTransactionVersion: 0 }],
+      }),
+      signal: abort.signal,
+    });
+  } catch (err) {
+    if (err.name === 'AbortError') throw new Error('Solana RPC timed out — try again in a moment');
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
   if (!res.ok) throw new Error(`Solana RPC HTTP ${res.status}`);
   const data = await res.json();
   if (data.error) throw new Error(data.error.message || 'Solana RPC error');
 
   const tx = data.result;
   if (!tx) throw new Error('transaction not found — wait for confirmation and try again');
-  if (tx.meta?.err !== null) throw new Error('transaction failed on-chain (non-null error)');
+  if (!tx.meta) throw new Error('transaction metadata unavailable — wait a moment and try again');
+  if (tx.meta.err !== null) throw new Error('transaction failed on-chain');
 
   // Strategy 1: find a jsonParsed spl-token burn instruction
   const outerIx  = tx.transaction?.message?.instructions || [];
