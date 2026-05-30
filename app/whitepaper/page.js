@@ -3,7 +3,7 @@ import Nav from '../components/Nav';
 import styles from './whitepaper.module.css';
 
 export const metadata = {
-  title: 'UNATPAPER — UNATRARE Protocol Documentation',
+  title: 'UNATPAPER',
   description: 'The UNATRARE protocol document. Counterparty, TAP, DMT, UNATPEPE, and the case for permanent P2P Pepe art preservation on Bitcoin.',
 };
 
