@@ -69,7 +69,6 @@ export async function POST(request) {
     videoHash         = '',
     unatpepeAllocQty  = 0,
     burnTxid          = '',
-    coverUrl          = '',
   } = body || {};
 
   // ── Required field checks ───────────────────────────────────
@@ -114,11 +113,6 @@ export async function POST(request) {
   // ── Validate art URL (must be from this server's upload endpoint) ───
   if (!artUrl || !artUrl.startsWith('/uploads/')) {
     return NextResponse.json({ ok: false, error: 'Invalid art URL — upload your art via the submission wizard first' }, { status: 422 });
-  }
-
-  // ── Validate cover URL if provided (must be from this server's upload endpoint) ───
-  if (coverUrl && !coverUrl.startsWith('/uploads/')) {
-    return NextResponse.json({ ok: false, error: 'Invalid cover URL' }, { status: 422 });
   }
 
   // ── Write to DB ─────────────────────────────────────────────
@@ -223,8 +217,8 @@ export async function POST(request) {
          description, category, subcategory, status, art_url, art_mime, art_hash,
          supply, cp_version, ord_inscription, submitted_at, series0_code_used,
          audio_url, audio_hash, audio_mime, video_url, video_hash, video_mime,
-         unatpepe_alloc_qty, softpwar_burn_txid, art_cover_url)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, unixepoch(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         unatpepe_alloc_qty, softpwar_burn_txid)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, unixepoch(), ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       normalized,
       normalized,
@@ -249,7 +243,6 @@ export async function POST(request) {
       videoMime.slice(0, 50),
       Math.max(0, parseInt(unatpepeAllocQty, 10) || 0),
       safeBurnTxid,
-      coverUrl && coverUrl.length > 4 ? coverUrl.slice(0, 500) : '',
     );
 
     // Consume invite code if used
