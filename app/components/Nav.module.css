@@ -54,6 +54,9 @@
 .nav-register { color: var(--amber-hot) !important; opacity: 0.9; }
 .nav-register:hover { opacity: 1 !important; }
 
+.nav-paper { color: var(--amber) !important; opacity: 0.75; letter-spacing: 3px !important; }
+.nav-paper:hover { opacity: 1 !important; color: var(--amber-hot) !important; }
+
 /* Right side wrapper */
 .navRight {
   display: flex;
@@ -235,6 +238,14 @@
   opacity: 0.6;
 }
 .drawerSecondaryLink:hover { opacity: 1 !important; }
+
+.drawerPaperLink {
+  font-size: 14px !important;
+  letter-spacing: 3px !important;
+  color: var(--amber) !important;
+  opacity: 0.85;
+}
+.drawerPaperLink:hover { opacity: 1 !important; color: var(--amber-hot) !important; }
 
 /* Responsive */
 @media (min-width: 1025px) and (max-width: 1280px) {

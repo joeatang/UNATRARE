@@ -496,6 +496,9 @@ export default function NodesPage() {
         <a className={styles.guideBtn} href="/nodes/guide">
           FULL SETUP GUIDE →
         </a>
+        <a className={styles.guideBtn} href="/whitepaper" style={{marginLeft: '12px'}}>
+          READ THE UNATPAPER →
+        </a>
 
         <div className={styles.codeBlock} style={{marginTop: '1.5rem'}}>
           <span className={styles.codeComment}># Quick start — Linux / macOS (native)</span>

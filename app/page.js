@@ -112,9 +112,14 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <Link href="/about" className={styles.thesisMore}>
-            read the full thesis →
-          </Link>
+          <div className={styles.thesisLinks}>
+            <Link href="/about" className={styles.thesisMore}>
+              read the full thesis →
+            </Link>
+            <Link href="/whitepaper" className={styles.thesisMore}>
+              read the UNATPAPER →
+            </Link>
+          </div>
         </section>
 
         {/* ─────────────────────────────────────────────────────
