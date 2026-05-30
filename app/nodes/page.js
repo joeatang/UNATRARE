@@ -497,7 +497,7 @@ export default function NodesPage() {
           FULL SETUP GUIDE →
         </a>
         <a className={styles.guideBtn} href="/whitepaper" style={{marginLeft: '12px'}}>
-          READ THE UNATPAPER →
+          READ THE UNATPEPER →
         </a>
 
         <div className={styles.codeBlock} style={{marginTop: '1.5rem'}}>

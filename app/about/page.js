@@ -96,7 +96,7 @@ export default function AboutPage() {
         <div className={styles.cta}>
           <Link href="/apply" className={styles.ctaBtn}>apply as an artist →</Link>
           <Link href="/rules" className={styles.ctaBtn}>submission process →</Link>
-          <Link href="/whitepaper" className={styles.ctaBtn}>read the UNATPAPER →</Link>
+          <Link href="/whitepaper" className={styles.ctaBtn}>read the UNATPEPER →</Link>
           <Link href="/submit" className={styles.ctaBtn} data-primary="true">submit your card →</Link>
         </div>
 

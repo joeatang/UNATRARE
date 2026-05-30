@@ -3,7 +3,7 @@ import Nav from '../components/Nav';
 import styles from './whitepaper.module.css';
 
 export const metadata = {
-  title: 'UNATPAPER',
+  title: 'UNATPEPER',
   description: 'The UNATRARE protocol document. Counterparty, TAP, DMT, UNATPEPE, and the case for permanent P2P Pepe art preservation on Bitcoin.',
 };
 
@@ -14,7 +14,7 @@ export default function WhitepaperPage() {
       <main className={styles.main}>
 
         <header className={styles.docHeader}>
-          <pre className={styles.asciiHeader}>{`─ UNATPAPER ─
+          <pre className={styles.asciiHeader}>{`─ UNATPEPER ─
 ─ UNATRARE PROTOCOL DOCUMENTATION ─
 ─ v0.4 · May 2026 ─`}</pre>
         </header>

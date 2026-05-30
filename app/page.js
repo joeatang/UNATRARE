@@ -117,7 +117,7 @@ export default function LandingPage() {
               read the full thesis →
             </Link>
             <Link href="/whitepaper" className={styles.thesisMore}>
-              read the UNATPAPER →
+              read the UNATPEPER →
             </Link>
           </div>
         </section>
