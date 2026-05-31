@@ -8,7 +8,6 @@ const RPC_URL     = 'https://api.mainnet-beta.solana.com';
 const WEB3_CDN    = 'https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.0/lib/index.iife.min.js';
 const SOL_SIG_RE  = /^[1-9A-HJ-NP-Za-km-z]{64,100}$/;
 const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
-const BTC_ADDR_RE = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
 
 function fmt(n) {
   if (!n) return '0';
@@ -64,6 +63,11 @@ function detectWallets() {
     w.push({ id: 'generic', name: 'Solana Wallet', provider: window.solana });
   }
   return w;
+}
+
+function isProbablyMobile() {
+  if (typeof navigator === 'undefined') return false;
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
 }
 
 async function rpc(method, params) {
@@ -155,6 +159,7 @@ const S = {
   burnBtnOff:  { opacity: 0.35, cursor: 'not-allowed' },
   statusMsg:   { fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)', padding: '18px 0', textAlign: 'center', letterSpacing: 1 },
   noWalletMsg: { fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, padding: '4px 0 10px' },
+  mobileTip:   { fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--amber)', lineHeight: 1.6, marginTop: 8, marginBottom: 10 },
   manualToggle:{ background: 'none', border: 'none', fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', cursor: 'pointer', padding: '10px 0 0', textDecoration: 'underline', display: 'block' },
   submitBtn:   { fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '3px', padding: '10px 22px', border: 'none', background: 'var(--green)', color: '#080808', cursor: 'pointer' },
 };
@@ -174,7 +179,6 @@ export default function SalutePanel({ cardName }) {
   // phase: idle | connecting | fetching | ready | burning | confirming | submitting | success | error
   const [phase,      setPhase]      = useState('idle');
   const [burnAmount, setBurnAmount] = useState('');
-  const [cpAddr,     setCpAddr]     = useState('');
   const [burnErr,    setBurnErr]    = useState('');
   const [burnResult, setBurnResult] = useState(null); // { displayAmount, rank }
   const [burnSig,    setBurnSig]    = useState('');   // tx sig — for explorer link + timeout errors
@@ -183,7 +187,6 @@ export default function SalutePanel({ cardName }) {
   const [showManual,   setShowManual]   = useState(false);
   const [manualSig,    setManualSig]    = useState('');
   const [manualWallet, setManualWallet] = useState('');
-  const [manualCp,     setManualCp]     = useState('');
   const [manualPhase,  setManualPhase]  = useState('idle'); // idle | submitting | success
   const [manualErr,    setManualErr]    = useState('');
   const [manualResult, setManualResult] = useState(null);
@@ -228,7 +231,23 @@ export default function SalutePanel({ cardName }) {
       setCashAcct(acct);
       setPhase('ready');
     } catch (e) {
-      setBurnErr(e.message || 'connection failed');
+      const msg = (e.message || '').toLowerCase();
+      // Phantom in-app browser throws "forbidden" / "User rejected the request"
+      // when the site isn't trusted or the user dismisses the approval dialog.
+      const isRejected = msg.includes('forbidden') || msg.includes('rejected') ||
+                         msg.includes('user denied') || msg.includes('cancelled') ||
+                         msg.includes('canceled');
+      if (isRejected) {
+        setBurnErr(
+          'Wallet connection was denied. ' +
+          (mobile
+            ? 'In Phantom's in-app browser, tap the connect request that appears and approve it, then try again. Or use the manual TxID form below — burn from your wallet first, then paste the transaction ID here.'
+            : 'Please approve the connection request in your wallet and try again.')
+        );
+        if (mobile) setShowManual(true);
+      } else {
+        setBurnErr(e.message || 'connection failed');
+      }
       setPhase('idle');
     }
   }
@@ -299,7 +318,6 @@ export default function SalutePanel({ cardName }) {
           card_name:  cardName,
           sol_wallet: connected.pubkey,
           tx_sig:     sig,
-          cp_address: cpAddr.trim(),
         }),
       });
       const json = await resp.json();
@@ -331,9 +349,6 @@ export default function SalutePanel({ cardName }) {
     if (!manualWallet.trim() || !SOL_ADDR_RE.test(manualWallet.trim())) {
       setManualErr('Enter a valid Solana wallet address.'); return;
     }
-    if (manualCp.trim() && !BTC_ADDR_RE.test(manualCp.trim())) {
-      setManualErr('Counterparty address must start with 1 or 3.'); return;
-    }
     setManualPhase('submitting');
     try {
       const resp = await fetch('/api/salute', {
@@ -343,7 +358,6 @@ export default function SalutePanel({ cardName }) {
           card_name:  cardName,
           sol_wallet: manualWallet.trim(),
           tx_sig:     manualSig.trim(),
-          cp_address: manualCp.trim(),
         }),
       });
       const json = await resp.json();
@@ -359,6 +373,7 @@ export default function SalutePanel({ cardName }) {
 
   const isEmpty = !lbLoading && (!lb || !lb.uniqueSaluters);
   const isBusy  = ['connecting','fetching','burning','confirming','submitting'].includes(phase);
+  const mobile = isProbablyMobile();
 
   // ── Phase status messages ────────────────────────────────────────────────
   const statusMessages = {
@@ -458,7 +473,13 @@ export default function SalutePanel({ cardName }) {
         <div style={S.sectionDivider} />
 
         <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 14 }}>
-          Burn $CASH (Solana) to honor this card. Top burner earns the card drop — the artist distributes supply directly to leaderboard wallets.
+          Burn $CASH (Solana) to honor this card. This panel is burn-only and only uses wallet data needed to verify your burn on-chain.
+          <br />
+          Need $CASH first? Buy on{' '}
+          <a href="https://nat.fun" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>
+            nat.fun
+          </a>
+          .
         </div>
 
         {/* Connected wallet bar — stays visible through signing + confirmation */}
@@ -489,6 +510,13 @@ export default function SalutePanel({ cardName }) {
             <a href="https://phantom.app" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>Phantom</a>,{' '}
             <a href="https://solflare.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>Solflare</a>, or{' '}
             <a href="https://backpack.app" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>Backpack</a> to burn $CASH natively.
+            {mobile && (
+              <div style={S.mobileTip}>
+                Mobile tip: open this page inside your wallet's built-in browser — Phantom, Solflare, Backpack, or OKX Wallet all work.
+                Tap the browser icon inside the app, go to unatrare.wtf, and the connect button will detect your wallet automatically.
+                <br />If you get a "forbidden" error, tap the approve/connect prompt that your wallet shows, then try again.
+              </div>
+            )}
             <br />Or use the manual TxID form below if you burned elsewhere.
           </div>
         )}
@@ -497,6 +525,12 @@ export default function SalutePanel({ cardName }) {
         {!isBusy && web3 && wallets.length > 0 && phase === 'idle' && !connected && (
           <div>
             <span style={{ ...S.label, marginTop: 0 }}>CONNECT SOLANA WALLET TO BURN</span>
+            {mobile && (
+              <div style={S.mobileTip}>
+                Tap connect below — your wallet will show an approval prompt. Accept it, then return here to burn.
+                If you see "forbidden access", tap approve in the wallet prompt that appeared and try again.
+              </div>
+            )}
             <div style={S.walletRow}>
               {wallets.map(w => (
                 <button key={w.id} style={S.walletBtn} onClick={() => connectWallet(w)}>
@@ -543,18 +577,6 @@ export default function SalutePanel({ cardName }) {
                   ))}
                 </div>
 
-                <label style={S.label}>BITCOIN (COUNTERPARTY) ADDRESS <span style={{ opacity: 0.5, fontWeight: 400 }}>optional</span></label>
-                <input
-                  style={S.input}
-                  value={cpAddr}
-                  onChange={e => setCpAddr(e.target.value)}
-                  placeholder="1YourBitcoinAddress — needed to receive card drops"
-                  autoComplete="off"
-                />
-                <div style={{ ...S.hint, marginBottom: 0 }}>
-                  Your Counterparty wallet address (starts with 1 or 3). Required if you want to receive the Rare Pepe card drop awarded to top saluters.
-                </div>
-
                 {burnErr && <div style={S.error}>{burnErr}</div>}
 
                 <button
@@ -595,7 +617,7 @@ export default function SalutePanel({ cardName }) {
               </div>
             )}
             <div style={{ ...S.hint, marginBottom: 12 }}>
-              Your position is live on the leaderboard. When this card&#39;s burn window closes, the artist sends supply to top wallets via Counterparty — to the Bitcoin address on record.
+              Your position is live on the leaderboard.
             </div>
             <button style={{ ...S.pctBtn, padding: '8px 16px' }} onClick={burnAgain}>
               BURN MORE
@@ -644,15 +666,6 @@ export default function SalutePanel({ cardName }) {
               spellCheck={false}
             />
 
-            <label style={S.label}>COUNTERPARTY ADDRESS (optional)</label>
-            <input
-              style={S.input}
-              value={manualCp}
-              onChange={e => setManualCp(e.target.value)}
-              placeholder="1YourBitcoinAddress — for art drop eligibility"
-              autoComplete="off"
-            />
-
             {manualErr && <div style={S.error}>{manualErr}</div>}
 
             <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
@@ -666,6 +679,11 @@ export default function SalutePanel({ cardName }) {
 
             <div style={{ ...S.hint, marginTop: 10 }}>
               Burn is verified on Solana mainnet. Any Solana wallet works — Phantom, Solflare, Backpack, CLI, etc.
+              {' '}To purchase $CASH, use{' '}
+              <a href="https://nat.fun" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>
+                nat.fun
+              </a>
+              .
             </div>
           </form>
         )}

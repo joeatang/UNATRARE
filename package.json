@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev -p 3007",
     "build": "next build",
-    "start": "next start -p 3007"
+    "start": "next start -p 3007",
+    "preflight:snapshot": "bash ./scripts/preflight-snapshot.sh"
   },
   "dependencies": {
     "@noble/curves": "^2.2.0",
