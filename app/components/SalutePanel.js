@@ -58,11 +58,19 @@ function detectWallets() {
   if (window.phantom?.solana?.isPhantom)  w.push({ id: 'phantom',  name: 'Phantom',  provider: window.phantom.solana });
   if (window.solflare?.isSolflare)        w.push({ id: 'solflare', name: 'Solflare', provider: window.solflare });
   if (window.backpack?.isBackpack)        w.push({ id: 'backpack', name: 'Backpack', provider: window.backpack });
+  if (window.okxwallet?.solana)           w.push({ id: 'okx',      name: 'OKX',      provider: window.okxwallet.solana });
   // Generic fallback injected by other wallets
   if (!w.length && window.solana?.isConnected !== undefined) {
     w.push({ id: 'generic', name: 'Solana Wallet', provider: window.solana });
   }
-  return w;
+  // De-duplicate in case multiple window aliases point to the same provider.
+  const seen = new Set();
+  return w.filter(entry => {
+    const key = entry.id + ':' + (entry.provider?.publicKey?.toString?.() || entry.name);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 function isProbablyMobile() {
@@ -221,16 +229,36 @@ export default function SalutePanel({ cardName }) {
   async function connectWallet(w) {
     setPhase('connecting');
     setBurnErr('');
-    try {
-      await w.provider.connect();
-      const pubkey = w.provider.publicKey?.toString();
-      if (!pubkey) throw new Error('wallet did not return a public key');
+
+    const hydrateConnected = async (pubkey) => {
       setConnected({ ...w, pubkey });
       setPhase('fetching');
       const acct = await getCashAccount(pubkey);
       setCashAcct(acct);
+      setBurnErr('');
       setPhase('ready');
+    };
+
+    try {
+      const alreadyPubkey = w.provider?.publicKey?.toString?.();
+      if (alreadyPubkey && SOL_ADDR_RE.test(alreadyPubkey)) {
+        await hydrateConnected(alreadyPubkey);
+        return;
+      }
+
+      await w.provider.connect();
+      const pubkey = w.provider.publicKey?.toString();
+      if (!pubkey) throw new Error('wallet did not return a public key');
+      await hydrateConnected(pubkey);
     } catch (e) {
+      const fallbackPubkey = w.provider?.publicKey?.toString?.();
+      if (fallbackPubkey && SOL_ADDR_RE.test(fallbackPubkey)) {
+        try {
+          await hydrateConnected(fallbackPubkey);
+          return;
+        } catch {}
+      }
+
       const msg = (e.message || '').toLowerCase();
       // Phantom in-app browser throws "forbidden" / "User rejected the request"
       // when the site isn't trusted or the user dismisses the approval dialog.
@@ -248,6 +276,7 @@ export default function SalutePanel({ cardName }) {
       } else {
         setBurnErr(e.message || 'connection failed');
       }
+      setCashAcct(null);
       setPhase('idle');
     }
   }
@@ -486,7 +515,7 @@ export default function SalutePanel({ cardName }) {
         {connected && (
           <div style={S.connBar}>
             <span style={S.connAddr}>
-              {connected.id === 'phantom' ? '👻' : connected.id === 'solflare' ? '🌟' : '💳'}
+              {connected.id === 'phantom' ? '👻' : connected.id === 'solflare' ? '🌟' : connected.id === 'backpack' ? '🎒' : connected.id === 'okx' ? '🅾️' : '💳'}
               {' '}{connected.name} · {truncWallet(connected.pubkey)}
             </span>
             <button style={S.disconnBtn} onClick={disconnect}>DISCONNECT</button>
@@ -535,7 +564,7 @@ export default function SalutePanel({ cardName }) {
               {wallets.map(w => (
                 <button key={w.id} style={S.walletBtn} onClick={() => connectWallet(w)}>
                   <span style={{ fontSize: 16 }}>
-                    {w.id === 'phantom' ? '👻' : w.id === 'solflare' ? '🌟' : w.id === 'backpack' ? '🎒' : '💳'}
+                    {w.id === 'phantom' ? '👻' : w.id === 'solflare' ? '🌟' : w.id === 'backpack' ? '🎒' : w.id === 'okx' ? '🅾️' : '💳'}
                   </span>
                   {w.name}
                 </button>
@@ -626,7 +655,7 @@ export default function SalutePanel({ cardName }) {
         )}
 
         {/* Error shown when phase is idle after wallet rejection or connection failure */}
-        {burnErr && phase === 'idle' && (
+        {burnErr && phase === 'idle' && !connected && (
           <div style={S.error}>{burnErr}</div>
         )}
 
