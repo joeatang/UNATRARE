@@ -309,7 +309,7 @@ export default function SalutePanel({ cardName }) {
     } catch {
       setCashAcct(null);
       setBurnErr('Could not load $CASH balance. Click refresh balance to try again.');
-      setPhase('idle');
+      setPhase('ready');
     }
   }
 
@@ -534,16 +534,22 @@ export default function SalutePanel({ cardName }) {
 
         {/* Connected wallet bar — stays visible through signing + confirmation */}
         {connected && (
-          <div style={S.connBar}>
-            <span style={S.connAddr}>
-              {connected.id === 'phantom' ? '👻' : connected.id === 'solflare' ? '🌟' : connected.id === 'backpack' ? '🎒' : connected.id === 'okx' ? '🅾️' : '💳'}
-              {' '}{connected.name} · {truncWallet(connected.pubkey)}
-            </span>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <button style={S.disconnBtn} onClick={refreshBalance}>REFRESH BALANCE</button>
-              <button style={S.disconnBtn} onClick={disconnect}>DISCONNECT</button>
+          <>
+            <div style={S.connBar}>
+              <span style={S.connAddr}>
+                {connected.id === 'phantom' ? '👻' : connected.id === 'solflare' ? '🌟' : connected.id === 'backpack' ? '🎒' : connected.id === 'okx' ? '🅾️' : '💳'}
+                {' '}{connected.name} · {truncWallet(connected.pubkey)}
+              </span>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <button style={S.disconnBtn} onClick={refreshBalance}>REFRESH BALANCE</button>
+                <button style={S.disconnBtn} onClick={disconnect}>DISCONNECT</button>
+              </div>
             </div>
-          </div>
+            <div style={{ ...S.hint, marginTop: -4, marginBottom: 10 }}>
+              <strong style={{ color: 'var(--text)' }}>Refresh balance</strong> checks this wallet for the $CASH token account.
+              When it loads, you can type <strong style={{ color: 'var(--text)' }}>any custom burn amount</strong>.
+            </div>
+          </>
         )}
 
         {/* Status spinner while busy */}
@@ -622,6 +628,9 @@ export default function SalutePanel({ cardName }) {
                   onKeyDown={e => ['e','E','+','-'].includes(e.key) && e.preventDefault()}
                   placeholder="e.g. 500000"
                 />
+                <div style={{ ...S.hint, marginTop: 6, marginBottom: 8 }}>
+                  Type any custom amount, or use quick buttons below.
+                </div>
                 <div style={S.pctRow}>
                   {[10, 25, 50, 100].map(pct => (
                     <button key={pct} style={S.pctBtn} onClick={() => setPercent(pct)}>
@@ -646,6 +655,26 @@ export default function SalutePanel({ cardName }) {
               <div style={S.noWalletMsg}>
                 This wallet has no $CASH balance.{' '}
                 $CASH mint: <code style={S.mintAddr}>{CASH_MINT}</code>
+              </div>
+            )}
+
+            {!cashAcct && (
+              <div style={{ border: '1px solid #2a2a2a', padding: '12px', marginTop: 8 }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--text)' }}>
+                  $CASH BALANCE NOT LOADED YET
+                </div>
+                <div style={{ ...S.hint, marginTop: 6, marginBottom: 10 }}>
+                  Click <strong style={{ color: 'var(--text)' }}>REFRESH BALANCE</strong> to load your wallet token account.
+                  If this wallet has no $CASH, buy on nat.fun and refresh again.
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button style={{ ...S.pctBtn, padding: '8px 14px', color: 'var(--green)', borderColor: 'var(--green)' }} onClick={refreshBalance}>
+                    ↻ REFRESH BALANCE
+                  </button>
+                  <a href="https://nat.fun" target="_blank" rel="noopener noreferrer" style={{ ...S.pctBtn, padding: '8px 14px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+                    BUY $CASH →
+                  </a>
+                </div>
               </div>
             )}
           </div>
@@ -698,6 +727,10 @@ export default function SalutePanel({ cardName }) {
 
         {/* Error shown when phase is idle after wallet rejection or connection failure */}
         {burnErr && phase === 'idle' && !connected && (
+          <div style={S.error}>{burnErr}</div>
+        )}
+
+        {burnErr && connected && !burnErr.toLowerCase().includes('wallet connection was denied') && (
           <div style={S.error}>{burnErr}</div>
         )}
 
