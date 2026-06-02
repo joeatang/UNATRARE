@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Nav from '../../components/Nav';
 import RarityBar from '../../components/RarityBar';
 import SalutePanel from '../../components/SalutePanel';
+import SaluteCeremonySpotlight from '../../components/SaluteCeremonySpotlight';
 import styles from './card.module.css';
 import { getDb } from '../../../lib/db';
 
@@ -69,6 +70,7 @@ export const revalidate = 3600;
 export default async function CardPage({ params }) {
   const { tokenname } = await params;
   const token = getToken(tokenname);
+  const showCeremonySpotlight = process.env.NEXT_PUBLIC_SALUTE_CEREMONY_UI === '1';
 
   if (!token) notFound();
 
@@ -419,6 +421,10 @@ export default async function CardPage({ params }) {
                 artist: manage drop →
               </Link>
             </div>
+
+            {showCeremonySpotlight && (
+              <SaluteCeremonySpotlight cardName={token.token_name} />
+            )}
 
             <SalutePanel cardName={token.token_name} />
 

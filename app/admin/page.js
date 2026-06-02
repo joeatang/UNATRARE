@@ -1869,6 +1869,286 @@ function ArtistProfilePanel({ authToken }) {
   );
 }
 
+// ── Salute ceremonies management panel ────────────────────────
+function SaluteCeremoniesPanel({ authToken }) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [rows, setRows] = useState([]);
+  const [policy, setPolicy] = useState({ enforceWindow: false, strictConfiguredOnly: false });
+  const [loadedFromRow, setLoadedFromRow] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [form, setForm] = useState({
+    card_name: '',
+    headline: 'Burn to Salute',
+    subtitle: 'Voluntary community ritual · proof of appreciation',
+    theme_key: 'ember',
+    status: 'draft',
+    starts_at: '',
+    ends_at: '',
+  });
+
+  function toInputTime(ts) {
+    if (!ts) return '';
+    const d = new Date(ts * 1000);
+    return d.toISOString().slice(0, 16);
+  }
+
+  function fromInputTime(v) {
+    if (!v) return null;
+    const n = Math.floor(new Date(v).getTime() / 1000);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  async function fetchCeremonies() {
+    setLoading(true);
+    try {
+      const qs = statusFilter ? `?status=${encodeURIComponent(statusFilter)}` : '';
+      const res = await fetch(`/api/admin/salute-ceremonies${qs}`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        setMsg(json.error || 'failed to load ceremonies');
+        return;
+      }
+      setRows(json.ceremonies || []);
+      if (json.policy) {
+        setPolicy({
+          enforceWindow: !!json.policy.enforceWindow,
+          strictConfiguredOnly: !!json.policy.strictConfiguredOnly,
+        });
+      }
+      setMsg('');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    fetchCeremonies();
+  }, [open, statusFilter]);
+
+  function loadRowIntoForm(row) {
+    setForm({
+      card_name: row.card_name || '',
+      headline: row.headline || 'Burn to Salute',
+      subtitle: row.subtitle || 'Voluntary community ritual · proof of appreciation',
+      theme_key: row.theme_key || 'ember',
+      status: row.status || 'draft',
+      starts_at: toInputTime(row.starts_at),
+      ends_at: toInputTime(row.ends_at),
+    });
+    setLoadedFromRow(true);
+    setMsg(`loaded ${row.card_name}`);
+  }
+
+  async function postAction(action) {
+    if (!form.card_name.trim()) {
+      setMsg('card_name required');
+      return;
+    }
+    setSaving(true);
+    try {
+      const body = {
+        action,
+        card_name: form.card_name.toUpperCase().trim(),
+        headline: form.headline,
+        subtitle: form.subtitle,
+        theme_key: form.theme_key,
+        status: form.status,
+        starts_at: fromInputTime(form.starts_at),
+        ends_at: fromInputTime(form.ends_at),
+      };
+
+      const res = await fetch('/api/admin/salute-ceremonies', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        setMsg(json.error || 'save failed');
+        return;
+      }
+      setMsg(`✓ ${action} saved for ${body.card_name}`);
+      await fetchCeremonies();
+      if (json.ceremony) loadRowIntoForm(json.ceremony);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const panelStyle = { margin: '24px 0', border: '1px solid var(--border-dim)', background: 'rgba(180,255,111,0.03)' };
+  const btn = (c = 'var(--text-dim)') => ({
+    padding: '6px 12px', border: `1px solid ${c}`, background: 'transparent', color: c,
+    fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', cursor: 'pointer',
+  });
+  const input = { width: '100%', padding: '7px 9px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 12, boxSizing: 'border-box' };
+  const label = { fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: 4, display: 'block' };
+
+  return (
+    <div style={panelStyle}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ width: '100%', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '3px', color: 'var(--green)' }}
+      >
+        <span>🔥 SALUTE CEREMONIES</span>
+        <span style={{ color: 'var(--text-dim)' }}>{open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <div style={{ padding: '0 20px 20px' }}>
+          <div style={{
+            marginTop: 2,
+            marginBottom: 12,
+            padding: '7px 10px',
+            border: '1px solid var(--border-dim)',
+            background: 'rgba(255,255,255,0.02)',
+            fontFamily: 'var(--font-card)',
+            fontSize: 9,
+            letterSpacing: '1.5px',
+            color: 'var(--text-dim)',
+          }}>
+            POLICY · WINDOW GATE: <span style={{ color: policy.enforceWindow ? 'var(--amber)' : 'var(--green)' }}>{policy.enforceWindow ? 'ON' : 'OFF'}</span>
+            {' · '}
+            STRICT CONFIGURED-ONLY: <span style={{ color: policy.strictConfiguredOnly ? 'var(--amber)' : 'var(--green)' }}>{policy.strictConfiguredOnly ? 'ON' : 'OFF'}</span>
+          </div>
+
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)', marginBottom: 14, lineHeight: 1.6 }}>
+            Configure per-card burn ritual windows, themes, and ceremony copy. This is additive and does not alter existing salute records.
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+            <div>
+              <span style={label}>CARD NAME</span>
+              <input
+                style={input}
+                value={form.card_name}
+                onChange={e => {
+                  setLoadedFromRow(false);
+                  setForm(f => ({ ...f, card_name: e.target.value.toUpperCase() }));
+                }}
+                placeholder="TOKENNAME"
+              />
+            </div>
+            <div>
+              <span style={label}>THEME</span>
+              <select style={input} value={form.theme_key} onChange={e => setForm(f => ({ ...f, theme_key: e.target.value }))}>
+                <option value="ember">ember</option>
+                <option value="flame">flame</option>
+                <option value="inferno">inferno</option>
+                <option value="legendary">legendary</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 10 }}>
+            <span style={label}>HEADLINE</span>
+            <input style={input} value={form.headline} onChange={e => setForm(f => ({ ...f, headline: e.target.value }))} placeholder="Burn to Salute" />
+          </div>
+
+          <div style={{ marginBottom: 10 }}>
+            <span style={label}>SUBTITLE</span>
+            <input style={input} value={form.subtitle} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))} placeholder="Voluntary community ritual · proof of appreciation" />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 12 }}>
+            <div>
+              <span style={label}>STATUS</span>
+              <select style={input} value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
+                <option value="draft">draft</option>
+                <option value="scheduled">scheduled</option>
+                <option value="active">active</option>
+                <option value="closed">closed</option>
+                <option value="archived">archived</option>
+              </select>
+            </div>
+            <div>
+              <span style={label}>STARTS AT</span>
+              <input type="datetime-local" style={input} value={form.starts_at} onChange={e => setForm(f => ({ ...f, starts_at: e.target.value }))} />
+            </div>
+            <div>
+              <span style={label}>ENDS AT</span>
+              <input type="datetime-local" style={input} value={form.ends_at} onChange={e => setForm(f => ({ ...f, ends_at: e.target.value }))} />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+            <button onClick={() => postAction('upsert')} disabled={saving} style={btn('var(--green)')}>{saving ? 'saving…' : 'save / upsert'}</button>
+            <button
+              onClick={() => postAction('activate')}
+              disabled={saving || (policy.strictConfiguredOnly && !loadedFromRow)}
+              style={
+                (policy.strictConfiguredOnly && !loadedFromRow)
+                  ? { ...btn('var(--border)'), opacity: 0.55, cursor: 'not-allowed' }
+                  : btn('var(--amber)')
+              }
+              title={policy.strictConfiguredOnly && !loadedFromRow ? 'strict mode: load an existing ceremony row first' : 'activate 48h'}
+            >
+              activate 48h
+            </button>
+            <button onClick={() => postAction('close')} disabled={saving} style={btn('var(--text-dim)')}>close</button>
+            <button onClick={() => postAction('archive')} disabled={saving} style={btn('var(--text-dim)')}>archive</button>
+            <button onClick={() => postAction('draft')} disabled={saving} style={btn('var(--text-dim)')}>back to draft</button>
+          </div>
+
+          {policy.strictConfiguredOnly && !loadedFromRow && (
+            <div style={{ marginTop: -4, marginBottom: 12, fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)' }}>
+              strict mode is ON: click edit on an existing ceremony row before activating.
+            </div>
+          )}
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <span style={{ ...label, marginBottom: 0 }}>CEREMONY LIST</span>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <select style={{ ...input, width: 140 }} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+                <option value="">all statuses</option>
+                <option value="draft">draft</option>
+                <option value="scheduled">scheduled</option>
+                <option value="active">active</option>
+                <option value="closed">closed</option>
+                <option value="archived">archived</option>
+              </select>
+              <button onClick={fetchCeremonies} disabled={loading} style={btn()}>{loading ? '...' : 'refresh'}</button>
+            </div>
+          </div>
+
+          <div style={{ border: '1px solid var(--border-dim)', background: 'rgba(255,255,255,0.01)' }}>
+            {rows.length === 0 && !loading && (
+              <div style={{ padding: '10px', fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)' }}>no ceremonies yet</div>
+            )}
+            {rows.map(r => (
+              <div key={r.card_name} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 10, alignItems: 'center', padding: '8px 10px', borderBottom: '1px solid var(--border-dim)' }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontFamily: 'var(--font-card)', fontSize: 10, letterSpacing: '2px', color: 'var(--text)' }}>{r.card_name}</div>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {r.headline || 'Burn to Salute'}
+                  </div>
+                </div>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, color: 'var(--amber)', letterSpacing: '1px' }}>{r.status}</div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--text-dim)' }}>{r.ends_at ? new Date(r.ends_at * 1000).toISOString().slice(0, 16).replace('T', ' ') : '—'}</div>
+                <button onClick={() => loadRowIntoForm(r)} style={btn('var(--amber)')}>edit</button>
+              </div>
+            ))}
+          </div>
+
+          {msg && (
+            <div style={{ marginTop: 10, fontFamily: 'var(--font-card)', fontSize: 10, letterSpacing: '1px', color: msg.startsWith('✓') ? 'var(--green)' : 'var(--amber)' }}>
+              {msg}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main admin dashboard ───────────────────────────────────────
 export default function AdminPage() {
   const [authToken, setAuthToken] = useState(null);
@@ -2185,6 +2465,7 @@ export default function AdminPage() {
       <div className={styles.queue}>
         {tab === 'tools' ? (
           <>
+            <SaluteCeremoniesPanel authToken={authToken} />
             <TelegramRegistrationsPanel authToken={authToken} />
             <GenesisGrantsPanel authToken={authToken} />
             <DropsPanel authToken={authToken} />

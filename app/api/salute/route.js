@@ -5,6 +5,8 @@ import { getDb } from '../../../lib/db';
 const CASH_MINT  = 'oMhwtzE6KeovcRMFAsFocEA6GcZUTAYFdvQ7tpJfnat';
 const SOLANA_RPC = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 const STRICT_BURN_INSTRUCTION_REQUIRED = process.env.SALUTE_STRICT_BURN_INSTRUCTION !== '0';
+const ENFORCE_CEREMONY_WINDOW = process.env.SALUTE_ENFORCE_CEREMONY_WINDOW === '1';
+const ENFORCE_CEREMONY_STRICT = process.env.SALUTE_ENFORCE_CEREMONY_STRICT === '1';
 const RATE_WINDOW_MS = Number(process.env.SALUTE_RATE_LIMIT_WINDOW_MS || 60_000);
 const RATE_LIMIT_PER_IP = Number(process.env.SALUTE_RATE_LIMIT_PER_IP || 20);
 const RATE_LIMIT_PER_WALLET = Number(process.env.SALUTE_RATE_LIMIT_PER_WALLET || 10);
@@ -107,6 +109,18 @@ export async function POST(request) {
     return NextResponse.json({ error: 'card not found or not certified' }, { status: 404 });
   }
 
+  const gate = getCeremonyGateDecision(db, cardNameClean);
+  if (!gate.allowed) {
+    logSaluteEvent('ceremony_blocked', {
+      clientIp,
+      cardName: cardNameClean,
+      solWallet: sol_wallet,
+      txSig: tx_sig,
+      message: gate.reason,
+    });
+    return NextResponse.json({ error: gate.reason }, { status: 409 });
+  }
+
   // Reject duplicate TxIDs (UNIQUE constraint would catch this too, but give a clear message)
   const dup = db.prepare('SELECT id FROM card_salutes WHERE tx_sig = ?').get(tx_sig);
   if (dup) {
@@ -170,6 +184,50 @@ export async function POST(request) {
     decimals:      burnInfo.decimals,
     rank:          rankRow?.rank ?? 1,
   });
+}
+
+function getCeremonyGateDecision(db, cardName) {
+  if (!ENFORCE_CEREMONY_WINDOW) {
+    return { allowed: true };
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const ceremony = db.prepare(
+    'SELECT status, starts_at, ends_at FROM salute_ceremonies WHERE card_name = ? LIMIT 1'
+  ).get(cardName);
+
+  if (!ceremony) {
+    if (ENFORCE_CEREMONY_STRICT) {
+      return {
+        allowed: false,
+        reason: 'salutes are currently gated to configured ceremony cards only',
+      };
+    }
+    return { allowed: true };
+  }
+
+  if (ceremony.status !== 'active') {
+    return {
+      allowed: false,
+      reason: 'this ceremony is not active right now',
+    };
+  }
+
+  if (ceremony.starts_at != null && now < ceremony.starts_at) {
+    return {
+      allowed: false,
+      reason: 'this ceremony has not started yet',
+    };
+  }
+
+  if (ceremony.ends_at != null && now > ceremony.ends_at) {
+    return {
+      allowed: false,
+      reason: 'this ceremony has ended',
+    };
+  }
+
+  return { allowed: true };
 }
 
 // ── Solana on-chain burn verification (plain fetch — no npm packages) ─────
@@ -303,6 +361,8 @@ function logSaluteEvent(event, data = {}) {
     solWallet: mask(data.solWallet || ''),
     txSig: mask(data.txSig || ''),
     strictInstructionRequired: data.strictInstructionRequired ?? STRICT_BURN_INSTRUCTION_REQUIRED,
+    ceremonyWindowEnforced: ENFORCE_CEREMONY_WINDOW,
+    ceremonyStrictMode: ENFORCE_CEREMONY_STRICT,
     amountRaw: data.amountRaw || null,
     amountDisplay: data.amountDisplay ?? null,
     message: data.message || null,
