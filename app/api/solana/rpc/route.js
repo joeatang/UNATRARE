@@ -7,6 +7,7 @@ const ALLOWED_METHODS = new Set([
   'sendTransaction',
   'getRecentBlockhash',
   'simulateTransaction',
+  'getBlockHeight',
 ]);
 
 export const dynamic = 'force-dynamic';

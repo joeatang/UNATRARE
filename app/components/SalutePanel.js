@@ -179,14 +179,37 @@ async function getCashAccount(walletPubkey) {
   };
 }
 
-// Poll for confirmation (more reliable in browser than subscriptions)
-async function waitConfirmed(sig, maxTries = 40) {
+// Poll for confirmation, re-broadcasting the signed tx every few seconds so that
+// dropped/forgotten transactions still land. Bounded by lastValidBlockHeight if
+// available, otherwise a hard maxTries fallback.
+async function waitConfirmed(sig, opts = {}) {
+  const { rawTx = null, lastValidBlockHeight = 0, maxTries = 60 } = opts;
+  let lastBroadcast = Date.now();
   for (let i = 0; i < maxTries; i++) {
     const res = await rpc('getSignatureStatuses', [[sig], { searchTransactionHistory: true }]);
     const st = res?.value?.[0];
     if (st?.err) throw new Error('Transaction failed on-chain');
     if (st?.confirmationStatus === 'confirmed' || st?.confirmationStatus === 'finalized') return;
-    await new Promise(r => setTimeout(r, 800));
+
+    // Re-broadcast every ~3s so a dropped tx still has a chance to land.
+    if (rawTx && Date.now() - lastBroadcast > 3000) {
+      try { await rpc('sendTransaction', [rawTx, { skipPreflight: true, encoding: 'base64', maxRetries: 0 }]); } catch {}
+      lastBroadcast = Date.now();
+    }
+
+    // Stop early if we already know the blockhash is past its expiry.
+    if (lastValidBlockHeight) {
+      try {
+        const h = await rpc('getBlockHeight', [{ commitment: 'confirmed' }]);
+        if (typeof h === 'number' && h > lastValidBlockHeight) {
+          throw new Error('Blockhash expired before the transaction was confirmed. Please try again.');
+        }
+      } catch (e) {
+        if (String(e.message || '').includes('Blockhash expired')) throw e;
+      }
+    }
+
+    await new Promise(r => setTimeout(r, 1500));
   }
   throw new Error('Confirmation timeout — check Solana Explorer for status');
 }
@@ -197,11 +220,13 @@ async function sendBurnTxWithWallet(provider, tx, web3) {
   // Phantom and Solflare apply to signAndSendTransaction for unverified tokens).
   if (provider?.signTransaction) {
     const signed = await provider.signTransaction(tx);
-    const conn = new web3.Connection(RPC_URL, 'confirmed');
-    return await conn.sendRawTransaction(signed.serialize(), {
-      skipPreflight: true,   // skip RPC preflight; validators still enforce rules
-      maxRetries: 5,
-    });
+    const raw = signed.serialize();
+    const rawB64 = (typeof Buffer !== 'undefined')
+      ? Buffer.from(raw).toString('base64')
+      : btoa(String.fromCharCode(...new Uint8Array(raw)));
+    const sig = await rpc('sendTransaction',
+      [rawB64, { skipPreflight: false, encoding: 'base64', preflightCommitment: 'confirmed', maxRetries: 5 }]);
+    return { sig, rawB64 };
   }
 
   // Fallback: some wallet adapters only expose signAndSendTransaction.
@@ -209,7 +234,7 @@ async function sendBurnTxWithWallet(provider, tx, web3) {
     const sendResult = await provider.signAndSendTransaction(tx);
     const sig = typeof sendResult === 'string' ? sendResult : sendResult?.signature;
     if (!sig) throw new Error('wallet did not return a transaction signature');
-    return sig;
+    return { sig, rawB64: null };
   }
 
   throw new Error('wallet does not support transaction signing for this action');
@@ -480,13 +505,14 @@ export default function SalutePanel({ cardName }) {
 
       // Sign + send via wallet using signTransaction (raw bytes path — avoids wallet token-risk screening).
       let sig;
-      sig = await sendBurnTxWithWallet(connected.provider, tx, web3);
+      const sent = await sendBurnTxWithWallet(connected.provider, tx, web3);
+      sig = sent.sig;
       if (!sig) throw new Error('wallet did not return a transaction signature');
       localSig = sig;
       setBurnSig(sig);
 
       setPhase('confirming');
-      await waitConfirmed(sig);
+      await waitConfirmed(sig, { rawTx: sent.rawB64, lastValidBlockHeight });
 
       setPhase('submitting');
       const resp = await fetch('/api/salute', {
