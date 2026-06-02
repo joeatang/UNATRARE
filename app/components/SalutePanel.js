@@ -578,6 +578,31 @@ export default function SalutePanel({ cardName }) {
 
   return (
     <div style={S.wrap}>
+      {/* Subtle burn animations — injected once per panel */}
+      <style>{`
+        @keyframes salute-flicker {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          25%      { opacity: 0.65; transform: scale(1.08) rotate(-3deg); }
+          50%      { opacity: 1; transform: scale(0.95); }
+          75%      { opacity: 0.8; transform: scale(1.05) rotate(2deg); }
+        }
+        @keyframes salute-glow-pulse {
+          0%, 100% { box-shadow: 0 0 0 rgba(180,255,111,0); border-color: var(--green); }
+          50%      { box-shadow: 0 0 18px rgba(180,255,111,0.35); border-color: rgba(180,255,111,0.9); }
+        }
+        @keyframes salute-ember-rise {
+          0%   { opacity: 0; transform: translateY(8px); }
+          50%  { opacity: 1; }
+          100% { opacity: 0; transform: translateY(-12px); }
+        }
+        .salute-flame-flicker { display: inline-block; animation: salute-flicker 1.4s ease-in-out infinite; transform-origin: 50% 80%; }
+        .salute-success-box   { animation: salute-glow-pulse 2.4s ease-in-out infinite; }
+        .salute-burn-btn:hover:not(:disabled) {
+          background: rgba(255,80,0,0.14) !important;
+          border-color: rgba(255,140,40,0.85) !important;
+          box-shadow: 0 0 14px rgba(255,100,0,0.25);
+        }
+      `}</style>
       {/* ── Header ── */}
       <div style={S.header}>
         <span style={S.headerLabel}>
@@ -696,7 +721,10 @@ export default function SalutePanel({ cardName }) {
 
         {/* Status spinner while busy */}
         {isBusy && (
-          <div style={S.statusMsg}>{statusMessages[phase]}</div>
+          <div style={S.statusMsg}>
+            <span className="salute-flame-flicker" style={{ marginRight: 8, fontSize: 16 }}>🔥</span>
+            {statusMessages[phase]}
+          </div>
         )}
 
         {/* Web3 still loading */}
@@ -791,11 +819,13 @@ export default function SalutePanel({ cardName }) {
                 {burnErr && <div style={S.error}>{burnErr}</div>}
 
                 <button
+                  className="salute-burn-btn"
                   style={{ ...S.burnBtn, ...(!burnAmount || parseFloat(burnAmount) <= 0 ? S.burnBtnOff : {}) }}
                   onClick={executeBurn}
                   disabled={!burnAmount || parseFloat(burnAmount) <= 0}
                 >
-                  🔥 BURN $CASH
+                  <span className="salute-flame-flicker" style={{ marginRight: 8 }}>🔥</span>
+                  BURN $CASH
                 </button>
               </>
             )}
@@ -849,9 +879,10 @@ export default function SalutePanel({ cardName }) {
 
         {/* Connected + success: confirmed result + explorer link + burn again */}
         {!isBusy && connected && phase === 'success' && burnResult && (
-          <div>
+          <div className="salute-success-box" style={{ padding: '12px 14px', border: '1px solid var(--green)', background: 'rgba(180,255,111,0.05)', marginBottom: 12 }}>
             <div style={{ fontFamily: 'var(--font-card)', fontSize: '11px', letterSpacing: '2px', color: 'var(--green)', marginBottom: 6 }}>
-              🔥 {fmt(burnResult.displayAmount)} $CASH BURNED · RANK #{burnResult.rank}
+              <span className="salute-flame-flicker" style={{ marginRight: 6 }}>🔥</span>
+              {fmt(burnResult.displayAmount)} $CASH BURNED · RANK #{burnResult.rank}
             </div>
             {burnSig && (
               <div style={{ marginBottom: 10 }}>
