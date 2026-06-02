@@ -5,6 +5,8 @@ import { getDb } from '../../../lib/db';
 const CASH_MINT  = 'oMhwtzE6KeovcRMFAsFocEA6GcZUTAYFdvQ7tpJfnat';
 const SOLANA_RPC = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 const STRICT_BURN_INSTRUCTION_REQUIRED = process.env.SALUTE_STRICT_BURN_INSTRUCTION !== '0';
+const SALUTE_BURN_PROGRAM_ID = (process.env.SALUTE_BURN_PROGRAM_ID || '').trim();
+const SALUTE_REQUIRE_PROGRAM_BURN = process.env.SALUTE_REQUIRE_PROGRAM_BURN === '1';
 const ENFORCE_CEREMONY_WINDOW = process.env.SALUTE_ENFORCE_CEREMONY_WINDOW === '1';
 const ENFORCE_CEREMONY_STRICT = process.env.SALUTE_ENFORCE_CEREMONY_STRICT === '1';
 const RATE_WINDOW_MS = Number(process.env.SALUTE_RATE_LIMIT_WINDOW_MS || 60_000);
@@ -269,6 +271,15 @@ async function verifySolanaBurn(txSig, expectedWallet) {
     .map(k => k.pubkey);
   if (!signers.includes(expectedWallet)) {
     throw new Error('wallet did not sign this transaction');
+  }
+
+  if (SALUTE_REQUIRE_PROGRAM_BURN) {
+    if (!SOL_ADDR_RE.test(SALUTE_BURN_PROGRAM_ID)) {
+      throw new Error('server misconfigured: SALUTE_BURN_PROGRAM_ID must be a valid Solana address');
+    }
+    const outerIx = tx.transaction?.message?.instructions || [];
+    const hasProgramCall = outerIx.some(ix => ix?.programId === SALUTE_BURN_PROGRAM_ID);
+    if (!hasProgramCall) return null;
   }
 
   // Strategy: find a jsonParsed spl-token burn instruction

@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 const CASH_MINT   = 'oMhwtzE6KeovcRMFAsFocEA6GcZUTAYFdvQ7tpJfnat';
 const TOKEN_PROG  = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const TOKEN_2022_PROG = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
+const SALUTE_BURN_PROGRAM_ID = process.env.NEXT_PUBLIC_SALUTE_BURN_PROGRAM_ID || '';
 const RPC_URL     = 'https://api.mainnet-beta.solana.com';
 const WEB3_CDN    = 'https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.0/lib/index.iife.min.js';
 const SOL_SIG_RE  = /^[1-9A-HJ-NP-Za-km-z]{64,100}$/;
@@ -48,6 +49,54 @@ function buildBurnIx(web3, tokenAcct, mint, owner, rawAmt, tokenProgramId) {
       { pubkey: new web3.PublicKey(tokenAcct), isSigner: false, isWritable: true },
       { pubkey: new web3.PublicKey(mint),      isSigner: false, isWritable: true },
       { pubkey: new web3.PublicKey(owner),     isSigner: true,  isWritable: false },
+    ],
+    data,
+  });
+}
+
+function toU64Le(n) {
+  const out = new Uint8Array(8);
+  let v = n;
+  for (let i = 0; i < 8; i++) { out[i] = Number(v & 0xffn); v >>= 8n; }
+  return out;
+}
+
+function toU32Le(n) {
+  return new Uint8Array([
+    n & 0xff,
+    (n >> 8) & 0xff,
+    (n >> 16) & 0xff,
+    (n >> 24) & 0xff,
+  ]);
+}
+
+async function getAnchorDiscriminator(name) {
+  if (!globalThis.crypto?.subtle) {
+    throw new Error('web crypto not available in this browser');
+  }
+  const bytes = new TextEncoder().encode(`global:${name}`);
+  const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
+  return new Uint8Array(digest).slice(0, 8);
+}
+
+// Build Anchor-style instruction: discriminator + u64 amount + utf8 card name.
+async function buildProgramBurnIx(web3, { programId, tokenAcct, mint, owner, rawAmt, tokenProgramId, cardName }) {
+  const discr = await getAnchorDiscriminator('burn_salute');
+  const nameBytes = new TextEncoder().encode((cardName || '').slice(0, 64));
+  const data = new Uint8Array(discr.length + 8 + 4 + nameBytes.length);
+  data.set(discr, 0);
+  data.set(toU64Le(rawAmt), 8);
+  data.set(toU32Le(nameBytes.length), 16);
+  data.set(nameBytes, 20);
+
+  const tokenProgram = tokenProgramId === TOKEN_2022_PROG ? TOKEN_2022_PROG : TOKEN_PROG;
+  return new web3.TransactionInstruction({
+    programId: new web3.PublicKey(programId),
+    keys: [
+      { pubkey: new web3.PublicKey(owner),     isSigner: true,  isWritable: true },
+      { pubkey: new web3.PublicKey(tokenAcct), isSigner: false, isWritable: true },
+      { pubkey: new web3.PublicKey(mint),      isSigner: false, isWritable: true },
+      { pubkey: new web3.PublicKey(tokenProgram), isSigner: false, isWritable: false },
     ],
     data,
   });
@@ -396,8 +445,20 @@ export default function SalutePanel({ cardName }) {
         rawAmt,
         cashAcct.tokenProgram,
       );
+      const useProgramBurn = !!(SALUTE_BURN_PROGRAM_ID && SOL_ADDR_RE.test(SALUTE_BURN_PROGRAM_ID));
+      const finalInstr = useProgramBurn
+        ? await buildProgramBurnIx(web3, {
+            programId: SALUTE_BURN_PROGRAM_ID,
+            tokenAcct: cashAcct.address,
+            mint: CASH_MINT,
+            owner: connected.pubkey,
+            rawAmt,
+            tokenProgramId: cashAcct.tokenProgram,
+            cardName: (cardName || '').toUpperCase().trim(),
+          })
+        : instr;
       const tx    = new web3.Transaction({ recentBlockhash: blockhash, feePayer: new web3.PublicKey(connected.pubkey) });
-      tx.add(instr);
+      tx.add(finalInstr);
 
       // Sign + send via wallet using signTransaction (raw bytes path — avoids wallet token-risk screening).
       let sig;
