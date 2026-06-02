@@ -455,8 +455,11 @@ export default function SalutePanel({ cardName }) {
       if (isTimeout && localSig) {
         setBurnErr(`Confirmation timed out - your burn may still confirm. Check: solscan.io/tx/${localSig}`);
       } else if (isForbidden) {
+        const isSolflare = connected?.id === 'solflare';
         setBurnErr(
-          `Wallet security blocked this burn request. Open your wallet extension, approve/sign the transaction prompt for unatrare.wtf, then try BURN again. If your wallet keeps blocking, use the manual TxID section below. Wallet said: ${msg}`
+          isSolflare
+            ? `Solflare is blocking this burn because $CASH is flagged as an unverified token in their system — this is a Solflare policy, not a problem with unatrare.wtf or your wallet. Switch to Phantom (phantom.app) for a seamless one-click burn, or paste your TxID below if you burn from another app.`
+            : `Wallet blocked this burn. Open your wallet extension, approve the transaction prompt for unatrare.wtf, then try again. Wallet said: ${msg}`
         );
         setShowManual(true);
       } else {
@@ -642,18 +645,20 @@ export default function SalutePanel({ cardName }) {
         {/* Wallet connect — no wallet detected */}
         {!isBusy && web3 && wallets.length === 0 && phase === 'idle' && !connected && (
           <div style={S.noWalletMsg}>
-            No Solana wallet extension detected. Install{' '}
-            <a href="https://phantom.app" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>Phantom</a>,{' '}
-            <a href="https://solflare.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>Solflare</a>, or{' '}
-            <a href="https://backpack.app" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>Backpack</a> to burn $CASH natively.
-            {mobile && (
-              <div style={S.mobileTip}>
-                Mobile tip: open this page inside your wallet's built-in browser — Phantom, Solflare, Backpack, or OKX Wallet all work.
-                Tap the browser icon inside the app, go to unatrare.wtf, and the connect button will detect your wallet automatically.
-                <br />If you get a "forbidden" error, tap the approve/connect prompt that your wallet shows, then try again.
+            No Solana wallet detected.{' '}
+            <a href="https://phantom.app" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--green)', fontWeight: 'bold' }}>Install Phantom</a>{' '}
+            for the best $CASH burn experience — one click, no blocks.
+            {!mobile && (
+              <div style={{ ...S.hint, marginTop: 8 }}>
+                Phantom and Backpack both support $CASH seamlessly.
+                Solflare may block $CASH burns due to its token-verification policy.
               </div>
             )}
-            <br />Or use the manual TxID form below if you burned elsewhere.
+            {mobile && (
+              <div style={S.mobileTip}>
+                Open this page inside Phantom's built-in browser: tap the browser icon inside the app, navigate to unatrare.wtf, and the connect button will appear automatically.
+              </div>
+            )}
           </div>
         )}
 
@@ -661,19 +666,24 @@ export default function SalutePanel({ cardName }) {
         {!isBusy && web3 && wallets.length > 0 && phase === 'idle' && !connected && (
           <div>
             <span style={{ ...S.label, marginTop: 0 }}>CONNECT SOLANA WALLET TO BURN</span>
+            <div style={{ ...S.hint, marginBottom: 10 }}>
+              <strong style={{ color: 'var(--green)' }}>Recommended: Phantom</strong> — seamless one-click burn for $CASH.
+              Solflare may block $CASH transactions due to token verification policies.
+            </div>
             {mobile && (
               <div style={S.mobileTip}>
                 Tap connect below — your wallet will show an approval prompt. Accept it, then return here to burn.
-                If you see "forbidden access", tap approve in the wallet prompt that appeared and try again.
               </div>
             )}
             <div style={S.walletRow}>
               {wallets.map(w => (
-                <button key={w.id} style={S.walletBtn} onClick={() => connectWallet(w)}>
+                <button key={w.id} style={{ ...S.walletBtn, ...(w.id === 'phantom' ? { borderColor: 'rgba(180,255,111,0.4)', color: 'var(--green)' } : {}) }} onClick={() => connectWallet(w)}>
                   <span style={{ fontSize: 16 }}>
                     {w.id === 'phantom' ? '👻' : w.id === 'solflare' ? '🌟' : w.id === 'backpack' ? '🎒' : w.id === 'okx' ? '🅾️' : '💳'}
                   </span>
                   {w.name}
+                  {w.id === 'phantom' && <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-card)', fontSize: '7px', letterSpacing: '2px', color: 'var(--green)', opacity: 0.7 }}>RECOMMENDED</span>}
+                  {w.id === 'solflare' && <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-card)', fontSize: '7px', letterSpacing: '2px', color: 'var(--amber)', opacity: 0.7 }}>MAY BLOCK $CASH</span>}
                 </button>
               ))}
             </div>
