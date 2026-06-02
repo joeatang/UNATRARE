@@ -219,7 +219,7 @@ export default function DirectoryPage({ searchParams }) {
                             </div>
                           );
                         }
-                        const burnersTxt = sum.unique_burners === 1 ? '1 holder' : `${sum.unique_burners} holders`;
+                        const burnersTxt = sum.unique_burners === 1 ? '1 saluter' : `${sum.unique_burners} saluters`;
                         const trending = today > 0;
                         return (
                           <div

@@ -120,10 +120,10 @@ export default function BurnsPage({ searchParams }) {
       <main className={styles.page}>
 
         <div className={styles.header}>
-          <div className={styles.eyebrow}>· the ritual ·</div>
+          <div className={styles.eyebrow}>· the salute ledger ·</div>
           <h1 className={styles.title}>BU<span>R</span>NS</h1>
           <div className={styles.tagline}>
-            $CASH burned in honor of UNATRARE cards. every flame is permanent · verifiable on Solana.
+            Every salute is a $CASH burn on Solana. Permanent. Public. Forever attributed to the wallet that lit it.
           </div>
         </div>
 
@@ -139,7 +139,7 @@ export default function BurnsPage({ searchParams }) {
           </div>
           <div className={styles.stat}>
             <div className={styles.statValue}>{(stats.unique_burners || 0).toLocaleString()}</div>
-            <div className={styles.statLabel}>holders</div>
+            <div className={styles.statLabel}>saluters</div>
           </div>
           <div className={styles.stat}>
             <div className={styles.statValue}>{(stats.cards_participating || 0).toLocaleString()}</div>
@@ -164,11 +164,10 @@ export default function BurnsPage({ searchParams }) {
         {/* ── Tabs ── */}
         <div className={styles.tabRow}>
           {[
-            { key: 'cards',   label: 'TOP CARDS' },
-            { key: 'wallets', label: 'TOP BURNERS' },
-            { key: 'recent',  label: 'RECENT' },
-          ].map(t => (
-            <Link
+            { key: 'cards',   label: 'MOST SALUTED' },
+            { key: 'wallets', label: 'TOP SALUTERS' },
+            { key: 'recent',  label: 'RECENT SALUTES' },
+          ].map(t => (            <Link
               key={t.key}
               href={buildHref(t.key, undefined)}
               className={`${styles.tab} ${safeTab === t.key ? styles.tabActive : ''}`}
@@ -200,7 +199,7 @@ export default function BurnsPage({ searchParams }) {
                     <div className={styles.cardTitle}>{row.display_title}</div>
                     <div className={styles.cardSub}>
                       {row.artist_handle ? `@${row.artist_handle}` : row.card_name}
-                      {' · '}{row.unique_burners} holder{row.unique_burners === 1 ? '' : 's'}
+                      {' · '}{row.unique_burners} saluter{row.unique_burners === 1 ? '' : 's'}
                       {' · '}{row.burn_count} salute{row.burn_count === 1 ? '' : 's'}
                     </div>
                   </div>
@@ -232,7 +231,7 @@ export default function BurnsPage({ searchParams }) {
                     <div className={styles.cardTitle}>{truncateWallet(row.sol_wallet)}</div>
                     <div className={styles.cardSub}>
                       {row.cards_saluted} card{row.cards_saluted === 1 ? '' : 's'} saluted
-                      {' · '}{row.burn_count} burn{row.burn_count === 1 ? '' : 's'}
+                      {' · '}{row.burn_count} salute{row.burn_count === 1 ? '' : 's'}
                       {' · '}last {relTime(row.last_burn_at)}
                     </div>
                   </div>
@@ -281,8 +280,8 @@ export default function BurnsPage({ searchParams }) {
         )}
 
         <div className={styles.footnote}>
-          Salutes are real on-chain $CASH burns on Solana. Every entry is verifiable.
-          New here? <Link href="/directory">Pick a card</Link> and light it up.
+          Salutes are real on-chain $CASH burns on Solana. Permanent and verifiable. Saluting never closes — every card stays open forever.
+          {' '}New here? <Link href="/directory">Pick a card</Link> and light it up.
         </div>
 
       </main>

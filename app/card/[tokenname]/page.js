@@ -281,7 +281,8 @@ export default async function CardPage({ params }) {
                     <>UNATPEPE holders can claim a free copy of this card.
                     {' '}<strong>{drop.supply_remaining}</strong> / {drop.supply_total} remaining.</>
                   ) : drop.status === 'complete' ? (
-                    <>Drop complete. All {drop.supply_total} allocations have been claimed.</>
+                    <>Drop complete. All {drop.supply_total} allocations have been claimed.
+                    {' '}<span style={{ color: 'var(--text-dim)' }}>Saluting this card is always open below.</span></>
                   ) : (
                     <>Drop announced — claiming opens soon. {drop.supply_total} copies reserved for UNATPEPE holders.</>
                   )}

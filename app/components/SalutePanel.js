@@ -658,7 +658,7 @@ export default function SalutePanel({ cardName }) {
       <div style={S.header}>
         <span style={S.headerLabel}>
           <span style={{ fontSize: 14 }}>🔥</span>
-          SALUTE RECORD
+          THE SALUTE LEDGER
         </span>
         <span style={S.headerChain}>$CASH · SOLANA</span>
       </div>
@@ -718,8 +718,7 @@ export default function SalutePanel({ cardName }) {
         {/* ── Empty state ── */}
         {!lbLoading && isEmpty && phase !== 'success' && (
           <div style={S.emptyNote}>
-            No salutes yet. Be the first to burn $CASH and honor this card —
-            your wallet enters the founding record.
+            No salutes yet. Be the first to honor this card — your burn enters the founding record, forever attributed to your wallet.
           </div>
         )}
 
@@ -741,7 +740,7 @@ export default function SalutePanel({ cardName }) {
         <div style={S.sectionDivider} />
 
         <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 14 }}>
-          Burn $CASH (Solana) to honor this card. This panel is burn-only and only uses wallet data needed to verify your burn on-chain.
+          <strong style={{ color: 'var(--text)' }}>Salute this card</strong> by burning $CASH on Solana. Permanent. Public. Forever attributed to your wallet — your name lives on this card.
           <br />
           Need $CASH first? Buy on{' '}
           <a href="https://nat.fun" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>
@@ -843,7 +842,7 @@ export default function SalutePanel({ cardName }) {
         {/* Wallet connect buttons */}
         {!isBusy && web3 && wallets.length > 0 && phase === 'idle' && !connected && (
           <div>
-            <span style={{ ...S.label, marginTop: 0 }}>CONNECT SOLANA WALLET TO BURN</span>
+            <span style={{ ...S.label, marginTop: 0 }}>CONNECT WALLET TO SALUTE</span>
             <div style={{ ...S.hint, marginBottom: 10 }}>
               <strong style={{ color: 'var(--green)' }}>Recommended: Phantom</strong> — seamless one-click burn for $CASH.
               Solflare may block $CASH transactions due to token verification policies.
@@ -882,7 +881,7 @@ export default function SalutePanel({ cardName }) {
 
             {cashAcct && cashAcct.uiBalance > 0 && (
               <>
-                <label style={{ ...S.label, marginTop: 0 }}>AMOUNT TO BURN</label>
+                <label style={{ ...S.label, marginTop: 0 }}>SALUTE AMOUNT ($CASH)</label>
                 <input
                   style={S.input}
                   type="number"
@@ -913,7 +912,7 @@ export default function SalutePanel({ cardName }) {
                   disabled={!burnAmount || parseFloat(burnAmount) <= 0}
                 >
                   <span className="salute-flame-flicker" style={{ marginRight: 8 }}>🔥</span>
-                  BURN $CASH
+                  SALUTE THIS CARD
                 </button>
               </>
             )}
@@ -988,7 +987,7 @@ export default function SalutePanel({ cardName }) {
               Your position is live on the leaderboard.
             </div>
             <button style={{ ...S.pctBtn, padding: '8px 16px' }} onClick={burnAgain}>
-              BURN MORE
+              SALUTE AGAIN
             </button>
           </div>
         )}
