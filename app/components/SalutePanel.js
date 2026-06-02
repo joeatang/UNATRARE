@@ -160,6 +160,17 @@ async function sendBurnTxWithWallet(provider, tx, web3) {
   throw new Error('wallet does not support transaction signing for this action');
 }
 
+function isWalletDeniedMsg(message) {
+  const lower = String(message || '').toLowerCase();
+  return (
+    lower.includes('access forbidden') ||
+    lower.includes('forbidden') ||
+    lower.includes('user denied') ||
+    lower.includes('rejected') ||
+    lower.includes('denied')
+  );
+}
+
 // ── Styles — inline, matching the UNATRARE design system ─────────────────
 const S = {
   wrap:        { margin: '32px 0', border: '1px solid #222', background: 'rgba(180,255,111,0.015)' },
@@ -401,7 +412,16 @@ export default function SalutePanel({ cardName }) {
       tx.add(instr);
 
       // Sign + send via wallet, with compatibility fallback for providers that block signAndSend.
-      const sig = await sendBurnTxWithWallet(connected.provider, tx, web3);
+      let sig;
+      try {
+        sig = await sendBurnTxWithWallet(connected.provider, tx, web3);
+      } catch (sendErr) {
+        // Re-auth once and retry. Solflare/other wallets can keep public key but drop sign permission.
+        if (!isWalletDeniedMsg(sendErr?.message)) throw sendErr;
+        try { connected.provider?.disconnect?.(); } catch {}
+        await connected.provider?.connect?.();
+        sig = await sendBurnTxWithWallet(connected.provider, tx, web3);
+      }
       if (!sig) throw new Error('wallet did not return a transaction signature');
       localSig = sig;
       setBurnSig(sig);
@@ -430,19 +450,13 @@ export default function SalutePanel({ cardName }) {
     } catch (e) {
       const isTimeout = e.message?.includes('Confirmation timeout');
       const msg = e?.message || 'burn failed';
-      const lower = msg.toLowerCase();
-      const isForbidden =
-        lower.includes('access forbidden') ||
-        lower.includes('forbidden') ||
-        lower.includes('user denied') ||
-        lower.includes('rejected') ||
-        lower.includes('denied');
+      const isForbidden = isWalletDeniedMsg(msg);
 
       if (isTimeout && localSig) {
         setBurnErr(`Confirmation timed out - your burn may still confirm. Check: solscan.io/tx/${localSig}`);
       } else if (isForbidden) {
         setBurnErr(
-          'Wallet security blocked this burn request. Open your wallet extension, approve/sign the transaction prompt for unatrare.wtf, then try BURN again. If your wallet keeps blocking, use the manual TxID section below.'
+          `Wallet security blocked this burn request. Open your wallet extension, approve/sign the transaction prompt for unatrare.wtf, then try BURN again. If your wallet keeps blocking, use the manual TxID section below. Wallet said: ${msg}`
         );
         setShowManual(true);
       } else {
