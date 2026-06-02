@@ -299,6 +299,12 @@ export default async function CardPage({ params }) {
               </div>
             )}
 
+            {showCeremonySpotlight && (
+              <SaluteCeremonySpotlight cardName={token.token_name} />
+            )}
+
+            <SalutePanel cardName={token.token_name} />
+
             {token.description && (
               <div className={styles.description}>
                 {token.description}
@@ -421,12 +427,6 @@ export default async function CardPage({ params }) {
                 artist: manage drop →
               </Link>
             </div>
-
-            {showCeremonySpotlight && (
-              <SaluteCeremonySpotlight cardName={token.token_name} />
-            )}
-
-            <SalutePanel cardName={token.token_name} />
 
             <div className={styles.backRow}>
               <Link href="/directory" className={styles.backLink}>← back to directory</Link>

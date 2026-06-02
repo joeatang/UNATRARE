@@ -3,6 +3,7 @@ import Nav from '../components/Nav';
 import RarityBar from '../components/RarityBar';
 import styles from './directory.module.css';
 import { getDb } from '../../lib/db';
+import { getSalutesByCardBatch, tierFor, fmtCash } from '../../lib/saluteDisplay';
 
 function toRoman(n) {
   const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
@@ -61,6 +62,14 @@ export default function DirectoryPage({ searchParams }) {
   const { grouped, total } = getApproved(seriesFilter, sortMode);
   const stats = getDirectoryStats();
   const seriesNumbers = Object.keys(grouped).map(Number).sort((a, b) => a - b);
+
+  // One batched query for salute summaries across every visible card.
+  let saluteByCard = new Map();
+  try {
+    const allCardNames = [];
+    for (const arr of Object.values(grouped)) for (const t of arr) allCardNames.push(t.token_name);
+    if (allCardNames.length) saluteByCard = getSalutesByCardBatch(getDb(), allCardNames);
+  } catch { /* directory still renders if salutes lookup fails */ }
 
   // Build series list for filter buttons
   let allSeries = [];
@@ -198,6 +207,38 @@ export default function DirectoryPage({ searchParams }) {
                           <RarityBar supply={token.supply} compact />
                         </div>
                       )}
+                      {(() => {
+                        const sum = saluteByCard.get(token.token_name);
+                        const total = Number(sum?.total_burned || 0);
+                        const today = Number(sum?.total_24h || 0);
+                        const tier = tierFor(total);
+                        if (total <= 0) {
+                          return (
+                            <div className={styles.cardSalute} style={{ color: '#8f8f8f', borderColor: '#222' }}>
+                              <span style={{ opacity: 0.7 }}>○</span> AWAITING SALUTE
+                            </div>
+                          );
+                        }
+                        const burnersTxt = sum.unique_burners === 1 ? '1 holder' : `${sum.unique_burners} holders`;
+                        const trending = today > 0;
+                        return (
+                          <div
+                            className={styles.cardSalute}
+                            style={{
+                              color: tier.color,
+                              borderColor: trending ? tier.color : '#222',
+                              boxShadow: trending ? `0 0 8px ${tier.color}33` : 'none',
+                            }}
+                          >
+                            <span>🔥</span> {fmtCash(total)} $CASH · {burnersTxt}
+                            {trending && (
+                              <span style={{ display: 'block', fontSize: 9, color: tier.color, opacity: 0.85, marginTop: 2 }}>
+                                +{fmtCash(today)} today
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </Link>
                 ))}
