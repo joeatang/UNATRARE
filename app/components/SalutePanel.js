@@ -241,7 +241,7 @@ export default function SalutePanel({ cardName }) {
         setBurnErr(
           'Wallet connection was denied. ' +
           (mobile
-            ? 'In Phantom's in-app browser, tap the connect request that appears and approve it, then try again. Or use the manual TxID form below — burn from your wallet first, then paste the transaction ID here.'
+            ? "In Phantom's in-app browser, tap the connect request that appears and approve it, then try again. Or use the manual TxID form below - burn from your wallet first, then paste the transaction ID here."
             : 'Please approve the connection request in your wallet and try again.')
         );
         if (mobile) setShowManual(true);
