@@ -470,6 +470,21 @@ export default function SalutePanel({ cardName }) {
     setPhase('burning');
     let localSig = ''; // preserve for error messages if confirmation times out
     try {
+      // Preflight: every Solana tx needs a tiny amount of SOL to pay the network fee,
+      // even when burning a non-SOL token. Surface this clearly so users top up.
+      try {
+        const balRes = await rpc('getBalance', [connected.pubkey, { commitment: 'confirmed' }]);
+        const lamports = typeof balRes === 'object' ? (balRes?.value ?? 0) : (balRes ?? 0);
+        // 5000 lamports = base fee. Require ~0.001 SOL headroom for safety.
+        if (lamports < 1_000_000) {
+          setBurnErr(
+            'Your wallet needs a little SOL to pay the Solana network fee (~0.001 SOL is plenty). ' +
+            'Send some SOL to this wallet and try again. This is a Solana network requirement — the SOL is not paid to UNATRARE.'
+          );
+          setPhase('ready');
+          return;
+        }
+      } catch { /* if the balance check fails, let the on-chain error path handle it */ }
       // Some wallet adapters drop signing permission while keeping a cached pubkey.
       // Reconnect if the provider reports disconnected before attempting to sign.
       if (connected.provider?.isConnected === false && connected.provider?.connect) {
@@ -537,8 +552,15 @@ export default function SalutePanel({ cardName }) {
       const msg = e?.message || 'burn failed';
       const isRpc403 = /solana rpc http 403/i.test(msg);
       const isForbidden = !isRpc403 && isWalletDeniedMsg(msg);
+      const isNoLamports = /attempt to debit an account but found no record of a prior credit/i.test(msg)
+                        || /insufficient funds for fee/i.test(msg);
 
-      if (isTimeout && localSig) {
+      if (isNoLamports) {
+        setBurnErr(
+          'Your wallet needs a little SOL to pay the Solana network fee (~0.001 SOL is plenty). ' +
+          'Send some SOL to this wallet and try again. This is a Solana network requirement — the SOL is not paid to UNATRARE.'
+        );
+      } else if (isTimeout && localSig) {
         setBurnErr(`Confirmation timed out - your burn may still confirm. Check: solscan.io/tx/${localSig}`);
       } else if (isRpc403) {
         setBurnErr(
