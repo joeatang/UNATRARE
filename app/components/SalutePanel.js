@@ -121,6 +121,42 @@ async function waitConfirmed(sig, maxTries = 40) {
   throw new Error('Confirmation timeout — check Solana Explorer for status');
 }
 
+async function sendBurnTxWithWallet(provider, tx, web3) {
+  let firstErr = null;
+
+  if (provider?.signAndSendTransaction) {
+    try {
+      const sendResult = await provider.signAndSendTransaction(tx);
+      const sig = typeof sendResult === 'string' ? sendResult : sendResult?.signature;
+      if (!sig) throw new Error('wallet did not return a transaction signature');
+      return sig;
+    } catch (err) {
+      firstErr = err;
+      const msg = String(err?.message || '').toLowerCase();
+      const canFallback =
+        msg.includes('forbidden') ||
+        msg.includes('denied') ||
+        msg.includes('rejected') ||
+        msg.includes('not support') ||
+        msg.includes('not implemented') ||
+        msg.includes('method not found');
+      if (!canFallback) throw err;
+    }
+  }
+
+  if (provider?.signTransaction) {
+    const signed = await provider.signTransaction(tx);
+    const conn = new web3.Connection(RPC_URL, 'confirmed');
+    return await conn.sendRawTransaction(signed.serialize(), {
+      skipPreflight: false,
+      maxRetries: 5,
+    });
+  }
+
+  if (firstErr) throw firstErr;
+  throw new Error('wallet does not support transaction signing for this action');
+}
+
 // ── Styles — inline, matching the UNATRARE design system ─────────────────
 const S = {
   wrap:        { margin: '32px 0', border: '1px solid #222', background: 'rgba(180,255,111,0.015)' },
@@ -354,9 +390,8 @@ export default function SalutePanel({ cardName }) {
       const tx    = new web3.Transaction({ recentBlockhash: blockhash, feePayer: new web3.PublicKey(connected.pubkey) });
       tx.add(instr);
 
-      // Sign & send via wallet — handle both { signature } and raw string returns
-      const sendResult = await connected.provider.signAndSendTransaction(tx);
-      const sig = typeof sendResult === 'string' ? sendResult : sendResult?.signature;
+      // Sign + send via wallet, with compatibility fallback for providers that block signAndSend.
+      const sig = await sendBurnTxWithWallet(connected.provider, tx, web3);
       if (!sig) throw new Error('wallet did not return a transaction signature');
       localSig = sig;
       setBurnSig(sig);
