@@ -1,0 +1,5 @@
+ M app/api/salute/route.js
+ M app/components/SalutePanel.js
+ M package.json
+?? preflight_snapshots/
+?? scripts/preflight-snapshot.sh

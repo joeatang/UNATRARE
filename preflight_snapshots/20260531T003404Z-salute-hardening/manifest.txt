@@ -1,0 +1,9 @@
+timestamp_utc=20260531T003404Z
+cwd=/Users/joeatang/UNATRARE/app
+uname=Darwin Mac.attwifi.manager 25.5.0 Darwin Kernel Version 25.5.0: Mon Apr 27 20:39:09 PDT 2026; root:xnu-12377.121.6~2/RELEASE_ARM64_T6020 arm64
+node=v22.22.2
+npm=10.9.7
+git_branch=main
+git_head=289a8f3fbe516f70861d29bc3844782efc126268
+db_present=yes
+sqlite3_present=yes

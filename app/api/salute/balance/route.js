@@ -20,6 +20,7 @@ async function rpcRequest(rpcUrl, method, params, timeoutMs = 10_000) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
       signal: abort.signal,
+      cache: 'no-store',
     });
     if (!res.ok) throw new Error(`RPC HTTP ${res.status}`);
     const payload = await res.json();
@@ -113,11 +114,14 @@ export async function GET(request) {
 
   try {
     const result = await getCashAccountViaRpc(wallet);
-    return NextResponse.json({ ok: true, ...result });
+    return NextResponse.json(
+      { ok: true, ...result },
+      { headers: { 'Cache-Control': 'no-store, max-age=0, must-revalidate' } },
+    );
   } catch (err) {
     return NextResponse.json({
       ok: false,
       error: err?.message || 'failed to load balance',
-    }, { status: 502 });
+    }, { status: 502, headers: { 'Cache-Control': 'no-store' } });
   }
 }

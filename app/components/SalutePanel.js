@@ -156,7 +156,10 @@ async function rpc(method, params) {
 }
 
 async function getCashAccount(walletPubkey) {
-  const res = await fetch(`/api/salute/balance?wallet=${encodeURIComponent(walletPubkey)}`);
+  const res = await fetch(
+    `/api/salute/balance?wallet=${encodeURIComponent(walletPubkey)}&t=${Date.now()}`,
+    { cache: 'no-store' },
+  );
   const json = await res.json();
   if (!res.ok || !json.ok) {
     throw new Error(json.error || 'failed to load balance');
@@ -698,6 +701,43 @@ export default function SalutePanel({ cardName }) {
           </a>
           .
         </div>
+
+        {/* ── Security / wallet-warning education ─────────────────────────── */}
+        <details style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: '11px',
+          color: 'var(--text-dim)',
+          lineHeight: 1.6,
+          marginBottom: 14,
+          padding: '10px 12px',
+          border: '1px solid var(--border)',
+          borderRadius: 6,
+          background: 'rgba(255,180,0,0.04)',
+        }}>
+          <summary style={{ cursor: 'pointer', color: 'var(--amber)', fontWeight: 600 }}>
+            ⚠ Why does my wallet warn about $CASH? (read before connecting)
+          </summary>
+          <div style={{ marginTop: 10 }}>
+            $CASH is a <strong style={{ color: 'var(--text)' }}>new Solana SPL Token-2022</strong> minted on{' '}
+            <a href="https://nat.fun" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>nat.fun</a>.
+            Because it's young and the ticker is generic, Phantom / Solflare / Backpack may show an
+            <em> &ldquo;unverified token&rdquo;</em> or <em>&ldquo;low-trust&rdquo;</em> warning. That is normal for any new token —
+            it is not evidence of a scam.
+            <br /><br />
+            <strong style={{ color: 'var(--text)' }}>Triple-check before signing:</strong>
+            <ul style={{ margin: '6px 0 6px 18px', padding: 0 }}>
+              <li>URL bar reads exactly <code style={{ color: 'var(--green)' }}>https://unatrare.wtf</code> (no lookalikes).</li>
+              <li>Mint: <code style={{ wordBreak: 'break-all' }}>oMhwtzE6KeovcRMFAsFocEA6GcZUTAYFdvQ7tpJfnat</code></li>
+              <li>Token program: <code>TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb</code> (Token-2022)</li>
+              <li>Burn program: <code style={{ wordBreak: 'break-all' }}>2kociKNJcSLo1TytiyWvT1r8sdFdLMZu9mMYHfogjxZc</code></li>
+              <li>Your wallet should ask to <strong>burn</strong> $CASH — never to transfer SOL or approve unlimited spending.</li>
+              <li>This panel never asks for your seed phrase. Ever. Close the tab if anything else shows up.</li>
+            </ul>
+            Verify any signature on{' '}
+            <a href="https://solscan.io" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>solscan.io</a>
+            {' '}before and after burning. The transaction must show <code>Burn</code> on the $CASH mint above — nothing else.
+          </div>
+        </details>
 
         {/* Connected wallet bar — stays visible through signing + confirmation */}
         {connected && (

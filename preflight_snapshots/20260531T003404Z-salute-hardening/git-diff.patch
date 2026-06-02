@@ -1,0 +1,315 @@
+diff --git a/app/api/salute/route.js b/app/api/salute/route.js
+index c637251..abd7960 100644
+--- a/app/api/salute/route.js
++++ b/app/api/salute/route.js
+@@ -4,11 +4,11 @@ import { getDb } from '../../../lib/db';
+ // $CASH Solana SPL token mint address
+ const CASH_MINT  = 'oMhwtzE6KeovcRMFAsFocEA6GcZUTAYFdvQ7tpJfnat';
+ const SOLANA_RPC = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
++const STRICT_BURN_INSTRUCTION_REQUIRED = process.env.SALUTE_STRICT_BURN_INSTRUCTION !== '0';
+ 
+ // Base58 character set (Solana uses this for addresses and signatures)
+ const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+ const SOL_SIG_RE  = /^[1-9A-HJ-NP-Za-km-z]{64,100}$/;
+-const BTC_ADDR_RE = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
+ 
+ export const dynamic = 'force-dynamic';
+ 
+@@ -62,7 +62,7 @@ export async function POST(request) {
+     return NextResponse.json({ error: 'invalid json' }, { status: 400 });
+   }
+ 
+-  const { card_name, sol_wallet, tx_sig, cp_address = '' } = body;
++  const { card_name, sol_wallet, tx_sig } = body;
+ 
+   // Input validation
+   if (!card_name || typeof card_name !== 'string') {
+@@ -78,10 +78,6 @@ export async function POST(request) {
+   if (!tx_sig || !SOL_SIG_RE.test(tx_sig)) {
+     return NextResponse.json({ error: 'invalid tx_sig — must be a valid Solana transaction signature' }, { status: 400 });
+   }
+-  if (cp_address && !BTC_ADDR_RE.test(cp_address)) {
+-    return NextResponse.json({ error: 'invalid cp_address — must be a legacy Bitcoin address (starts with 1 or 3)' }, { status: 400 });
+-  }
+-
+   const db = getDb();
+ 
+   // Verify the card exists and is certified
+@@ -116,7 +112,7 @@ export async function POST(request) {
+   db.prepare(`
+     INSERT INTO card_salutes (card_name, sol_wallet, amount_raw, amount_display, decimals, tx_sig, cp_address)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
+-  `).run(cardNameClean, sol_wallet, burnInfo.rawAmount, burnInfo.displayAmount, burnInfo.decimals, tx_sig, cp_address);
++  `).run(cardNameClean, sol_wallet, burnInfo.rawAmount, burnInfo.displayAmount, burnInfo.decimals, tx_sig, '');
+ 
+   // Return rank for this wallet on this card
+   const rankRow = db.prepare(`
+@@ -170,13 +166,22 @@ async function verifySolanaBurn(txSig, expectedWallet) {
+   if (!tx.meta) throw new Error('transaction metadata unavailable — wait a moment and try again');
+   if (tx.meta.err !== null) throw new Error('transaction failed on-chain');
+ 
+-  // Strategy 1: find a jsonParsed spl-token burn instruction
++  // Require an explicit SPL burn instruction for $CASH.
++  // Balance-delta-only inference is intentionally rejected to avoid false positives.
++  const signers = (tx.transaction?.message?.accountKeys || [])
++    .filter(k => k?.signer)
++    .map(k => k.pubkey);
++  if (!signers.includes(expectedWallet)) {
++    throw new Error('wallet did not sign this transaction');
++  }
++
++  // Strategy: find a jsonParsed spl-token burn instruction
+   const outerIx  = tx.transaction?.message?.instructions || [];
+   const innerIx  = (tx.meta?.innerInstructions || []).flatMap(ii => ii.instructions);
+   for (const ix of [...outerIx, ...innerIx]) {
+     if (
+       ix.program === 'spl-token' &&
+-      ix.parsed?.type === 'burn' &&
++      (ix.parsed?.type === 'burn' || ix.parsed?.type === 'burnChecked') &&
+       ix.parsed?.info?.mint === CASH_MINT &&
+       ix.parsed?.info?.authority === expectedWallet
+     ) {
+@@ -189,27 +194,30 @@ async function verifySolanaBurn(txSig, expectedWallet) {
+     }
+   }
+ 
+-  // Strategy 2: infer from token balance delta (handles non-jsonParsed instructions)
+-  const pre  = (tx.meta?.preTokenBalances  || []).filter(b => b.mint === CASH_MINT && b.owner === expectedWallet);
+-  const post = (tx.meta?.postTokenBalances || []).filter(b => b.mint === CASH_MINT && b.owner === expectedWallet);
+-  if (pre.length > 0) {
+-    const preAmt  = pre.reduce( (s, b) => s + BigInt(b.uiTokenAmount?.amount ?? 0), BigInt(0));
+-    const postAmt = post.reduce((s, b) => s + BigInt(b.uiTokenAmount?.amount ?? 0), BigInt(0));
+-    const burned  = preAmt - postAmt;
+-    if (burned > BigInt(0)) {
+-      // Confirm the expected wallet actually signed this transaction
+-      const signers = (tx.transaction?.message?.accountKeys || [])
+-        .filter(k => k.signer)
+-        .map(k => k.pubkey);
+-      if (!signers.includes(expectedWallet)) {
+-        throw new Error('wallet did not sign this transaction');
+-      }
+-      const decimals  = pre[0].uiTokenAmount?.decimals ?? 6;
+-      const rawAmount = burned.toString();
+-      const displayAmount = Number(burned) / Math.pow(10, decimals);
+-      return { rawAmount, displayAmount, decimals };
+-    }
++  if (!STRICT_BURN_INSTRUCTION_REQUIRED) {
++    const inferred = inferBurnByBalanceDelta(tx, expectedWallet);
++    if (inferred) return inferred;
+   }
+ 
+-  return null; // no $CASH burn found in this transaction
++  return null; // no acceptable $CASH burn found in this transaction
++}
++
++function inferBurnByBalanceDelta(tx, expectedWallet) {
++  const pre = (tx.meta?.preTokenBalances || []).filter(
++    b => b.mint === CASH_MINT && b.owner === expectedWallet,
++  );
++  const post = (tx.meta?.postTokenBalances || []).filter(
++    b => b.mint === CASH_MINT && b.owner === expectedWallet,
++  );
++  if (!pre.length) return null;
++
++  const preAmt = pre.reduce((s, b) => s + BigInt(b.uiTokenAmount?.amount ?? 0), 0n);
++  const postAmt = post.reduce((s, b) => s + BigInt(b.uiTokenAmount?.amount ?? 0), 0n);
++  const burned = preAmt - postAmt;
++  if (burned <= 0n) return null;
++
++  const decimals = pre[0].uiTokenAmount?.decimals ?? 6;
++  const rawAmount = burned.toString();
++  const displayAmount = Number(burned) / Math.pow(10, decimals);
++  return { rawAmount, displayAmount, decimals };
+ }
+diff --git a/app/components/SalutePanel.js b/app/components/SalutePanel.js
+index 4267cd9..e86ca64 100644
+--- a/app/components/SalutePanel.js
++++ b/app/components/SalutePanel.js
+@@ -8,7 +8,6 @@ const RPC_URL     = 'https://api.mainnet-beta.solana.com';
+ const WEB3_CDN    = 'https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.0/lib/index.iife.min.js';
+ const SOL_SIG_RE  = /^[1-9A-HJ-NP-Za-km-z]{64,100}$/;
+ const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+-const BTC_ADDR_RE = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
+ 
+ function fmt(n) {
+   if (!n) return '0';
+@@ -66,6 +65,11 @@ function detectWallets() {
+   return w;
+ }
+ 
++function isProbablyMobile() {
++  if (typeof navigator === 'undefined') return false;
++  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
++}
++
+ async function rpc(method, params) {
+   const res = await fetch(RPC_URL, {
+     method: 'POST',
+@@ -155,6 +159,7 @@ const S = {
+   burnBtnOff:  { opacity: 0.35, cursor: 'not-allowed' },
+   statusMsg:   { fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)', padding: '18px 0', textAlign: 'center', letterSpacing: 1 },
+   noWalletMsg: { fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, padding: '4px 0 10px' },
++  mobileTip:   { fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--amber)', lineHeight: 1.6, marginTop: 8, marginBottom: 10 },
+   manualToggle:{ background: 'none', border: 'none', fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', cursor: 'pointer', padding: '10px 0 0', textDecoration: 'underline', display: 'block' },
+   submitBtn:   { fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '3px', padding: '10px 22px', border: 'none', background: 'var(--green)', color: '#080808', cursor: 'pointer' },
+ };
+@@ -174,7 +179,6 @@ export default function SalutePanel({ cardName }) {
+   // phase: idle | connecting | fetching | ready | burning | confirming | submitting | success | error
+   const [phase,      setPhase]      = useState('idle');
+   const [burnAmount, setBurnAmount] = useState('');
+-  const [cpAddr,     setCpAddr]     = useState('');
+   const [burnErr,    setBurnErr]    = useState('');
+   const [burnResult, setBurnResult] = useState(null); // { displayAmount, rank }
+   const [burnSig,    setBurnSig]    = useState('');   // tx sig — for explorer link + timeout errors
+@@ -183,7 +187,6 @@ export default function SalutePanel({ cardName }) {
+   const [showManual,   setShowManual]   = useState(false);
+   const [manualSig,    setManualSig]    = useState('');
+   const [manualWallet, setManualWallet] = useState('');
+-  const [manualCp,     setManualCp]     = useState('');
+   const [manualPhase,  setManualPhase]  = useState('idle'); // idle | submitting | success
+   const [manualErr,    setManualErr]    = useState('');
+   const [manualResult, setManualResult] = useState(null);
+@@ -299,7 +302,6 @@ export default function SalutePanel({ cardName }) {
+           card_name:  cardName,
+           sol_wallet: connected.pubkey,
+           tx_sig:     sig,
+-          cp_address: cpAddr.trim(),
+         }),
+       });
+       const json = await resp.json();
+@@ -331,9 +333,6 @@ export default function SalutePanel({ cardName }) {
+     if (!manualWallet.trim() || !SOL_ADDR_RE.test(manualWallet.trim())) {
+       setManualErr('Enter a valid Solana wallet address.'); return;
+     }
+-    if (manualCp.trim() && !BTC_ADDR_RE.test(manualCp.trim())) {
+-      setManualErr('Counterparty address must start with 1 or 3.'); return;
+-    }
+     setManualPhase('submitting');
+     try {
+       const resp = await fetch('/api/salute', {
+@@ -343,7 +342,6 @@ export default function SalutePanel({ cardName }) {
+           card_name:  cardName,
+           sol_wallet: manualWallet.trim(),
+           tx_sig:     manualSig.trim(),
+-          cp_address: manualCp.trim(),
+         }),
+       });
+       const json = await resp.json();
+@@ -359,6 +357,7 @@ export default function SalutePanel({ cardName }) {
+ 
+   const isEmpty = !lbLoading && (!lb || !lb.uniqueSaluters);
+   const isBusy  = ['connecting','fetching','burning','confirming','submitting'].includes(phase);
++  const mobile = isProbablyMobile();
+ 
+   // ── Phase status messages ────────────────────────────────────────────────
+   const statusMessages = {
+@@ -458,7 +457,13 @@ export default function SalutePanel({ cardName }) {
+         <div style={S.sectionDivider} />
+ 
+         <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 14 }}>
+-          Burn $CASH (Solana) to honor this card. Top burner earns the card drop — the artist distributes supply directly to leaderboard wallets.
++          Burn $CASH (Solana) to honor this card. This panel is burn-only and only uses wallet data needed to verify your burn on-chain.
++          <br />
++          Need $CASH first? Buy on{' '}
++          <a href="https://nat.fun" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>
++            nat.fun
++          </a>
++          .
+         </div>
+ 
+         {/* Connected wallet bar — stays visible through signing + confirmation */}
+@@ -489,6 +494,12 @@ export default function SalutePanel({ cardName }) {
+             <a href="https://phantom.app" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>Phantom</a>,{' '}
+             <a href="https://solflare.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>Solflare</a>, or{' '}
+             <a href="https://backpack.app" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>Backpack</a> to burn $CASH natively.
++            {mobile && (
++              <div style={S.mobileTip}>
++                Mobile tip: open this page inside Phantom or Solflare in-app browser, then tap connect and burn.
++                If your wallet app cannot inject here, use manual TxID submission below after burning in-wallet.
++              </div>
++            )}
+             <br />Or use the manual TxID form below if you burned elsewhere.
+           </div>
+         )}
+@@ -497,6 +508,11 @@ export default function SalutePanel({ cardName }) {
+         {!isBusy && web3 && wallets.length > 0 && phase === 'idle' && !connected && (
+           <div>
+             <span style={{ ...S.label, marginTop: 0 }}>CONNECT SOLANA WALLET TO BURN</span>
++            {mobile && (
++              <div style={S.mobileTip}>
++                On mobile, approve connection in your wallet app and return here to continue.
++              </div>
++            )}
+             <div style={S.walletRow}>
+               {wallets.map(w => (
+                 <button key={w.id} style={S.walletBtn} onClick={() => connectWallet(w)}>
+@@ -543,18 +559,6 @@ export default function SalutePanel({ cardName }) {
+                   ))}
+                 </div>
+ 
+-                <label style={S.label}>BITCOIN (COUNTERPARTY) ADDRESS <span style={{ opacity: 0.5, fontWeight: 400 }}>optional</span></label>
+-                <input
+-                  style={S.input}
+-                  value={cpAddr}
+-                  onChange={e => setCpAddr(e.target.value)}
+-                  placeholder="1YourBitcoinAddress — needed to receive card drops"
+-                  autoComplete="off"
+-                />
+-                <div style={{ ...S.hint, marginBottom: 0 }}>
+-                  Your Counterparty wallet address (starts with 1 or 3). Required if you want to receive the Rare Pepe card drop awarded to top saluters.
+-                </div>
+-
+                 {burnErr && <div style={S.error}>{burnErr}</div>}
+ 
+                 <button
+@@ -595,7 +599,7 @@ export default function SalutePanel({ cardName }) {
+               </div>
+             )}
+             <div style={{ ...S.hint, marginBottom: 12 }}>
+-              Your position is live on the leaderboard. When this card&#39;s burn window closes, the artist sends supply to top wallets via Counterparty — to the Bitcoin address on record.
++              Your position is live on the leaderboard.
+             </div>
+             <button style={{ ...S.pctBtn, padding: '8px 16px' }} onClick={burnAgain}>
+               BURN MORE
+@@ -644,15 +648,6 @@ export default function SalutePanel({ cardName }) {
+               spellCheck={false}
+             />
+ 
+-            <label style={S.label}>COUNTERPARTY ADDRESS (optional)</label>
+-            <input
+-              style={S.input}
+-              value={manualCp}
+-              onChange={e => setManualCp(e.target.value)}
+-              placeholder="1YourBitcoinAddress — for art drop eligibility"
+-              autoComplete="off"
+-            />
+-
+             {manualErr && <div style={S.error}>{manualErr}</div>}
+ 
+             <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+@@ -666,6 +661,11 @@ export default function SalutePanel({ cardName }) {
+ 
+             <div style={{ ...S.hint, marginTop: 10 }}>
+               Burn is verified on Solana mainnet. Any Solana wallet works — Phantom, Solflare, Backpack, CLI, etc.
++              {' '}To purchase $CASH, use{' '}
++              <a href="https://nat.fun" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>
++                nat.fun
++              </a>
++              .
+             </div>
+           </form>
+         )}
+diff --git a/package.json b/package.json
+index c6ef667..f64786c 100644
+--- a/package.json
++++ b/package.json
+@@ -5,7 +5,8 @@
+   "scripts": {
+     "dev": "next dev -p 3007",
+     "build": "next build",
+-    "start": "next start -p 3007"
++    "start": "next start -p 3007",
++    "preflight:snapshot": "bash ./scripts/preflight-snapshot.sh"
+   },
+   "dependencies": {
+     "@noble/curves": "^2.2.0",
