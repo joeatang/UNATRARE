@@ -233,7 +233,13 @@ export default function SalutePanel({ cardName }) {
     const hydrateConnected = async (pubkey) => {
       setConnected({ ...w, pubkey });
       setPhase('fetching');
-      const acct = await getCashAccount(pubkey);
+      let acct = null;
+      try {
+        acct = await getCashAccount(pubkey);
+      } catch {
+        // Keep UI usable even if a balance fetch fails transiently.
+        acct = null;
+      }
       setCashAcct(acct);
       setBurnErr('');
       setPhase('ready');
@@ -290,6 +296,21 @@ export default function SalutePanel({ cardName }) {
     setBurnResult(null);
     setBurnSig('');
     setPhase('idle');
+  }
+
+  async function refreshBalance() {
+    if (!connected) return;
+    setPhase('fetching');
+    setBurnErr('');
+    try {
+      const acct = await getCashAccount(connected.pubkey);
+      setCashAcct(acct);
+      setPhase('ready');
+    } catch {
+      setCashAcct(null);
+      setBurnErr('Could not load $CASH balance. Click refresh balance to try again.');
+      setPhase('idle');
+    }
   }
 
   function burnAgain() {
@@ -518,7 +539,10 @@ export default function SalutePanel({ cardName }) {
               {connected.id === 'phantom' ? '👻' : connected.id === 'solflare' ? '🌟' : connected.id === 'backpack' ? '🎒' : connected.id === 'okx' ? '🅾️' : '💳'}
               {' '}{connected.name} · {truncWallet(connected.pubkey)}
             </span>
-            <button style={S.disconnBtn} onClick={disconnect}>DISCONNECT</button>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button style={S.disconnBtn} onClick={refreshBalance}>REFRESH BALANCE</button>
+              <button style={S.disconnBtn} onClick={disconnect}>DISCONNECT</button>
+            </div>
           </div>
         )}
 
@@ -624,6 +648,24 @@ export default function SalutePanel({ cardName }) {
                 $CASH mint: <code style={S.mintAddr}>{CASH_MINT}</code>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Connected but not yet in ready/success state: keep next step obvious */}
+        {!isBusy && connected && phase === 'idle' && (
+          <div style={{ border: '1px solid #2a2a2a', padding: '12px', marginTop: 8, marginBottom: 6 }}>
+            <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--text)' }}>
+              CONNECTED. NEXT STEP: LOAD YOUR $CASH BALANCE.
+            </div>
+            <div style={{ ...S.hint, marginTop: 6, marginBottom: 10 }}>
+              Once balance loads, amount input and burn button will appear below.
+            </div>
+            <button
+              style={{ ...S.pctBtn, padding: '8px 14px', color: 'var(--green)', borderColor: 'var(--green)' }}
+              onClick={refreshBalance}
+            >
+              ↻ LOAD BALANCE
+            </button>
           </div>
         )}
 
