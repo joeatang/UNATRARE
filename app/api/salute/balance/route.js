@@ -54,6 +54,7 @@ async function getCashAccountViaRpc(wallet) {
 
       const top = accounts[0];
       const tokenAmount = top?.account?.data?.parsed?.info?.tokenAmount;
+      const tokenProgram = top?.account?.owner || '';
       return {
         found: true,
         account: {
@@ -61,6 +62,7 @@ async function getCashAccountViaRpc(wallet) {
           uiBalance: tokenAmount?.uiAmount || 0,
           rawBalance: tokenAmount?.amount || '0',
           decimals: tokenAmount?.decimals ?? 6,
+          tokenProgram,
         },
       };
     } catch (err) {

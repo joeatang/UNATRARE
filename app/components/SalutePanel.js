@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 const CASH_MINT   = 'oMhwtzE6KeovcRMFAsFocEA6GcZUTAYFdvQ7tpJfnat';
 const TOKEN_PROG  = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+const TOKEN_2022_PROG = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
 const RPC_URL     = 'https://api.mainnet-beta.solana.com';
 const WEB3_CDN    = 'https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.0/lib/index.iife.min.js';
 const SOL_SIG_RE  = /^[1-9A-HJ-NP-Za-km-z]{64,100}$/;
@@ -35,13 +36,14 @@ function parseToRaw(str, decimals) {
 }
 
 // Build SPL Token burn instruction manually (no @solana/spl-token needed)
-function buildBurnIx(web3, tokenAcct, mint, owner, rawAmt) {
+function buildBurnIx(web3, tokenAcct, mint, owner, rawAmt, tokenProgramId) {
   const data = new Uint8Array(9);
   data[0] = 8; // Burn instruction index
   let n = rawAmt;
   for (let i = 1; i <= 8; i++) { data[i] = Number(n & 0xFFn); n >>= 8n; }
+  const programId = tokenProgramId === TOKEN_2022_PROG ? TOKEN_2022_PROG : TOKEN_PROG;
   return new web3.TransactionInstruction({
-    programId: new web3.PublicKey(TOKEN_PROG),
+    programId: new web3.PublicKey(programId),
     keys: [
       { pubkey: new web3.PublicKey(tokenAcct), isSigner: false, isWritable: true },
       { pubkey: new web3.PublicKey(mint),      isSigner: false, isWritable: true },
@@ -106,6 +108,7 @@ async function getCashAccount(walletPubkey) {
     uiBalance:  tokenAmount.uiAmount || 0,
     rawBalance: BigInt(tokenAmount.amount),
     decimals:   tokenAmount.decimals,
+    tokenProgram: json.account.tokenProgram || TOKEN_PROG,
   };
 }
 
@@ -386,7 +389,14 @@ export default function SalutePanel({ cardName }) {
       const { blockhash, lastValidBlockHeight } = await rpc('getLatestBlockhash', [{ commitment: 'confirmed' }])
         .then(r => ({ blockhash: r.value.blockhash, lastValidBlockHeight: r.value.lastValidBlockHeight }));
 
-      const instr = buildBurnIx(web3, cashAcct.address, CASH_MINT, connected.pubkey, rawAmt);
+      const instr = buildBurnIx(
+        web3,
+        cashAcct.address,
+        CASH_MINT,
+        connected.pubkey,
+        rawAmt,
+        cashAcct.tokenProgram,
+      );
       const tx    = new web3.Transaction({ recentBlockhash: blockhash, feePayer: new web3.PublicKey(connected.pubkey) });
       tx.add(instr);
 
