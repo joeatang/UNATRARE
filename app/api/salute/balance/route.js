@@ -72,13 +72,26 @@ async function getCashAccountViaRpc(wallet) {
       const top = accounts[0];
       const tokenAmount = top?.account?.data?.parsed?.info?.tokenAmount;
       const tokenProgram = top?.account?.owner || TOKEN_PROG;
+      const accountAddress = top?.pubkey || '';
+
+      // Public RPCs (mainnet-beta) cache parsed token-account data and can lag
+      // by minutes after a burn. getTokenAccountBalance reads live state.
+      let liveAmount = tokenAmount;
+      if (accountAddress) {
+        try {
+          const fresh = await rpcRequest(rpcUrl, 'getTokenAccountBalance',
+            [accountAddress, { commitment: 'confirmed' }]);
+          if (fresh?.value) liveAmount = fresh.value;
+        } catch { /* fall back to parsed amount */ }
+      }
+
       return {
         found: true,
         account: {
-          address: top?.pubkey || '',
-          uiBalance: tokenAmount?.uiAmount || 0,
-          rawBalance: tokenAmount?.amount || '0',
-          decimals: tokenAmount?.decimals ?? 6,
+          address: accountAddress,
+          uiBalance: liveAmount?.uiAmount || 0,
+          rawBalance: liveAmount?.amount || '0',
+          decimals: liveAmount?.decimals ?? 6,
           tokenProgram,
         },
       };
