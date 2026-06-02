@@ -3,7 +3,7 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-unatrare_salute_burn = "11111111111111111111111111111111"
+unatrare_salute_burn = "2kociKNJcSLo1TytiyWvT1r8sdFdLMZu9mMYHfogjxZc"
 
 [registry]
 url = "https://api.apr.dev"

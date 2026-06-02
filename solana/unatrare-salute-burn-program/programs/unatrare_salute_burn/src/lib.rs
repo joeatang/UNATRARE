@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{self, Burn, Mint, TokenAccount, TokenInterface};
 
 // Replace this with your deployed program ID before production deployment.
-declare_id!("11111111111111111111111111111111");
+declare_id!("2kociKNJcSLo1TytiyWvT1r8sdFdLMZu9mMYHfogjxZc");
 
 pub const CASH_MINT: Pubkey = pubkey!("oMhwtzE6KeovcRMFAsFocEA6GcZUTAYFdvQ7tpJfnat");
 

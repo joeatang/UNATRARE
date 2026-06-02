@@ -6,7 +6,7 @@ const CASH_MINT   = 'oMhwtzE6KeovcRMFAsFocEA6GcZUTAYFdvQ7tpJfnat';
 const TOKEN_PROG  = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const TOKEN_2022_PROG = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
 const SALUTE_BURN_PROGRAM_ID = process.env.NEXT_PUBLIC_SALUTE_BURN_PROGRAM_ID || '';
-const RPC_URL     = 'https://api.mainnet-beta.solana.com';
+const RPC_URL     = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || '/api/solana/rpc';
 const WEB3_CDN    = 'https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.0/lib/index.iife.min.js';
 const SOL_SIG_RE  = /^[1-9A-HJ-NP-Za-km-z]{64,100}$/;
 const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
@@ -135,6 +135,9 @@ async function rpc(method, params) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
   });
+  if (!res.ok) {
+    throw new Error(`Solana RPC HTTP ${res.status}`);
+  }
   const { result, error } = await res.json();
   if (error) throw new Error(error.message);
   return result;
@@ -491,10 +494,16 @@ export default function SalutePanel({ cardName }) {
     } catch (e) {
       const isTimeout = e.message?.includes('Confirmation timeout');
       const msg = e?.message || 'burn failed';
-      const isForbidden = isWalletDeniedMsg(msg);
+      const isRpc403 = /solana rpc http 403/i.test(msg);
+      const isForbidden = !isRpc403 && isWalletDeniedMsg(msg);
 
       if (isTimeout && localSig) {
         setBurnErr(`Confirmation timed out - your burn may still confirm. Check: solscan.io/tx/${localSig}`);
+      } else if (isRpc403) {
+        setBurnErr(
+          'Solana RPC rejected this request (HTTP 403). This is a network/provider issue, not a wallet rejection. ' +
+          'Set NEXT_PUBLIC_SOLANA_RPC_URL to a dedicated RPC endpoint (Helius/QuickNode/Alchemy) and retry.'
+        );
       } else if (isForbidden) {
         const isSolflare = connected?.id === 'solflare';
         setBurnErr(
