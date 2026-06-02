@@ -90,21 +90,19 @@ async function rpc(method, params) {
 }
 
 async function getCashAccount(walletPubkey) {
-  const result = await rpc('getTokenAccountsByOwner', [
-    walletPubkey,
-    { mint: CASH_MINT },
-    { encoding: 'jsonParsed' },
-  ]);
-  const accounts = result?.value || [];
-  if (!accounts.length) return null;
-  // Use the account with the highest balance (handles rare edge case of multiple ATAs)
-  accounts.sort((a, b) =>
-    Number(BigInt(b.account.data.parsed.info.tokenAmount.amount) -
-           BigInt(a.account.data.parsed.info.tokenAmount.amount))
-  );
-  const { tokenAmount } = accounts[0].account.data.parsed.info;
+  const res = await fetch(`/api/salute/balance?wallet=${encodeURIComponent(walletPubkey)}`);
+  const json = await res.json();
+  if (!res.ok || !json.ok) {
+    throw new Error(json.error || 'failed to load balance');
+  }
+  if (!json.found || !json.account) return null;
+  const tokenAmount = {
+    uiAmount: json.account.uiBalance || 0,
+    amount: json.account.rawBalance || '0',
+    decimals: json.account.decimals ?? 6,
+  };
   return {
-    address:    accounts[0].pubkey,
+    address:    json.account.address,
     uiBalance:  tokenAmount.uiAmount || 0,
     rawBalance: BigInt(tokenAmount.amount),
     decimals:   tokenAmount.decimals,
