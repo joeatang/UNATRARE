@@ -742,6 +742,8 @@ export default function SalutePanel({ cardName }) {
         <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 14 }}>
           <strong style={{ color: 'var(--text)' }}>Salute this card</strong> by burning $CASH on Solana. Permanent. Public. Forever attributed to your wallet — your name lives on this card.
           <br />
+          New here? <a href="/about/salutes" style={{ color: 'var(--amber)' }}>What is a salute? →</a>
+          <br />
           Need $CASH first? Buy on{' '}
           <a href="https://nat.fun" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>
             nat.fun
@@ -986,9 +988,22 @@ export default function SalutePanel({ cardName }) {
             <div style={{ ...S.hint, marginBottom: 12 }}>
               Your position is live on the leaderboard.
             </div>
-            <button style={{ ...S.pctBtn, padding: '8px 16px' }} onClick={burnAgain}>
-              SALUTE AGAIN
-            </button>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button style={{ ...S.pctBtn, padding: '8px 16px' }} onClick={burnAgain}>
+                SALUTE AGAIN
+              </button>
+              <a
+                href={`https://twitter.com/intent/tweet?${new URLSearchParams({
+                  text: `Just saluted ${cardName} on UNATRARE 🔥\n\n${fmt(burnResult.displayAmount)} $CASH burned on Solana · rank #${burnResult.rank} · forever on the ledger.\n\nYour name lives on the card.`,
+                  url:  `https://unatrare.wtf/card/${cardName}`,
+                }).toString()}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ ...S.pctBtn, padding: '8px 16px', textDecoration: 'none', color: 'var(--amber)', borderColor: 'var(--amber)', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+              >
+                SHARE ON X ↗
+              </a>
+            </div>
           </div>
         )}
 
