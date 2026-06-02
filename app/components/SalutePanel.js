@@ -340,6 +340,12 @@ export default function SalutePanel({ cardName }) {
     setPhase('burning');
     let localSig = ''; // preserve for error messages if confirmation times out
     try {
+      // Some wallet adapters drop signing permission while keeping a cached pubkey.
+      // Reconnect if the provider reports disconnected before attempting to sign.
+      if (connected.provider?.isConnected === false && connected.provider?.connect) {
+        await connected.provider.connect();
+      }
+
       // Build transaction
       const { blockhash, lastValidBlockHeight } = await rpc('getLatestBlockhash', [{ commitment: 'confirmed' }])
         .then(r => ({ blockhash: r.value.blockhash, lastValidBlockHeight: r.value.lastValidBlockHeight }));
@@ -378,11 +384,25 @@ export default function SalutePanel({ cardName }) {
       fetchLb();
     } catch (e) {
       const isTimeout = e.message?.includes('Confirmation timeout');
-      setBurnErr(
-        isTimeout && localSig
-          ? `Confirmation timed out — your burn may still confirm. Check: solscan.io/tx/${localSig}`
-          : (e.message || 'burn failed')
-      );
+      const msg = e?.message || 'burn failed';
+      const lower = msg.toLowerCase();
+      const isForbidden =
+        lower.includes('access forbidden') ||
+        lower.includes('forbidden') ||
+        lower.includes('user denied') ||
+        lower.includes('rejected') ||
+        lower.includes('denied');
+
+      if (isTimeout && localSig) {
+        setBurnErr(`Confirmation timed out - your burn may still confirm. Check: solscan.io/tx/${localSig}`);
+      } else if (isForbidden) {
+        setBurnErr(
+          'Wallet security blocked this burn request. Open your wallet extension, approve/sign the transaction prompt for unatrare.wtf, then try BURN again. If your wallet keeps blocking, use the manual TxID section below.'
+        );
+        setShowManual(true);
+      } else {
+        setBurnErr(msg);
+      }
       setPhase('ready');
     }
   }
@@ -725,10 +745,6 @@ export default function SalutePanel({ cardName }) {
 
         {/* Error shown when phase is idle after wallet rejection or connection failure */}
         {burnErr && phase === 'idle' && !connected && (
-          <div style={S.error}>{burnErr}</div>
-        )}
-
-        {burnErr && connected && !burnErr.toLowerCase().includes('wallet connection was denied') && (
           <div style={S.error}>{burnErr}</div>
         )}
 
