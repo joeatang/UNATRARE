@@ -31,16 +31,33 @@ async function rpcRequest(rpcUrl, method, params, timeoutMs = 10_000) {
 }
 
 async function getCashAccountViaRpc(wallet) {
+  // $CASH is Token-2022 — query both programs and merge, prefer highest balance.
+  const TOKEN_PROG      = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+  const TOKEN_2022_PROG = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
+
   let lastErr = null;
   for (const rpcUrl of RPC_ENDPOINTS) {
     try {
-      const result = await rpcRequest(
-        rpcUrl,
-        'getTokenAccountsByOwner',
-        [wallet, { mint: CASH_MINT }, { encoding: 'jsonParsed' }],
-      );
+      // Query both token programs in parallel.
+      // Query both token programs in parallel.
+      // Classic SPL: filter by mint directly.
+      // Token-2022: filter by programId (mint filter not supported with programId together),
+      //             then narrow to CASH_MINT client-side.
+      const [res1, res2] = await Promise.allSettled([
+        rpcRequest(rpcUrl, 'getTokenAccountsByOwner',
+          [wallet, { mint: CASH_MINT }, { encoding: 'jsonParsed' }]),
+        rpcRequest(rpcUrl, 'getTokenAccountsByOwner',
+          [wallet, { programId: TOKEN_2022_PROG }, { encoding: 'jsonParsed' }]),
+      ]);
 
-      const accounts = result?.value || [];
+      const t22Accounts = (res2.status === 'fulfilled' ? res2.value?.value || [] : [])
+        .filter(a => a?.account?.data?.parsed?.info?.mint === CASH_MINT);
+
+      const accounts = [
+        ...(res1.status === 'fulfilled' ? res1.value?.value || [] : []),
+        ...t22Accounts,
+      ];
+
       if (!accounts.length) {
         return { found: false };
       }
@@ -54,7 +71,7 @@ async function getCashAccountViaRpc(wallet) {
 
       const top = accounts[0];
       const tokenAmount = top?.account?.data?.parsed?.info?.tokenAmount;
-      const tokenProgram = top?.account?.owner || '';
+      const tokenProgram = top?.account?.owner || TOKEN_PROG;
       return {
         found: true,
         account: {
