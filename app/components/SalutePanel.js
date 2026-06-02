@@ -6,10 +6,22 @@ const CASH_MINT   = 'oMhwtzE6KeovcRMFAsFocEA6GcZUTAYFdvQ7tpJfnat';
 const TOKEN_PROG  = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const TOKEN_2022_PROG = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
 const SALUTE_BURN_PROGRAM_ID = process.env.NEXT_PUBLIC_SALUTE_BURN_PROGRAM_ID || '';
-const RPC_URL     = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || '/api/solana/rpc';
+const RPC_URL_RAW = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || '/api/solana/rpc';
 const WEB3_CDN    = 'https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.0/lib/index.iife.min.js';
 const SOL_SIG_RE  = /^[1-9A-HJ-NP-Za-km-z]{64,100}$/;
 const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+
+function resolveRpcUrl(url) {
+  if (!url) return 'https://api.mainnet-beta.solana.com';
+  if (/^https?:\/\//i.test(url)) return url;
+  if (typeof window !== 'undefined') {
+    if (url.startsWith('/')) return `${window.location.origin}${url}`;
+    return new URL(url, window.location.origin).toString();
+  }
+  return url;
+}
+
+const RPC_URL = resolveRpcUrl(RPC_URL_RAW);
 
 function fmt(n) {
   if (!n) return '0';
