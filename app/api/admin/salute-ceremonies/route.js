@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '../../../../lib/db';
 import { verifyAdminToken } from '../auth/route';
+import { notifyCeremonyOpen, notifyCeremonyClose } from '../../../../lib/telegram';
 
 export const dynamic = 'force-dynamic';
 
@@ -166,6 +167,12 @@ export async function POST(request) {
     }
 
     const ceremony = db.prepare('SELECT * FROM salute_ceremonies WHERE card_name = ?').get(cardName);
+    try {
+      const tokenRow = db.prepare(
+        'SELECT token_name, display_title, art_url, artist_handle, artist_address FROM tokens WHERE token_name = ?'
+      ).get(cardName);
+      if (tokenRow) notifyCeremonyOpen(tokenRow, ceremony);
+    } catch {}
     return NextResponse.json({ ok: true, ceremony });
   }
 
@@ -178,6 +185,27 @@ export async function POST(request) {
     `).run(targetStatus, now, cardName);
 
     const ceremony = db.prepare('SELECT * FROM salute_ceremonies WHERE card_name = ?').get(cardName);
+    if (action === 'close') {
+      try {
+        const tokenRow = db.prepare(
+          'SELECT token_name, display_title, art_url, artist_handle, artist_address FROM tokens WHERE token_name = ?'
+        ).get(cardName);
+        const summary = db.prepare(`
+          SELECT COALESCE(SUM(amount_display),0) AS total,
+                 COUNT(DISTINCT sol_wallet)      AS burners
+          FROM card_salutes WHERE card_name = ?
+        `).get(cardName);
+        const topRow = db.prepare(`
+          SELECT sol_wallet FROM card_salutes WHERE card_name = ?
+          GROUP BY sol_wallet ORDER BY SUM(amount_display) DESC LIMIT 1
+        `).get(cardName);
+        if (tokenRow) notifyCeremonyClose(tokenRow, {
+          totalBurned: summary?.total ?? 0,
+          uniqueBurners: summary?.burners ?? 0,
+          topWallet: topRow?.sol_wallet || null,
+        });
+      } catch {}
+    }
     return NextResponse.json({ ok: true, ceremony });
   }
 
