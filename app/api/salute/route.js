@@ -17,9 +17,6 @@ const RATE_LIMIT_PER_WALLET = Number(process.env.SALUTE_RATE_LIMIT_PER_WALLET ||
 const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 const SOL_SIG_RE  = /^[1-9A-HJ-NP-Za-km-z]{64,100}$/;
 
-const rateByIp = new Map();
-const rateByWallet = new Map();
-
 export const dynamic = 'force-dynamic';
 
 // ── GET /api/salute?card=TOKENNAME — leaderboard ─────────────────────────
@@ -89,31 +86,30 @@ export async function POST(request) {
     return NextResponse.json({ error: 'invalid tx_sig — must be a valid Solana transaction signature' }, { status: 400 });
   }
 
+  const db = getDb();
   const clientIp = getClientIp(request);
-  const ipHit = registerRateHit(rateByIp, clientIp, RATE_WINDOW_MS);
+  const ipHit = registerRateHit(db, 'ip', clientIp, RATE_WINDOW_MS);
   if (ipHit > RATE_LIMIT_PER_IP) {
-    logSaluteEvent('rate_limited_ip', { clientIp, cardName: cardNameClean, solWallet: sol_wallet });
+    logSaluteEvent(db, 'rate_limited_ip', { clientIp, cardName: cardNameClean, solWallet: sol_wallet });
     return NextResponse.json({ error: 'too many requests — try again shortly' }, { status: 429 });
   }
-  const walletHit = registerRateHit(rateByWallet, sol_wallet, RATE_WINDOW_MS);
+  const walletHit = registerRateHit(db, 'wallet', sol_wallet, RATE_WINDOW_MS);
   if (walletHit > RATE_LIMIT_PER_WALLET) {
-    logSaluteEvent('rate_limited_wallet', { clientIp, cardName: cardNameClean, solWallet: sol_wallet });
+    logSaluteEvent(db, 'rate_limited_wallet', { clientIp, cardName: cardNameClean, solWallet: sol_wallet });
     return NextResponse.json({ error: 'too many attempts for this wallet — try again shortly' }, { status: 429 });
   }
 
-  const db = getDb();
-
-  // Verify the card exists and is certified
   const card = db.prepare(
     "SELECT token_name FROM tokens WHERE token_name = ? AND status = 'approved'"
   ).get(cardNameClean);
   if (!card) {
+    logSaluteEvent(db, 'card_not_found', { clientIp, cardName: cardNameClean, solWallet: sol_wallet, txSig: tx_sig });
     return NextResponse.json({ error: 'card not found or not certified' }, { status: 404 });
   }
 
   const gate = getCeremonyGateDecision(db, cardNameClean);
   if (!gate.allowed) {
-    logSaluteEvent('ceremony_blocked', {
+    logSaluteEvent(db, 'ceremony_blocked', {
       clientIp,
       cardName: cardNameClean,
       solWallet: sol_wallet,
@@ -126,7 +122,7 @@ export async function POST(request) {
   // Reject duplicate TxIDs (UNIQUE constraint would catch this too, but give a clear message)
   const dup = db.prepare('SELECT id FROM card_salutes WHERE tx_sig = ?').get(tx_sig);
   if (dup) {
-    logSaluteEvent('duplicate_tx', { clientIp, cardName: cardNameClean, solWallet: sol_wallet, txSig: tx_sig });
+    logSaluteEvent(db, 'duplicate_tx', { clientIp, cardName: cardNameClean, solWallet: sol_wallet, txSig: tx_sig });
     return NextResponse.json({ error: 'this transaction has already been recorded' }, { status: 409 });
   }
 
@@ -135,7 +131,7 @@ export async function POST(request) {
   try {
     burnInfo = await verifySolanaBurn(tx_sig, sol_wallet);
   } catch (err) {
-    logSaluteEvent('verify_error', {
+    logSaluteEvent(db, 'verify_error', {
       clientIp,
       cardName: cardNameClean,
       solWallet: sol_wallet,
@@ -145,7 +141,7 @@ export async function POST(request) {
     return NextResponse.json({ error: `on-chain verification failed: ${err.message}` }, { status: 422 });
   }
   if (!burnInfo) {
-    logSaluteEvent('rejected_non_burn', { clientIp, cardName: cardNameClean, solWallet: sol_wallet, txSig: tx_sig });
+    logSaluteEvent(db, 'rejected_non_burn', { clientIp, cardName: cardNameClean, solWallet: sol_wallet, txSig: tx_sig });
     return NextResponse.json(
       { error: 'transaction is not a confirmed $CASH burn authorized by this wallet' },
       { status: 422 }
@@ -158,7 +154,7 @@ export async function POST(request) {
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `).run(cardNameClean, sol_wallet, burnInfo.rawAmount, burnInfo.displayAmount, burnInfo.decimals, tx_sig, '');
 
-  logSaluteEvent('accepted', {
+  logSaluteEvent(db, 'accepted', {
     clientIp,
     cardName: cardNameClean,
     solWallet: sol_wallet,
@@ -336,25 +332,24 @@ function getClientIp(request) {
   return first || real || 'unknown';
 }
 
-function registerRateHit(map, key, windowMs) {
-  const now = Date.now();
+function registerRateHit(db, scope, key, windowMs) {
   const id = key || 'unknown';
-  const entry = map.get(id);
-  if (!entry || now - entry.start >= windowMs) {
-    map.set(id, { start: now, count: 1, updatedAt: now });
-    return 1;
-  }
-  entry.count += 1;
-  entry.updatedAt = now;
-  map.set(id, entry);
+  const bucket = Math.floor(Date.now() / windowMs) * windowMs;
+  const row = db.prepare(`
+    INSERT INTO rate_limit_counters (scope, key, window_start, count)
+    VALUES (?, ?, ?, 1)
+    ON CONFLICT(scope, key, window_start) DO UPDATE SET count = count + 1
+    RETURNING count
+  `).get(scope, id, bucket);
 
-  // Opportunistic cleanup for stale entries to bound memory.
-  if (map.size > 2000) {
-    for (const [k, v] of map.entries()) {
-      if (now - (v.updatedAt || v.start) > windowMs * 5) map.delete(k);
-    }
+  // Opportunistic cleanup of buckets older than 5 windows.
+  if (Math.random() < 0.01) {
+    try {
+      db.prepare('DELETE FROM rate_limit_counters WHERE window_start < ?')
+        .run(bucket - windowMs * 5);
+    } catch { /* non-fatal */ }
   }
-  return entry.count;
+  return row?.count ?? 1;
 }
 
 function mask(value) {
@@ -363,8 +358,8 @@ function mask(value) {
   return `${value.slice(0, 6)}...${value.slice(-4)}`;
 }
 
-function logSaluteEvent(event, data = {}) {
-  console.info('[salute]', JSON.stringify({
+function logSaluteEvent(db, event, data = {}) {
+  const payload = {
     event,
     at: new Date().toISOString(),
     cardName: data.cardName || null,
@@ -377,5 +372,28 @@ function logSaluteEvent(event, data = {}) {
     amountRaw: data.amountRaw || null,
     amountDisplay: data.amountDisplay ?? null,
     message: data.message || null,
-  }));
+  };
+  console.info('[salute]', JSON.stringify(payload));
+
+  // Persist for forensics. Storing masked client_ip — matches the console log
+  // and avoids holding raw IPs in the DB.
+  try {
+    db.prepare(`
+      INSERT INTO salute_verifications
+        (event, card_name, sol_wallet, tx_sig, client_ip, amount_raw, amount_display, message)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      event,
+      data.cardName || null,
+      data.solWallet || null,
+      data.txSig || null,
+      mask(data.clientIp || ''),
+      data.amountRaw || null,
+      data.amountDisplay ?? null,
+      data.message || null,
+    );
+  } catch (err) {
+    // Audit insert failure must never block a user's request.
+    console.warn('[salute] audit insert failed:', err?.message || err);
+  }
 }
