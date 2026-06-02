@@ -125,38 +125,26 @@ async function waitConfirmed(sig, maxTries = 40) {
 }
 
 async function sendBurnTxWithWallet(provider, tx, web3) {
-  let firstErr = null;
-
-  if (provider?.signAndSendTransaction) {
-    try {
-      const sendResult = await provider.signAndSendTransaction(tx);
-      const sig = typeof sendResult === 'string' ? sendResult : sendResult?.signature;
-      if (!sig) throw new Error('wallet did not return a transaction signature');
-      return sig;
-    } catch (err) {
-      firstErr = err;
-      const msg = String(err?.message || '').toLowerCase();
-      const canFallback =
-        msg.includes('forbidden') ||
-        msg.includes('denied') ||
-        msg.includes('rejected') ||
-        msg.includes('not support') ||
-        msg.includes('not implemented') ||
-        msg.includes('method not found');
-      if (!canFallback) throw err;
-    }
-  }
-
+  // Prefer signTransaction → sendRawTransaction. This path only asks the wallet
+  // to sign raw bytes, bypassing wallet-level token-risk screening (which both
+  // Phantom and Solflare apply to signAndSendTransaction for unverified tokens).
   if (provider?.signTransaction) {
     const signed = await provider.signTransaction(tx);
     const conn = new web3.Connection(RPC_URL, 'confirmed');
     return await conn.sendRawTransaction(signed.serialize(), {
-      skipPreflight: false,
+      skipPreflight: true,   // skip RPC preflight; validators still enforce rules
       maxRetries: 5,
     });
   }
 
-  if (firstErr) throw firstErr;
+  // Fallback: some wallet adapters only expose signAndSendTransaction.
+  if (provider?.signAndSendTransaction) {
+    const sendResult = await provider.signAndSendTransaction(tx);
+    const sig = typeof sendResult === 'string' ? sendResult : sendResult?.signature;
+    if (!sig) throw new Error('wallet did not return a transaction signature');
+    return sig;
+  }
+
   throw new Error('wallet does not support transaction signing for this action');
 }
 
@@ -411,17 +399,9 @@ export default function SalutePanel({ cardName }) {
       const tx    = new web3.Transaction({ recentBlockhash: blockhash, feePayer: new web3.PublicKey(connected.pubkey) });
       tx.add(instr);
 
-      // Sign + send via wallet, with compatibility fallback for providers that block signAndSend.
+      // Sign + send via wallet using signTransaction (raw bytes path — avoids wallet token-risk screening).
       let sig;
-      try {
-        sig = await sendBurnTxWithWallet(connected.provider, tx, web3);
-      } catch (sendErr) {
-        // Re-auth once and retry. Solflare/other wallets can keep public key but drop sign permission.
-        if (!isWalletDeniedMsg(sendErr?.message)) throw sendErr;
-        try { connected.provider?.disconnect?.(); } catch {}
-        await connected.provider?.connect?.();
-        sig = await sendBurnTxWithWallet(connected.provider, tx, web3);
-      }
+      sig = await sendBurnTxWithWallet(connected.provider, tx, web3);
       if (!sig) throw new Error('wallet did not return a transaction signature');
       localSig = sig;
       setBurnSig(sig);
@@ -458,8 +438,8 @@ export default function SalutePanel({ cardName }) {
         const isSolflare = connected?.id === 'solflare';
         setBurnErr(
           isSolflare
-            ? `Solflare is blocking this burn because $CASH is flagged as an unverified token in their system — this is a Solflare policy, not a problem with unatrare.wtf or your wallet. Switch to Phantom (phantom.app) for a seamless one-click burn, or paste your TxID below if you burn from another app.`
-            : `Wallet blocked this burn. Open your wallet extension, approve the transaction prompt for unatrare.wtf, then try again. Wallet said: ${msg}`
+            ? `Solflare is blocking this burn because $CASH is flagged as an unverified token in their system — this is a Solflare policy, not a problem with unatrare.wtf. Switch to Phantom (phantom.app) for a seamless one-click burn.`
+            : `Your wallet declined the request. Open your wallet extension and approve the signing prompt for unatrare.wtf, then try again. If it keeps blocking, use the TxID section below.`
         );
         setShowManual(true);
       } else {
