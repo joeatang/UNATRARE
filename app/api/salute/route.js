@@ -165,6 +165,15 @@ export async function POST(request) {
   if (split.artist_pct > 0 && SALUTE_REQUIRE_ARTIST_SPLIT_TX) {
     const artistSol = (card.artist_sol_address || '').trim();
     if (!SOL_ADDR_RE.test(artistSol)) {
+      logSaluteEvent(db, 'split_missing_artist_address', {
+        clientIp,
+        cardName: cardNameClean,
+        solWallet: sol_wallet,
+        txSig: tx_sig,
+        amountRaw: burnInfo.rawAmount,
+        amountDisplay: burnInfo.displayAmount,
+        message: 'artist payout address is not configured yet for this card',
+      });
       return NextResponse.json(
         { error: 'artist payout address is not configured yet for this card' },
         { status: 422 }
@@ -174,6 +183,15 @@ export async function POST(request) {
     const burnRawBig = BigInt(burnInfo.rawAmount);
     const artistGainRaw = ownerGainRaw(burnInfo.tx, artistSol, CASH_MINT);
     if (artistGainRaw <= 0n) {
+      logSaluteEvent(db, 'split_missing_artist_leg', {
+        clientIp,
+        cardName: cardNameClean,
+        solWallet: sol_wallet,
+        txSig: tx_sig,
+        amountRaw: burnInfo.rawAmount,
+        amountDisplay: burnInfo.displayAmount,
+        message: 'split verification failed: missing artist transfer leg in this salute transaction',
+      });
       return NextResponse.json(
         { error: 'split verification failed: missing artist transfer leg in this salute transaction' },
         { status: 422 }
@@ -184,6 +202,15 @@ export async function POST(request) {
     const right = artistGainRaw * BigInt(split.burn_pct);
     const tolerance = BigInt(Math.max(1, split.burn_pct));
     if (absBigInt(left - right) > tolerance) {
+      logSaluteEvent(db, 'split_ratio_mismatch', {
+        clientIp,
+        cardName: cardNameClean,
+        solWallet: sol_wallet,
+        txSig: tx_sig,
+        amountRaw: burnInfo.rawAmount,
+        amountDisplay: burnInfo.displayAmount,
+        message: `split verification failed: expected ${split.burn_pct}/${split.artist_pct} burn/artist ratio`,
+      });
       return NextResponse.json(
         { error: `split verification failed: expected ${split.burn_pct}/${split.artist_pct} burn/artist ratio` },
         { status: 422 }

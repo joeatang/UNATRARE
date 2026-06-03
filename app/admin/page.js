@@ -2223,6 +2223,157 @@ function SaluteCeremoniesPanel({ authToken }) {
   );
 }
 
+function SaluteVerificationPanel({ authToken }) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [rows, setRows] = useState([]);
+  const [counts, setCounts] = useState([]);
+  const [filters, setFilters] = useState({
+    split_only: true,
+    event: '',
+    card: '',
+    limit: '100',
+  });
+
+  const panelStyle = { margin: '24px 0', border: '1px solid var(--border-dim)', background: 'rgba(255,175,80,0.03)' };
+  const btn = (c = 'var(--text-dim)') => ({
+    padding: '6px 12px', border: `1px solid ${c}`, background: 'transparent', color: c,
+    fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', cursor: 'pointer',
+  });
+  const input = { width: '100%', padding: '7px 9px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 12, boxSizing: 'border-box' };
+  const label = { fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: 4, display: 'block' };
+
+  function short(v) {
+    if (!v) return '—';
+    if (v.length <= 14) return v;
+    return `${v.slice(0, 6)}…${v.slice(-4)}`;
+  }
+
+  async function fetchAudit() {
+    setLoading(true);
+    try {
+      const sp = new URLSearchParams();
+      sp.set('split_only', filters.split_only ? '1' : '0');
+      sp.set('limit', filters.limit || '100');
+      if (filters.event.trim()) sp.set('event', filters.event.trim());
+      if (filters.card.trim()) sp.set('card', filters.card.trim().toUpperCase());
+      const res = await fetch(`/api/admin/salute-verifications?${sp.toString()}`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        setMsg(json.error || 'failed to load salute verifications');
+        return;
+      }
+      setRows(json.rows || []);
+      setCounts(json.counts || []);
+      setMsg('');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    fetchAudit();
+  }, [open]);
+
+  return (
+    <div style={panelStyle}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ width: '100%', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '3px', color: 'var(--amber)' }}
+      >
+        <span>🧪 SALUTE VERIFICATION AUDIT</span>
+        <span style={{ color: 'var(--text-dim)' }}>{open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <div style={{ padding: '0 20px 20px' }}>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)', marginBottom: 12, lineHeight: 1.6 }}>
+            Review split verification failures without tailing logs. Default view shows split-only events.
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px auto', gap: 10, alignItems: 'end', marginBottom: 10 }}>
+            <div>
+              <span style={label}>CARD FILTER</span>
+              <input
+                style={input}
+                value={filters.card}
+                onChange={e => setFilters(f => ({ ...f, card: e.target.value.toUpperCase() }))}
+                placeholder="TOKENNAME"
+              />
+            </div>
+            <div>
+              <span style={label}>EVENT FILTER</span>
+              <input
+                style={input}
+                value={filters.event}
+                onChange={e => setFilters(f => ({ ...f, event: e.target.value }))}
+                placeholder="split_ratio_mismatch"
+              />
+            </div>
+            <div>
+              <span style={label}>LIMIT</span>
+              <input
+                style={input}
+                value={filters.limit}
+                onChange={e => setFilters(f => ({ ...f, limit: e.target.value.replace(/[^0-9]/g, '') }))}
+                placeholder="100"
+              />
+            </div>
+            <button onClick={fetchAudit} disabled={loading} style={btn('var(--amber)')}>{loading ? 'loading…' : 'refresh'}</button>
+          </div>
+
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)' }}>
+            <input
+              type="checkbox"
+              checked={filters.split_only}
+              onChange={e => setFilters(f => ({ ...f, split_only: e.target.checked }))}
+            />
+            split-only events
+          </label>
+
+          {counts.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+              {counts.map(c => (
+                <span key={c.event} style={{ border: '1px solid var(--border-dim)', padding: '3px 8px', fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text-dim)' }}>
+                  {c.event} · {c.n}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div style={{ border: '1px solid var(--border-dim)', background: 'rgba(255,255,255,0.01)' }}>
+            {rows.length === 0 && !loading && (
+              <div style={{ padding: '10px', fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)' }}>no matching verification events</div>
+            )}
+            {rows.map(r => (
+              <div key={r.id} style={{ display: 'grid', gridTemplateColumns: '140px 180px 120px 120px 140px 1fr', gap: 8, alignItems: 'start', padding: '8px 10px', borderBottom: '1px solid var(--border-dim)' }}>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--text-dim)' }}>
+                  {new Date((r.created_at || 0) * 1000).toISOString().slice(0, 19).replace('T', ' ')}
+                </div>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--amber)' }}>{r.event}</div>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text)' }} title={r.card_name || ''}>{r.card_name || '—'}</div>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text-dim)' }} title={r.sol_wallet || ''}>{short(r.sol_wallet)}</div>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text-dim)' }} title={r.tx_sig || ''}>{short(r.tx_sig)}</div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)' }}>{r.message || '—'}</div>
+              </div>
+            ))}
+          </div>
+
+          {msg && (
+            <div style={{ marginTop: 10, fontFamily: 'var(--font-card)', fontSize: 10, letterSpacing: '1px', color: 'var(--amber)' }}>
+              {msg}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main admin dashboard ───────────────────────────────────────
 export default function AdminPage() {
   const [authToken, setAuthToken] = useState(null);
@@ -2540,6 +2691,7 @@ export default function AdminPage() {
         {tab === 'tools' ? (
           <>
             <SaluteCeremoniesPanel authToken={authToken} />
+            <SaluteVerificationPanel authToken={authToken} />
             <TelegramRegistrationsPanel authToken={authToken} />
             <GenesisGrantsPanel authToken={authToken} />
             <DropsPanel authToken={authToken} />
