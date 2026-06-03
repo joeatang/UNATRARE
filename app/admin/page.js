@@ -2028,7 +2028,13 @@ function SaluteCeremoniesPanel({ authToken }) {
       });
       const json = await res.json();
       if (!res.ok || !json.ok) {
-        setMsg(json.error || 'save failed');
+        if (json.error === 'missing_artist_sol') {
+          const card = body.card_name;
+          const btc = json.artist_btc_address || '(unknown)';
+          setMsg(`⚠ ${card} has no artist SOL payout address yet.\n\nFix path A (preferred — keeps artist sovereign):\n  • Send the artist this link: ${typeof window !== 'undefined' ? window.location.origin : 'https://unatrare.wtf'}/status\n  • They enter their submission BTC address (${btc}), open the Manage section on the ${card} card, paste their Solana address, and sign the BIP-137 message with that BTC wallet.\n\nFix path B (admin override — only with their permission):\n  • Open ⚙️ ADVANCED below\n  • Paste the SOL address into ARTIST SOL ADDRESS (override)\n  • Click ▶ ENABLE LIVE CEREMONY again`);
+          return;
+        }
+        setMsg(json.message || json.error || 'save failed');
         return;
       }
       setMsg(`✓ ${action} saved for ${body.card_name}`);
@@ -2069,7 +2075,7 @@ function SaluteCeremoniesPanel({ authToken }) {
               fontFamily: 'var(--font-body)', fontSize: 13, color: msg.startsWith('✓') ? 'var(--green)' : 'var(--amber)',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
             }}>
-              <span>{msg}</span>
+              <span style={{ whiteSpace: 'pre-line', flex: 1, lineHeight: 1.5 }}>{msg}</span>
               <button onClick={() => setMsg('')} style={{ background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: 0 }}>×</button>
             </div>
           )}
@@ -2102,41 +2108,26 @@ function SaluteCeremoniesPanel({ authToken }) {
             </div>
           )}
 
-          {/* ══ PRIMARY ACTION — go live in two fields ════════════════════════ */}
+          {/* ══ PRIMARY ACTION — go live in one field ════════════════════════ */}
           <div style={{ marginBottom: 16, padding: '14px 14px 12px', border: '1px solid var(--green)', background: 'rgba(180,255,111,0.04)' }}>
             <div style={{ fontFamily: 'var(--font-card)', fontSize: 10, letterSpacing: '2px', color: 'var(--green)', marginBottom: 10 }}>
               ▶ GO LIVE NOW · 48h SPLIT SALUTE
             </div>
             <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: 12 }}>
-              Two fields. Click the button. Ceremony goes live for 48 hours with 69% burn / 31% to artist. All other settings use sensible defaults — tweak under <em>Advanced</em> below.
+              One field. Click the button. Ceremony goes live for {policy.spotlightHours}h with 69% burn / 31% to artist. The artist must already have set their SOL payout address on their <code>/status</code> page (they sign with their submission BTC wallet). If they haven&apos;t, you&apos;ll see a clear notice and can paste it under <em>Advanced</em> below.
             </div>
-            <div className={styles.ceremonyGrid2}>
-              <div>
-                <span style={label}>CARD NAME *</span>
-                <input
-                  style={input}
-                  value={form.card_name}
-                  onChange={e => { setLoadedFromRow(false); setForm(f => ({ ...f, card_name: e.target.value.toUpperCase() })); }}
-                  placeholder="DRAWNATPEPE"
-                />
-              </div>
-              <div>
-                <span style={label}>ARTIST SOL ADDRESS *</span>
-                <input
-                  style={input}
-                  value={form.artist_sol_address}
-                  onChange={e => setForm(f => ({ ...f, artist_sol_address: e.target.value.trim() }))}
-                  placeholder="paste Solana address (44 chars)"
-                />
-                {form.artist_sol_address && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(form.artist_sol_address) && (
-                  <div style={{ marginTop: 4, fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--amber)' }}>not a valid Solana address</div>
-                )}
-              </div>
+            <div>
+              <span style={label}>CARD NAME *</span>
+              <input
+                style={input}
+                value={form.card_name}
+                onChange={e => { setLoadedFromRow(false); setForm(f => ({ ...f, card_name: e.target.value.toUpperCase() })); }}
+                placeholder="DRAWNATPEPE"
+              />
             </div>
             <button
               onClick={() => {
                 if (!form.card_name.trim()) { setMsg('card name required'); return; }
-                if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(form.artist_sol_address)) { setMsg('valid artist SOL address required'); return; }
                 postAction('activate', { starts_at: null, ends_at: null });
               }}
               disabled={saving}
@@ -2149,9 +2140,6 @@ function SaluteCeremoniesPanel({ authToken }) {
             >
               {saving ? 'WORKING…' : `▶ ENABLE LIVE CEREMONY (${policy.spotlightHours}h)`}
             </button>
-            <div style={{ marginTop: 8, fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.5 }}>
-              This creates the ceremony row if missing, sets the artist SOL address on the token, activates immediately, and ends in {policy.spotlightHours}h. Status will appear below.
-            </div>
           </div>
 
           <details style={{ marginBottom: 12, border: '1px solid var(--border-dim)', padding: '8px 12px', background: 'rgba(255,255,255,0.01)' }}>
@@ -2159,6 +2147,22 @@ function SaluteCeremoniesPanel({ authToken }) {
               ⚙️ ADVANCED — only open if scheduling for later, customizing split %, or editing headline/theme
             </summary>
             <div style={{ marginTop: 12 }}>
+
+          <div style={{ marginBottom: 12, padding: '8px 10px', border: '1px dashed var(--amber)', background: 'rgba(255,180,0,0.04)' }}>
+            <span style={label}>ARTIST SOL ADDRESS (override)</span>
+            <input
+              style={input}
+              value={form.artist_sol_address}
+              onChange={e => setForm(f => ({ ...f, artist_sol_address: e.target.value.trim() }))}
+              placeholder="leave blank — artist sets this themselves on /status"
+            />
+            {form.artist_sol_address && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(form.artist_sol_address) && (
+              <div style={{ marginTop: 4, fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--amber)' }}>not a valid Solana address</div>
+            )}
+            <div style={{ marginTop: 6, fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.5 }}>
+              Artists own this field. They set it on their <code>/status</code> page and sign with their submission BTC wallet (verified server-side). Use this override only when the artist needs help and has confirmed the address with you out-of-band. When supplied here on save / activate, it&rsquo;s written to <code>tokens.artist_sol_address</code> for that card.
+            </div>
+          </div>
 
           <div className={styles.ceremonyGrid2}>
             <div>

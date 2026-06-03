@@ -247,6 +247,20 @@ export async function POST(request) {
       );
     }
 
+    // Pre-flight: split-tx env requires the token to have an artist SOL payout address.
+    // Re-read because the optional inline update earlier may have just populated it.
+    const requireSplitTxEnv = process.env.SALUTE_REQUIRE_ARTIST_SPLIT_TX === '1';
+    if (requireSplitTxEnv) {
+      const tokRow = db.prepare('SELECT artist_sol_address, artist_address FROM tokens WHERE token_name = ?').get(cardName);
+      if (!tokRow?.artist_sol_address) {
+        return NextResponse.json({
+          error: 'missing_artist_sol',
+          message: `${cardName} has no artist SOL payout address. Ask the artist to set it on their /status page (they must sign with their submission BTC address), OR paste it under ⚙️ ADVANCED → ARTIST SOL ADDRESS to set it on their behalf.`,
+          artist_btc_address: tokRow?.artist_address || null,
+        }, { status: 422 });
+      }
+    }
+
     const effectiveStart = startsAt ?? now;
     const effectiveEnd = effectiveStart + SPOTLIGHT_HOURS * 60 * 60;
     if (endsAt != null && endsAt !== effectiveEnd) {
