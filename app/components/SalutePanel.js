@@ -544,12 +544,15 @@ export default function SalutePanel({ cardName }) {
     if (!web3 || !connected || !cashAcct) return;
     setBurnErr('');
 
-    const rawAmt = parseToRaw(burnAmount, cashAcct.decimals);
-    if (rawAmt <= 0n) { setBurnErr('Enter an amount to burn.'); return; }
+    const totalRawAmt = parseToRaw(burnAmount, cashAcct.decimals);
+    if (totalRawAmt <= 0n) { setBurnErr('Enter a salute amount.'); return; }
 
     const burnPct = Number(ceremonySplit.burnPct || 100);
     const artistPct = Number(ceremonySplit.artistPct || 0);
     const requiresArtistSplit = !!ceremonySplit.requireArtistSplitTx && artistPct > 0;
+
+    // Default: no split — the entire amount is burned.
+    let burnRawAmt = totalRawAmt;
     let artistRawAmt = 0n;
 
     if (requiresArtistSplit) {
@@ -557,18 +560,24 @@ export default function SalutePanel({ cardName }) {
         setBurnErr('Artist payout address is not configured for this ceremony yet. Try again shortly.');
         return;
       }
-      artistRawAmt = (rawAmt * BigInt(artistPct) + BigInt(Math.max(1, burnPct)) - 1n) / BigInt(Math.max(1, burnPct));
+      // Split the amount the user entered: artist gets `artistPct` of total,
+      // burn gets `burnPct` of total. Any rounding residue (≤ 1 raw unit) goes
+      // to burn so the artist never receives a higher percentage than declared
+      // and total spend never exceeds the entered amount.
+      artistRawAmt = (totalRawAmt * BigInt(artistPct)) / 100n;
+      burnRawAmt = totalRawAmt - artistRawAmt;
       if (artistRawAmt <= 0n) {
-        setBurnErr('Split amount is too small. Increase your salute amount.');
+        setBurnErr('Salute amount is too small to split. Increase the amount.');
+        return;
+      }
+      if (burnRawAmt <= 0n) {
+        setBurnErr('Salute amount is too small to burn. Increase the amount.');
         return;
       }
     }
 
-    const totalSpendRaw = rawAmt + artistRawAmt;
-    if (totalSpendRaw > cashAcct.rawBalance) {
-      setBurnErr(requiresArtistSplit
-        ? 'Burn + artist split exceeds your $CASH balance.'
-        : 'Amount exceeds your $CASH balance.');
+    if (totalRawAmt > cashAcct.rawBalance) {
+      setBurnErr('Amount exceeds your $CASH balance.');
       return;
     }
 
@@ -605,7 +614,7 @@ export default function SalutePanel({ cardName }) {
         cashAcct.address,
         CASH_MINT,
         connected.pubkey,
-        rawAmt,
+        burnRawAmt,
         cashAcct.tokenProgram,
       );
 
@@ -651,7 +660,7 @@ export default function SalutePanel({ cardName }) {
             tokenAcct: cashAcct.address,
             mint: CASH_MINT,
             owner: connected.pubkey,
-            rawAmt,
+            rawAmt: burnRawAmt,
             tokenProgramId: cashAcct.tokenProgram,
             cardName: (cardName || '').toUpperCase().trim(),
           })
@@ -905,7 +914,7 @@ export default function SalutePanel({ cardName }) {
                 ceremony live · split salute
               </span>
               <br />
-              A live ceremony is running for this card: burn {ceremonySplit.burnPct}% and send {ceremonySplit.artistPct}% to the artist in the same transaction.
+              A live ceremony is running for this card. The amount you enter is the total salute: {ceremonySplit.burnPct}% is burned and {ceremonySplit.artistPct}% goes to the artist in the same transaction.
             </>
           ) : ceremonySplit.status === 'scheduled' ? (
             <>
@@ -1084,7 +1093,7 @@ export default function SalutePanel({ cardName }) {
                 </div>
                 {ceremonySplit.requireArtistSplitTx && Number(ceremonySplit.artistPct || 0) > 0 && (
                   <div style={{ ...S.hint, marginTop: 0, marginBottom: 8, color: 'var(--amber)' }}>
-                    Split ceremony is active: the amount you enter is the burn amount. Your wallet will also include an artist payout in the same transaction.
+                    Split ceremony is active: the amount you enter is the <strong style={{ color: 'var(--text)' }}>total salute</strong>. {ceremonySplit.burnPct}% is burned and {ceremonySplit.artistPct}% routes to the artist — all in one transaction.
                     <br />
                     <span style={{ color: 'var(--text-dim)', fontSize: '10px' }}>
                       First-time salute for this artist may include a ~0.002 SOL one-time setup fee to create their $CASH payout account. Subsequent salutes by anyone are free of this fee.
