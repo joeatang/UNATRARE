@@ -11,8 +11,9 @@
   --green-hot:   #ccff80;   /* hover lime */
   --orange:      #F7931A;
   --red:         #c0392b;
-  --text:        #5abf5a;   /* PEPE EMERALD — primary body + headline text */
-  --text-dim:    #5a9a5a;   /* muted green — secondary labels */
+  --text:        #c8e6c0;   /* aged phosphor — primary body (readable, low fatigue) */
+  --text-dim:    #8fb88a;   /* muted phosphor — secondary labels / metadata */
+  --text-strong: var(--green); /* bright lime — for headings & emphasis */
   --muted:       var(--text-dim);
   --green-rgb:   180, 255, 111;
   --amber-hot-rgb: 201, 168, 76;
@@ -28,10 +29,41 @@ html { font-size: 17px; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   min-height: 100vh;
   padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Headings: bright phosphor pop, tighter leading.
+   Module-scoped CSS can still override per-page. */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-strong);
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+/* Long-form prose container — opt-in via className="prose".
+   Use on /about, /terms, /rules, /whitepaper, card descriptions. */
+.prose {
+  max-width: 70ch;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.7;
+}
+.prose p { margin-bottom: 1em; }
+.prose p + p { margin-top: 0; }
+.prose h1, .prose h2, .prose h3 {
+  margin-top: 1.75em;
+  margin-bottom: 0.5em;
+}
+.prose ul, .prose ol { margin: 0 0 1em 1.25em; }
+.prose li { margin-bottom: 0.35em; }
+.prose a { text-decoration: underline; text-underline-offset: 3px;   padding-top: env(safe-area-inset-top, 0px);
 }
 
 a { color: var(--amber-hot); text-decoration: none; }
