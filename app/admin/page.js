@@ -1876,7 +1876,15 @@ function SaluteCeremoniesPanel({ authToken }) {
   const [saving, setSaving] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
   const [rows, setRows] = useState([]);
-  const [policy, setPolicy] = useState({ enforceWindow: false, strictConfiguredOnly: false });
+  const [policy, setPolicy] = useState({
+    enforceWindow: false,
+    strictConfiguredOnly: false,
+    burnFloor: 69,
+    spotlightHours: 48,
+    splitPresets: [
+      { key: 'phase1_artist_31', label: '69 burn / 31 artist', burn_pct: 69, artist_pct: 31, node_pct: 0 },
+    ],
+  });
   const [loadedFromRow, setLoadedFromRow] = useState(false);
   const [msg, setMsg] = useState('');
   const [form, setForm] = useState({
@@ -1884,6 +1892,10 @@ function SaluteCeremoniesPanel({ authToken }) {
     headline: 'Burn to Salute',
     subtitle: 'Voluntary community ritual · proof of appreciation',
     theme_key: 'ember',
+    split_preset: 'phase1_artist_31',
+    distribution_mode: 'none',
+    distribution_asset: '',
+    distribution_rule: '',
     status: 'draft',
     starts_at: '',
     ends_at: '',
@@ -1918,6 +1930,11 @@ function SaluteCeremoniesPanel({ authToken }) {
         setPolicy({
           enforceWindow: !!json.policy.enforceWindow,
           strictConfiguredOnly: !!json.policy.strictConfiguredOnly,
+          burnFloor: Number(json.policy.burnFloor || 69),
+          spotlightHours: Number(json.policy.spotlightHours || 48),
+          splitPresets: Array.isArray(json.policy.splitPresets) && json.policy.splitPresets.length
+            ? json.policy.splitPresets
+            : [{ key: 'phase1_artist_31', label: '69 burn / 31 artist', burn_pct: 69, artist_pct: 31, node_pct: 0 }],
         });
       }
       setMsg('');
@@ -1937,6 +1954,10 @@ function SaluteCeremoniesPanel({ authToken }) {
       headline: row.headline || 'Burn to Salute',
       subtitle: row.subtitle || 'Voluntary community ritual · proof of appreciation',
       theme_key: row.theme_key || 'ember',
+      split_preset: row.split_preset || 'phase1_artist_31',
+      distribution_mode: row.distribution_mode || 'none',
+      distribution_asset: row.distribution_asset || '',
+      distribution_rule: row.distribution_rule || '',
       status: row.status || 'draft',
       starts_at: toInputTime(row.starts_at),
       ends_at: toInputTime(row.ends_at),
@@ -1958,6 +1979,10 @@ function SaluteCeremoniesPanel({ authToken }) {
         headline: form.headline,
         subtitle: form.subtitle,
         theme_key: form.theme_key,
+        split_preset: form.split_preset,
+        distribution_mode: form.distribution_mode,
+        distribution_asset: form.distribution_asset,
+        distribution_rule: form.distribution_rule,
         status: form.status,
         starts_at: fromInputTime(form.starts_at),
         ends_at: fromInputTime(form.ends_at),
@@ -2018,10 +2043,56 @@ function SaluteCeremoniesPanel({ authToken }) {
             POLICY · WINDOW GATE: <span style={{ color: policy.enforceWindow ? 'var(--amber)' : 'var(--green)' }}>{policy.enforceWindow ? 'ON' : 'OFF'}</span>
             {' · '}
             STRICT CONFIGURED-ONLY: <span style={{ color: policy.strictConfiguredOnly ? 'var(--amber)' : 'var(--green)' }}>{policy.strictConfiguredOnly ? 'ON' : 'OFF'}</span>
+            {' · '}
+            BURN FLOOR: <span style={{ color: 'var(--amber)' }}>{policy.burnFloor}%</span>
+            {' · '}
+            SPOTLIGHT: <span style={{ color: 'var(--amber)' }}>{policy.spotlightHours}h fixed</span>
           </div>
 
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)', marginBottom: 14, lineHeight: 1.6 }}>
             Configure per-card burn ritual windows, themes, and ceremony copy. This is additive and does not alter existing salute records.
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+            <div>
+              <span style={label}>SPLIT PRESET</span>
+              <select style={input} value={form.split_preset} onChange={e => setForm(f => ({ ...f, split_preset: e.target.value }))}>
+                {policy.splitPresets.map(p => (
+                  <option key={p.key} value={p.key}>{p.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <span style={label}>DISTRIBUTION LOGIC</span>
+              <select style={input} value={form.distribution_mode} onChange={e => setForm(f => ({ ...f, distribution_mode: e.target.value }))}>
+                <option value="none">none (salute only)</option>
+                <option value="top_burners">top burners</option>
+                <option value="weighted_burners">weighted burners</option>
+                <option value="raffle_burners">raffle burners</option>
+                <option value="manual_curated">manual curated</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+            <div>
+              <span style={label}>DISTRIBUTION ASSET</span>
+              <input
+                style={input}
+                value={form.distribution_asset}
+                onChange={e => setForm(f => ({ ...f, distribution_asset: e.target.value.toUpperCase() }))}
+                placeholder="TOKENNAME / NFT / reward note"
+              />
+            </div>
+            <div>
+              <span style={label}>RULE NOTES</span>
+              <input
+                style={input}
+                value={form.distribution_rule}
+                onChange={e => setForm(f => ({ ...f, distribution_rule: e.target.value }))}
+                placeholder="ex: top 10 burners, weighted by total burn"
+              />
+            </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
@@ -2089,9 +2160,9 @@ function SaluteCeremoniesPanel({ authToken }) {
                   ? { ...btn('var(--border)'), opacity: 0.55, cursor: 'not-allowed' }
                   : btn('var(--amber)')
               }
-              title={policy.strictConfiguredOnly && !loadedFromRow ? 'strict mode: load an existing ceremony row first' : 'activate 48h'}
+              title={policy.strictConfiguredOnly && !loadedFromRow ? 'strict mode: load an existing ceremony row first' : `activate ${policy.spotlightHours}h`}
             >
-              activate 48h
+              activate {policy.spotlightHours}h
             </button>
             <button onClick={() => postAction('close')} disabled={saving} style={btn('var(--text-dim)')}>close</button>
             <button onClick={() => postAction('archive')} disabled={saving} style={btn('var(--text-dim)')}>archive</button>
@@ -2129,6 +2200,9 @@ function SaluteCeremoniesPanel({ authToken }) {
                   <div style={{ fontFamily: 'var(--font-card)', fontSize: 10, letterSpacing: '2px', color: 'var(--text)' }}>{r.card_name}</div>
                   <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {r.headline || 'Burn to Salute'}
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, color: 'var(--green)', letterSpacing: '1px' }}>
+                    {r.burn_pct ?? 69}% burn · {r.artist_pct ?? 31}% artist{(r.node_pct ?? 0) > 0 ? ` · ${r.node_pct}% nodes` : ''}
                   </div>
                 </div>
                 <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, color: 'var(--amber)', letterSpacing: '1px' }}>{r.status}</div>

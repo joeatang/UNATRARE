@@ -25,6 +25,51 @@ Policy rails:
 - Keep node runner infrastructure behavior unchanged.
 - Keep manual TxID fallback available at all times.
 
+## Launch Operations (Must Be Detailed Before Public Push)
+Purpose: launch cleanly, avoid confusion, and prevent rushed policy drift.
+
+Required launch pack for each phase:
+1. Owner list:
+  - product owner,
+  - engineering owner,
+  - ops/deploy owner,
+  - comms owner.
+2. Ship checklist:
+  - migration applied,
+  - feature flags set,
+  - canary verified,
+  - rollback command tested,
+  - announcement copy approved.
+3. Day-0 monitoring:
+  - salute success rate,
+  - verify error rate,
+  - RPC failure rate,
+  - leaderboard freshness,
+  - split reconciliation sanity checks.
+4. Day-1 report:
+  - what shipped,
+  - what failed,
+  - what changed,
+  - next actions.
+
+## Salute Wizard Expansion (Admin Flexibility)
+Goal: keep split rules strict while making distribution planning flexible.
+
+Admin wizard must support:
+1. Fixed split preset selection (no custom percentages).
+2. Distribution logic mode selection:
+  - none,
+  - top burners,
+  - weighted burners,
+  - raffle burners,
+  - manual curated.
+3. Distribution asset field (what will be distributed).
+4. Distribution rule notes field (human-readable rule intent).
+
+Note:
+- Distribution automation is staged later.
+- Launch focus stays on split testing + ceremony control + transparent policy.
+
 ## Snapshot: Current Live State
 Verified touchpoints:
 - Salute verification and ledger:
@@ -86,6 +131,7 @@ Next:
 - Add split preset table/config with hard validation enforcing burn >= 69.
 - Add integration tests for split validation and aggregates.
 - Add feature flag checks around split-aware UI surfaces.
+- Add ops runbook per launch phase (owner mapping, canary commands, rollback).
 
 Exit gate:
 - Existing salute endpoints remain unchanged and stable.
@@ -99,6 +145,7 @@ Scope:
 - Spotlight overlays use 48h only.
 - Introduce preset: 69 burn / 31 artist.
 - Enforce split lock at spotlight activation.
+- Enable admin wizard controls for distribution planning (mode, asset, rule notes).
 - Publish transparent counters:
   - total burned
   - total artist support

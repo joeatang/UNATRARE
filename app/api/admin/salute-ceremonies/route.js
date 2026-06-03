@@ -6,9 +6,37 @@ import { notifyCeremonyOpen, notifyCeremonyClose } from '../../../../lib/telegra
 export const dynamic = 'force-dynamic';
 
 const VALID_STATUSES = new Set(['draft', 'scheduled', 'active', 'closed', 'archived']);
+const SPOTLIGHT_HOURS = 48;
+const BURN_FLOOR = 69;
+const SPLIT_PRESETS = {
+  phase1_artist_31: {
+    key: 'phase1_artist_31',
+    label: '69 burn / 31 artist',
+    burn_pct: 69,
+    artist_pct: 31,
+    node_pct: 0,
+  },
+  phase2_artist_21_node_10: {
+    key: 'phase2_artist_21_node_10',
+    label: '69 burn / 21 artist / 10 nodes',
+    burn_pct: 69,
+    artist_pct: 21,
+    node_pct: 10,
+  },
+};
+const VALID_DISTRIBUTION_MODES = new Set([
+  'none',
+  'top_burners',
+  'weighted_burners',
+  'raffle_burners',
+  'manual_curated',
+]);
 const POLICY = {
   enforceWindow: process.env.SALUTE_ENFORCE_CEREMONY_WINDOW === '1',
   strictConfiguredOnly: process.env.SALUTE_ENFORCE_CEREMONY_STRICT === '1',
+  burnFloor: BURN_FLOOR,
+  spotlightHours: SPOTLIGHT_HOURS,
+  splitPresets: Object.values(SPLIT_PRESETS),
 };
 
 function normalizeCardName(v) {
@@ -24,6 +52,20 @@ function parseUnix(v) {
   const n = Number(v);
   if (!Number.isFinite(n)) return null;
   return Math.floor(n);
+}
+
+function parseSplitPreset(v) {
+  const key = String(v || 'phase1_artist_31').trim();
+  const preset = SPLIT_PRESETS[key];
+  if (!preset) return null;
+  if (preset.burn_pct < BURN_FLOOR) return null;
+  if ((preset.burn_pct + preset.artist_pct + preset.node_pct) !== 100) return null;
+  return preset;
+}
+
+function normalizeDistributionMode(v) {
+  const mode = String(v || 'none').trim();
+  return VALID_DISTRIBUTION_MODES.has(mode) ? mode : null;
 }
 
 export async function GET(request) {
@@ -93,6 +135,17 @@ export async function POST(request) {
   const themeKey = String(body?.theme_key || 'ember').trim() || 'ember';
   const startsAt = parseUnix(body?.starts_at);
   const endsAt = parseUnix(body?.ends_at);
+  const splitPreset = parseSplitPreset(body?.split_preset);
+  const distributionMode = normalizeDistributionMode(body?.distribution_mode);
+  const distributionAsset = String(body?.distribution_asset || '').trim().slice(0, 80);
+  const distributionRule = String(body?.distribution_rule || '').trim().slice(0, 500);
+
+  if (!splitPreset) {
+    return NextResponse.json({ error: 'invalid split_preset' }, { status: 422 });
+  }
+  if (!distributionMode) {
+    return NextResponse.json({ error: 'invalid distribution_mode' }, { status: 422 });
+  }
 
   const existing = db.prepare('SELECT id FROM salute_ceremonies WHERE card_name = ?').get(cardName);
 
@@ -108,15 +161,54 @@ export async function POST(request) {
     if (existing) {
       db.prepare(`
         UPDATE salute_ceremonies
-        SET headline = ?, subtitle = ?, theme_key = ?, status = ?, starts_at = ?, ends_at = ?, updated_at = ?
+        SET headline = ?, subtitle = ?, theme_key = ?,
+            split_preset = ?, burn_pct = ?, artist_pct = ?, node_pct = ?,
+            distribution_mode = ?, distribution_asset = ?, distribution_rule = ?,
+            status = ?, starts_at = ?, ends_at = ?, updated_at = ?
         WHERE card_name = ?
-      `).run(headline, subtitle, themeKey, nextStatus, startsAt, endsAt, now, cardName);
+      `).run(
+        headline,
+        subtitle,
+        themeKey,
+        splitPreset.key,
+        splitPreset.burn_pct,
+        splitPreset.artist_pct,
+        splitPreset.node_pct,
+        distributionMode,
+        distributionAsset,
+        distributionRule,
+        nextStatus,
+        startsAt,
+        endsAt,
+        now,
+        cardName,
+      );
     } else {
       db.prepare(`
         INSERT INTO salute_ceremonies (
-          card_name, headline, subtitle, theme_key, status, starts_at, ends_at, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(cardName, headline, subtitle, themeKey, nextStatus, startsAt, endsAt, now, now);
+          card_name, headline, subtitle, theme_key,
+          split_preset, burn_pct, artist_pct, node_pct,
+          distribution_mode, distribution_asset, distribution_rule,
+          status, starts_at, ends_at, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        cardName,
+        headline,
+        subtitle,
+        themeKey,
+        splitPreset.key,
+        splitPreset.burn_pct,
+        splitPreset.artist_pct,
+        splitPreset.node_pct,
+        distributionMode,
+        distributionAsset,
+        distributionRule,
+        nextStatus,
+        startsAt,
+        endsAt,
+        now,
+        now,
+      );
     }
 
     const ceremony = db.prepare('SELECT * FROM salute_ceremonies WHERE card_name = ?').get(cardName);
@@ -132,7 +224,10 @@ export async function POST(request) {
     }
 
     const effectiveStart = startsAt ?? now;
-    const effectiveEnd = endsAt ?? (effectiveStart + 48 * 60 * 60);
+    const effectiveEnd = effectiveStart + SPOTLIGHT_HOURS * 60 * 60;
+    if (endsAt != null && endsAt !== effectiveEnd) {
+      return NextResponse.json({ error: `spotlight campaigns are fixed at ${SPOTLIGHT_HOURS}h` }, { status: 422 });
+    }
     if (effectiveEnd <= effectiveStart) {
       return NextResponse.json({ error: 'ends_at must be greater than starts_at' }, { status: 422 });
     }
@@ -146,19 +241,51 @@ export async function POST(request) {
             headline = COALESCE(NULLIF(?, ''), headline),
             subtitle = COALESCE(NULLIF(?, ''), subtitle),
             theme_key = COALESCE(NULLIF(?, ''), theme_key),
+            split_preset = ?,
+            burn_pct = ?,
+            artist_pct = ?,
+            node_pct = ?,
+            distribution_mode = ?,
+            distribution_asset = ?,
+            distribution_rule = ?,
             updated_at = ?
         WHERE card_name = ?
-      `).run(effectiveStart, effectiveEnd, headline, subtitle, themeKey, now, cardName);
+      `).run(
+        effectiveStart,
+        effectiveEnd,
+        headline,
+        subtitle,
+        themeKey,
+        splitPreset.key,
+        splitPreset.burn_pct,
+        splitPreset.artist_pct,
+        splitPreset.node_pct,
+        distributionMode,
+        distributionAsset,
+        distributionRule,
+        now,
+        cardName,
+      );
     } else {
       db.prepare(`
         INSERT INTO salute_ceremonies (
-          card_name, headline, subtitle, theme_key, status, starts_at, ends_at, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, 'active', ?, ?, ?, ?)
+          card_name, headline, subtitle, theme_key,
+          split_preset, burn_pct, artist_pct, node_pct,
+          distribution_mode, distribution_asset, distribution_rule,
+          status, starts_at, ends_at, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?)
       `).run(
         cardName,
         headline || 'Burn to Salute',
         subtitle || 'Voluntary community ritual · proof of appreciation',
         themeKey,
+        splitPreset.key,
+        splitPreset.burn_pct,
+        splitPreset.artist_pct,
+        splitPreset.node_pct,
+        distributionMode,
+        distributionAsset,
+        distributionRule,
         effectiveStart,
         effectiveEnd,
         now,
