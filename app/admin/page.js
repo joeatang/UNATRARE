@@ -2258,6 +2258,16 @@ function SaluteVerificationPanel({ authToken }) {
     return 'var(--text-dim)';
   }
 
+  async function copyTxSig(sig) {
+    if (!sig) return;
+    try {
+      await navigator.clipboard.writeText(sig);
+      setMsg('copied tx signature');
+    } catch {
+      setMsg('failed to copy tx signature');
+    }
+  }
+
   async function fetchAudit(overrideFilters = null) {
     const active = overrideFilters ? { ...filters, ...overrideFilters } : filters;
     if (overrideFilters) setFilters(active);
@@ -2403,7 +2413,45 @@ function SaluteVerificationPanel({ authToken }) {
                 </div>
                 <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text)' }} title={r.card_name || ''}>{r.card_name || '—'}</div>
                 <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text-dim)' }} title={r.sol_wallet || ''}>{short(r.sol_wallet)}</div>
-                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text-dim)' }} title={r.tx_sig || ''}>{short(r.tx_sig)}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text-dim)' }} title={r.tx_sig || ''}>{short(r.tx_sig)}</div>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    <button
+                      onClick={() => copyTxSig(r.tx_sig)}
+                      style={{
+                        padding: '2px 6px',
+                        border: '1px solid var(--border-dim)',
+                        background: 'transparent',
+                        color: 'var(--text-dim)',
+                        fontFamily: 'var(--font-card)',
+                        fontSize: 8,
+                        letterSpacing: '1px',
+                        cursor: 'pointer',
+                      }}
+                      disabled={!r.tx_sig}
+                    >
+                      copy
+                    </button>
+                    {r.tx_sig && (
+                      <a
+                        href={`https://solscan.io/tx/${r.tx_sig}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          padding: '2px 6px',
+                          border: '1px solid var(--amber)',
+                          color: 'var(--amber)',
+                          textDecoration: 'none',
+                          fontFamily: 'var(--font-card)',
+                          fontSize: 8,
+                          letterSpacing: '1px',
+                        }}
+                      >
+                        solscan ↗
+                      </a>
+                    )}
+                  </div>
+                </div>
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)' }}>{r.message || '—'}</div>
               </div>
             ))}
