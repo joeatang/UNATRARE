@@ -26,6 +26,9 @@ export async function GET(request) {
     SELECT
       sol_wallet,
       SUM(amount_display)        AS total_burned,
+      SUM(artist_amount_display) AS total_artist,
+      SUM(node_amount_display)   AS total_node,
+      SUM(amount_display + artist_amount_display + node_amount_display) AS total_ritual,
       COUNT(*)                   AS burn_count,
       COUNT(DISTINCT card_name)  AS cards_saluted,
       MIN(burned_at)             AS first_burn_at,
