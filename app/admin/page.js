@@ -2229,10 +2229,12 @@ function SaluteVerificationPanel({ authToken }) {
   const [msg, setMsg] = useState('');
   const [rows, setRows] = useState([]);
   const [counts, setCounts] = useState([]);
+  const [severityCounts, setSeverityCounts] = useState({ high: 0, medium: 0, low: 0 });
   const [filters, setFilters] = useState({
     split_only: true,
     event: '',
     card: '',
+    window: '24h',
     limit: '100',
   });
 
@@ -2250,14 +2252,23 @@ function SaluteVerificationPanel({ authToken }) {
     return `${v.slice(0, 6)}…${v.slice(-4)}`;
   }
 
-  async function fetchAudit() {
+  function severityColor(severity) {
+    if (severity === 'high') return '#ff6666';
+    if (severity === 'medium') return 'var(--amber)';
+    return 'var(--text-dim)';
+  }
+
+  async function fetchAudit(overrideFilters = null) {
+    const active = overrideFilters ? { ...filters, ...overrideFilters } : filters;
+    if (overrideFilters) setFilters(active);
     setLoading(true);
     try {
       const sp = new URLSearchParams();
-      sp.set('split_only', filters.split_only ? '1' : '0');
-      sp.set('limit', filters.limit || '100');
-      if (filters.event.trim()) sp.set('event', filters.event.trim());
-      if (filters.card.trim()) sp.set('card', filters.card.trim().toUpperCase());
+      sp.set('split_only', active.split_only ? '1' : '0');
+      sp.set('limit', active.limit || '100');
+      sp.set('window', active.window || '24h');
+      if (active.event.trim()) sp.set('event', active.event.trim());
+      if (active.card.trim()) sp.set('card', active.card.trim().toUpperCase());
       const res = await fetch(`/api/admin/salute-verifications?${sp.toString()}`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
@@ -2268,6 +2279,7 @@ function SaluteVerificationPanel({ authToken }) {
       }
       setRows(json.rows || []);
       setCounts(json.counts || []);
+      setSeverityCounts(json.severityCounts || { high: 0, medium: 0, low: 0 });
       setMsg('');
     } finally {
       setLoading(false);
@@ -2295,7 +2307,15 @@ function SaluteVerificationPanel({ authToken }) {
             Review split verification failures without tailing logs. Default view shows split-only events.
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px auto', gap: 10, alignItems: 'end', marginBottom: 10 }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+            <button onClick={() => fetchAudit({ split_only: true, event: '', window: '24h' })} disabled={loading} style={btn('var(--amber)')}>last 24h split</button>
+            <button onClick={() => fetchAudit({ split_only: true, event: 'split_ratio_mismatch', window: '24h' })} disabled={loading} style={btn('#ff6666')}>ratio mismatches</button>
+            <button onClick={() => fetchAudit({ split_only: true, event: 'split_missing_artist_leg', window: '24h' })} disabled={loading} style={btn('var(--amber)')}>missing artist leg</button>
+            <button onClick={() => fetchAudit({ split_only: true, event: 'split_missing_artist_address', window: '7d' })} disabled={loading} style={btn('var(--text-dim)')}>missing artist address 7d</button>
+            <button onClick={() => fetchAudit({ split_only: false, event: '', window: '24h' })} disabled={loading} style={btn('var(--text-dim)')}>all events 24h</button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px 120px auto', gap: 10, alignItems: 'end', marginBottom: 10 }}>
             <div>
               <span style={label}>CARD FILTER</span>
               <input
@@ -2313,6 +2333,20 @@ function SaluteVerificationPanel({ authToken }) {
                 onChange={e => setFilters(f => ({ ...f, event: e.target.value }))}
                 placeholder="split_ratio_mismatch"
               />
+            </div>
+            <div>
+              <span style={label}>WINDOW</span>
+              <select
+                style={input}
+                value={filters.window}
+                onChange={e => setFilters(f => ({ ...f, window: e.target.value }))}
+              >
+                <option value="1h">1h</option>
+                <option value="24h">24h</option>
+                <option value="48h">48h</option>
+                <option value="7d">7d</option>
+                <option value="all">all</option>
+              </select>
             </div>
             <div>
               <span style={label}>LIMIT</span>
@@ -2337,6 +2371,15 @@ function SaluteVerificationPanel({ authToken }) {
 
           {counts.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+              <span style={{ border: '1px solid #402020', padding: '3px 8px', fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: '#ff6666' }}>
+                high · {severityCounts.high || 0}
+              </span>
+              <span style={{ border: '1px solid #4a3a1f', padding: '3px 8px', fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--amber)' }}>
+                medium · {severityCounts.medium || 0}
+              </span>
+              <span style={{ border: '1px solid var(--border-dim)', padding: '3px 8px', fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text-dim)' }}>
+                low · {severityCounts.low || 0}
+              </span>
               {counts.map(c => (
                 <span key={c.event} style={{ border: '1px solid var(--border-dim)', padding: '3px 8px', fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text-dim)' }}>
                   {c.event} · {c.n}
@@ -2354,7 +2397,10 @@ function SaluteVerificationPanel({ authToken }) {
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--text-dim)' }}>
                   {new Date((r.created_at || 0) * 1000).toISOString().slice(0, 19).replace('T', ' ')}
                 </div>
-                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--amber)' }}>{r.event}</div>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: severityColor(r.severity) }}>
+                  {r.event}
+                  <span style={{ color: 'var(--text-dim)', marginLeft: 6 }}>{r.severity || 'low'}</span>
+                </div>
                 <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text)' }} title={r.card_name || ''}>{r.card_name || '—'}</div>
                 <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text-dim)' }} title={r.sol_wallet || ''}>{short(r.sol_wallet)}</div>
                 <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text-dim)' }} title={r.tx_sig || ''}>{short(r.tx_sig)}</div>
