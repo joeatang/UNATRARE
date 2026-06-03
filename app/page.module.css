@@ -17,10 +17,11 @@
 .eyebrow {
   font-family: var(--font-card);
   font-size: 13px;
-  letter-spacing: 3px;
+  letter-spacing: 2px;
   color: var(--text-dim);
   text-transform: uppercase;
   margin-bottom: 16px;
+  text-wrap: balance;
 }
 
 .heroTitle {
@@ -83,10 +84,11 @@
 
 .heroBeta {
   font-family: var(--font-card);
-  font-size: 13px;
-  letter-spacing: 3px;
+  font-size: 12px;
+  letter-spacing: 2px;
   color: var(--amber);
   opacity: 0.9;
+  text-wrap: balance;
 }
 
 .saluteBanner {
@@ -133,10 +135,11 @@
 .thesisEyebrow {
   font-family: var(--font-card);
   font-size: 13px;
-  letter-spacing: 4px;
+  letter-spacing: 3px;
   color: var(--text-dim);
   text-transform: uppercase;
   margin-bottom: 20px;
+  text-wrap: balance;
 }
 
 .thesisBody {
@@ -186,10 +189,11 @@
 .pathsEyebrow {
   font-family: var(--font-card);
   font-size: 13px;
-  letter-spacing: 4px;
+  letter-spacing: 3px;
   color: var(--text-dim);
   text-transform: uppercase;
   margin-bottom: 8px;
+  text-wrap: balance;
 }
 
 .pathsSub {
@@ -326,10 +330,11 @@
 .councilEyebrow {
   font-family: var(--font-card);
   font-size: 13px;
-  letter-spacing: 4px;
+  letter-spacing: 3px;
   color: var(--text-dim);
   text-transform: uppercase;
   margin-bottom: 16px;
+  text-wrap: balance;
 }
 
 .councilTitle {
