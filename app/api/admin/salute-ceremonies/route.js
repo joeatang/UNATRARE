@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic';
 const VALID_STATUSES = new Set(['draft', 'scheduled', 'active', 'closed', 'archived']);
 const SPOTLIGHT_HOURS = 48;
 const BURN_FLOOR = 69;
+const ENABLE_NODE_PRESET = process.env.SALUTE_ENABLE_NODE_PRESET === '1';
 const SPLIT_PRESETS = {
   phase1_artist_31: {
     key: 'phase1_artist_31',
@@ -24,6 +25,15 @@ const SPLIT_PRESETS = {
     node_pct: 10,
   },
 };
+
+function getActiveSplitPresets() {
+  const active = [SPLIT_PRESETS.phase1_artist_31];
+  if (ENABLE_NODE_PRESET) active.push(SPLIT_PRESETS.phase2_artist_21_node_10);
+  return active;
+}
+
+const ACTIVE_SPLIT_PRESETS = getActiveSplitPresets();
+const ACTIVE_SPLIT_MAP = Object.fromEntries(ACTIVE_SPLIT_PRESETS.map(p => [p.key, p]));
 const VALID_DISTRIBUTION_MODES = new Set([
   'none',
   'top_burners',
@@ -36,7 +46,8 @@ const POLICY = {
   strictConfiguredOnly: process.env.SALUTE_ENFORCE_CEREMONY_STRICT === '1',
   burnFloor: BURN_FLOOR,
   spotlightHours: SPOTLIGHT_HOURS,
-  splitPresets: Object.values(SPLIT_PRESETS),
+  splitPresets: ACTIVE_SPLIT_PRESETS,
+  nodePresetEnabled: ENABLE_NODE_PRESET,
 };
 
 function normalizeCardName(v) {
@@ -56,7 +67,7 @@ function parseUnix(v) {
 
 function parseSplitPreset(v) {
   const key = String(v || 'phase1_artist_31').trim();
-  const preset = SPLIT_PRESETS[key];
+  const preset = ACTIVE_SPLIT_MAP[key];
   if (!preset) return null;
   if (preset.burn_pct < BURN_FLOOR) return null;
   if ((preset.burn_pct + preset.artist_pct + preset.node_pct) !== 100) return null;

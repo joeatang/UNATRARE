@@ -19,7 +19,8 @@ export async function GET(request, { params }) {
         art_url, art_mime, art_cover_url, artist_handle, display_title, description,
         audio_url, video_url, category, subcategory,
         series, card_number, supply,
-        unatpepe_alloc_qty, dispenser_address
+        unatpepe_alloc_qty, dispenser_address,
+        artist_sol_address, artist_sol_verified_at
       FROM tokens
       WHERE artist_address = ?
       ORDER BY submitted_at DESC
@@ -76,6 +77,8 @@ export async function GET(request, { params }) {
         payUrl:           r.status === 'approved' ? `https://unatrare.wtf/pay/${r.token_name}` : null,
         unatpepeAllocQty: r.unatpepe_alloc_qty || 0,
         dispenserAddress: r.dispenser_address || '',
+        artistSolAddress: r.artist_sol_address || '',
+        artistSolVerifiedAt: r.artist_sol_verified_at || null,
         drop,
       };
     });

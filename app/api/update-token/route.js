@@ -11,7 +11,8 @@ import { getDb } from '../../../lib/db';
  *
  * Updatable fields: display_title, artist_handle, description,
  *   category, subcategory, audio_url, video_url,
- *   art_url / art_hash / art_mime (optional art replacement)
+ *   art_url / art_hash / art_mime (optional art replacement),
+ *   artist_sol_address (optional payout binding)
  *
  * Immutable: token_name, artist_address, owner_address,
  *   series, card_number, supply, status, revealed_at, council_certified
@@ -19,6 +20,7 @@ import { getDb } from '../../../lib/db';
 
 const ADDR_RE   = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
 const BASE64_RE = /^[A-Za-z0-9+/=]{87,88}$/; // 65-byte BIP-137 sig
+const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
 function buildChallenge(tokenName) {
   return `UNATRARE:UPDATE:${tokenName.toUpperCase()}`;
@@ -45,6 +47,7 @@ export async function POST(request) {
     artHash,
     artMime,
     dispenserAddress,
+    artistSolAddress,
   } = body || {};
 
   // ── Required auth fields ─────────────────────────────────────────────
@@ -172,6 +175,22 @@ export async function POST(request) {
     }
   }
 
+
+  if (typeof artistSolAddress === 'string') {
+    const s = artistSolAddress.trim();
+    if (s === '') {
+      updates.artist_sol_address = '';
+      updates.artist_sol_verified_at = null;
+    } else if (SOL_ADDR_RE.test(s)) {
+      updates.artist_sol_address = s;
+      updates.artist_sol_verified_at = Math.floor(Date.now() / 1000);
+    } else {
+      return NextResponse.json(
+        { ok: false, error: 'Invalid SOL payout address — must be a valid Solana public key' },
+        { status: 422 }
+      );
+    }
+  }
   // Art replacement — locked once approved (bait-and-switch prevention)
   if ((artUrl || artHash || artMime) && token.status === 'approved') {
     return NextResponse.json(

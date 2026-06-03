@@ -815,6 +815,7 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
   const [manageOpen, setManageOpen] = useState(false);
   // editable fields
   const [dispenser,    setDispenser]    = useState(sub.dispenserAddress || '');
+  const [artistSolAddress, setArtistSolAddress] = useState(sub.artistSolAddress || '');
   const [displayTitle, setDisplayTitle] = useState(sub.displayTitle || '');
   const [artistHandle, setArtistHandle] = useState(sub.artistHandle || '');
   const [description,  setDescription]  = useState(sub.description || '');
@@ -831,6 +832,7 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
   const meta = STATUS_META[sub.status] || STATUS_META.pending;
 
   const DISPENSER_RE = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
+  const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
   const challenge = `UNATRARE:UPDATE:${sub.tokenName}`;
 
   function resetManage() {
@@ -868,6 +870,10 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
       setManageErr('Invalid address — must be a legacy Bitcoin address starting with 1');
       return;
     }
+    if (artistSolAddress && !SOL_ADDR_RE.test(artistSolAddress.trim())) {
+      setManageErr('Invalid SOL payout address — must be a valid Solana public key');
+      return;
+    }
     if (!manageSig.trim()) {
       setManageErr('Paste your BIP-137 signature');
       return;
@@ -880,6 +886,7 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
         artistAddress:    artistAddress,
         signature:        manageSig.trim(),
         dispenserAddress: dispenser.trim(),
+          artistSolAddress: artistSolAddress.trim(),
         displayTitle:     displayTitle.trim(),
         artistHandle:     artistHandle.trim(),
         description:      description.trim(),
@@ -1180,6 +1187,29 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
                   />
                 </div>
               )}
+
+                {/* ── Artist SOL payout address (signed binding) ───────────── */}
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 6 }}>
+                    ARTIST SOL PAYOUT ADDRESS
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', marginBottom: 8, lineHeight: 1.5 }}>
+                    Optional for split-ready launches. This address is bound by your BTC signature below.
+                    {sub.artistSolVerifiedAt ? ` Last verified ${new Date(sub.artistSolVerifiedAt * 1000).toISOString().slice(0, 10)}.` : ''}
+                  </div>
+                  <input
+                    type="text"
+                    value={artistSolAddress}
+                    onChange={e => { setArtistSolAddress(e.target.value.trim()); resetManage(); }}
+                    placeholder="SolanaAddress... (leave blank to remove)"
+                    style={{
+                      width: '100%', padding: '7px 10px', boxSizing: 'border-box',
+                      background: 'var(--bg-card)', border: '1px solid var(--border)',
+                      color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 12,
+                      outline: 'none',
+                    }}
+                  />
+                </div>
 
               {/* ── Signature ─────────────────────────────────────────── */}
               <div style={{ marginBottom: 12 }}>

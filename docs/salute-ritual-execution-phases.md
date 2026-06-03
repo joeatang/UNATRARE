@@ -11,7 +11,7 @@ This plan is built for live production safety.
 
 Launch presets:
 - Phase 1 default: 69 burn / 31 artist.
-- Phase 2 target: 69 burn / 21 artist / 10 nodes pool.
+- Phase 2 target: 69 burn / 21 artist / 10 nodes pool (feature-flagged until enabled).
 
 Policy rails:
 - Never allow burn below 69% unless governance explicitly approves.
@@ -85,7 +85,7 @@ Verified touchpoints:
 - On-chain burn program:
   - `solana/unatrare-salute-burn-program/programs/unatrare_salute_burn/src/lib.rs`
 - Existing ceremony behavior:
-  - 48h is a default fallback, not a hard cap.
+  - Spotlight activation is fixed at 48h.
   - Ceremony gating is env-controlled and can be disabled.
 
 ## Phase 0 - Clean Baseline + Safety Rails
@@ -121,17 +121,18 @@ Status: Ready to execute
 
 Shipped:
 - `salute_ceremonies` table and indexes in `lib/db.js`.
+- Split preset and distribution planning fields in `salute_ceremonies`.
 - New read endpoints:
   - `/api/salute/ceremony`
   - `/api/salute/history`
   - `/api/salute/global`
 
 Next:
-- Add additive fields for split accounting (burn, artist, nodes, preset key).
-- Add split preset table/config with hard validation enforcing burn >= 69.
+- Add per-salute ledger accounting fields (burn, artist, nodes, preset snapshot).
 - Add integration tests for split validation and aggregates.
 - Add feature flag checks around split-aware UI surfaces.
 - Add ops runbook per launch phase (owner mapping, canary commands, rollback).
+- Add artist SOL payout binding workflow (BTC-signed ownership proof).
 
 Exit gate:
 - Existing salute endpoints remain unchanged and stable.

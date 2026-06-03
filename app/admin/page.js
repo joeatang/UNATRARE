@@ -2050,7 +2050,7 @@ function SaluteCeremoniesPanel({ authToken }) {
           </div>
 
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)', marginBottom: 14, lineHeight: 1.6 }}>
-            Configure per-card burn ritual windows, themes, and ceremony copy. This is additive and does not alter existing salute records.
+            Base salutes stay always open. Spotlight campaigns are fixed at 48h on activation. Configure per-card themes, split preset, and campaign copy here.
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
