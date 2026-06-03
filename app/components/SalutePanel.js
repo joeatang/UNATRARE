@@ -447,7 +447,7 @@ export default function SalutePanel({ cardName }) {
         setBurnErr(
           'Wallet connection was denied. ' +
           (mobile
-            ? "In Phantom's in-app browser, tap the connect request that appears and approve it, then try again. Or use the manual TxID form below - burn from your wallet first, then paste the transaction ID here."
+            ? "In Phantom's in-app browser, tap the connect request that appears and approve it, then try again. Or use the manual transaction form below - burn from your wallet first, then paste the transaction ID here."
             : 'Please approve the connection request in your wallet and try again.')
         );
         if (mobile) setShowManual(true);
@@ -660,7 +660,7 @@ export default function SalutePanel({ cardName }) {
         setBurnErr(
           isSolflare
             ? `Solflare is blocking this burn because $CASH is flagged as an unverified token in their system — this is a Solflare policy, not a problem with unatrare.wtf. Switch to Phantom (phantom.app) for a seamless one-click burn.`
-            : `Your wallet declined the request. Open your wallet extension and approve the signing prompt for unatrare.wtf, then try again. If it keeps blocking, use the TxID section below.`
+            : `Your wallet declined the request. Open your wallet extension and approve the signing prompt for unatrare.wtf, then try again. If it keeps blocking, use the transaction ID section below.`
         );
         setShowManual(true);
       } else {
@@ -1146,7 +1146,7 @@ export default function SalutePanel({ cardName }) {
               style={S.input}
               value={manualSig}
               onChange={e => setManualSig(e.target.value)}
-              placeholder="paste your burn TxID here…"
+              placeholder="paste your burn transaction ID here..."
               autoComplete="off"
               spellCheck={false}
             />
@@ -1173,7 +1173,7 @@ export default function SalutePanel({ cardName }) {
             </div>
 
             <div style={{ ...S.hint, marginTop: 10 }}>
-              Burn is verified on Solana mainnet. Any Solana wallet works — Phantom, Solflare, Backpack, CLI, etc.
+              Burn is verified on Solana mainnet. Any Solana wallet works - Phantom, Solflare, Backpack, and others.
               {' '}To purchase $CASH, use{' '}
               <a href="https://nat.fun" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>
                 nat.fun
