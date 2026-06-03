@@ -2156,7 +2156,7 @@ function SaluteCeremoniesPanel({ authToken }) {
 
           <details style={{ marginBottom: 12, border: '1px solid var(--border-dim)', padding: '8px 12px', background: 'rgba(255,255,255,0.01)' }}>
             <summary style={{ cursor: 'pointer', fontFamily: 'var(--font-card)', fontSize: 10, letterSpacing: '2px', color: 'var(--text-dim)' }}>
-              ADVANCED · custom dates · split preset · headline · distribution
+              ⚙️ ADVANCED — only open if scheduling for later, customizing split %, or editing headline/theme
             </summary>
             <div style={{ marginTop: 12 }}>
 
@@ -2245,12 +2245,15 @@ function SaluteCeremoniesPanel({ authToken }) {
             </div>
           </div>
 
-          <div style={{ marginTop: -4, marginBottom: 12, padding: '6px 9px', border: '1px dashed var(--border-dim)', fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.5 }}>
-            <strong style={{ color: 'var(--text)' }}>Tip:</strong> leave <code>STARTS AT</code> blank when activating to go live <em>now</em>. Setting a future <code>STARTS AT</code> means the ceremony stays in <em>scheduled</em> state until that time — the salute panel will show 100% burn until then.
+          <div style={{ marginTop: -4, marginBottom: 12, padding: '8px 10px', border: '1px dashed var(--border-dim)', fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.6 }}>
+            <div style={{ color: 'var(--text)', marginBottom: 4, fontFamily: 'var(--font-card)', letterSpacing: '1.5px', fontSize: 10 }}>WHEN DO I USE THIS SECTION?</div>
+            Only when you need to <em>schedule</em> a ceremony for a future date, customize the headline/distribution, or save settings <strong>without going live yet</strong>. For a normal &ldquo;start it right now for {policy.spotlightHours}h&rdquo; ceremony, just use the green button above &mdash; you don&rsquo;t need anything down here.
+            <br /><br />
+            <strong style={{ color: 'var(--text)' }}>Dates:</strong> leave <code>STARTS AT</code> blank to go live <em>immediately</em> on activate. A future <code>STARTS AT</code> keeps it in <em>scheduled</em> state until that moment (panel shows 100% burn until it flips live).
           </div>
 
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
-            <button onClick={() => postAction('upsert')} disabled={saving} style={btn('var(--green)')}>{saving ? 'saving…' : 'save / upsert'}</button>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
+            <button onClick={() => postAction('upsert')} disabled={saving} style={btn('var(--green)')} title="save settings to DB; does NOT activate">{saving ? 'saving…' : '💾 save draft (no activation)'}</button>
             <button
               onClick={() => postAction('activate')}
               disabled={saving || (policy.strictConfiguredOnly && !loadedFromRow)}
@@ -2259,13 +2262,19 @@ function SaluteCeremoniesPanel({ authToken }) {
                   ? { ...btn('var(--border)'), opacity: 0.55, cursor: 'not-allowed' }
                   : btn('var(--amber)')
               }
-              title={policy.strictConfiguredOnly && !loadedFromRow ? 'strict mode: load an existing ceremony row first' : `activate ${policy.spotlightHours}h`}
+              title={policy.strictConfiguredOnly && !loadedFromRow ? 'strict mode: load an existing ceremony row first' : `save + activate using STARTS AT / ENDS AT above (or now+${policy.spotlightHours}h if blank)`}
             >
-              activate {policy.spotlightHours}h
+              📅 save + activate (custom dates)
             </button>
-            <button onClick={() => postAction('close')} disabled={saving} style={btn('var(--text-dim)')}>close</button>
-            <button onClick={() => postAction('archive')} disabled={saving} style={btn('var(--text-dim)')}>archive</button>
-            <button onClick={() => postAction('draft')} disabled={saving} style={btn('var(--text-dim)')}>back to draft</button>
+            <button onClick={() => postAction('close')} disabled={saving} style={btn('var(--text-dim)')} title="end the ceremony immediately">close now</button>
+            <button onClick={() => postAction('archive')} disabled={saving} style={btn('var(--text-dim)')} title="hide from active listings">archive</button>
+            <button onClick={() => postAction('draft')} disabled={saving} style={btn('var(--text-dim)')} title="reset status to draft (un-activate)">back to draft</button>
+          </div>
+          <div style={{ marginBottom: 14, fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--text-dim)', lineHeight: 1.5 }}>
+            <strong style={{ color: 'var(--text)' }}>save draft</strong> = persist settings only, ceremony stays inactive ·&nbsp;
+            <strong style={{ color: 'var(--text)' }}>save + activate</strong> = persist + flip to active using your dates above ·&nbsp;
+            <strong style={{ color: 'var(--text)' }}>close</strong> = stop a live ceremony ·&nbsp;
+            <strong style={{ color: 'var(--text)' }}>archive</strong> / <strong style={{ color: 'var(--text)' }}>back to draft</strong> = lifecycle housekeeping
           </div>
 
           {policy.strictConfiguredOnly && !loadedFromRow && (
