@@ -845,23 +845,32 @@ export default function SalutePanel({ cardName }) {
 
         <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 14 }}>
           <strong style={{ color: 'var(--text)' }}>Salute this card</strong> by burning $CASH on Solana. Permanent. Public. Forever attributed to your wallet — your name lives on this card.
-          {ceremonySplit.requireArtistSplitTx && ceremonySplit.artistPct > 0 ? (
+          {ceremonySplit.status === 'active' && ceremonySplit.requireArtistSplitTx && ceremonySplit.artistPct > 0 ? (
             <>
               <br />
               <span style={{ display: 'inline-block', marginTop: 6, padding: '2px 8px', border: '1px solid var(--amber)', color: 'var(--amber)', fontSize: '10px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                ceremony active · split salute
+                ceremony live · split salute
               </span>
               <br />
-              This active ceremony uses a split salute: burn {ceremonySplit.burnPct}% and send {ceremonySplit.artistPct}% to the artist in the same transaction.
+              A live ceremony is running for this card: burn {ceremonySplit.burnPct}% and send {ceremonySplit.artistPct}% to the artist in the same transaction.
+            </>
+          ) : ceremonySplit.status === 'scheduled' ? (
+            <>
+              <br />
+              <span style={{ display: 'inline-block', marginTop: 6, padding: '2px 8px', border: '1px solid var(--text-dim)', color: 'var(--text-dim)', fontSize: '10px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                ceremony scheduled · 100% burn for now
+              </span>
+              <br />
+              A split ceremony is scheduled but hasn&apos;t started yet — until then, the full amount you enter is burned.
             </>
           ) : (
             <>
               <br />
               <span style={{ display: 'inline-block', marginTop: 6, padding: '2px 8px', border: '1px solid var(--border)', color: 'var(--text-dim)', fontSize: '10px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                ceremony: inactive · 100% burn
+                no live ceremony · 100% burn
               </span>
               <br />
-              No split ceremony is active for this card right now — the full amount you enter is burned. No portion is routed to the artist in this transaction.
+              No live split ceremony for this card right now — the full amount you enter is burned.
             </>
           )}
           <br />

@@ -1870,12 +1870,32 @@ function ArtistProfilePanel({ authToken }) {
 }
 
 // ── Salute ceremonies management panel ────────────────────────
+function effectiveCeremonyStatus(row, nowSec) {
+  if (!row) return 'none';
+  if (row.status === 'archived') return 'archived';
+  if (row.status === 'closed') return 'closed';
+  if (row.starts_at && nowSec < row.starts_at) return 'scheduled';
+  if (row.ends_at && nowSec >= row.ends_at) return row.status === 'active' ? 'closed' : row.status;
+  if (row.status === 'scheduled' && row.starts_at && nowSec >= row.starts_at) return 'active';
+  return row.status;
+}
+function humanDelta(targetSec, nowSec) {
+  if (!targetSec) return '';
+  const d = Math.abs(targetSec - nowSec);
+  const h = Math.floor(d / 3600);
+  const m = Math.floor((d % 3600) / 60);
+  if (h >= 24) return `${Math.floor(h / 24)}d ${h % 24}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
 function SaluteCeremoniesPanel({ authToken }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
   const [rows, setRows] = useState([]);
+  const [envRequireSplitTx, setEnvRequireSplitTx] = useState(false);
+  const [nowTick, setNowTick] = useState(() => Math.floor(Date.now() / 1000));
   const [policy, setPolicy] = useState({
     enforceWindow: false,
     strictConfiguredOnly: false,
@@ -1926,6 +1946,7 @@ function SaluteCeremoniesPanel({ authToken }) {
         return;
       }
       setRows(json.ceremonies || []);
+      setEnvRequireSplitTx(!!(json.env && json.env.requireSplitTx));
       if (json.policy) {
         setPolicy({
           enforceWindow: !!json.policy.enforceWindow,
@@ -1948,6 +1969,12 @@ function SaluteCeremoniesPanel({ authToken }) {
     fetchCeremonies();
   }, [open, statusFilter]);
 
+  useEffect(() => {
+    if (!open) return;
+    const id = setInterval(() => setNowTick(Math.floor(Date.now() / 1000)), 30000);
+    return () => clearInterval(id);
+  }, [open]);
+
   function loadRowIntoForm(row) {
     setForm({
       card_name: row.card_name || '',
@@ -1966,8 +1993,8 @@ function SaluteCeremoniesPanel({ authToken }) {
     setMsg(`loaded ${row.card_name}`);
   }
 
-  async function postAction(action) {
-    if (!form.card_name.trim()) {
+  async function postAction(action, overrides = {}) {
+    if (!form.card_name.trim() && !overrides.card_name) {
       setMsg('card_name required');
       return;
     }
@@ -1975,7 +2002,7 @@ function SaluteCeremoniesPanel({ authToken }) {
     try {
       const body = {
         action,
-        card_name: form.card_name.toUpperCase().trim(),
+        card_name: (overrides.card_name || form.card_name).toUpperCase().trim(),
         headline: form.headline,
         subtitle: form.subtitle,
         theme_key: form.theme_key,
@@ -1983,9 +2010,9 @@ function SaluteCeremoniesPanel({ authToken }) {
         distribution_mode: form.distribution_mode,
         distribution_asset: form.distribution_asset,
         distribution_rule: form.distribution_rule,
-        status: form.status,
-        starts_at: fromInputTime(form.starts_at),
-        ends_at: fromInputTime(form.ends_at),
+        status: overrides.status || form.status,
+        starts_at: overrides.starts_at !== undefined ? overrides.starts_at : fromInputTime(form.starts_at),
+        ends_at: overrides.ends_at !== undefined ? overrides.ends_at : fromInputTime(form.ends_at),
       };
 
       const res = await fetch('/api/admin/salute-ceremonies', {
@@ -2047,13 +2074,21 @@ function SaluteCeremoniesPanel({ authToken }) {
             BURN FLOOR: <span style={{ color: 'var(--amber)' }}>{policy.burnFloor}%</span>
             {' · '}
             SPOTLIGHT: <span style={{ color: 'var(--amber)' }}>{policy.spotlightHours}h fixed</span>
+            {' · '}
+            SPLIT-TX ENFORCEMENT: <span style={{ color: envRequireSplitTx ? 'var(--green)' : 'var(--amber)' }}>{envRequireSplitTx ? 'ON' : 'OFF (env SALUTE_REQUIRE_ARTIST_SPLIT_TX=0)'}</span>
           </div>
+
+          {!envRequireSplitTx && (
+            <div style={{ marginBottom: 12, padding: '8px 10px', border: '1px solid var(--amber)', background: 'rgba(255,180,0,0.05)', fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--amber)', lineHeight: 1.5 }}>
+              ⚠ Split-tx enforcement is OFF. Ceremonies will run, but the salute panel will show <strong>&ldquo;no live ceremony · 100% burn&rdquo;</strong> because wallets won&apos;t actually route an artist payout. To enable split salutes site-wide, set <code>SALUTE_REQUIRE_ARTIST_SPLIT_TX=1</code> in <code>.env</code> and restart pm2 with <code>--update-env</code>.
+            </div>
+          )}
 
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)', marginBottom: 14, lineHeight: 1.6 }}>
             Base salutes stay always open. Spotlight campaigns are fixed at 48h on activation. Configure per-card themes, split preset, and campaign copy here.
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+          <div className={styles.ceremonyGrid2}>
             <div>
               <span style={label}>SPLIT PRESET</span>
               <select style={input} value={form.split_preset} onChange={e => setForm(f => ({ ...f, split_preset: e.target.value }))}>
@@ -2074,7 +2109,7 @@ function SaluteCeremoniesPanel({ authToken }) {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+          <div className={styles.ceremonyGrid2}>
             <div>
               <span style={label}>DISTRIBUTION ASSET</span>
               <input
@@ -2095,7 +2130,7 @@ function SaluteCeremoniesPanel({ authToken }) {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+          <div className={styles.ceremonyGrid2}>
             <div>
               <span style={label}>CARD NAME</span>
               <input
@@ -2129,7 +2164,7 @@ function SaluteCeremoniesPanel({ authToken }) {
             <input style={input} value={form.subtitle} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))} placeholder="Voluntary community ritual · proof of appreciation" />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 12 }}>
+          <div className={styles.ceremonyGrid3}>
             <div>
               <span style={label}>STATUS</span>
               <select style={input} value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
@@ -2148,6 +2183,10 @@ function SaluteCeremoniesPanel({ authToken }) {
               <span style={label}>ENDS AT</span>
               <input type="datetime-local" style={input} value={form.ends_at} onChange={e => setForm(f => ({ ...f, ends_at: e.target.value }))} />
             </div>
+          </div>
+
+          <div style={{ marginTop: -4, marginBottom: 12, padding: '6px 9px', border: '1px dashed var(--border-dim)', fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.5 }}>
+            <strong style={{ color: 'var(--text)' }}>Tip:</strong> leave <code>STARTS AT</code> blank when activating to go live <em>now</em>. Setting a future <code>STARTS AT</code> means the ceremony stays in <em>scheduled</em> state until that time — the salute panel will show 100% burn until then.
           </div>
 
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
@@ -2194,22 +2233,73 @@ function SaluteCeremoniesPanel({ authToken }) {
             {rows.length === 0 && !loading && (
               <div style={{ padding: '10px', fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)' }}>no ceremonies yet</div>
             )}
-            {rows.map(r => (
-              <div key={r.card_name} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 10, alignItems: 'center', padding: '8px 10px', borderBottom: '1px solid var(--border-dim)' }}>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontFamily: 'var(--font-card)', fontSize: 10, letterSpacing: '2px', color: 'var(--text)' }}>{r.card_name}</div>
-                  <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {r.headline || 'Burn to Salute'}
+            {rows.map(r => {
+              const eff = effectiveCeremonyStatus(r, nowTick);
+              const hasArtistSol = !!(r.artist_sol_address && r.artist_sol_address.trim());
+              const willShowLive = eff === 'active' && envRequireSplitTx && Number(r.artist_pct || 0) > 0 && hasArtistSol;
+              const pillColor = eff === 'active' ? 'var(--green)' : eff === 'scheduled' ? 'var(--amber)' : 'var(--text-dim)';
+              const pillBg = eff === 'active' ? 'rgba(180,255,111,0.10)' : eff === 'scheduled' ? 'rgba(255,180,0,0.08)' : 'transparent';
+              let timing = '';
+              if (eff === 'scheduled' && r.starts_at) timing = `starts in ${humanDelta(r.starts_at, nowTick)}`;
+              else if (eff === 'active' && r.ends_at) timing = `ends in ${humanDelta(r.ends_at, nowTick)}`;
+              else if (eff === 'closed' && r.ends_at) timing = `ended ${humanDelta(r.ends_at, nowTick)} ago`;
+              return (
+                <div key={r.card_name} style={{ padding: '12px', borderBottom: '1px solid var(--border-dim)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'baseline', justifyContent: 'space-between' }}>
+                    <div style={{ minWidth: 0, flex: '1 1 220px' }}>
+                      <div style={{ fontFamily: 'var(--font-card)', fontSize: 11, letterSpacing: '2px', color: 'var(--text)' }}>{r.card_name}</div>
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {r.headline || 'Burn to Salute'}
+                      </div>
+                      <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, color: 'var(--green)', letterSpacing: '1px', marginTop: 2 }}>
+                        {r.burn_pct ?? 69}% burn · {r.artist_pct ?? 31}% artist{(r.node_pct ?? 0) > 0 ? ` · ${r.node_pct}% nodes` : ''}
+                      </div>
+                    </div>
+                    <span style={{ display: 'inline-block', padding: '3px 8px', border: `1px solid ${pillColor}`, color: pillColor, background: pillBg, fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '2px' }}>
+                      {eff}{timing ? ` · ${timing}` : ''}
+                    </span>
                   </div>
-                  <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, color: 'var(--green)', letterSpacing: '1px' }}>
-                    {r.burn_pct ?? 69}% burn · {r.artist_pct ?? 31}% artist{(r.node_pct ?? 0) > 0 ? ` · ${r.node_pct}% nodes` : ''}
+
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)' }}>
+                    <span style={{ color: eff === 'active' ? 'var(--green)' : 'var(--amber)' }}>
+                      {eff === 'active' ? '✓' : '✗'} effective status: <strong>{eff}</strong>
+                    </span>
+                    <span style={{ color: envRequireSplitTx ? 'var(--green)' : 'var(--amber)' }}>
+                      {envRequireSplitTx ? '✓' : '✗'} split-tx env on
+                    </span>
+                    <span style={{ color: hasArtistSol ? 'var(--green)' : 'var(--amber)' }}>
+                      {hasArtistSol ? '✓' : '✗'} artist SOL set
+                    </span>
+                    <span style={{ color: willShowLive ? 'var(--green)' : 'var(--text-dim)' }}>
+                      {willShowLive ? '✓ salute panel will show LIVE · SPLIT' : '○ salute panel will show 100% burn'}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    <button onClick={() => loadRowIntoForm(r)} style={btn('var(--amber)')}>edit</button>
+                    {eff !== 'active' && (
+                      <button
+                        onClick={() => postAction('activate', { card_name: r.card_name, starts_at: null, ends_at: null })}
+                        disabled={saving}
+                        style={btn('var(--green)')}
+                        title={`activate now for ${policy.spotlightHours}h`}
+                      >
+                        ▶ go live now ({policy.spotlightHours}h)
+                      </button>
+                    )}
+                    {eff === 'active' && (
+                      <button
+                        onClick={() => postAction('close', { card_name: r.card_name })}
+                        disabled={saving}
+                        style={btn('var(--text-dim)')}
+                      >
+                        close now
+                      </button>
+                    )}
                   </div>
                 </div>
-                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, color: 'var(--amber)', letterSpacing: '1px' }}>{r.status}</div>
-                <div style={{ fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--text-dim)' }}>{r.ends_at ? new Date(r.ends_at * 1000).toISOString().slice(0, 16).replace('T', ' ') : '—'}</div>
-                <button onClick={() => loadRowIntoForm(r)} style={btn('var(--amber)')}>edit</button>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {msg && (

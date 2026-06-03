@@ -89,20 +89,22 @@ export async function GET(request) {
   const card = normalizeCardName(searchParams.get('card') || '');
   const db = getDb();
 
+  const requireSplitTxEnv = process.env.SALUTE_REQUIRE_ARTIST_SPLIT_TX === '1';
+
   if (card) {
     const row = db.prepare(`
-      SELECT c.*, t.display_title, t.artist_handle
+      SELECT c.*, t.display_title, t.artist_handle, t.artist_sol_address
       FROM salute_ceremonies c
       LEFT JOIN tokens t ON t.token_name = c.card_name
       WHERE c.card_name = ?
       LIMIT 1
     `).get(card);
-    return NextResponse.json({ ok: true, ceremony: row || null, policy: POLICY });
+    return NextResponse.json({ ok: true, ceremony: row || null, policy: POLICY, env: { requireSplitTx: requireSplitTxEnv } });
   }
 
   const where = status && VALID_STATUSES.has(status) ? 'WHERE c.status = ?' : '';
   const rows = db.prepare(`
-    SELECT c.*, t.display_title, t.artist_handle
+    SELECT c.*, t.display_title, t.artist_handle, t.artist_sol_address
     FROM salute_ceremonies c
     LEFT JOIN tokens t ON t.token_name = c.card_name
     ${where}
@@ -110,7 +112,7 @@ export async function GET(request) {
     LIMIT 500
   `).all(...(where ? [status] : []));
 
-  return NextResponse.json({ ok: true, ceremonies: rows, policy: POLICY });
+  return NextResponse.json({ ok: true, ceremonies: rows, policy: POLICY, env: { requireSplitTx: requireSplitTxEnv } });
 }
 
 export async function POST(request) {
