@@ -63,6 +63,28 @@ export default function AboutPage() {
           </div>
         </section>
 
+        <section id="artist-incentive-flow" className={styles.section}>
+          <h2 className={styles.sectionTitle}>ARTIST INCENTIVE FLOW</h2>
+          <div className={styles.prose}>
+            <p>
+              The incentive model is simple: certification establishes trust, salutes create public momentum,
+              and split ceremonies can route part of that ritual directly to artists.
+            </p>
+            <p>
+              You do not need to learn every mechanic at once. Follow the path in order and each step unlocks
+              the next one naturally.
+            </p>
+          </div>
+
+          <div className={styles.flowRow}>
+            <Link href="/rules" className={styles.flowCard}>1) learn submission rules</Link>
+            <Link href="/submit" className={styles.flowCard}>2) submit your card</Link>
+            <Link href="/status" className={styles.flowCard}>3) track verdict + listing</Link>
+            <Link href="/status/sol-payout-help" className={styles.flowCard}>4) set SOL payout address</Link>
+            <Link href="/burns" className={styles.flowCard}>5) monitor salutes + momentum</Link>
+          </div>
+        </section>
+
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>THE NETWORK</h2>
           <div className={styles.prose}>

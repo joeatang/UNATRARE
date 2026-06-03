@@ -126,6 +126,174 @@
   .saluteBannerArrow { font-size: 10px; width: 100%; }
 }
 
+.artistJourneyRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.artistJourneyLink {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-decoration: none;
+  border: 1px solid var(--border-dim);
+  padding: 7px 10px;
+  background: var(--surface);
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.artistJourneyLink:hover {
+  border-color: var(--amber-hot);
+  color: var(--amber-hot);
+}
+
+.burnBoardSection {
+  margin: 24px 20px 0;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(168, 144, 96, 0.06) 0%, rgba(8, 8, 8, 0.96) 68%);
+  padding: 16px;
+}
+
+.burnBoardHead {
+  margin-bottom: 12px;
+}
+
+.burnBoardEyebrow {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--amber);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.burnBoardSub {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.burnBoardFlowline {
+  margin-top: 8px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.burnBoardFlowline a {
+  color: var(--amber-hot);
+  text-decoration: none;
+}
+
+.burnBoardFlowline a:hover {
+  color: var(--amber);
+}
+
+.burnBoardTable {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.burnBoardRow {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border-dim);
+  background: rgba(8, 8, 8, 0.82);
+  text-decoration: none;
+  color: inherit;
+  padding: 10px 12px;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.burnBoardRow:hover {
+  border-color: var(--amber);
+  transform: translateY(-1px);
+}
+
+.burnBoardRank {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--amber);
+  text-align: center;
+  line-height: 1;
+}
+
+.burnBoardCard {
+  min-width: 0;
+}
+
+.burnBoardTitle {
+  font-family: var(--font-card);
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: var(--text);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.burnBoardMeta {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.burnBoardAmount {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--amber-hot);
+  letter-spacing: 1px;
+  text-align: right;
+}
+
+.burnBoardCtas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.burnBoardCtaPrimary,
+.burnBoardCtaSecondary {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 9px 12px;
+}
+
+.burnBoardCtaPrimary {
+  color: var(--bg);
+  background: var(--amber-hot);
+  border: 1px solid var(--amber-hot);
+}
+
+.burnBoardCtaPrimary:hover {
+  background: var(--amber);
+}
+
+.burnBoardCtaSecondary {
+  color: var(--amber);
+  border: 1px solid var(--amber);
+}
+
+.burnBoardCtaSecondary:hover {
+  color: var(--amber-hot);
+  border-color: var(--amber-hot);
+}
+
 /* ─── THESIS ─────────────────────────────────────────────── */
 .thesis {
   padding: 40px 20px;
@@ -540,6 +708,33 @@
     padding: 13px 28px;
   }
 
+  .artistJourneyLink {
+    font-size: 11px;
+    padding: 8px 12px;
+  }
+
+  .burnBoardSection {
+    margin: 28px 28px 0;
+    padding: 18px;
+  }
+
+  .burnBoardRow {
+    grid-template-columns: 44px 1fr auto;
+    padding: 12px 14px;
+  }
+
+  .burnBoardRank {
+    font-size: 28px;
+  }
+
+  .burnBoardTitle {
+    font-size: 16px;
+  }
+
+  .burnBoardAmount {
+    font-size: 24px;
+  }
+
   .thesisBody p:first-child { font-size: 24px; }
   .thesisBody p              { font-size: 16px; }
 
@@ -577,6 +772,25 @@
   .heroTitle { font-size: 58px; letter-spacing: 2px; }
   .heroSub   { font-size: 17px; max-width: 560px; }
   .heroCtaPrimary, .heroCtaSecondary { font-size: 15px; padding: 13px 32px; }
+
+  .burnBoardSection {
+    max-width: 1100px;
+    margin: 30px auto 0;
+    padding: 20px;
+  }
+
+  .burnBoardSub,
+  .burnBoardFlowline {
+    font-size: 14px;
+  }
+
+  .burnBoardRow {
+    padding: 14px 16px;
+  }
+
+  .burnBoardAmount {
+    font-size: 26px;
+  }
 
   .thesisBody p:first-child { font-size: 26px; letter-spacing: 1px; }
   .thesisBody p              { font-size: 17px; }

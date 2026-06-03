@@ -54,16 +54,31 @@ function getLandingStats() {
              COUNT(DISTINCT sol_wallet)       AS unique_saluters
       FROM card_salutes
     `).get();
+    const burnBoard = db.prepare(`
+      SELECT
+        s.card_name,
+        COALESCE(t.display_title, s.card_name) AS display_title,
+        COALESCE(t.artist_handle, '')          AS artist_handle,
+        SUM(s.amount_display)                  AS total_burned,
+        COUNT(DISTINCT s.sol_wallet)           AS unique_saluters
+      FROM card_salutes s
+      LEFT JOIN tokens t ON t.token_name = s.card_name
+      GROUP BY s.card_name
+      ORDER BY total_burned DESC
+      LIMIT 6
+    `).all();
     return {
       certified, nodes, vault, archived, promoUsed, promoMax, cryptThumbs,
       saluteTotal:    saluteAgg?.total_burned    || 0,
       saluteCards:    saluteAgg?.cards_saluted   || 0,
       saluteSaluters: saluteAgg?.unique_saluters || 0,
+      burnBoard,
     };
   } catch {
     return {
       certified: 0, nodes: 0, vault: 0, archived: 0, promoUsed: 0, promoMax: 500, cryptThumbs: [],
       saluteTotal: 0, saluteCards: 0, saluteSaluters: 0,
+      burnBoard: [],
     };
   }
 }
@@ -117,7 +132,49 @@ export default function LandingPage() {
           <div className={styles.heroBeta}>
             · experimental · in beta · art is permanent, process is evolving ·
           </div>
+
+          <div className={styles.artistJourneyRow}>
+            <Link href="/rules" className={styles.artistJourneyLink}>1) rules</Link>
+            <Link href="/submit" className={styles.artistJourneyLink}>2) submit</Link>
+            <Link href="/status" className={styles.artistJourneyLink}>3) check status</Link>
+            <Link href="/status/sol-payout-help" className={styles.artistJourneyLink}>4) set SOL payout</Link>
+            <Link href="/burns" className={styles.artistJourneyLink}>5) watch salutes</Link>
+          </div>
         </section>
+
+        {stats.burnBoard.length > 0 && (
+          <section className={styles.burnBoardSection}>
+            <div className={styles.burnBoardHead}>
+              <div className={styles.burnBoardEyebrow}>LIVE BURN BOARD</div>
+              <div className={styles.burnBoardSub}>Top saluted cards right now. Live on-chain $CASH ritual data.</div>
+              <div className={styles.burnBoardFlowline}>
+                Artist talking point: salutes drive public momentum and leaderboard visibility.
+                {' '}Need the full incentive path? <Link href="/about#artist-incentive-flow">start here</Link>.
+              </div>
+            </div>
+
+            <div className={styles.burnBoardTable}>
+              {stats.burnBoard.map((row, i) => (
+                <Link key={row.card_name} href={`/card/${row.card_name}`} className={styles.burnBoardRow}>
+                  <div className={styles.burnBoardRank}>{i + 1}</div>
+                  <div className={styles.burnBoardCard}>
+                    <div className={styles.burnBoardTitle}>{row.display_title}</div>
+                    <div className={styles.burnBoardMeta}>
+                      {row.artist_handle ? `@${row.artist_handle} · ` : ''}
+                      {row.unique_saluters} saluter{row.unique_saluters === 1 ? '' : 's'}
+                    </div>
+                  </div>
+                  <div className={styles.burnBoardAmount}>🔥 {fmtCash(row.total_burned)}</div>
+                </Link>
+              ))}
+            </div>
+
+            <div className={styles.burnBoardCtas}>
+              <Link href="/burns" className={styles.burnBoardCtaPrimary}>open full burn ledger →</Link>
+              <Link href="/about/salutes" className={styles.burnBoardCtaSecondary}>what is a salute? →</Link>
+            </div>
+          </section>
+        )}
 
         {/* ─────────────────────────────────────────────────────
             THE THESIS
@@ -308,6 +365,8 @@ export default function LandingPage() {
             <Link href="/terms">terms</Link>
             <span>·</span>
             <Link href="/about">about</Link>
+            <span>·</span>
+            <Link href="/status">artist status</Link>
           </div>
         </div>
 

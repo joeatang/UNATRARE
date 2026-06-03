@@ -127,6 +127,19 @@ export default function BurnsPage({ searchParams }) {
           </div>
         </div>
 
+        <div className={styles.flowCallout}>
+          <div className={styles.flowCalloutTitle}>ARTIST INCENTIVE MODEL</div>
+          <div className={styles.flowCalloutBody}>
+            Salutes are social proof and ranking momentum for certified cards. When split ceremonies are active,
+            artist routing can happen in the same on-chain ritual.
+          </div>
+          <div className={styles.flowCalloutLinks}>
+            <Link href="/about#artist-incentive-flow">full artist flow →</Link>
+            <Link href="/status/sol-payout-help">set payout in 1 minute →</Link>
+            <Link href="/status">open artist status →</Link>
+          </div>
+        </div>
+
         {/* ── Top-line stats ── */}
         <div className={styles.statsRow}>
           <div className={styles.stat}>
