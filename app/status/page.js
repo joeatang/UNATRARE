@@ -1193,15 +1193,35 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
                   <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 6 }}>
                     ARTIST SOL PAYOUT ADDRESS
                   </div>
+
+                  <div style={{
+                    border: '1px solid var(--amber)',
+                    background: 'rgba(184,134,44,0.06)',
+                    padding: '10px 12px',
+                    marginBottom: 10,
+                  }}>
+                    <div style={{ fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--amber)', marginBottom: 6 }}>
+                      QUICK SETUP (ARTIST-FRIENDLY)
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6 }}>
+                      1. Paste your Solana receive address below.
+                      <br />
+                      2. Sign the BTC message in the section below (same as other listing edits).
+                      <br />
+                      3. Click <strong style={{ color: 'var(--text)' }}>save changes</strong>.
+                    </div>
+                  </div>
+
                   <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', marginBottom: 8, lineHeight: 1.5 }}>
-                    Optional for split-ready launches. This address is bound by your BTC signature below.
+                    This makes sure split payouts go to your wallet. You can update it anytime with a new signature.
                     {sub.artistSolVerifiedAt ? ` Last verified ${new Date(sub.artistSolVerifiedAt * 1000).toISOString().slice(0, 10)}.` : ''}
                   </div>
+
                   <input
                     type="text"
                     value={artistSolAddress}
                     onChange={e => { setArtistSolAddress(e.target.value.trim()); resetManage(); }}
-                    placeholder="SolanaAddress... (leave blank to remove)"
+                    placeholder="Example: 9xQeWvG816bUx9EPfV7a..."
                     style={{
                       width: '100%', padding: '7px 10px', boxSizing: 'border-box',
                       background: 'var(--bg-card)', border: '1px solid var(--border)',
@@ -1209,6 +1229,10 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
                       outline: 'none',
                     }}
                   />
+
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 6, lineHeight: 1.5 }}>
+                    Tip: send a tiny test transfer to this address first if you want to double-check it.
+                  </div>
                 </div>
 
               {/* ── Signature ─────────────────────────────────────────── */}
