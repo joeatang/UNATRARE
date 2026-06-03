@@ -123,6 +123,9 @@ Verified touchpoints:
 ## Phase 0 - Clean Baseline + Safety Rails
 Status: Ready to execute
 
+Operational runbook:
+- See `docs/salute-phase-a-runbook.md` for owner map, command flow, canary gates, rollback, comms, and UX audit sign-off.
+
 Checklist:
 - Commit and tag pre-split baseline.
 - Preflight snapshot process before each deploy.
