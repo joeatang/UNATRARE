@@ -137,9 +137,20 @@ export async function POST(request) {
   }
 
   const db = getDb();
-  const token = db.prepare("SELECT token_name FROM tokens WHERE token_name = ? AND status = 'approved'").get(cardName);
+  const token = db.prepare("SELECT token_name, artist_sol_address FROM tokens WHERE token_name = ? AND status = 'approved'").get(cardName);
   if (!token) {
     return NextResponse.json({ error: 'card not found or not certified' }, { status: 404 });
+  }
+
+  // Optional inline artist SOL address update (used for activate/upsert from admin).
+  const artistSolRaw = String(body?.artist_sol_address || '').trim();
+  if (artistSolRaw) {
+    if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(artistSolRaw)) {
+      return NextResponse.json({ error: 'artist_sol_address is not a valid Solana address' }, { status: 422 });
+    }
+    if (artistSolRaw !== (token.artist_sol_address || '')) {
+      db.prepare('UPDATE tokens SET artist_sol_address = ? WHERE token_name = ?').run(artistSolRaw, cardName);
+    }
   }
 
   const now = Math.floor(Date.now() / 1000);

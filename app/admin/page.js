@@ -1916,6 +1916,7 @@ function SaluteCeremoniesPanel({ authToken }) {
     distribution_mode: 'none',
     distribution_asset: '',
     distribution_rule: '',
+    artist_sol_address: '',
     status: 'draft',
     starts_at: '',
     ends_at: '',
@@ -1985,6 +1986,7 @@ function SaluteCeremoniesPanel({ authToken }) {
       distribution_mode: row.distribution_mode || 'none',
       distribution_asset: row.distribution_asset || '',
       distribution_rule: row.distribution_rule || '',
+      artist_sol_address: row.artist_sol_address || '',
       status: row.status || 'draft',
       starts_at: toInputTime(row.starts_at),
       ends_at: toInputTime(row.ends_at),
@@ -2010,6 +2012,7 @@ function SaluteCeremoniesPanel({ authToken }) {
         distribution_mode: form.distribution_mode,
         distribution_asset: form.distribution_asset,
         distribution_rule: form.distribution_rule,
+        artist_sol_address: overrides.artist_sol_address !== undefined ? overrides.artist_sol_address : form.artist_sol_address,
         status: overrides.status || form.status,
         starts_at: overrides.starts_at !== undefined ? overrides.starts_at : fromInputTime(form.starts_at),
         ends_at: overrides.ends_at !== undefined ? overrides.ends_at : fromInputTime(form.ends_at),
@@ -2056,6 +2059,21 @@ function SaluteCeremoniesPanel({ authToken }) {
 
       {open && (
         <div style={{ padding: '0 20px 20px' }}>
+          {/* ── Sticky message banner — top of panel so feedback is unmissable ── */}
+          {msg && (
+            <div style={{
+              position: 'sticky', top: 0, zIndex: 5,
+              marginTop: 8, marginBottom: 12, padding: '10px 12px',
+              border: `1px solid ${msg.startsWith('✓') ? 'var(--green)' : 'var(--amber)'}`,
+              background: msg.startsWith('✓') ? 'rgba(180,255,111,0.07)' : 'rgba(255,180,0,0.07)',
+              fontFamily: 'var(--font-body)', fontSize: 13, color: msg.startsWith('✓') ? 'var(--green)' : 'var(--amber)',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
+            }}>
+              <span>{msg}</span>
+              <button onClick={() => setMsg('')} style={{ background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: 0 }}>×</button>
+            </div>
+          )}
+
           <div style={{
             marginTop: 2,
             marginBottom: 12,
@@ -2084,9 +2102,63 @@ function SaluteCeremoniesPanel({ authToken }) {
             </div>
           )}
 
-          <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)', marginBottom: 14, lineHeight: 1.6 }}>
-            Base salutes stay always open. Spotlight campaigns are fixed at 48h on activation. Configure per-card themes, split preset, and campaign copy here.
+          {/* ══ PRIMARY ACTION — go live in two fields ════════════════════════ */}
+          <div style={{ marginBottom: 16, padding: '14px 14px 12px', border: '1px solid var(--green)', background: 'rgba(180,255,111,0.04)' }}>
+            <div style={{ fontFamily: 'var(--font-card)', fontSize: 10, letterSpacing: '2px', color: 'var(--green)', marginBottom: 10 }}>
+              ▶ GO LIVE NOW · 48h SPLIT SALUTE
+            </div>
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: 12 }}>
+              Two fields. Click the button. Ceremony goes live for 48 hours with 69% burn / 31% to artist. All other settings use sensible defaults — tweak under <em>Advanced</em> below.
+            </div>
+            <div className={styles.ceremonyGrid2}>
+              <div>
+                <span style={label}>CARD NAME *</span>
+                <input
+                  style={input}
+                  value={form.card_name}
+                  onChange={e => { setLoadedFromRow(false); setForm(f => ({ ...f, card_name: e.target.value.toUpperCase() })); }}
+                  placeholder="DRAWNATPEPE"
+                />
+              </div>
+              <div>
+                <span style={label}>ARTIST SOL ADDRESS *</span>
+                <input
+                  style={input}
+                  value={form.artist_sol_address}
+                  onChange={e => setForm(f => ({ ...f, artist_sol_address: e.target.value.trim() }))}
+                  placeholder="paste Solana address (44 chars)"
+                />
+                {form.artist_sol_address && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(form.artist_sol_address) && (
+                  <div style={{ marginTop: 4, fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--amber)' }}>not a valid Solana address</div>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                if (!form.card_name.trim()) { setMsg('card name required'); return; }
+                if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(form.artist_sol_address)) { setMsg('valid artist SOL address required'); return; }
+                postAction('activate', { starts_at: null, ends_at: null });
+              }}
+              disabled={saving}
+              style={{
+                marginTop: 12, width: '100%', padding: '12px 16px',
+                border: '1px solid var(--green)', background: 'rgba(180,255,111,0.10)',
+                color: 'var(--green)', cursor: saving ? 'wait' : 'pointer',
+                fontFamily: 'var(--font-card)', fontSize: 11, letterSpacing: '3px',
+              }}
+            >
+              {saving ? 'WORKING…' : `▶ ENABLE LIVE CEREMONY (${policy.spotlightHours}h)`}
+            </button>
+            <div style={{ marginTop: 8, fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.5 }}>
+              This creates the ceremony row if missing, sets the artist SOL address on the token, activates immediately, and ends in {policy.spotlightHours}h. Status will appear below.
+            </div>
           </div>
+
+          <details style={{ marginBottom: 12, border: '1px solid var(--border-dim)', padding: '8px 12px', background: 'rgba(255,255,255,0.01)' }}>
+            <summary style={{ cursor: 'pointer', fontFamily: 'var(--font-card)', fontSize: 10, letterSpacing: '2px', color: 'var(--text-dim)' }}>
+              ADVANCED · custom dates · split preset · headline · distribution
+            </summary>
+            <div style={{ marginTop: 12 }}>
 
           <div className={styles.ceremonyGrid2}>
             <div>
@@ -2132,24 +2204,22 @@ function SaluteCeremoniesPanel({ authToken }) {
 
           <div className={styles.ceremonyGrid2}>
             <div>
-              <span style={label}>CARD NAME</span>
-              <input
-                style={input}
-                value={form.card_name}
-                onChange={e => {
-                  setLoadedFromRow(false);
-                  setForm(f => ({ ...f, card_name: e.target.value.toUpperCase() }));
-                }}
-                placeholder="TOKENNAME"
-              />
-            </div>
-            <div>
               <span style={label}>THEME</span>
               <select style={input} value={form.theme_key} onChange={e => setForm(f => ({ ...f, theme_key: e.target.value }))}>
                 <option value="ember">ember</option>
                 <option value="flame">flame</option>
                 <option value="inferno">inferno</option>
                 <option value="legendary">legendary</option>
+              </select>
+            </div>
+            <div>
+              <span style={label}>STATUS (manual)</span>
+              <select style={input} value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
+                <option value="draft">draft</option>
+                <option value="scheduled">scheduled</option>
+                <option value="active">active</option>
+                <option value="closed">closed</option>
+                <option value="archived">archived</option>
               </select>
             </div>
           </div>
@@ -2164,17 +2234,7 @@ function SaluteCeremoniesPanel({ authToken }) {
             <input style={input} value={form.subtitle} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))} placeholder="Voluntary community ritual · proof of appreciation" />
           </div>
 
-          <div className={styles.ceremonyGrid3}>
-            <div>
-              <span style={label}>STATUS</span>
-              <select style={input} value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
-                <option value="draft">draft</option>
-                <option value="scheduled">scheduled</option>
-                <option value="active">active</option>
-                <option value="closed">closed</option>
-                <option value="archived">archived</option>
-              </select>
-            </div>
+          <div className={styles.ceremonyGrid2}>
             <div>
               <span style={label}>STARTS AT</span>
               <input type="datetime-local" style={input} value={form.starts_at} onChange={e => setForm(f => ({ ...f, starts_at: e.target.value }))} />
@@ -2213,6 +2273,9 @@ function SaluteCeremoniesPanel({ authToken }) {
               strict mode is ON: click edit on an existing ceremony row before activating.
             </div>
           )}
+
+            </div>
+          </details>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <span style={{ ...label, marginBottom: 0 }}>CEREMONY LIST</span>
@@ -2260,18 +2323,18 @@ function SaluteCeremoniesPanel({ authToken }) {
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)' }}>
-                    <span style={{ color: eff === 'active' ? 'var(--green)' : 'var(--amber)' }}>
-                      {eff === 'active' ? '✓' : '✗'} effective status: <strong>{eff}</strong>
+                  <div style={{ display: 'flex', flexWrap: 'nowrap', gap: 14, fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }}>
+                    <span style={{ color: eff === 'active' ? 'var(--green)' : 'var(--amber)', whiteSpace: 'nowrap' }}>
+                      {eff === 'active' ? '✓' : '✗'} status: <strong>{eff}</strong>
                     </span>
-                    <span style={{ color: envRequireSplitTx ? 'var(--green)' : 'var(--amber)' }}>
-                      {envRequireSplitTx ? '✓' : '✗'} split-tx env on
+                    <span style={{ color: envRequireSplitTx ? 'var(--green)' : 'var(--amber)', whiteSpace: 'nowrap' }}>
+                      {envRequireSplitTx ? '✓' : '✗'} split-tx env
                     </span>
-                    <span style={{ color: hasArtistSol ? 'var(--green)' : 'var(--amber)' }}>
+                    <span style={{ color: hasArtistSol ? 'var(--green)' : 'var(--amber)', whiteSpace: 'nowrap' }}>
                       {hasArtistSol ? '✓' : '✗'} artist SOL set
                     </span>
-                    <span style={{ color: willShowLive ? 'var(--green)' : 'var(--text-dim)' }}>
-                      {willShowLive ? '✓ salute panel will show LIVE · SPLIT' : '○ salute panel will show 100% burn'}
+                    <span style={{ color: willShowLive ? 'var(--green)' : 'var(--text-dim)', whiteSpace: 'nowrap' }}>
+                      {willShowLive ? '✓ panel: LIVE · SPLIT' : '○ panel: 100% burn'}
                     </span>
                   </div>
 
@@ -2301,12 +2364,6 @@ function SaluteCeremoniesPanel({ authToken }) {
               );
             })}
           </div>
-
-          {msg && (
-            <div style={{ marginTop: 10, fontFamily: 'var(--font-card)', fontSize: 10, letterSpacing: '1px', color: msg.startsWith('✓') ? 'var(--green)' : 'var(--amber)' }}>
-              {msg}
-            </div>
-          )}
         </div>
       )}
     </div>
