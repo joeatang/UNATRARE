@@ -52,6 +52,38 @@ Required launch pack for each phase:
   - what changed,
   - next actions.
 
+## Visual Experience Gate (Mandatory Every Phase)
+Purpose: maintain premium feel and trust, not just technical correctness.
+
+UI/UX audit checklist (required before each phase goes public):
+1. Layout rhythm:
+  - spacing scale is consistent,
+  - no cramped controls,
+  - no dead whitespace blocks.
+2. Typography and readability:
+  - hierarchy is obvious at a glance,
+  - labels and microcopy are concise,
+  - mobile text remains readable without zoom.
+3. Interaction quality:
+  - button states are clear (idle/loading/success/error),
+  - no ambiguous click targets,
+  - copy and external-link actions give immediate feedback.
+4. Motion and pacing:
+  - animation supports meaning,
+  - no distracting or jittery transitions,
+  - loading states do not feel stalled.
+5. Cross-device pass:
+  - desktop, tablet, mobile checked,
+  - wallet flow checked on at least one mobile wallet browser,
+  - no horizontal overflow.
+6. Brand/polish review:
+  - visual language feels intentional,
+  - ceremony moments feel ceremonial,
+  - no placeholder-looking UI in production surfaces.
+
+Exit gate:
+- Design owner and engineering owner both sign off that UI quality is release-grade.
+
 ## Salute Wizard Expansion (Admin Flexibility)
 Goal: keep split rules strict while making distribution planning flexible.
 
@@ -117,7 +149,7 @@ Exit gate:
 - No regressions in current live UX/data flow.
 
 ## Phase 1 - Policy and Data Foundation (69% floor)
-Status: Ready to execute
+Status: In progress (core shipped)
 
 Shipped:
 - `salute_ceremonies` table and indexes in `lib/db.js`.
@@ -126,20 +158,22 @@ Shipped:
   - `/api/salute/ceremony`
   - `/api/salute/history`
   - `/api/salute/global`
+- Per-salute split snapshot fields in `card_salutes`.
+- Split-aware global/top-wallet analytics outputs.
+- Admin split verification audit API + panel.
 
 Next:
-- Add per-salute ledger accounting fields (burn, artist, nodes, preset snapshot).
 - Add integration tests for split validation and aggregates.
 - Add feature flag checks around split-aware UI surfaces.
 - Add ops runbook per launch phase (owner mapping, canary commands, rollback).
-- Add artist SOL payout binding workflow (BTC-signed ownership proof).
+- Add production E2E validation checklist for split-on and split-off modes.
 
 Exit gate:
 - Existing salute endpoints remain unchanged and stable.
 - New and existing endpoints return deterministic aggregates against production-like data.
 
 ## Phase 2 - Artist-First Split (Always Open + 48h Spotlight)
-Status: Not started
+Status: In progress (enforcement shipped, rollout pending)
 
 Scope:
 - Keep base salutes always open platform-wide.
@@ -152,11 +186,22 @@ Scope:
   - total artist support
   - total saluters and spotlight stats
 
+Shipped:
+- Client can build split salute tx when required.
+- Server verifies artist leg + burn/artist ratio when split enforcement flag is enabled.
+- Artist SOL payout binding is wired into BTC-signed artist update flow.
+- Card panel and analytics expose burn vs artist totals.
+
+Next:
+- Run live canary ceremony with split enforcement enabled.
+- Record rejection reason distribution and wallet compatibility results.
+- Approve launch comms copy that explains split behavior in plain language.
+
 Exit gate:
 - Artist-first split is live with no burn flow regressions.
 
 ## Phase 3 - Campaign Layer and Frontpage Highlights
-Status: Not started
+Status: Ready after Phase 2 canary
 
 Scope:
 - Keep spotlight fixed at 48h for now.
@@ -166,6 +211,24 @@ Scope:
 
 Exit gate:
 - Spotlight campaigns can be run repeatedly without changing core fairness rules.
+
+## Phase 3.5 - UX/Visual Excellence Sweep
+Status: Not started
+
+Scope:
+- Full UI review of salute surfaces (admin tools, salute panel, analytics views).
+- Pixel-level spacing and typography pass.
+- Interaction pass for all key actions:
+  - connect,
+  - burn/split submit,
+  - error recovery,
+  - audit actions.
+- Mobile wallet browser pass for pacing and readability.
+- Copy pass for creative-director tone consistency.
+
+Exit gate:
+- No major UI friction findings remain open.
+- Interface quality sign-off captured in launch report.
 
 ## Phase 4 - Node Share (Phase 2 economics)
 Status: Not started
