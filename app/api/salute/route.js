@@ -8,6 +8,7 @@ const SOLANA_RPC = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solan
 const STRICT_BURN_INSTRUCTION_REQUIRED = process.env.SALUTE_STRICT_BURN_INSTRUCTION !== '0';
 const SALUTE_BURN_PROGRAM_ID = (process.env.SALUTE_BURN_PROGRAM_ID || '').trim();
 const SALUTE_REQUIRE_PROGRAM_BURN = process.env.SALUTE_REQUIRE_PROGRAM_BURN === '1';
+const SALUTE_REQUIRE_ARTIST_SPLIT_TX = process.env.SALUTE_REQUIRE_ARTIST_SPLIT_TX === '1';
 const ENFORCE_CEREMONY_WINDOW = process.env.SALUTE_ENFORCE_CEREMONY_WINDOW === '1';
 const ENFORCE_CEREMONY_STRICT = process.env.SALUTE_ENFORCE_CEREMONY_STRICT === '1';
 const RATE_WINDOW_MS = Number(process.env.SALUTE_RATE_LIMIT_WINDOW_MS || 60_000);
@@ -101,7 +102,7 @@ export async function POST(request) {
   }
 
   const card = db.prepare(
-    "SELECT token_name FROM tokens WHERE token_name = ? AND status = 'approved'"
+    "SELECT token_name, artist_sol_address FROM tokens WHERE token_name = ? AND status = 'approved'"
   ).get(cardNameClean);
   if (!card) {
     logSaluteEvent(db, 'card_not_found', { clientIp, cardName: cardNameClean, solWallet: sol_wallet, txSig: tx_sig });
@@ -127,6 +128,8 @@ export async function POST(request) {
     return NextResponse.json({ error: 'this transaction has already been recorded' }, { status: 409 });
   }
 
+  const split = getSplitSnapshot(db, cardNameClean);
+
   // Verify the burn on Solana mainnet
   let burnInfo;
   try {
@@ -149,11 +152,68 @@ export async function POST(request) {
     );
   }
 
+  let artistRaw = '0';
+  let artistDisplay = 0;
+  if (split.artist_pct > 0 && SALUTE_REQUIRE_ARTIST_SPLIT_TX) {
+    const artistSol = (card.artist_sol_address || '').trim();
+    if (!SOL_ADDR_RE.test(artistSol)) {
+      return NextResponse.json(
+        { error: 'artist payout address is not configured yet for this card' },
+        { status: 422 }
+      );
+    }
+
+    const burnRawBig = BigInt(burnInfo.rawAmount);
+    const artistGainRaw = ownerGainRaw(burnInfo.tx, artistSol, CASH_MINT);
+    if (artistGainRaw <= 0n) {
+      return NextResponse.json(
+        { error: 'split verification failed: missing artist transfer leg in this salute transaction' },
+        { status: 422 }
+      );
+    }
+
+    const left = burnRawBig * BigInt(split.artist_pct);
+    const right = artistGainRaw * BigInt(split.burn_pct);
+    const tolerance = BigInt(Math.max(1, split.burn_pct));
+    if (absBigInt(left - right) > tolerance) {
+      return NextResponse.json(
+        { error: `split verification failed: expected ${split.burn_pct}/${split.artist_pct} burn/artist ratio` },
+        { status: 422 }
+      );
+    }
+
+    artistRaw = artistGainRaw.toString();
+    artistDisplay = Number(artistGainRaw) / Math.pow(10, burnInfo.decimals);
+  }
+
   // Record the salute
   db.prepare(`
-    INSERT INTO card_salutes (card_name, sol_wallet, amount_raw, amount_display, decimals, tx_sig, cp_address)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(cardNameClean, sol_wallet, burnInfo.rawAmount, burnInfo.displayAmount, burnInfo.decimals, tx_sig, '');
+    INSERT INTO card_salutes (
+      card_name, sol_wallet,
+      amount_raw, amount_display,
+      artist_amount_raw, artist_amount_display,
+      node_amount_raw, node_amount_display,
+      split_preset, burn_pct, artist_pct, node_pct,
+      decimals, tx_sig, cp_address
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    cardNameClean,
+    sol_wallet,
+    burnInfo.rawAmount,
+    burnInfo.displayAmount,
+    artistRaw,
+    artistDisplay,
+    '0',
+    0,
+    split.preset,
+    split.burn_pct,
+    split.artist_pct,
+    split.node_pct,
+    burnInfo.decimals,
+    tx_sig,
+    '',
+  );
 
   logSaluteEvent(db, 'accepted', {
     clientIp,
@@ -197,9 +257,43 @@ export async function POST(request) {
   return NextResponse.json({
     ok:            true,
     displayAmount: burnInfo.displayAmount,
+    artistDisplay,
     decimals:      burnInfo.decimals,
     rank:          rankRow?.rank ?? 1,
   });
+}
+
+function getSplitSnapshot(db, cardName) {
+  const row = getActiveCeremony(db, cardName);
+  if (!row) {
+    return {
+      preset: 'burn_only',
+      burn_pct: 100,
+      artist_pct: 0,
+      node_pct: 0,
+    };
+  }
+  const burnPct = Number(row.burn_pct || 100);
+  const artistPct = Number(row.artist_pct || 0);
+  const nodePct = Number(row.node_pct || 0);
+  return {
+    preset: row.split_preset || 'burn_only',
+    burn_pct: burnPct,
+    artist_pct: artistPct,
+    node_pct: nodePct,
+  };
+}
+
+function getActiveCeremony(db, cardName) {
+  const row = db.prepare(
+    'SELECT status, starts_at, ends_at, split_preset, burn_pct, artist_pct, node_pct FROM salute_ceremonies WHERE card_name = ? LIMIT 1'
+  ).get(cardName);
+  if (!row) return null;
+  const now = Math.floor(Date.now() / 1000);
+  if (row.status !== 'active') return null;
+  if (row.starts_at != null && now < row.starts_at) return null;
+  if (row.ends_at != null && now > row.ends_at) return null;
+  return row;
 }
 
 function getCeremonyGateDecision(db, cardName) {
@@ -311,7 +405,7 @@ async function verifySolanaBurn(txSig, expectedWallet) {
       const cashBal   = allBals.find(b => b.mint === CASH_MINT);
       const decimals  = cashBal?.uiTokenAmount?.decimals ?? 6;
       const displayAmount = Number(BigInt(rawAmount)) / Math.pow(10, decimals);
-      return { rawAmount, displayAmount, decimals };
+      return { rawAmount, displayAmount, decimals, tx };
     }
   }
 
@@ -340,7 +434,23 @@ function inferBurnByBalanceDelta(tx, expectedWallet) {
   const decimals = pre[0].uiTokenAmount?.decimals ?? 6;
   const rawAmount = burned.toString();
   const displayAmount = Number(burned) / Math.pow(10, decimals);
-  return { rawAmount, displayAmount, decimals };
+  return { rawAmount, displayAmount, decimals, tx };
+}
+
+function ownerGainRaw(tx, owner, mint) {
+  const pre = ownerTokenRaw(tx.meta?.preTokenBalances || [], owner, mint);
+  const post = ownerTokenRaw(tx.meta?.postTokenBalances || [], owner, mint);
+  return post - pre;
+}
+
+function ownerTokenRaw(balances, owner, mint) {
+  return balances
+    .filter(b => b?.owner === owner && b?.mint === mint)
+    .reduce((sum, b) => sum + BigInt(b?.uiTokenAmount?.amount ?? '0'), 0n);
+}
+
+function absBigInt(v) {
+  return v < 0n ? -v : v;
 }
 
 function getClientIp(request) {

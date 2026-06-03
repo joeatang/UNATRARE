@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDb } from '../../../../lib/db';
 
 export const dynamic = 'force-dynamic';
+const REQUIRE_ARTIST_SPLIT_TX = process.env.SALUTE_REQUIRE_ARTIST_SPLIT_TX === '1';
 
 function effectiveStatus(row, now) {
   if (!row) return 'none';
@@ -24,7 +25,7 @@ export async function GET(request) {
   const now = Math.floor(Date.now() / 1000);
 
   const token = db.prepare(
-    "SELECT token_name, display_title, artist_handle FROM tokens WHERE token_name = ? AND status = 'approved'"
+    "SELECT token_name, display_title, artist_handle, artist_sol_address FROM tokens WHERE token_name = ? AND status = 'approved'"
   ).get(card);
   if (!token) {
     return NextResponse.json({ error: 'card not found or not certified' }, { status: 404 });
@@ -69,6 +70,8 @@ export async function GET(request) {
         distributionMode: 'none',
         distributionAsset: '',
         distributionRule: '',
+        artistSolAddress: token.artist_sol_address || '',
+        requireArtistSplitTx: false,
         startsAt: null,
         endsAt: null,
         status: 'none',
@@ -92,6 +95,8 @@ export async function GET(request) {
       distributionMode: ceremony.distribution_mode || 'none',
       distributionAsset: ceremony.distribution_asset || '',
       distributionRule: ceremony.distribution_rule || '',
+      artistSolAddress: token.artist_sol_address || '',
+      requireArtistSplitTx: REQUIRE_ARTIST_SPLIT_TX && (effectiveStatus(ceremony, now) === 'active') && Number(ceremony.artist_pct || 0) > 0,
       startsAt: ceremony.starts_at,
       endsAt: ceremony.ends_at,
       status: effectiveStatus(ceremony, now),

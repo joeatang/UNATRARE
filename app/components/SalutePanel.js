@@ -66,6 +66,24 @@ function buildBurnIx(web3, tokenAcct, mint, owner, rawAmt, tokenProgramId) {
   });
 }
 
+// Build SPL Token transfer instruction manually.
+function buildTransferIx(web3, sourceAcct, destinationAcct, owner, rawAmt, tokenProgramId) {
+  const data = new Uint8Array(9);
+  data[0] = 3; // Transfer instruction index
+  let n = rawAmt;
+  for (let i = 1; i <= 8; i++) { data[i] = Number(n & 0xFFn); n >>= 8n; }
+  const programId = tokenProgramId === TOKEN_2022_PROG ? TOKEN_2022_PROG : TOKEN_PROG;
+  return new web3.TransactionInstruction({
+    programId: new web3.PublicKey(programId),
+    keys: [
+      { pubkey: new web3.PublicKey(sourceAcct),      isSigner: false, isWritable: true },
+      { pubkey: new web3.PublicKey(destinationAcct), isSigner: false, isWritable: true },
+      { pubkey: new web3.PublicKey(owner),           isSigner: true,  isWritable: false },
+    ],
+    data,
+  });
+}
+
 function toU64Le(n) {
   const out = new Uint8Array(8);
   let v = n;
@@ -318,6 +336,12 @@ export default function SalutePanel({ cardName }) {
   const [burnErr,    setBurnErr]    = useState('');
   const [burnResult, setBurnResult] = useState(null); // { displayAmount, rank }
   const [burnSig,    setBurnSig]    = useState('');   // tx sig — for explorer link + timeout errors
+  const [ceremonySplit, setCeremonySplit] = useState({
+    burnPct: 100,
+    artistPct: 0,
+    requireArtistSplitTx: false,
+    artistSolAddress: '',
+  });
 
   // ── Manual TxID fallback ─────────────────────────────────────────────────
   const [showManual,   setShowManual]   = useState(false);
@@ -352,6 +376,26 @@ export default function SalutePanel({ cardName }) {
   }, [cardName]);
 
   useEffect(() => { fetchLb(); }, [fetchLb]);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const res = await fetch(`/api/salute/ceremony?card=${encodeURIComponent(cardName)}`, { cache: 'no-store' });
+        const json = await res.json();
+        if (!res.ok || !json?.ok || !active) return;
+        setCeremonySplit({
+          burnPct: Number(json?.ceremony?.burnPct ?? 100),
+          artistPct: Number(json?.ceremony?.artistPct ?? 0),
+          requireArtistSplitTx: !!json?.ceremony?.requireArtistSplitTx,
+          artistSolAddress: String(json?.ceremony?.artistSolAddress || '').trim(),
+        });
+      } catch {
+        // Keep burn-only as the safe default when ceremony metadata cannot be fetched.
+      }
+    })();
+    return () => { active = false; };
+  }, [cardName]);
 
   // ── Connect wallet ───────────────────────────────────────────────────────
   async function connectWallet(w) {
@@ -465,7 +509,31 @@ export default function SalutePanel({ cardName }) {
 
     const rawAmt = parseToRaw(burnAmount, cashAcct.decimals);
     if (rawAmt <= 0n) { setBurnErr('Enter an amount to burn.'); return; }
-    if (rawAmt > cashAcct.rawBalance) { setBurnErr('Amount exceeds your $CASH balance.'); return; }
+
+    const burnPct = Number(ceremonySplit.burnPct || 100);
+    const artistPct = Number(ceremonySplit.artistPct || 0);
+    const requiresArtistSplit = !!ceremonySplit.requireArtistSplitTx && artistPct > 0;
+    let artistRawAmt = 0n;
+
+    if (requiresArtistSplit) {
+      if (!SOL_ADDR_RE.test(ceremonySplit.artistSolAddress || '')) {
+        setBurnErr('Artist payout address is not configured for this ceremony yet. Try again shortly.');
+        return;
+      }
+      artistRawAmt = (rawAmt * BigInt(artistPct) + BigInt(Math.max(1, burnPct)) - 1n) / BigInt(Math.max(1, burnPct));
+      if (artistRawAmt <= 0n) {
+        setBurnErr('Split amount is too small. Increase your salute amount.');
+        return;
+      }
+    }
+
+    const totalSpendRaw = rawAmt + artistRawAmt;
+    if (totalSpendRaw > cashAcct.rawBalance) {
+      setBurnErr(requiresArtistSplit
+        ? 'Burn + artist split exceeds your $CASH balance.'
+        : 'Amount exceeds your $CASH balance.');
+      return;
+    }
 
     setPhase('burning');
     let localSig = ''; // preserve for error messages if confirmation times out
@@ -495,7 +563,7 @@ export default function SalutePanel({ cardName }) {
       const { blockhash, lastValidBlockHeight } = await rpc('getLatestBlockhash', [{ commitment: 'confirmed' }])
         .then(r => ({ blockhash: r.value.blockhash, lastValidBlockHeight: r.value.lastValidBlockHeight }));
 
-      const instr = buildBurnIx(
+      const burnIx = buildBurnIx(
         web3,
         cashAcct.address,
         CASH_MINT,
@@ -503,8 +571,27 @@ export default function SalutePanel({ cardName }) {
         rawAmt,
         cashAcct.tokenProgram,
       );
+
+      let artistTransferIx = null;
+      if (requiresArtistSplit) {
+        const artistCashAcct = await getCashAccount(ceremonySplit.artistSolAddress);
+        if (!artistCashAcct?.address) {
+          setBurnErr('Artist wallet has no $CASH token account yet. Split salutes are temporarily unavailable.');
+          setPhase('ready');
+          return;
+        }
+        artistTransferIx = buildTransferIx(
+          web3,
+          cashAcct.address,
+          artistCashAcct.address,
+          connected.pubkey,
+          artistRawAmt,
+          cashAcct.tokenProgram,
+        );
+      }
+
       const useProgramBurn = !!(SALUTE_BURN_PROGRAM_ID && SOL_ADDR_RE.test(SALUTE_BURN_PROGRAM_ID));
-      const finalInstr = useProgramBurn
+      const finalBurnIx = useProgramBurn
         ? await buildProgramBurnIx(web3, {
             programId: SALUTE_BURN_PROGRAM_ID,
             tokenAcct: cashAcct.address,
@@ -514,9 +601,10 @@ export default function SalutePanel({ cardName }) {
             tokenProgramId: cashAcct.tokenProgram,
             cardName: (cardName || '').toUpperCase().trim(),
           })
-        : instr;
+        : burnIx;
       const tx    = new web3.Transaction({ recentBlockhash: blockhash, feePayer: new web3.PublicKey(connected.pubkey) });
-      tx.add(finalInstr);
+      if (artistTransferIx) tx.add(artistTransferIx);
+      tx.add(finalBurnIx);
 
       // Sign + send via wallet using signTransaction (raw bytes path — avoids wallet token-risk screening).
       let sig;
@@ -741,6 +829,12 @@ export default function SalutePanel({ cardName }) {
 
         <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 14 }}>
           <strong style={{ color: 'var(--text)' }}>Salute this card</strong> by burning $CASH on Solana. Permanent. Public. Forever attributed to your wallet — your name lives on this card.
+          {ceremonySplit.requireArtistSplitTx && ceremonySplit.artistPct > 0 && (
+            <>
+              <br />
+              This active ceremony uses a split salute: burn {ceremonySplit.burnPct}% and send {ceremonySplit.artistPct}% to the artist in the same transaction.
+            </>
+          )}
           <br />
           New here? <a href="/about/salutes" style={{ color: 'var(--amber)' }}>What is a salute? →</a>
           <br />
