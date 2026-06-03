@@ -2227,6 +2227,7 @@ function SaluteVerificationPanel({ authToken }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
+  const [copiedSig, setCopiedSig] = useState('');
   const [rows, setRows] = useState([]);
   const [counts, setCounts] = useState([]);
   const [severityCounts, setSeverityCounts] = useState({ high: 0, medium: 0, low: 0 });
@@ -2262,11 +2263,18 @@ function SaluteVerificationPanel({ authToken }) {
     if (!sig) return;
     try {
       await navigator.clipboard.writeText(sig);
-      setMsg('copied tx signature');
+      setCopiedSig(sig);
+      setMsg('');
     } catch {
       setMsg('failed to copy tx signature');
     }
   }
+
+  useEffect(() => {
+    if (!copiedSig) return;
+    const timer = setTimeout(() => setCopiedSig(''), 1400);
+    return () => clearTimeout(timer);
+  }, [copiedSig]);
 
   async function fetchAudit(overrideFilters = null) {
     const active = overrideFilters ? { ...filters, ...overrideFilters } : filters;
@@ -2432,6 +2440,18 @@ function SaluteVerificationPanel({ authToken }) {
                     >
                       copy
                     </button>
+                    {copiedSig && copiedSig === r.tx_sig && (
+                      <span style={{
+                        padding: '2px 6px',
+                        border: '1px solid var(--green)',
+                        color: 'var(--green)',
+                        fontFamily: 'var(--font-card)',
+                        fontSize: 8,
+                        letterSpacing: '1px',
+                      }}>
+                        copied
+                      </span>
+                    )}
                     {r.tx_sig && (
                       <a
                         href={`https://solscan.io/tx/${r.tx_sig}`}
