@@ -189,10 +189,13 @@
   font-size: 10px;
   letter-spacing: 1px;
   text-transform: uppercase;
-  line-height: 1.3;
-  white-space: nowrap;
+  line-height: 1.25;
+  /* allow 2-line wrap so AWAITING SALUTE stays readable in narrow cells */
+  white-space: normal;
   overflow: hidden;
-  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 /* Amber top edge on each card — certified dank mark */
@@ -302,9 +305,10 @@
 
 @media (max-width: 480px) {
   .title { font-size: 28px; }
-  .grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
-  /* Min 44px touch target on filter buttons */
-  .filterBtn { padding: 9px 14px; font-size: 15px; }
+  /* 2-column grid on phones — token names like UNATTHRILLER / GODMOLECULE need room to breathe */
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  /* 44px+ tap target on filter buttons — Apple HIG / Material 3 */
+  .filterBtn { padding: 12px 16px; font-size: 15px; min-height: 44px; display: inline-flex; align-items: center; }
 }
 
 /* ─── Stats row (directory header) ──────────────────────────── */

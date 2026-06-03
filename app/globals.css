@@ -155,6 +155,18 @@ main { overflow-x: clip; width: 100%; }
 /* Tap highlight suppressed on interactive elements */
 a, button { -webkit-tap-highlight-color: transparent; }
 
+/* Visible focus ring for keyboard navigation (WCAG 2.4.7).
+   Mouse clicks don't trigger :focus-visible, so this is a11y-only. */
+:focus-visible {
+  outline: 2px solid var(--amber-hot);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--amber-hot);
+  outline-offset: 3px;
+}
+
 /* TV / large display baseline (≥1920px) */
 @media (min-width: 1920px) {
   html { font-size: 18px; }

@@ -119,7 +119,7 @@ export default function DirectoryPage({ searchParams }) {
               href={`/directory?series=${s}${sortMode === 'rarity' ? '&sort=rarity' : ''}`}
               className={`${styles.filterBtn} ${seriesFilter === s ? styles.active : ''}`}
             >
-              {toRoman(s)}
+              {toRoman(s) || 'S'}
             </Link>
           ))}
           <span className={styles.filterSep}>·</span>
