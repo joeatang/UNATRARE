@@ -45,6 +45,7 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-strong);
   line-height: 1.2;
   letter-spacing: 0.02em;
+  text-wrap: balance;
 }
 
 /* Long-form prose container — opt-in via className="prose".
@@ -151,6 +152,12 @@ img { max-width: 100%; height: auto; }
 
 /* Universal overflow guard — no page can cause horizontal scroll */
 main { overflow-x: clip; width: 100%; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
 
 /* Tap highlight suppressed on interactive elements */
 a, button { -webkit-tap-highlight-color: transparent; }
