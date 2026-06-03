@@ -5,6 +5,8 @@ import { useState, useEffect, useCallback } from 'react';
 const CASH_MINT   = 'oMhwtzE6KeovcRMFAsFocEA6GcZUTAYFdvQ7tpJfnat';
 const TOKEN_PROG  = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const TOKEN_2022_PROG = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
+const ASSOCIATED_TOKEN_PROGRAM_ID = 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
+const SYSTEM_PROGRAM_ID = '11111111111111111111111111111111';
 const SALUTE_BURN_PROGRAM_ID = process.env.NEXT_PUBLIC_SALUTE_BURN_PROGRAM_ID || '';
 const RPC_URL_RAW = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || '/api/solana/rpc';
 const WEB3_CDN    = 'https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.0/lib/index.iife.min.js';
@@ -81,6 +83,39 @@ function buildTransferIx(web3, sourceAcct, destinationAcct, owner, rawAmt, token
       { pubkey: new web3.PublicKey(owner),           isSigner: true,  isWritable: false },
     ],
     data,
+  });
+}
+
+// Derive the canonical Associated Token Account address for (owner, mint, tokenProgram).
+// The address is a deterministic PDA — anyone can compute it offline. Cannot be spoofed.
+function deriveAta(web3, ownerPubkey, mintPubkey, tokenProgramId) {
+  const [pda] = web3.PublicKey.findProgramAddressSync(
+    [
+      new web3.PublicKey(ownerPubkey).toBuffer(),
+      new web3.PublicKey(tokenProgramId).toBuffer(),
+      new web3.PublicKey(mintPubkey).toBuffer(),
+    ],
+    new web3.PublicKey(ASSOCIATED_TOKEN_PROGRAM_ID),
+  );
+  return pda.toString();
+}
+
+// Build the canonical "create ATA idempotent" instruction. If the ATA already
+// exists this becomes a no-op on-chain (no rent charged twice). The payer pays
+// ~0.00203 SOL rent the first time only. The payer gets ZERO authority over
+// the new account — ownership is set to `owner` on creation by the ATA program.
+function buildCreateAtaIdempotentIx(web3, payer, ataAddress, owner, mint, tokenProgramId) {
+  return new web3.TransactionInstruction({
+    programId: new web3.PublicKey(ASSOCIATED_TOKEN_PROGRAM_ID),
+    keys: [
+      { pubkey: new web3.PublicKey(payer),         isSigner: true,  isWritable: true },
+      { pubkey: new web3.PublicKey(ataAddress),    isSigner: false, isWritable: true },
+      { pubkey: new web3.PublicKey(owner),         isSigner: false, isWritable: false },
+      { pubkey: new web3.PublicKey(mint),          isSigner: false, isWritable: false },
+      { pubkey: new web3.PublicKey(SYSTEM_PROGRAM_ID), isSigner: false, isWritable: false },
+      { pubkey: new web3.PublicKey(tokenProgramId), isSigner: false, isWritable: false },
+    ],
+    data: new Uint8Array([1]), // 1 = CreateIdempotent
   });
 }
 
@@ -575,17 +610,34 @@ export default function SalutePanel({ cardName }) {
       );
 
       let artistTransferIx = null;
+      let createArtistAtaIx = null;
       if (requiresArtistSplit) {
+        // $CASH is Token-2022. Use the saluter's tokenProgram (same mint = same program).
+        const artistTokenProgram = cashAcct.tokenProgram || TOKEN_2022_PROG;
         const artistCashAcct = await getCashAccount(ceremonySplit.artistSolAddress);
-        if (!artistCashAcct?.address) {
-          setBurnErr('Artist wallet has no $CASH token account yet. Split salutes are temporarily unavailable.');
-          setPhase('ready');
-          return;
+        let destAta;
+        if (artistCashAcct?.address) {
+          // Existing ATA found — use it. Server validates by owner+mint, so any
+          // owner-controlled ATA is acceptable.
+          destAta = artistCashAcct.address;
+        } else {
+          // No ATA yet — derive the canonical address and add an idempotent
+          // create instruction. The saluter pays the one-time ~0.002 SOL rent.
+          // The artist pubkey is the only owner; payer has no authority.
+          destAta = deriveAta(web3, ceremonySplit.artistSolAddress, CASH_MINT, artistTokenProgram);
+          createArtistAtaIx = buildCreateAtaIdempotentIx(
+            web3,
+            connected.pubkey,           // payer = saluter
+            destAta,
+            ceremonySplit.artistSolAddress, // owner = artist
+            CASH_MINT,
+            artistTokenProgram,
+          );
         }
         artistTransferIx = buildTransferIx(
           web3,
           cashAcct.address,
-          artistCashAcct.address,
+          destAta,
           connected.pubkey,
           artistRawAmt,
           cashAcct.tokenProgram,
@@ -605,6 +657,7 @@ export default function SalutePanel({ cardName }) {
           })
         : burnIx;
       const tx    = new web3.Transaction({ recentBlockhash: blockhash, feePayer: new web3.PublicKey(connected.pubkey) });
+      if (createArtistAtaIx) tx.add(createArtistAtaIx);
       if (artistTransferIx) tx.add(artistTransferIx);
       tx.add(finalBurnIx);
 
@@ -1032,6 +1085,10 @@ export default function SalutePanel({ cardName }) {
                 {ceremonySplit.requireArtistSplitTx && Number(ceremonySplit.artistPct || 0) > 0 && (
                   <div style={{ ...S.hint, marginTop: 0, marginBottom: 8, color: 'var(--amber)' }}>
                     Split ceremony is active: the amount you enter is the burn amount. Your wallet will also include an artist payout in the same transaction.
+                    <br />
+                    <span style={{ color: 'var(--text-dim)', fontSize: '10px' }}>
+                      First-time salute for this artist may include a ~0.002 SOL one-time setup fee to create their $CASH payout account. Subsequent salutes by anyone are free of this fee.
+                    </span>
                   </div>
                 )}
                 <div style={S.pctRow}>
