@@ -1210,6 +1210,20 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
                       <br />
                       3. Click <strong style={{ color: 'var(--text)' }}>save changes</strong>.
                     </div>
+                    <div style={{ marginTop: 8 }}>
+                      <Link
+                        href="/status/sol-payout-help"
+                        style={{
+                          fontFamily: 'var(--font-card)',
+                          fontSize: '9px',
+                          letterSpacing: '2px',
+                          color: 'var(--amber)',
+                          textDecoration: 'none',
+                        }}
+                      >
+                        need help? 1-minute walkthrough →
+                      </Link>
+                    </div>
                   </div>
 
                   <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', marginBottom: 8, lineHeight: 1.5 }}>

@@ -1005,6 +1005,11 @@ export default function SalutePanel({ cardName }) {
                 <div style={{ ...S.hint, marginTop: 6, marginBottom: 8 }}>
                   Type any custom amount, or use quick buttons below.
                 </div>
+                {ceremonySplit.requireArtistSplitTx && Number(ceremonySplit.artistPct || 0) > 0 && (
+                  <div style={{ ...S.hint, marginTop: 0, marginBottom: 8, color: 'var(--amber)' }}>
+                    Split ceremony is active: the amount you enter is the burn amount. Your wallet will also include an artist payout in the same transaction.
+                  </div>
+                )}
                 <div style={S.pctRow}>
                   {[10, 25, 50, 100].map(pct => (
                     <button key={pct} style={S.pctBtn} onClick={() => setPercent(pct)}>
@@ -1123,7 +1128,7 @@ export default function SalutePanel({ cardName }) {
         {/* ══ Manual TxID fallback ════════════════════════════════════════════ */}
         <div style={S.sectionDivider} />
         <button style={S.manualToggle} onClick={() => { setShowManual(v => !v); setManualErr(''); }}>
-          {showManual ? '↑ hide' : 'burned in another wallet or CLI? paste TxID →'}
+          {showManual ? '↑ hide' : 'already burned in another wallet? paste transaction id →'}
         </button>
 
         {showManual && (
