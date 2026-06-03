@@ -630,7 +630,7 @@ export default function SalutePanel({ cardName }) {
       const json = await resp.json();
       if (!resp.ok || !json.ok) throw new Error(json.error || 'server error');
 
-      setBurnResult({ displayAmount: json.displayAmount, rank: json.rank });
+      setBurnResult({ displayAmount: json.displayAmount, artistDisplay: json.artistDisplay || 0, rank: json.rank });
       setPhase('success');
       // Refresh balance + leaderboard
       getCashAccount(connected.pubkey).then(a => { if (a) setCashAcct(a); });
@@ -766,10 +766,19 @@ export default function SalutePanel({ cardName }) {
               <div style={S.statBlock}>
                 <span style={S.statLabel}>TOTAL BURNED</span>
                 <span style={S.statValue}>
-                  {fmt(lb.totalDisplay)}
+                  {fmt(lb.totalBurnDisplay || lb.totalDisplay)}
                   <span style={S.statUnit}>$CASH</span>
                 </span>
               </div>
+              {Number(lb.totalArtistDisplay || 0) > 0 && (
+                <div style={S.statBlock}>
+                  <span style={S.statLabel}>TO ARTISTS</span>
+                  <span style={S.statValue}>
+                    {fmt(lb.totalArtistDisplay)}
+                    <span style={S.statUnit}>$CASH</span>
+                  </span>
+                </div>
+              )}
               <div style={S.statBlock}>
                 <span style={S.statLabel}>SALUTERS</span>
                 <span style={S.statValue}>{lb.uniqueSaluters}</span>
@@ -816,6 +825,11 @@ export default function SalutePanel({ cardName }) {
             <div style={S.successTxt}>
               🔥 SALUTE RECORDED — {fmt(burnResult.displayAmount)} $CASH burned · rank #{burnResult.rank}
             </div>
+            {burnResult.artistDisplay > 0 && (
+              <div style={{ ...S.statLabel, marginTop: 6 }}>
+                + {fmt(burnResult.artistDisplay)} $CASH routed to artist
+              </div>
+            )}
             {cashAcct && (
               <div style={{ ...S.statLabel, marginTop: 6 }}>
                 remaining balance: {fmt(cashAcct.uiBalance)} $CASH

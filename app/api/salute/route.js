@@ -33,6 +33,8 @@ export async function GET(request) {
     SELECT
       sol_wallet,
       SUM(amount_display) AS total_display,
+      SUM(artist_amount_display) AS artist_display,
+      SUM(amount_display + artist_amount_display) AS ritual_total_display,
       COUNT(*)            AS num_salutes,
       MIN(burned_at)      AS first_burn,
       MAX(cp_address)     AS cp_address
@@ -46,7 +48,9 @@ export async function GET(request) {
   const stats = db.prepare(`
     SELECT
       COUNT(DISTINCT sol_wallet) AS unique_saluters,
-      SUM(amount_display)        AS total_display
+      SUM(amount_display)        AS total_display,
+      SUM(artist_amount_display) AS artist_total_display,
+      SUM(node_amount_display)   AS node_total_display
     FROM card_salutes
     WHERE card_name = ?
   `).get(card);
@@ -58,6 +62,10 @@ export async function GET(request) {
   return NextResponse.json({
     card,
     totalDisplay:   stats?.total_display   ?? 0,
+    totalBurnDisplay: stats?.total_display ?? 0,
+    totalArtistDisplay: stats?.artist_total_display ?? 0,
+    totalNodeDisplay: stats?.node_total_display ?? 0,
+    totalRitualDisplay: (stats?.total_display ?? 0) + (stats?.artist_total_display ?? 0) + (stats?.node_total_display ?? 0),
     uniqueSaluters: stats?.unique_saluters ?? 0,
     firstSaluter:   firstSaluterRow?.sol_wallet ?? null,
     leaderboard,
