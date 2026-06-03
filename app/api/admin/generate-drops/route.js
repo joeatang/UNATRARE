@@ -308,10 +308,11 @@ export async function POST(req) {
       const rest = allJudges.filter(j => j.id !== NAKA_ID).sort(() => Math.random() - 0.5);
       selectedJudges = nakaJudge ? [...rest, nakaJudge] : rest;
     } else {
-      // Rotation: exactly 1 random judge per run from the full council pool.
-      // Cron fires hourly — one voice at a time, spread across the day.
-      const pick = [...allJudges].sort(() => Math.random() - 0.5)[0];
-      selectedJudges = pick ? [pick] : [allJudges[0]];
+      // Rotation mode for site feed drops: single fixed judge voice by default.
+      // This keeps random feed chatter consistent while approvals still use full judging.
+      const rotationJudgeId = process.env.FEED_DROP_JUDGE_ID || 'dj_pepai';
+      const configuredJudge = allJudges.find(j => j.id === rotationJudgeId);
+      selectedJudges = configuredJudge ? [configuredJudge] : [allJudges[0]];
     }
 
     // ── Build topic pool ──────────────────────────────────────────
