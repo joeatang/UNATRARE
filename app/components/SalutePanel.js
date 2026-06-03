@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 const CASH_MINT   = 'oMhwtzE6KeovcRMFAsFocEA6GcZUTAYFdvQ7tpJfnat';
 const TOKEN_PROG  = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
@@ -324,7 +324,7 @@ const S = {
   tdRight:     { fontFamily: 'var(--font-card)', fontSize: '10px', color: 'var(--green)', textAlign: 'right', padding: '7px 0 7px 0', borderBottom: '1px solid #141414' },
   genesisTag:  { fontFamily: 'var(--font-card)', fontSize: '7px', letterSpacing: '2px', color: 'var(--amber)', marginLeft: 7, padding: '1px 5px', border: '1px solid rgba(168,144,96,0.35)', verticalAlign: 'middle' },
   label:       { display: 'block', fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 5, marginTop: 10 },
-  input:       { width: '100%', padding: '9px 11px', boxSizing: 'border-box', background: '#0a0a0a', border: '1px solid #262626', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 12, outline: 'none' },
+  input:       { width: '100%', padding: '10px 12px', boxSizing: 'border-box', background: '#0a0a0a', border: '1px solid #262626', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 16, outline: 'none' },
   hint:        { fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', lineHeight: 1.5, marginTop: 4, marginBottom: 14 },
   cancelBtn:   { fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', padding: '10px 16px', border: '1px solid #262626', background: 'transparent', color: 'var(--text-dim)', cursor: 'pointer' },
   error:       { fontFamily: 'var(--font-body)', fontSize: '11px', color: '#ff5555', marginTop: 8, lineHeight: 1.5 },
@@ -371,6 +371,15 @@ export default function SalutePanel({ cardName }) {
   const [burnErr,    setBurnErr]    = useState('');
   const [burnResult, setBurnResult] = useState(null); // { displayAmount, rank }
   const [burnSig,    setBurnSig]    = useState('');   // tx sig — for explorer link + timeout errors
+  const successRef = useRef(null);
+  useEffect(() => {
+    if (phase === 'success' && successRef.current) {
+      // Defer until next paint so layout settles before we scroll.
+      requestAnimationFrame(() => {
+        successRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+  }, [phase]);
   const [ceremonySplit, setCeremonySplit] = useState({
     burnPct: 100,
     artistPct: 0,
@@ -883,28 +892,10 @@ export default function SalutePanel({ cardName }) {
           </div>
         )}
 
-        {/* ── Success after native burn ── */}
-        {phase === 'success' && burnResult && (
-          <div style={{ ...S.successBox, marginBottom: 14 }}>
-            <div style={S.successTxt}>
-              🔥 SALUTE RECORDED — {fmt(burnResult.displayAmount)} $CASH burned · rank #{burnResult.rank}
-            </div>
-            {burnResult.artistDisplay > 0 && (
-              <div style={{ ...S.statLabel, marginTop: 6 }}>
-                + {fmt(burnResult.artistDisplay)} $CASH routed to artist
-              </div>
-            )}
-            {cashAcct && (
-              <div style={{ ...S.statLabel, marginTop: 6 }}>
-                remaining balance: {fmt(cashAcct.uiBalance)} $CASH
-              </div>
-            )}
-          </div>
-        )}
-
         {/* ══ Native burn section ════════════════════════════════════════════ */}
         <div style={S.sectionDivider} />
 
+        {phase !== 'success' && (
         <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 14 }}>
           <strong style={{ color: 'var(--text)' }}>Salute this card</strong> by burning $CASH on Solana. Permanent. Public. Forever attributed to your wallet — your name lives on this card.
           {ceremonySplit.status === 'active' && ceremonySplit.requireArtistSplitTx && ceremonySplit.artistPct > 0 ? (
@@ -944,6 +935,7 @@ export default function SalutePanel({ cardName }) {
           </a>
           .
         </div>
+        )}
 
         {/* ── Security / wallet-warning education ─────────────────────────── */}
         <details style={{
@@ -1171,11 +1163,16 @@ export default function SalutePanel({ cardName }) {
 
         {/* Connected + success: confirmed result + explorer link + burn again */}
         {!isBusy && connected && phase === 'success' && burnResult && (
-          <div className="salute-success-box" style={{ padding: '12px 14px', border: '1px solid var(--green)', background: 'rgba(180,255,111,0.05)', marginBottom: 12 }}>
+          <div ref={successRef} className="salute-success-box" style={{ padding: '12px 14px', border: '1px solid var(--green)', background: 'rgba(180,255,111,0.05)', marginBottom: 12, scrollMarginTop: '20vh' }}>
             <div style={{ fontFamily: 'var(--font-card)', fontSize: '11px', letterSpacing: '2px', color: 'var(--green)', marginBottom: 6 }}>
               <span className="salute-flame-flicker" style={{ marginRight: 6 }}>🔥</span>
               {fmt(burnResult.displayAmount)} $CASH BURNED · RANK #{burnResult.rank}
             </div>
+            {burnResult.artistDisplay > 0 && (
+              <div style={{ ...S.hint, marginTop: 0, marginBottom: 8, color: 'var(--text)' }}>
+                + {fmt(burnResult.artistDisplay)} $CASH routed to the artist
+              </div>
+            )}
             {burnSig && (
               <div style={{ marginBottom: 10 }}>
                 <a
