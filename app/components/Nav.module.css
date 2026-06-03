@@ -64,6 +64,23 @@
   gap: 12px;
 }
 
+.nav-status {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  padding: 7px 12px;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.nav-status:hover {
+  color: var(--amber-hot);
+  border-color: var(--amber-hot);
+}
+
 .nav-submit {
   font-family: var(--font-card);
   font-size: 15px;
@@ -257,6 +274,7 @@
   .nav { padding: env(safe-area-inset-top, 0px) 20px 0; height: calc(56px + env(safe-area-inset-top, 0px)); }
   .nav-links { display: none; }
   .hamburger { display: flex; }
+  .nav-status { display: none; }
   .nav-submit { display: none; }
 }
 
