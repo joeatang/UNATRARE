@@ -159,6 +159,9 @@ html { scroll-behavior: smooth; }
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
 
+/* Anchor scroll offset — prevents anchored sections from hiding under sticky nav (#paths, #manage-vault, etc.) */
+[id] { scroll-margin-top: 80px; }
+
 /* Tap highlight suppressed on interactive elements */
 a, button { -webkit-tap-highlight-color: transparent; }
 

@@ -273,7 +273,7 @@ export default function LandingPage() {
 
           <div className={styles.numberStat}>
             <div className={styles.numberVal}>{stats.vault}</div>
-            <div className={styles.numberLabel}>crypt<br />assets</div>
+            <div className={styles.numberLabel}>vault<br />assets</div>
           </div>
         </div>
 
@@ -291,11 +291,17 @@ export default function LandingPage() {
           <div className={styles.finalCtaLinks}>
             <Link href="/directory">directory</Link>
             <span>·</span>
-            <Link href="/feed">the feed</Link>
+            <Link href="/vault">vault</Link>
+            <span>·</span>
+            <Link href="/burns">burns</Link>
+            <span>·</span>
+            <Link href="/feed">feed</Link>
             <span>·</span>
             <Link href="/archive">archive</Link>
             <span>·</span>
             <Link href="/council">council</Link>
+            <span>·</span>
+            <Link href="/nodes">nodes</Link>
             <span>·</span>
             <Link href="/rules">rules</Link>
             <span>·</span>
