@@ -365,6 +365,24 @@ export default function NodesPage() {
                       ) : null}
                     </span>
                   )}
+                  {node.status && node.status !== 'online' && (
+                    <span
+                      title={`Last heartbeat: ${timeAgo(node.last_heartbeat)}`}
+                      style={{
+                        display: 'inline-block',
+                        marginLeft: 6,
+                        padding: '1px 6px',
+                        fontSize: 9,
+                        letterSpacing: '0.05em',
+                        border: '1px solid',
+                        borderColor: node.status === 'offline' ? '#7a2a2a' : '#7a6a2a',
+                        color:       node.status === 'offline' ? '#ff7a7a' : '#ffd36a',
+                        background:  node.status === 'offline' ? 'rgba(122,42,42,0.15)' : 'rgba(122,106,42,0.15)',
+                      }}
+                    >
+                      {node.status === 'offline' ? 'OFFLINE' : 'STALE'}
+                    </span>
+                  )}
                   <div className={styles.pubkey} title={node.pubkey}>
                     {truncPubkey(node.pubkey)}
                   </div>

@@ -50,9 +50,10 @@ function getLandingStats() {
       'SELECT art_hash, art_mime FROM vault_assets ORDER BY uploaded_at DESC LIMIT 4'
     ).all();
     const saluteAgg = db.prepare(`
-      SELECT COALESCE(SUM(amount_display), 0) AS total_burned,
-             COUNT(DISTINCT card_name)        AS cards_saluted,
-             COUNT(DISTINCT sol_wallet)       AS unique_saluters
+      SELECT COALESCE(SUM(amount_display), 0)        AS total_burned,
+             COALESCE(SUM(artist_amount_display), 0) AS total_artist,
+             COUNT(DISTINCT card_name)               AS cards_saluted,
+             COUNT(DISTINCT sol_wallet)              AS unique_saluters
       FROM card_salutes
     `).get();
     const burnBoard = db.prepare(`
@@ -71,6 +72,7 @@ function getLandingStats() {
     return {
       certified, nodes, vault, archived, promoUsed, promoMax, cryptThumbs,
       saluteTotal:    saluteAgg?.total_burned    || 0,
+      saluteArtist:   saluteAgg?.total_artist    || 0,
       saluteCards:    saluteAgg?.cards_saluted   || 0,
       saluteSaluters: saluteAgg?.unique_saluters || 0,
       burnBoard,
@@ -78,7 +80,7 @@ function getLandingStats() {
   } catch {
     return {
       certified: 0, nodes: 0, vault: 0, archived: 0, promoUsed: 0, promoMax: 500, cryptThumbs: [],
-      saluteTotal: 0, saluteCards: 0, saluteSaluters: 0,
+      saluteTotal: 0, saluteArtist: 0, saluteCards: 0, saluteSaluters: 0,
       burnBoard: [],
     };
   }
@@ -122,7 +124,8 @@ export default function LandingPage() {
             <Link href="/burns" className={styles.saluteBanner}>
               <span className={styles.saluteBannerFlame}>🔥</span>
               <span>
-                <strong>{fmtCash(stats.saluteTotal)} $CASH</strong> saluted across{' '}
+                <strong>{fmtCash(stats.saluteTotal)} $CASH</strong> burned ·{' '}
+                <strong>{fmtCash(stats.saluteArtist)} $CASH</strong> to artists ·{' '}
                 <strong>{stats.saluteCards}</strong> card{stats.saluteCards === 1 ? '' : 's'} ·{' '}
                 <strong>{stats.saluteSaluters}</strong> saluter{stats.saluteSaluters === 1 ? '' : 's'}
               </span>

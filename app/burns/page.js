@@ -265,7 +265,12 @@ export default function BurnsPage({ searchParams }) {
             ) : recent.map((row) => {
               const tier = tierFor(row.amount_display);
               return (
-                <Link key={row.tx_sig} href={`/card/${row.card_name}`} className={styles.cardRow}>
+                <div key={row.tx_sig} className={styles.cardRow} style={{ position: 'relative' }}>
+                  <Link
+                    href={`/card/${row.card_name}`}
+                    aria-label={row.display_title}
+                    style={{ position: 'absolute', inset: 0, zIndex: 1 }}
+                  />
                   <div className={styles.rank}>🔥</div>
                   <div className={styles.cardMeta}>
                     <div className={styles.cardTitle}>{row.display_title}</div>
@@ -275,8 +280,8 @@ export default function BurnsPage({ searchParams }) {
                         href={`https://solscan.io/tx/${row.tx_sig}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
                         className={styles.solscan}
+                        style={{ position: 'relative', zIndex: 2 }}
                       >
                         solscan ↗
                       </a>
@@ -286,7 +291,7 @@ export default function BurnsPage({ searchParams }) {
                     <div className={styles.amountValue}>{fmtCash(row.amount_display)}</div>
                     <div className={styles.amountLabel}>$CASH</div>
                   </div>
-                </Link>
+                </div>
               );
             })}
           </div>

@@ -34,7 +34,19 @@ export async function GET() {
     `).all();
     const grantMap = Object.fromEntries(grants.map(g => [g.xcp_address, g]));
 
-    // Attach grant info to each node
+    // Derived liveness status (heartbeat interval is 1h)
+    const now = Date.now();
+    const ONLINE_MS  = 2  * 60 * 60 * 1000;   // ≤ 2h
+    const STALE_MS   = 48 * 60 * 60 * 1000;   // ≤ 48h, else offline
+    function nodeStatus(lastHb) {
+      if (!lastHb) return 'offline';
+      const age = now - lastHb;
+      if (age <= ONLINE_MS) return 'online';
+      if (age <= STALE_MS)  return 'stale';
+      return 'offline';
+    }
+
+    // Attach grant info + status to each node
     const nodesWithGrant = nodes.map(n => {
       const grant = grantMap[n.xcp_address];
       return {
@@ -42,6 +54,7 @@ export async function GET() {
         genesis_slot_number:    grant?.slot_number          ?? null,
         genesis_confirmed_at:   grant?.genesis_confirmed_at ?? null,
         genesis_provisional_at: grant?.provisional_at       ?? null,
+        status:                 nodeStatus(n.last_heartbeat),
       };
     });
 
