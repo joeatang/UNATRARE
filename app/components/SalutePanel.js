@@ -391,16 +391,17 @@ export default function SalutePanel({ cardName }) {
 
   // Theme palette — server picks one randomly per activation; we just paint with it.
   const THEME_PALETTE = {
-    ember:     { color: '#ffb347', label: 'EMBER' },
-    flame:     { color: '#ff7a3d', label: 'FLAME' },
-    inferno:   { color: '#ff3d3d', label: 'INFERNO' },
-    legendary: { color: '#d4af37', label: 'LEGENDARY' },
-    frost:     { color: '#7adfff', label: 'FROST' },
-    neon:      { color: '#b4ff6f', label: 'NEON' },
-    void:      { color: '#b87aff', label: 'VOID' },
-    gold:      { color: '#ffd24a', label: 'GOLD' },
+    ember:     { color: '#ffb347', label: 'EMBER',     glyph: '🪵' },
+    flame:     { color: '#ff7a3d', label: 'FLAME',     glyph: '🔥' },
+    inferno:   { color: '#ff3d3d', label: 'INFERNO',   glyph: '🌋' },
+    legendary: { color: '#d4af37', label: 'LEGENDARY', glyph: '👑' },
+    frost:     { color: '#7adfff', label: 'FROST',     glyph: '❄️' },
+    neon:      { color: '#b4ff6f', label: 'NEON',      glyph: '⚡' },
+    void:      { color: '#b87aff', label: 'VOID',      glyph: '🌌' },
+    gold:      { color: '#ffd24a', label: 'GOLD',      glyph: '✨' },
   };
   const themePalette = THEME_PALETTE[ceremonySplit.themeKey] || THEME_PALETTE.ember;
+  const ceremonyLive = ceremonySplit.status === 'active' && ceremonySplit.requireArtistSplitTx && ceremonySplit.artistPct > 0;
 
   // ── Manual TxID fallback ─────────────────────────────────────────────────
   const [showManual,   setShowManual]   = useState(false);
@@ -831,10 +832,15 @@ export default function SalutePanel({ cardName }) {
         }
       `}</style>
       {/* ── Header ── */}
-      <div style={S.header}>
+      <div style={{ ...S.header, ...(ceremonyLive ? { borderTopColor: themePalette.color, boxShadow: `inset 0 1px 0 0 ${themePalette.color}, 0 0 24px ${themePalette.color}22` } : {}) }}>
         <span style={S.headerLabel}>
           <span style={{ fontSize: 14 }}>🔥</span>
           THE SALUTE LEDGER
+          {ceremonyLive && (
+            <span style={{ marginLeft: 8, padding: '2px 8px', border: `1px solid ${themePalette.color}`, color: themePalette.color, fontSize: 9, letterSpacing: '0.18em', textShadow: `0 0 8px ${themePalette.color}88`, animation: 'salutePulse 2.4s ease-in-out infinite' }}>
+              {themePalette.glyph} {themePalette.label} LIVE
+            </span>
+          )}
         </span>
         <span style={S.headerChain}>$CASH · SOLANA</span>
       </div>
@@ -913,12 +919,38 @@ export default function SalutePanel({ cardName }) {
         {phase !== 'success' && (
         <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 14 }}>
           <strong style={{ color: 'var(--text)' }}>Salute this card</strong> by burning $CASH on Solana. Permanent. Public. Forever attributed to your wallet — your name lives on this card.
-          {ceremonySplit.status === 'active' && ceremonySplit.requireArtistSplitTx && ceremonySplit.artistPct > 0 ? (
+          {ceremonyLive ? (
             <>
               <br />
-              <span style={{ display: 'inline-block', marginTop: 6, padding: '2px 8px', border: `1px solid ${themePalette.color}`, color: themePalette.color, fontSize: '10px', letterSpacing: '0.06em', textTransform: 'uppercase', textShadow: `0 0 8px ${themePalette.color}55` }}>
-                {themePalette.label} CEREMONY · SPLIT SALUTE
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  marginTop: 8,
+                  padding: '6px 12px',
+                  border: `1px solid ${themePalette.color}`,
+                  background: `linear-gradient(90deg, ${themePalette.color}26 0%, ${themePalette.color}0A 100%)`,
+                  color: themePalette.color,
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
+                  textShadow: `0 0 10px ${themePalette.color}77`,
+                  boxShadow: `0 0 14px ${themePalette.color}33, inset 0 0 12px ${themePalette.color}1A`,
+                  borderRadius: 2,
+                  animation: 'salutePulse 2.4s ease-in-out infinite',
+                }}
+              >
+                <span aria-hidden style={{ fontSize: 14 }}>{themePalette.glyph}</span>
+                {themePalette.label} CEREMONY · LIVE SPLIT SALUTE
               </span>
+              <style jsx>{`
+                @keyframes salutePulse {
+                  0%, 100% { box-shadow: 0 0 14px ${themePalette.color}33, inset 0 0 12px ${themePalette.color}1A; }
+                  50%      { box-shadow: 0 0 22px ${themePalette.color}66, inset 0 0 16px ${themePalette.color}2E; }
+                }
+              `}</style>
               <br />
               A live ceremony is running for this card. The amount you enter is the total salute: {ceremonySplit.burnPct}% is burned and {ceremonySplit.artistPct}% goes to the artist in the same transaction.
             </>

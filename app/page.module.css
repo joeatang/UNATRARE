@@ -26,7 +26,7 @@
 
 .heroTitle {
   font-family: var(--font-display);
-  font-size: 32px;
+  font-size: clamp(24px, 6vw, 32px);
   color: var(--text);
   letter-spacing: 0.5px;
   line-height: 1.15;
@@ -123,7 +123,7 @@
 }
 @media (max-width: 600px) {
   .saluteBanner { font-size: 12px; gap: 8px; padding: 10px 14px; flex-wrap: wrap; justify-content: center; text-align: center; }
-  .saluteBannerArrow { font-size: 10px; width: 100%; }
+  .saluteBannerArrow { font-size: 10px; }
 }
 
 .artistJourneyRow {

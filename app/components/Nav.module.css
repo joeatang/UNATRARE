@@ -40,6 +40,7 @@
   list-style: none;
 }
 
+.nav-links li { white-space: nowrap; }
 .nav-links a {
   font-family: var(--font-card);
   font-size: 15px;
@@ -47,6 +48,7 @@
   color: var(--text-dim);
   text-transform: uppercase;
   text-decoration: none;
+  white-space: nowrap;
   transition: color 0.15s;
 }
 .nav-links a:hover { color: var(--amber-hot); }
@@ -266,8 +268,21 @@
 
 /* Responsive */
 @media (min-width: 1025px) and (max-width: 1280px) {
-  .nav-links { gap: 18px; }
+  .nav-links { gap: 16px; }
+  .nav-links a { font-size: 12px; letter-spacing: 1.5px; }
+  .nav-paper { letter-spacing: 1.5px !important; }
+  .nav-status { font-size: 11px; letter-spacing: 1.5px; padding: 6px 10px; }
+  .nav-submit { font-size: 13px; letter-spacing: 2px; padding: 6px 14px; }
+  .navRight { gap: 8px; }
+}
+
+@media (min-width: 1281px) and (max-width: 1599px) {
+  .nav-links { gap: 22px; }
   .nav-links a { font-size: 13px; letter-spacing: 2px; }
+  .nav-paper { letter-spacing: 2px !important; }
+  .nav-status { font-size: 12px; letter-spacing: 2px; padding: 6px 10px; }
+  .nav-submit { font-size: 14px; letter-spacing: 2px; padding: 6px 14px; }
+  .navRight { gap: 10px; }
 }
 
 @media (max-width: 1024px) {

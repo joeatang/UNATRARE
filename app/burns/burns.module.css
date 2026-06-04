@@ -17,8 +17,8 @@
 }
 .title {
   font-family: var(--font-display);
-  font-size: 64px;
-  letter-spacing: 6px;
+  font-size: clamp(36px, 8vw, 64px);
+  letter-spacing: clamp(2px, 0.6vw, 6px);
   color: var(--text);
   margin: 0;
   line-height: 1;
@@ -83,7 +83,6 @@
 }
 @media (max-width: 600px) {
   .statsRow { grid-template-columns: repeat(2, 1fr); }
-  .title { font-size: 48px; }
   .flowCalloutLinks { flex-direction: column; gap: 8px; }
 }
 .stat {
