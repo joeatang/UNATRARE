@@ -299,23 +299,36 @@ export async function POST(request) {
 }
 
 function getSplitSnapshot(db, cardName) {
+  // 1) An active ceremony always wins — it can override the default split
+  //    (e.g. include a node_pct or change ratios).
   const row = getActiveCeremony(db, cardName);
-  if (!row) {
+  if (row) {
     return {
-      preset: 'burn_only',
-      burn_pct: 100,
-      artist_pct: 0,
+      preset: row.split_preset || 'phase1_artist_31',
+      burn_pct: Number(row.burn_pct || 69),
+      artist_pct: Number(row.artist_pct || 31),
+      node_pct: Number(row.node_pct || 0),
+    };
+  }
+  // 2) No active ceremony, but if the artist has set their SOL payout address
+  //    we honor the standing 69/31 split site-wide. Setting up = opting in.
+  const tok = db.prepare(
+    "SELECT artist_sol_address FROM tokens WHERE token_name = ? AND status = 'approved'"
+  ).get(cardName);
+  if (tok && (tok.artist_sol_address || '').trim()) {
+    return {
+      preset: 'phase1_artist_31',
+      burn_pct: 69,
+      artist_pct: 31,
       node_pct: 0,
     };
   }
-  const burnPct = Number(row.burn_pct || 100);
-  const artistPct = Number(row.artist_pct || 0);
-  const nodePct = Number(row.node_pct || 0);
+  // 3) Otherwise — pure burn.
   return {
-    preset: row.split_preset || 'burn_only',
-    burn_pct: burnPct,
-    artist_pct: artistPct,
-    node_pct: nodePct,
+    preset: 'burn_only',
+    burn_pct: 100,
+    artist_pct: 0,
+    node_pct: 0,
   };
 }
 

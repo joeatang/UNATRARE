@@ -55,30 +55,49 @@ export async function GET(request) {
   `).get(card);
 
   if (!ceremony) {
+    // No ceremony row — derive split from artist_sol_address.
+    // If the artist has set their payout address, the standing 69/31 split is live.
+    const hasArtistSol = !!(token.artist_sol_address || '').trim();
     return NextResponse.json({
       card,
       displayTitle: token.display_title || card,
       artistHandle: token.artist_handle || '',
       ceremony: {
-        headline: 'Burn to Salute',
-        subtitle: 'Voluntary community ritual · proof of appreciation',
+        headline: hasArtistSol ? 'Salute & Support the Artist' : 'Burn to Salute',
+        subtitle: hasArtistSol
+          ? '69% burn · 31% to the artist · permanent on-chain'
+          : 'Voluntary community ritual · proof of appreciation',
         themeKey: 'ember',
-        splitPreset: 'phase1_artist_31',
-        burnPct: 69,
-        artistPct: 31,
+        splitPreset: hasArtistSol ? 'phase1_artist_31' : 'burn_only',
+        burnPct: hasArtistSol ? 69 : 100,
+        artistPct: hasArtistSol ? 31 : 0,
         nodePct: 0,
         distributionMode: 'none',
         distributionAsset: '',
         distributionRule: '',
         artistSolAddress: token.artist_sol_address || '',
-        requireArtistSplitTx: false,
+        requireArtistSplitTx: REQUIRE_ARTIST_SPLIT_TX && hasArtistSol,
         startsAt: null,
         endsAt: null,
-        status: 'none',
-        configured: false,
+        status: hasArtistSol ? 'standing' : 'none',
+        configured: hasArtistSol,
       },
     });
   }
+
+  // Ceremony row exists — but if it's not active and artist_sol is set,
+  // fall back to the standing default rather than zeroing out the artist split.
+  const ceremonyEffective = effectiveStatus(ceremony, now);
+  const ceremonyIsActive = ceremonyEffective === 'active';
+  const hasArtistSol = !!(token.artist_sol_address || '').trim();
+
+  const burnPct = ceremonyIsActive
+    ? (ceremony.burn_pct ?? 69)
+    : (hasArtistSol ? 69 : 100);
+  const artistPct = ceremonyIsActive
+    ? (ceremony.artist_pct ?? 31)
+    : (hasArtistSol ? 31 : 0);
+  const nodePct = ceremonyIsActive ? (ceremony.node_pct ?? 0) : 0;
 
   return NextResponse.json({
     card,
@@ -89,17 +108,17 @@ export async function GET(request) {
       subtitle: ceremony.subtitle || 'Voluntary community ritual · proof of appreciation',
       themeKey: ceremony.theme_key || 'ember',
       splitPreset: ceremony.split_preset || 'phase1_artist_31',
-      burnPct: ceremony.burn_pct ?? 69,
-      artistPct: ceremony.artist_pct ?? 31,
-      nodePct: ceremony.node_pct ?? 0,
+      burnPct,
+      artistPct,
+      nodePct,
       distributionMode: ceremony.distribution_mode || 'none',
       distributionAsset: ceremony.distribution_asset || '',
       distributionRule: ceremony.distribution_rule || '',
       artistSolAddress: token.artist_sol_address || '',
-      requireArtistSplitTx: REQUIRE_ARTIST_SPLIT_TX && (effectiveStatus(ceremony, now) === 'active') && Number(ceremony.artist_pct || 0) > 0,
+      requireArtistSplitTx: REQUIRE_ARTIST_SPLIT_TX && Number(artistPct) > 0,
       startsAt: ceremony.starts_at,
       endsAt: ceremony.ends_at,
-      status: effectiveStatus(ceremony, now),
+      status: ceremonyEffective,
       configured: true,
     },
   });

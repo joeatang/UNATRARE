@@ -206,6 +206,22 @@ export async function POST(request) {
       }, { status: 429 });
     }
 
+    // Per-wallet daily cap: 1 submission / 24 h. Now that artists earn $CASH
+    // from salutes, we want to discourage spam-uploads to farm the split.
+    // Quality over quantity. Counts ALL recent submissions (any status) so
+    // rejected/spam tries also burn the daily slot.
+    const recentSubmit = db.prepare(
+      "SELECT submitted_at FROM tokens WHERE artist_address = ? AND submitted_at > unixepoch() - 86400 ORDER BY submitted_at DESC LIMIT 1"
+    ).get(owner);
+    if (recentSubmit?.submitted_at) {
+      const nowSec = Math.floor(Date.now() / 1000);
+      const hoursLeft = Math.max(1, Math.ceil((recentSubmit.submitted_at + 86400 - nowSec) / 3600));
+      return NextResponse.json({
+        ok: false,
+        error: `Daily limit reached: 1 submission per 24 h per wallet. Try again in ~${hoursLeft} h. This is intentional — quality over quantity, and to keep the salute split honest.`,
+      }, { status: 429 });
+    }
+
     // Validate ordinals inscription ID if provided
     const safeInscription = /^[0-9a-fA-F]{64}$/.test(ordInscription.trim())
       ? ordInscription.trim()

@@ -926,19 +926,28 @@ export default function SalutePanel({ cardName }) {
             <>
               <br />
               <span style={{ display: 'inline-block', marginTop: 6, padding: '2px 8px', border: '1px solid var(--text-dim)', color: 'var(--text-dim)', fontSize: '10px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                ceremony scheduled · 100% burn for now
+                ceremony scheduled
               </span>
               <br />
-              A split ceremony is scheduled but hasn&apos;t started yet — until then, the full amount you enter is burned.
+              A ceremony is scheduled — until it starts, the standing split below applies.
+            </>
+          ) : ceremonySplit.requireArtistSplitTx && Number(ceremonySplit.artistPct || 0) > 0 ? (
+            <>
+              <br />
+              <span style={{ display: 'inline-block', marginTop: 6, padding: '2px 8px', border: '1px solid rgba(180,255,111,0.4)', color: 'var(--green)', fontSize: '10px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                standing split · {ceremonySplit.burnPct}% burn / {ceremonySplit.artistPct}% artist
+              </span>
+              <br />
+              The artist has set their payout address — every salute splits {ceremonySplit.burnPct}% to the burn and {ceremonySplit.artistPct}% to the artist in the same transaction.
             </>
           ) : (
             <>
               <br />
               <span style={{ display: 'inline-block', marginTop: 6, padding: '2px 8px', border: '1px solid var(--border)', color: 'var(--text-dim)', fontSize: '10px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                no live ceremony · 100% burn
+                100% burn
               </span>
               <br />
-              No live split ceremony for this card right now — the full amount you enter is burned.
+              The artist hasn&apos;t set a payout address yet — the full amount you enter is burned.
             </>
           )}
           <br />
@@ -1100,7 +1109,7 @@ export default function SalutePanel({ cardName }) {
                 </div>
                 {ceremonySplit.requireArtistSplitTx && Number(ceremonySplit.artistPct || 0) > 0 && (
                   <div style={{ ...S.hint, marginTop: 0, marginBottom: 8, color: 'var(--amber)' }}>
-                    Split ceremony is active: the amount you enter is the <strong style={{ color: 'var(--text)' }}>total salute</strong>. {ceremonySplit.burnPct}% is burned and {ceremonySplit.artistPct}% routes to the artist — all in one transaction.
+                    {ceremonySplit.status === 'active' ? 'Split ceremony is active' : 'Standing split is active'}: the amount you enter is the <strong style={{ color: 'var(--text)' }}>total salute</strong>. {ceremonySplit.burnPct}% is burned and {ceremonySplit.artistPct}% routes to the artist — all in one transaction.
                     <br />
                     <span style={{ color: 'var(--text-dim)', fontSize: '10px' }}>
                       First-time salute for this artist may include a ~0.002 SOL one-time setup fee to create their $CASH payout account. Subsequent salutes by anyone are free of this fee.
