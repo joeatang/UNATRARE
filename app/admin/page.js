@@ -2209,12 +2209,9 @@ function SaluteCeremoniesPanel({ authToken }) {
           <div className={styles.ceremonyGrid2}>
             <div>
               <span style={label}>THEME</span>
-              <select style={input} value={form.theme_key} onChange={e => setForm(f => ({ ...f, theme_key: e.target.value }))}>
-                <option value="ember">ember</option>
-                <option value="flame">flame</option>
-                <option value="inferno">inferno</option>
-                <option value="legendary">legendary</option>
-              </select>
+              <div style={{ ...input, display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-dim)', cursor: 'default' }}>
+                🎲 randomized per activation
+              </div>
             </div>
             <div>
               <span style={label}>STATUS (manual)</span>

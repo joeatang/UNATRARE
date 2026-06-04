@@ -386,7 +386,21 @@ export default function SalutePanel({ cardName }) {
     requireArtistSplitTx: false,
     artistSolAddress: '',
     status: 'none',
+    themeKey: 'ember',
   });
+
+  // Theme palette — server picks one randomly per activation; we just paint with it.
+  const THEME_PALETTE = {
+    ember:     { color: '#ffb347', label: 'EMBER' },
+    flame:     { color: '#ff7a3d', label: 'FLAME' },
+    inferno:   { color: '#ff3d3d', label: 'INFERNO' },
+    legendary: { color: '#d4af37', label: 'LEGENDARY' },
+    frost:     { color: '#7adfff', label: 'FROST' },
+    neon:      { color: '#b4ff6f', label: 'NEON' },
+    void:      { color: '#b87aff', label: 'VOID' },
+    gold:      { color: '#ffd24a', label: 'GOLD' },
+  };
+  const themePalette = THEME_PALETTE[ceremonySplit.themeKey] || THEME_PALETTE.ember;
 
   // ── Manual TxID fallback ─────────────────────────────────────────────────
   const [showManual,   setShowManual]   = useState(false);
@@ -435,6 +449,7 @@ export default function SalutePanel({ cardName }) {
           requireArtistSplitTx: !!json?.ceremony?.requireArtistSplitTx,
           status: String(json?.ceremony?.status || 'none'),
           artistSolAddress: String(json?.ceremony?.artistSolAddress || '').trim(),
+          themeKey: String(json?.ceremony?.themeKey || 'ember'),
         });
       } catch {
         // Keep burn-only as the safe default when ceremony metadata cannot be fetched.
@@ -901,8 +916,8 @@ export default function SalutePanel({ cardName }) {
           {ceremonySplit.status === 'active' && ceremonySplit.requireArtistSplitTx && ceremonySplit.artistPct > 0 ? (
             <>
               <br />
-              <span style={{ display: 'inline-block', marginTop: 6, padding: '2px 8px', border: '1px solid var(--amber)', color: 'var(--amber)', fontSize: '10px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                ceremony live · split salute
+              <span style={{ display: 'inline-block', marginTop: 6, padding: '2px 8px', border: `1px solid ${themePalette.color}`, color: themePalette.color, fontSize: '10px', letterSpacing: '0.06em', textTransform: 'uppercase', textShadow: `0 0 8px ${themePalette.color}55` }}>
+                {themePalette.label} CEREMONY · SPLIT SALUTE
               </span>
               <br />
               A live ceremony is running for this card. The amount you enter is the total salute: {ceremonySplit.burnPct}% is burned and {ceremonySplit.artistPct}% goes to the artist in the same transaction.

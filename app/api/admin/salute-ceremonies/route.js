@@ -8,6 +8,12 @@ export const dynamic = 'force-dynamic';
 const VALID_STATUSES = new Set(['draft', 'scheduled', 'active', 'closed', 'archived']);
 const SPOTLIGHT_HOURS = 48;
 const BURN_FLOOR = 69;
+
+// Themes are randomized per activation — experiential, not configurable by admin.
+const THEMES = ['ember', 'flame', 'inferno', 'legendary', 'frost', 'neon', 'void', 'gold'];
+function randomTheme() {
+  return THEMES[Math.floor(Math.random() * THEMES.length)];
+}
 const ENABLE_NODE_PRESET = process.env.SALUTE_ENABLE_NODE_PRESET === '1';
 const SPLIT_PRESETS = {
   phase1_artist_31: {
@@ -156,7 +162,10 @@ export async function POST(request) {
   const now = Math.floor(Date.now() / 1000);
   const headline = String(body?.headline || '').trim();
   const subtitle = String(body?.subtitle || '').trim();
-  const themeKey = String(body?.theme_key || 'ember').trim() || 'ember';
+  // Theme is always randomized per activation — ignore any admin-supplied value
+  // unless explicitly overridden via theme_key_override (debug only).
+  const themeOverride = String(body?.theme_key_override || '').trim();
+  const themeKey = (themeOverride && THEMES.includes(themeOverride)) ? themeOverride : randomTheme();
   const startsAt = parseUnix(body?.starts_at);
   const endsAt = parseUnix(body?.ends_at);
   const splitPreset = parseSplitPreset(body?.split_preset);
