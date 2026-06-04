@@ -13,6 +13,8 @@ const WEB3_CDN    = 'https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.0/lib/ind
 const SOL_SIG_RE  = /^[1-9A-HJ-NP-Za-km-z]{64,100}$/;
 const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
+const pendingSigKey = (card) => `unatrare:pendingSalute:${(card || '').toUpperCase()}`;
+
 function resolveRpcUrl(url) {
   if (!url) return 'https://api.mainnet-beta.solana.com';
   if (/^https?:\/\//i.test(url)) return url;
@@ -437,6 +439,44 @@ export default function SalutePanel({ cardName }) {
 
   useEffect(() => { fetchLb(); }, [fetchLb]);
 
+  // ── Recover any pending tx_sig that never made it to the server ──────────
+  // If a previous salute burned on-chain but the POST failed (site down,
+  // network blip, tab closed mid-submit), retry it transparently on next
+  // visit. The server is idempotent on tx_sig (UNIQUE), so this is safe.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let cancelled = false;
+    (async () => {
+      let pending;
+      try {
+        const raw = localStorage.getItem(pendingSigKey(cardName));
+        if (!raw) return;
+        pending = JSON.parse(raw);
+      } catch { return; }
+      if (!pending?.sig || !SOL_SIG_RE.test(pending.sig)) {
+        try { localStorage.removeItem(pendingSigKey(cardName)); } catch {}
+        return;
+      }
+      try {
+        const resp = await fetch('/api/salute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ card_name: cardName, sol_wallet: pending.wallet, tx_sig: pending.sig }),
+        });
+        const json = await resp.json().catch(() => ({}));
+        // Clear on success OR on duplicate (already recorded). Keep on transient errors so we can retry next visit.
+        const dup = /already been recorded/i.test(json?.error || '');
+        if (resp.ok || dup) {
+          try { localStorage.removeItem(pendingSigKey(cardName)); } catch {}
+          if (!cancelled) fetchLb();
+        }
+      } catch {
+        // network down — leave the pending entry for next visit
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [cardName, fetchLb]);
+
   useEffect(() => {
     let active = true;
     (async () => {
@@ -702,6 +742,8 @@ export default function SalutePanel({ cardName }) {
       if (!sig) throw new Error('wallet did not return a transaction signature');
       localSig = sig;
       setBurnSig(sig);
+      // Persist tx_sig immediately so a site outage during POST cannot lose it.
+      try { localStorage.setItem(pendingSigKey(cardName), JSON.stringify({ sig, wallet: connected.pubkey, ts: Date.now() })); } catch {}
 
       setPhase('confirming');
       await waitConfirmed(sig, { rawTx: sent.rawB64, lastValidBlockHeight });
@@ -719,6 +761,7 @@ export default function SalutePanel({ cardName }) {
       const json = await resp.json();
       if (!resp.ok || !json.ok) throw new Error(json.error || 'server error');
 
+      try { localStorage.removeItem(pendingSigKey(cardName)); } catch {}
       setBurnResult({ displayAmount: json.displayAmount, artistDisplay: json.artistDisplay || 0, rank: json.rank });
       setPhase('success');
       // Refresh balance + leaderboard
