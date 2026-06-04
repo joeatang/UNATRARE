@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import Nav from './components/Nav';
 import PathCards from './components/PathCards';
+import CeremonyRail from './components/CeremonyRail';
 import styles from './page.module.css';
 import { getDb } from '../lib/db';
 import { fmtCash } from '../lib/saluteDisplay';
@@ -141,6 +142,8 @@ export default function LandingPage() {
             <Link href="/burns" className={styles.artistJourneyLink}>5) watch salutes</Link>
           </div>
         </section>
+
+        <CeremonyRail variant="home" />
 
         {stats.burnBoard.length > 0 && (
           <section className={styles.burnBoardSection}>

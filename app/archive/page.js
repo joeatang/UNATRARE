@@ -7,6 +7,7 @@
 
 import Link from 'next/link';
 import Nav from '../components/Nav';
+import CeremonyRail from '../components/CeremonyRail';
 import styles from './archive.module.css';
 import { getDb } from '../../lib/db.js';
 import { COLLECTIONS } from '../../lib/archiveCollections.js';
@@ -92,6 +93,8 @@ export default function ArchivePage() {
             </div>
           </div>
         </header>
+
+        <CeremonyRail variant="archive" />
 
         <section className={styles.collectionsGrid}>
           {Object.entries(COLLECTIONS).map(([id, col]) => {
