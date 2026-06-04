@@ -614,7 +614,11 @@ export default function SalutePanel({ cardName }) {
 
     const burnPct = Number(ceremonySplit.burnPct || 100);
     const artistPct = Number(ceremonySplit.artistPct || 0);
-    const requiresArtistSplit = !!ceremonySplit.requireArtistSplitTx && artistPct > 0;
+    // Always honor the configured split when the card has a payout address.
+    // We don't gate on `requireArtistSplitTx` — that flag now only controls
+    // whether the *server* rejects salutes missing the artist leg. The
+    // frontend should always pay the artist when a split is in effect.
+    const requiresArtistSplit = artistPct > 0 && SOL_ADDR_RE.test(ceremonySplit.artistSolAddress || '');
 
     // Default: no split — the entire amount is burned.
     let burnRawAmt = totalRawAmt;

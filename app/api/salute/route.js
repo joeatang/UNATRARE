@@ -162,63 +162,65 @@ export async function POST(request) {
 
   let artistRaw = '0';
   let artistDisplay = 0;
-  if (split.artist_pct > 0 && SALUTE_REQUIRE_ARTIST_SPLIT_TX) {
+  let effectiveSplit = split;
+  if (split.artist_pct > 0) {
     const artistSol = (card.artist_sol_address || '').trim();
     if (!SOL_ADDR_RE.test(artistSol)) {
-      logSaluteEvent(db, 'split_missing_artist_address', {
-        clientIp,
-        cardName: cardNameClean,
-        solWallet: sol_wallet,
-        txSig: tx_sig,
-        amountRaw: burnInfo.rawAmount,
-        amountDisplay: burnInfo.displayAmount,
-        message: 'artist payout address is not configured yet for this card',
-      });
-      return NextResponse.json(
-        { error: 'artist payout address is not configured yet for this card' },
-        { status: 422 }
-      );
-    }
+      // Artist sol_address vanished between snapshot and verification.
+      // Fall back to burn-only rather than reject — the burn really happened.
+      effectiveSplit = { preset: 'burn_only', burn_pct: 100, artist_pct: 0, node_pct: 0 };
+    } else {
+      const artistGainRaw = ownerGainRaw(burnInfo.tx, artistSol, CASH_MINT);
 
-    const burnRawBig = BigInt(burnInfo.rawAmount);
-    const artistGainRaw = ownerGainRaw(burnInfo.tx, artistSol, CASH_MINT);
-    if (artistGainRaw <= 0n) {
-      logSaluteEvent(db, 'split_missing_artist_leg', {
-        clientIp,
-        cardName: cardNameClean,
-        solWallet: sol_wallet,
-        txSig: tx_sig,
-        amountRaw: burnInfo.rawAmount,
-        amountDisplay: burnInfo.displayAmount,
-        message: 'split verification failed: missing artist transfer leg in this salute transaction',
-      });
-      return NextResponse.json(
-        { error: 'split verification failed: missing artist transfer leg in this salute transaction' },
-        { status: 422 }
-      );
-    }
+      if (SALUTE_REQUIRE_ARTIST_SPLIT_TX) {
+        // Strict mode: reject if the artist leg is missing or ratio is off.
+        if (artistGainRaw <= 0n) {
+          logSaluteEvent(db, 'split_missing_artist_leg', {
+            clientIp,
+            cardName: cardNameClean,
+            solWallet: sol_wallet,
+            txSig: tx_sig,
+            amountRaw: burnInfo.rawAmount,
+            amountDisplay: burnInfo.displayAmount,
+            message: 'split verification failed: missing artist transfer leg in this salute transaction',
+          });
+          return NextResponse.json(
+            { error: 'split verification failed: missing artist transfer leg in this salute transaction' },
+            { status: 422 }
+          );
+        }
+        const burnRawBig = BigInt(burnInfo.rawAmount);
+        const left = burnRawBig * BigInt(split.artist_pct);
+        const right = artistGainRaw * BigInt(split.burn_pct);
+        const tolerance = BigInt(Math.max(1, split.burn_pct));
+        if (absBigInt(left - right) > tolerance) {
+          logSaluteEvent(db, 'split_ratio_mismatch', {
+            clientIp,
+            cardName: cardNameClean,
+            solWallet: sol_wallet,
+            txSig: tx_sig,
+            amountRaw: burnInfo.rawAmount,
+            amountDisplay: burnInfo.displayAmount,
+            message: `split verification failed: expected ${split.burn_pct}/${split.artist_pct} burn/artist ratio`,
+          });
+          return NextResponse.json(
+            { error: `split verification failed: expected ${split.burn_pct}/${split.artist_pct} burn/artist ratio` },
+            { status: 422 }
+          );
+        }
+      }
 
-    const left = burnRawBig * BigInt(split.artist_pct);
-    const right = artistGainRaw * BigInt(split.burn_pct);
-    const tolerance = BigInt(Math.max(1, split.burn_pct));
-    if (absBigInt(left - right) > tolerance) {
-      logSaluteEvent(db, 'split_ratio_mismatch', {
-        clientIp,
-        cardName: cardNameClean,
-        solWallet: sol_wallet,
-        txSig: tx_sig,
-        amountRaw: burnInfo.rawAmount,
-        amountDisplay: burnInfo.displayAmount,
-        message: `split verification failed: expected ${split.burn_pct}/${split.artist_pct} burn/artist ratio`,
-      });
-      return NextResponse.json(
-        { error: `split verification failed: expected ${split.burn_pct}/${split.artist_pct} burn/artist ratio` },
-        { status: 422 }
-      );
+      // Lenient & strict modes both record whatever was actually transferred
+      // on-chain. If the saluter skipped the artist leg in lenient mode, the
+      // ledger reflects honestly: artist_display = 0, split_preset downgraded
+      // to burn_only so totals stay consistent.
+      if (artistGainRaw > 0n) {
+        artistRaw = artistGainRaw.toString();
+        artistDisplay = Number(artistGainRaw) / Math.pow(10, burnInfo.decimals);
+      } else {
+        effectiveSplit = { preset: 'burn_only', burn_pct: 100, artist_pct: 0, node_pct: 0 };
+      }
     }
-
-    artistRaw = artistGainRaw.toString();
-    artistDisplay = Number(artistGainRaw) / Math.pow(10, burnInfo.decimals);
   }
 
   // Record the salute
@@ -241,10 +243,10 @@ export async function POST(request) {
     artistDisplay,
     '0',
     0,
-    split.preset,
-    split.burn_pct,
-    split.artist_pct,
-    split.node_pct,
+    effectiveSplit.preset,
+    effectiveSplit.burn_pct,
+    effectiveSplit.artist_pct,
+    effectiveSplit.node_pct,
     burnInfo.decimals,
     tx_sig,
     '',
