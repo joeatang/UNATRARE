@@ -249,12 +249,11 @@ export async function POST(request) {
   }
 
   if (action === 'activate') {
-    if (POLICY.strictConfiguredOnly && !existing) {
-      return NextResponse.json(
-        { error: 'strict mode requires an existing ceremony row before activation' },
-        { status: 422 },
-      );
-    }
+    // Note: strict mode (POLICY.strictConfiguredOnly) used to block activation
+    // of cards with no pre-existing salute_ceremonies row. That gate fought the
+    // one-click "GO LIVE NOW" UX — the INSERT branch below handles new cards
+    // cleanly, so activate is now always allowed once the token exists + is
+    // certified (already enforced above).
 
     // Pre-flight: split-tx env requires the token to have an artist SOL payout address.
     // Re-read because the optional inline update earlier may have just populated it.

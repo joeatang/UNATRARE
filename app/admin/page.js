@@ -2257,13 +2257,9 @@ function SaluteCeremoniesPanel({ authToken }) {
             <button onClick={() => postAction('upsert')} disabled={saving} style={btn('var(--green)')} title="save settings to DB; does NOT activate">{saving ? 'saving…' : '💾 save draft (no activation)'}</button>
             <button
               onClick={() => postAction('activate')}
-              disabled={saving || (policy.strictConfiguredOnly && !loadedFromRow)}
-              style={
-                (policy.strictConfiguredOnly && !loadedFromRow)
-                  ? { ...btn('var(--border)'), opacity: 0.55, cursor: 'not-allowed' }
-                  : btn('var(--amber)')
-              }
-              title={policy.strictConfiguredOnly && !loadedFromRow ? 'strict mode: load an existing ceremony row first' : `save + activate using STARTS AT / ENDS AT above (or now+${policy.spotlightHours}h if blank)`}
+              disabled={saving}
+              style={btn('var(--amber)')}
+              title={`save + activate using STARTS AT / ENDS AT above (or now+${policy.spotlightHours}h if blank)`}
             >
               📅 save + activate (custom dates)
             </button>
@@ -2278,11 +2274,7 @@ function SaluteCeremoniesPanel({ authToken }) {
             <strong style={{ color: 'var(--text)' }}>archive</strong> / <strong style={{ color: 'var(--text)' }}>back to draft</strong> = lifecycle housekeeping
           </div>
 
-          {policy.strictConfiguredOnly && !loadedFromRow && (
-            <div style={{ marginTop: -4, marginBottom: 12, fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)' }}>
-              strict mode is ON: click edit on an existing ceremony row before activating.
-            </div>
-          )}
+
 
             </div>
           </details>
