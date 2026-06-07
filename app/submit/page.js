@@ -1233,6 +1233,29 @@ function StepBurn({ data, onNext, onBack, burnRequired }) {
         Each burn unlocks one submission attempt.
       </p>
 
+      {/* Beta notice — admission burn is gated by /api/burn-config; copy reassures
+          artists during the launch window when burn may be paused or in flux. */}
+      <div style={{
+        marginBottom: 16,
+        padding: '12px 14px',
+        border: '1px solid var(--green)',
+        background: 'rgba(90,191,90,0.06)',
+      }}>
+        <div style={{
+          fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px',
+          color: 'var(--green)', marginBottom: 6,
+        }}>
+          🐸 BETA ROUND — DON&apos;T STRESS THE BURN
+        </div>
+        <div style={{
+          fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.6,
+        }}>
+          We&apos;re still tuning the site. <strong style={{color:'var(--text)'}}>Your submission is good</strong> —
+          if the admission burn is a friction point right now, reach out and we&apos;ll get you through.
+          The burn flow stays here so it&apos;s ready when the next round opens.
+        </div>
+      </div>
+
       {/* Send from address */}
       <div style={{marginBottom:16, padding:'10px 14px', border:'1px solid rgba(201,168,76,0.4)', background:'rgba(201,168,76,0.06)'}}>
         <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'3px', color:'var(--amber-hot)', marginBottom:6}}>

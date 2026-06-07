@@ -52,7 +52,7 @@ export async function POST(request) {
     return NextResponse.json({ error: 'invalid JSON' }, { status: 400 });
   }
 
-  const { tokenName, action, note, series: seriesOverride } = body;
+  const { tokenName, action, note, series: seriesOverride, reannounce } = body;
 
   if (!tokenName || typeof tokenName !== 'string') {
     return NextResponse.json({ error: 'tokenName required' }, { status: 400 });
@@ -77,6 +77,18 @@ export async function POST(request) {
       if (token.status !== 'approved') {
         return NextResponse.json({ error: 'token must be approved before stamping' }, { status: 400 });
       }
+      const wasAlreadyCertified = token.council_certified === 1 && !!token.revealed_at;
+      // If already stamped + revealed, suppress duplicate Telegram/Discord posts
+      // unless caller explicitly opts in via { reannounce: true }.
+      if (wasAlreadyCertified && !reannounce) {
+        return NextResponse.json({
+          ok: true,
+          action: 'certify_stamp',
+          council_certified: 1,
+          already_certified: true,
+          reannounced: false,
+        });
+      }
       // Auto-reveal: certifying as dank means it's ready to go public
       db.prepare(
         'UPDATE tokens SET council_certified=1, revealed_at=COALESCE(revealed_at, unixepoch()) WHERE token_name=?'
@@ -84,7 +96,13 @@ export async function POST(request) {
       notifyCertification(token).catch(e => console.warn('[telegram] stamp:', e.message));
       discordCertification(token).catch(e => console.warn('[discord] stamp:', e.message));
       fireFullCouncil();
-      return NextResponse.json({ ok: true, action: 'certify_stamp', council_certified: 1 });
+      return NextResponse.json({
+        ok: true,
+        action: 'certify_stamp',
+        council_certified: 1,
+        already_certified: wasAlreadyCertified,
+        reannounced: true,
+      });
     }
 
     if (action === 'decertify_stamp') {

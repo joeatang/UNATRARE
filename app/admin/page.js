@@ -65,9 +65,9 @@ function TokenRow({ token, authToken, onAction }) {
   const [dirHidden, setDirHidden] = useState(!!token.directory_hidden);
   const [stamped, setStamped] = useState(!!token.council_certified);
 
-  async function act(action) {
+  async function act(action, extra = {}) {
     setLoading(action);
-    const body = { tokenName: token.token_name, action, note };
+    const body = { tokenName: token.token_name, action, note, ...extra };
     if ((action === 'approve' || action === 'genesis') && targetSeries !== '') body.series = targetSeries;
     const res = await fetch('/api/admin/action', {
       method: 'POST',
@@ -87,6 +87,11 @@ function TokenRow({ token, authToken, onAction }) {
       } else if (action === 'certify_stamp') {
         setStamped(true);
         setRevealed(true); // certify_stamp auto-reveals server-side
+        if (json.already_certified && !json.reannounced) {
+          alert('Already certified — no announcement re-sent. Use "re-announce" to repost on Telegram.');
+        } else if (json.reannounced) {
+          alert('Council stamp re-announced on Telegram.');
+        }
       } else if (action === 'decertify_stamp') {
         setStamped(false);
       } else if (action === 'approve' || action === 'genesis') {
@@ -397,6 +402,20 @@ function TokenRow({ token, authToken, onAction }) {
                   {loading === 'certify_stamp' || loading === 'decertify_stamp'
                     ? '...'
                     : stamped ? '⬟ stamped' : '⬟ stamp'}
+                </button>
+              )}
+              {token.status === 'approved' && stamped && (
+                <button
+                  className={styles.actionBtn}
+                  onClick={() => act('certify_stamp', { reannounce: true })}
+                  disabled={!!loading}
+                  title="Re-post council stamp announcement on Telegram + Discord (no DB change)"
+                  style={{
+                    border: '1px solid var(--amber)',
+                    color: 'var(--amber)',
+                  }}
+                >
+                  {loading === 'certify_stamp' ? '...' : '📣 re-announce'}
                 </button>
               )}
             </div>

@@ -404,6 +404,23 @@ export default async function CardPage({ params }) {
                   </a>
                 </div>
               )}
+              {token.artist_sol_address && token.artist_sol_verified_at && (
+                <div className={styles.metaRow}>
+                  <span className={styles.metaKey}>Artist Payout</span>
+                  <a
+                    href={`https://solscan.io/account/${token.artist_sol_address}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className={styles.metaVal}
+                    style={{ color: 'var(--green)', textDecoration: 'none' }}
+                    title={`Salute split active — ${token.artist_sol_address}`}
+                  >
+                    <span className={styles.addressTrunc}>
+                      {token.artist_sol_address.slice(0,6)}…{token.artist_sol_address.slice(-4)}
+                    </span>
+                    <span style={{ marginLeft: 6 }}>↗</span>
+                  </a>
+                </div>
+              )}
             </div>
 
             <div className={styles.actions}>
