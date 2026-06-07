@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import styles from './admin.module.css';
+import CashBurnPanel from './CashBurnPanel';
 
 // ── Admin password gate ────────────────────────────────────────
 function LoginGate({ onAuth }) {
@@ -2972,6 +2973,7 @@ export default function AdminPage() {
       <div className={styles.queue}>
         {tab === 'tools' ? (
           <>
+            <CashBurnPanel authToken={authToken} />
             <SaluteCeremoniesPanel authToken={authToken} />
             <SaluteVerificationPanel authToken={authToken} />
             <TelegramRegistrationsPanel authToken={authToken} />

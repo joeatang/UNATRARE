@@ -6,6 +6,103 @@
   color: var(--text);
 }
 
+/* ── Active Cash Burn Ceremony banner ── */
+.cbcBanner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin: 0 0 22px;
+  padding: 12px;
+  border: 1px solid var(--amber-hot, #C9A84C);
+  background:
+    radial-gradient(ellipse at top right, rgba(201, 168, 76, 0.10), transparent 70%),
+    var(--surface);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.cbcBanner:hover { border-color: var(--green); transform: translateY(-1px); }
+
+@media (min-width: 720px) {
+  .cbcBanner { grid-template-columns: 360px 1fr; gap: 20px; padding: 16px; }
+}
+
+.cbcBannerImg {
+  width: 100%;
+  display: block;
+  background: var(--bg);
+  border: 1px solid var(--border-dim);
+}
+
+.cbcBannerBody {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 6px;
+}
+
+.cbcBannerEyebrow {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--green);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cbcBannerEyebrow::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: cbcPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes cbcPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.6); }
+}
+
+.cbcBannerTitle {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 6vw, 44px);
+  letter-spacing: 2px;
+  color: var(--amber-hot, #C9A84C);
+  line-height: 1;
+  margin: 0;
+}
+
+.cbcBannerLine {
+  font-family: var(--font-card);
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.cbcBannerQuote {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.45;
+  margin: 4px 0 0;
+}
+
+.cbcBannerCta {
+  margin-top: 6px;
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--green);
+  text-transform: uppercase;
+}
+
 .header { text-align: center; margin-bottom: 28px; }
 .eyebrow {
   font-family: var(--font-card);

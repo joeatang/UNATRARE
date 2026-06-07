@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Nav from '../components/Nav';
 import { getDb } from '../../lib/db';
 import { fmtCash, tierFor, truncateWallet } from '../../lib/saluteDisplay';
+import { fmtCompact, fmtFull, CHARACTER_BY_KEY } from '../../lib/cashBurn';
 import styles from './burns.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -80,6 +81,20 @@ function getRecent(db, limit = 50) {
   `).all(limit);
 }
 
+function getActiveBurn(db) {
+  try {
+    return db.prepare(`
+      SELECT id, ordinal, character_key, amount, card_name, headline, quote, image_path, burned_at
+      FROM cash_burns
+      WHERE status = 'active'
+      ORDER BY burned_at DESC
+      LIMIT 1
+    `).get() || null;
+  } catch {
+    return null;
+  }
+}
+
 function relTime(unixSec) {
   if (!unixSec) return '';
   const diff = Math.max(0, Math.floor(Date.now() / 1000) - Number(unixSec));
@@ -98,6 +113,7 @@ export default function BurnsPage({ searchParams }) {
 
   const db = getDb();
   const stats = getStats(db, since);
+  const activeBurn = getActiveBurn(db);
   const cards   = tab === 'cards'   ? getTopCards(db, since)   : [];
   const wallets = tab === 'wallets' ? getTopWallets(db, since) : [];
   const recent  = tab === 'recent'  ? getRecent(db)            : [];
@@ -126,6 +142,37 @@ export default function BurnsPage({ searchParams }) {
             Every salute is a $CASH burn on Solana. Permanent. Public. Forever attributed to the wallet that lit it.
           </div>
         </div>
+
+        {activeBurn && (
+          <Link href={`/burns/${activeBurn.id}`} className={styles.cbcBanner}>
+            {activeBurn.image_path ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={`/api/og/cash-burn/${activeBurn.id}`}
+                alt={`Cash Burn Ceremony #${String(activeBurn.ordinal).padStart(3, '0')}`}
+                className={styles.cbcBannerImg}
+              />
+            ) : <div className={styles.cbcBannerImg} style={{ aspectRatio: '1200 / 630' }} />}
+            <div className={styles.cbcBannerBody}>
+              <div className={styles.cbcBannerEyebrow}>
+                live · cash burn ceremony #{String(activeBurn.ordinal).padStart(3, '0')}
+              </div>
+              <h2 className={styles.cbcBannerTitle}>
+                {fmtCompact(activeBurn.amount)} $CASH
+              </h2>
+              <div className={styles.cbcBannerLine}>
+                {fmtFull(activeBurn.amount)} burned ·{' '}
+                {activeBurn.card_name ? <>for <strong>{activeBurn.card_name}</strong></> : 'for the culture'}
+              </div>
+              {(activeBurn.quote || CHARACTER_BY_KEY[activeBurn.character_key]?.quote) && (
+                <p className={styles.cbcBannerQuote}>
+                  &ldquo;{activeBurn.quote || CHARACTER_BY_KEY[activeBurn.character_key]?.quote}&rdquo;
+                </p>
+              )}
+              <div className={styles.cbcBannerCta}>view ceremony →</div>
+            </div>
+          </Link>
+        )}
 
         <div className={styles.flowCallout}>
           <div className={styles.flowCalloutTitle}>ARTIST INCENTIVE MODEL</div>
