@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Nav from '../../components/Nav';
 import { getDb } from '../../../lib/db';
-import { fmtCash } from '../../../lib/saluteDisplay';
+import { fmtCash, getSitewideBurnTotals } from '../../../lib/saluteDisplay';
 import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -22,9 +22,13 @@ function getSiteSaluteStats() {
              COUNT(*)                         AS salute_count
       FROM card_salutes
     `).get();
-    return r || { total_burned: 0, cards_saluted: 0, unique_saluters: 0, salute_count: 0 };
+    const sitewide = getSitewideBurnTotals(db);
+    return { ...(r || { total_burned: 0, cards_saluted: 0, unique_saluters: 0, salute_count: 0 }), sitewide };
   } catch {
-    return { total_burned: 0, cards_saluted: 0, unique_saluters: 0, salute_count: 0 };
+    return {
+      total_burned: 0, cards_saluted: 0, unique_saluters: 0, salute_count: 0,
+      sitewide: { total: 0, salutes: 0, ceremonies: 0, ceremonyCount: 0 },
+    };
   }
 }
 
@@ -43,11 +47,18 @@ export default function AboutSalutesPage() {
           You burn $CASH on Solana — and your wallet is forever attributed to that card on the public ledger.
         </p>
 
-        {s.salute_count > 0 && (
+        {(s.salute_count > 0 || s.sitewide.ceremonies > 0) && (
           <div className={styles.statsRow}>
             <div className={styles.stat}>
-              <div className={styles.statValue}>{fmtCash(s.total_burned)}</div>
-              <div className={styles.statLabel}>$CASH burned</div>
+              <div className={styles.statValue}>{fmtCash(s.sitewide.total)}</div>
+              <div className={styles.statLabel}>
+                $CASH burned
+                {s.sitewide.ceremonies > 0 && s.salute_count > 0 && (
+                  <span style={{ display: 'block', fontSize: '0.85em', opacity: 0.7, marginTop: 2 }}>
+                    {fmtCash(s.total_burned)} salutes · {fmtCash(s.sitewide.ceremonies)} ceremonies
+                  </span>
+                )}
+              </div>
             </div>
             <div className={styles.stat}>
               <div className={styles.statValue}>{s.salute_count.toLocaleString()}</div>

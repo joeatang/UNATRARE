@@ -7,7 +7,7 @@ import PathCards from './components/PathCards';
 import CeremonyRail from './components/CeremonyRail';
 import styles from './page.module.css';
 import { getDb } from '../lib/db';
-import { fmtCash } from '../lib/saluteDisplay';
+import { fmtCash, getSitewideBurnTotals } from '../lib/saluteDisplay';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,12 +76,14 @@ function getLandingStats() {
       saluteCards:    saluteAgg?.cards_saluted   || 0,
       saluteSaluters: saluteAgg?.unique_saluters || 0,
       burnBoard,
+      sitewide:       getSitewideBurnTotals(db),
     };
   } catch {
     return {
       certified: 0, nodes: 0, vault: 0, archived: 0, promoUsed: 0, promoMax: 500, cryptThumbs: [],
       saluteTotal: 0, saluteArtist: 0, saluteCards: 0, saluteSaluters: 0,
       burnBoard: [],
+      sitewide: { total: 0, salutes: 0, ceremonies: 0, ceremonyCount: 0 },
     };
   }
 }
@@ -120,14 +122,23 @@ export default function LandingPage() {
             </a>
           </div>
 
-          {stats.saluteTotal > 0 && (
+          {stats.sitewide.total > 0 && (
             <Link href="/burns" className={styles.saluteBanner}>
               <span className={styles.saluteBannerFlame}>🔥</span>
               <span>
-                <strong>{fmtCash(stats.saluteTotal)} $CASH</strong> burned ·{' '}
+                <strong>{fmtCash(stats.sitewide.total)} $CASH</strong> burned ·{' '}
                 <strong>{fmtCash(stats.saluteArtist)} $CASH</strong> to artists ·{' '}
                 <strong>{stats.saluteCards}</strong> card{stats.saluteCards === 1 ? '' : 's'} ·{' '}
                 <strong>{stats.saluteSaluters}</strong> saluter{stats.saluteSaluters === 1 ? '' : 's'}
+                {stats.sitewide.ceremonies > 0 && (
+                  <>
+                    {' · '}
+                    <strong>{fmtCash(stats.sitewide.ceremonies)} $CASH</strong>{' '}
+                    via{' '}
+                    <strong>{stats.sitewide.ceremonyCount}</strong>{' '}
+                    cash-burn ceremon{stats.sitewide.ceremonyCount === 1 ? 'y' : 'ies'}
+                  </>
+                )}
               </span>
               <span className={styles.saluteBannerArrow}>see the ledger →</span>
             </Link>

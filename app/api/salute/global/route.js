@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '../../../../lib/db';
+import { getSitewideBurnTotals } from '../../../../lib/saluteDisplay';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,6 +73,8 @@ export async function GET(request) {
       burnCount: stats?.burn_count ?? 0,
       uniqueBurners: stats?.unique_burners ?? 0,
       cardsParticipating: stats?.cards_participating ?? 0,
+      // Site-wide breakdown — salutes + cash-burn ceremonies = sitewide.total
+      sitewide: getSitewideBurnTotals(db),
     },
     leaderboard: rows,
   });

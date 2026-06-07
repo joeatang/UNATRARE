@@ -18,6 +18,18 @@ export const dynamic = 'force-dynamic';
 const VALID_STATUSES = new Set(['active', 'closed', 'archived']);
 const MAX_AMOUNT = 1e15; // Sanity cap, prevents accidental Infinity
 
+// $CASH SPL token on Solana mainnet — same mint used by /api/salute/route.js.
+const CASH_MINT  = 'oMhwtzE6KeovcRMFAsFocEA6GcZUTAYFdvQ7tpJfnat';
+const SOLANA_RPC = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
+
+// Comma-separated whitelist of Solana wallets allowed to sign cash-burn
+// ceremonies. Empty = no whitelist enforced (any admin-authed wallet, dev only).
+const CBC_ADMIN_WALLETS = (process.env.CBC_ADMIN_WALLETS || '')
+  .split(',').map(s => s.trim()).filter(Boolean);
+
+const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+const SOL_SIG_RE  = /^[1-9A-HJ-NP-Za-km-z]{64,100}$/;
+
 function isPositiveFiniteNumber(n) {
   return typeof n === 'number' && Number.isFinite(n) && n > 0;
 }
@@ -168,15 +180,27 @@ export async function POST(request) {
     });
   }
 
-  // ── OPEN — create ceremony, render image, fire Telegram ─────────────────
+  // ── OPEN — verify on-chain $CASH burn, create ceremony, fire Telegram ─
   if (action === 'open') {
     const character_key = String(body?.character_key || '').trim();
     const amount        = safeNumber(body?.amount);
+    const tx_sig        = String(body?.tx_sig || '').trim();
+    const admin_wallet  = String(body?.admin_wallet || '').trim();
+
     if (!isValidCharacterKey(character_key)) {
       return NextResponse.json({ error: 'invalid character_key' }, { status: 422 });
     }
     if (!isPositiveFiniteNumber(amount) || amount > MAX_AMOUNT) {
       return NextResponse.json({ error: 'invalid amount' }, { status: 422 });
+    }
+    if (!SOL_SIG_RE.test(tx_sig)) {
+      return NextResponse.json({ error: 'tx_sig required — must be a valid Solana transaction signature' }, { status: 422 });
+    }
+    if (!SOL_ADDR_RE.test(admin_wallet)) {
+      return NextResponse.json({ error: 'admin_wallet required — must be a valid Solana address' }, { status: 422 });
+    }
+    if (CBC_ADMIN_WALLETS.length > 0 && !CBC_ADMIN_WALLETS.includes(admin_wallet)) {
+      return NextResponse.json({ error: 'admin_wallet is not authorized to fire cash-burn ceremonies' }, { status: 403 });
     }
 
     // Refuse to open a second active ceremony — admin must close current first
@@ -186,6 +210,38 @@ export async function POST(request) {
         error: `another ceremony is already active (#${existingActive.ordinal}) — close it before opening a new one`,
         active_id: existingActive.id,
       }, { status: 409 });
+    }
+
+    // Refuse if this tx_sig is already recorded.
+    const dup = db.prepare('SELECT id, ordinal FROM cash_burns WHERE tx_sig = ?').get(tx_sig);
+    if (dup) {
+      return NextResponse.json({
+        error: `this Solana transaction is already recorded as ceremony #${dup.ordinal}`,
+        existing_id: dup.id,
+      }, { status: 409 });
+    }
+
+    // Verify the burn on Solana mainnet — same logic as /api/salute/route.js.
+    let burnInfo;
+    try {
+      burnInfo = await verifyCashBurnTx(tx_sig, admin_wallet);
+    } catch (err) {
+      return NextResponse.json({ error: `on-chain verification failed: ${err.message}` }, { status: 422 });
+    }
+    if (!burnInfo) {
+      return NextResponse.json({
+        error: 'transaction is not a confirmed $CASH burn authorized by this wallet',
+      }, { status: 422 });
+    }
+
+    // Confirm on-chain raw amount matches the entered amount (1-unit rounding tolerance).
+    const expectedRaw = BigInt(Math.round(amount * Math.pow(10, burnInfo.decimals)));
+    const actualRaw   = BigInt(burnInfo.rawAmount);
+    if (actualRaw < expectedRaw - 1n || actualRaw > expectedRaw + 1n) {
+      const actualDisplay = Number(actualRaw) / Math.pow(10, burnInfo.decimals);
+      return NextResponse.json({
+        error: `on-chain amount mismatch: tx burned ${actualDisplay} $CASH but form says ${amount}`,
+      }, { status: 422 });
     }
 
     const ordinal   = nextOrdinal(db);
@@ -206,10 +262,12 @@ export async function POST(request) {
     db.prepare(`
       INSERT INTO cash_burns (
         ordinal, character_key, amount, card_name, headline, quote,
-        status, image_path, txids, burned_at, opened_at, opened_by
-      ) VALUES (?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, 'admin')
+        status, image_path, txids, burned_at, opened_at, opened_by,
+        tx_sig, admin_wallet, amount_raw, decimals
+      ) VALUES (?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, 'admin', ?, ?, ?, ?)
     `).run(ordinal, character_key, amount, card_name, headline, quote,
-           imagePath, JSON.stringify(txids), burnedAt, burnedAt);
+           imagePath, JSON.stringify(txids), burnedAt, burnedAt,
+           tx_sig, admin_wallet, burnInfo.rawAmount, burnInfo.decimals);
 
     const row = db.prepare('SELECT * FROM cash_burns WHERE ordinal = ?').get(ordinal);
     const character = CHARACTER_BY_KEY[character_key];
@@ -230,6 +288,8 @@ export async function POST(request) {
         serial,
         card_name,
         quote: quote || character.quote,
+        tx_sig,
+        admin_wallet,
       }, absPath);
     } catch (e) {
       console.warn('[cash-burn] telegram open failed:', e.message);
@@ -263,9 +323,11 @@ export async function POST(request) {
       return NextResponse.json({ error: 'can only update active ceremonies' }, { status: 409 });
     }
 
-    // Mutable fields: amount, character_key, card_name, headline, quote, txids
+    // Mutable fields ONLY: character_key, card_name, headline, quote, txids.
+    // amount / tx_sig / admin_wallet are notarized on-chain and cannot be edited
+    // — the only way to change those is archive this one + open a new ceremony
+    // with a new on-chain burn.
     const next = {
-      amount:        body?.amount        != null ? safeNumber(body.amount)               : existing.amount,
       character_key: body?.character_key != null ? String(body.character_key).trim()      : existing.character_key,
       card_name:     body?.card_name     != null ? normalizeCardName(body.card_name)      : existing.card_name,
       headline:      body?.headline      != null ? normalizeText(body.headline, 60)       : existing.headline,
@@ -275,23 +337,20 @@ export async function POST(request) {
     if (!isValidCharacterKey(next.character_key)) {
       return NextResponse.json({ error: 'invalid character_key' }, { status: 422 });
     }
-    if (!isPositiveFiniteNumber(next.amount) || next.amount > MAX_AMOUNT) {
-      return NextResponse.json({ error: 'invalid amount' }, { status: 422 });
-    }
 
     db.prepare(`
       UPDATE cash_burns
-         SET amount = ?, character_key = ?, card_name = ?,
+         SET character_key = ?, card_name = ?,
              headline = ?, quote = ?, txids = ?
        WHERE id = ?
-    `).run(next.amount, next.character_key, next.card_name,
+    `).run(next.character_key, next.card_name,
            next.headline, next.quote, JSON.stringify(next.txids), id);
 
-    // Re-render image at same path (idempotent overwrite)
+    // Re-render image at same path (idempotent overwrite). Amount is unchanged.
     await renderCashBurnImageToFile({
       ordinal:       existing.ordinal,
       character_key: next.character_key,
-      amount:        next.amount,
+      amount:        existing.amount,
       card_name:     next.card_name,
       headline:      next.headline,
       quote:         next.quote,
@@ -335,6 +394,8 @@ export async function POST(request) {
         tierLabel:      tier.label,
         characterTitle: character.title,
         topBurners,
+        tx_sig:         fresh.tx_sig || '',
+        admin_wallet:   fresh.admin_wallet || '',
       }, absImagePathFor(fresh.ordinal));
     } catch (e) {
       console.warn('[cash-burn] telegram close failed:', e.message);
@@ -363,6 +424,8 @@ export async function POST(request) {
         card_name:      existing.card_name,
         quote:          existing.quote || character.quote,
         topBurners:     safeJsonParse(existing.top_burners, []),
+        tx_sig:         existing.tx_sig || '',
+        admin_wallet:   existing.admin_wallet || '',
       }, absImagePathFor(existing.ordinal));
     } catch (e) {
       console.warn('[cash-burn] telegram repost failed:', e.message);
@@ -377,4 +440,63 @@ export async function POST(request) {
   }
 
   return NextResponse.json({ error: 'unhandled action' }, { status: 422 });
+}
+
+// ── Solana on-chain burn verification (mirror of /api/salute/route.js) ──────
+async function verifyCashBurnTx(txSig, expectedWallet) {
+  const abort = new AbortController();
+  const timer = setTimeout(() => abort.abort(), 15_000);
+  let res;
+  try {
+    res = await fetch(SOLANA_RPC, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id:      1,
+        method:  'getTransaction',
+        params:  [txSig, { encoding: 'jsonParsed', commitment: 'confirmed', maxSupportedTransactionVersion: 0 }],
+      }),
+      signal: abort.signal,
+    });
+  } catch (err) {
+    if (err.name === 'AbortError') throw new Error('Solana RPC timed out — try again in a moment');
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+  if (!res.ok) throw new Error(`Solana RPC HTTP ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message || 'Solana RPC error');
+
+  const tx = data.result;
+  if (!tx)       throw new Error('transaction not found — wait for confirmation and try again');
+  if (!tx.meta)  throw new Error('transaction metadata unavailable — wait a moment and try again');
+  if (tx.meta.err !== null) throw new Error('transaction failed on-chain');
+
+  const signers = (tx.transaction?.message?.accountKeys || [])
+    .filter(k => k?.signer)
+    .map(k => k.pubkey);
+  if (!signers.includes(expectedWallet)) {
+    throw new Error('admin wallet did not sign this transaction');
+  }
+
+  const outerIx = tx.transaction?.message?.instructions || [];
+  const innerIx = (tx.meta?.innerInstructions || []).flatMap(ii => ii.instructions);
+  for (const ix of [...outerIx, ...innerIx]) {
+    if (
+      ix.program === 'spl-token' &&
+      (ix.parsed?.type === 'burn' || ix.parsed?.type === 'burnChecked') &&
+      ix.parsed?.info?.mint === CASH_MINT &&
+      ix.parsed?.info?.authority === expectedWallet
+    ) {
+      const rawAmount = ix.parsed.info.amount; // string — raw SPL units
+      const allBals   = [...(tx.meta?.preTokenBalances || []), ...(tx.meta?.postTokenBalances || [])];
+      const cashBal   = allBals.find(b => b.mint === CASH_MINT);
+      const decimals  = cashBal?.uiTokenAmount?.decimals ?? 6;
+      const displayAmount = Number(BigInt(rawAmount)) / Math.pow(10, decimals);
+      return { rawAmount, displayAmount, decimals, tx };
+    }
+  }
+  return null;
 }

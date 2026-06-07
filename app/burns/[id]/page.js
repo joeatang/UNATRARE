@@ -74,6 +74,11 @@ export default function BurnDetailPage({ params }) {
   const quote = burn.quote || character?.quote || '';
   const dedicationLine = burn.card_name ? `for ${burn.card_name}` : 'for the culture';
 
+  const txSig = (burn.tx_sig || '').trim();
+  const signer = (burn.admin_wallet || '').trim();
+  const signerShort = signer ? `${signer.slice(0, 5)}…${signer.slice(-4)}` : '';
+  const txShort = txSig ? `${txSig.slice(0, 8)}…${txSig.slice(-6)}` : '';
+
   const shareUrl = `https://unatrare.wtf/burns/${burn.id}`;
   const tweetText = encodeURIComponent(
     `🔥 Cash Burn #${ordinal} — ${fmtCompact(burn.amount)} $CASH committed to the fire ${dedicationLine}. ${quote ? `"${quote}"` : ''}`.trim()
@@ -125,6 +130,39 @@ export default function BurnDetailPage({ params }) {
             <div className={styles.quoteMark}>“</div>
             <p className={styles.quoteText}>{quote}</p>
             <div className={styles.quoteAttr}>— {character?.title || burn.character_key} · {character?.bureau || 'CASH BUREAU'}</div>
+          </div>
+        )}
+
+        {txSig && (
+          <div className={styles.proofBlock}>
+            <div className={styles.proofLabel}>on-chain proof · Solana mainnet</div>
+            <div className={styles.proofRow}>
+              <span className={styles.proofKey}>tx</span>
+              <a
+                className={styles.proofVal}
+                href={`https://solscan.io/tx/${txSig}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {txShort} ↗
+              </a>
+            </div>
+            {signer && (
+              <div className={styles.proofRow}>
+                <span className={styles.proofKey}>signed by</span>
+                <a
+                  className={styles.proofVal}
+                  href={`https://solscan.io/account/${signer}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {signerShort} ↗
+                </a>
+              </div>
+            )}
+            <div className={styles.proofNote}>
+              This $CASH was burned on Solana. The transaction is permanent and publicly verifiable.
+            </div>
           </div>
         )}
 
