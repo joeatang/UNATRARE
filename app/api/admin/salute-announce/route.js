@@ -29,7 +29,7 @@ export async function POST(request) {
 
   const db = getDb();
   const tokenRow = db.prepare(
-    'SELECT token_name, display_title, art_url, artist_handle, artist_address FROM tokens WHERE token_name = ?'
+    'SELECT token_name, display_title, art_url, art_mime, art_cover_url, artist_handle, artist_address FROM tokens WHERE token_name = ?'
   ).get(cardName);
   if (!tokenRow) return NextResponse.json({ error: 'card not found' }, { status: 404 });
 

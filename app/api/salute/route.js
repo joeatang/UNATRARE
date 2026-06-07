@@ -265,7 +265,7 @@ export async function POST(request) {
   // Telegram salute announcement (fire-and-forget, never blocks the API)
   try {
     const tokenRow = db.prepare(
-      'SELECT token_name, display_title, art_url, artist_handle, artist_address FROM tokens WHERE token_name = ?'
+      'SELECT token_name, display_title, art_url, art_mime, art_cover_url, artist_handle, artist_address FROM tokens WHERE token_name = ?'
     ).get(cardNameClean);
     const totalsRow = db.prepare(
       'SELECT COUNT(*) AS n, COALESCE(SUM(amount_display),0) AS total FROM card_salutes WHERE card_name = ?'
