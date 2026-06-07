@@ -1,3 +1,8 @@
+/* ─────────────────────────────────────────────────────────
+   /rules — mobile-first, scales up to desktop
+   Base = phone (< 640px). Tablet @ 640px. Desktop @ 900px.
+   ───────────────────────────────────────────────────────── */
+
 .page {
   padding-top: 88px;
   min-height: 100vh;
@@ -6,64 +11,131 @@
 .inner {
   max-width: 800px;
   margin: 0 auto;
-  padding: 56px 32px 80px;
+  padding: 32px 16px 56px;
 }
 
 /* ─── Header ─────────────────────────────────────────────── */
 .header {
-  margin-bottom: 48px;
+  margin-bottom: 32px;
   border-bottom: 1px solid var(--border-dim);
-  padding-bottom: 40px;
+  padding-bottom: 28px;
+  text-align: left;
 }
 
 .eyebrow {
   font-family: var(--font-card);
-  font-size: 15px;
-  letter-spacing: 5px;
+  font-size: 12px;
+  letter-spacing: 4px;
   color: var(--text-dim);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .title {
   font-family: var(--font-display);
-  font-size: 52px;
-  letter-spacing: 4px;
-  line-height: 1;
+  font-size: 34px;
+  letter-spacing: 2px;
+  line-height: 1.05;
   color: var(--text);
-  margin-bottom: 16px;
+  margin: 0 0 12px;
+  word-wrap: break-word;
 }
 
 .title span { color: var(--amber); }
 
 .subtitle {
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: 15px;
   color: var(--text-dim);
-  line-height: 1.8;
+  line-height: 1.7;
+}
+
+/* ─── Concept boxes (what is / what to create) ───────────── */
+.conceptBox {
+  border: 1px solid var(--amber-hot);
+  background: rgba(180,255,111,0.03);
+  padding: 20px 18px;
+  margin-bottom: 20px;
+}
+
+.conceptBoxMuted {
+  border-color: var(--border);
+  background: transparent;
+  margin-bottom: 32px;
+}
+
+.conceptLabel {
+  font-family: var(--font-card);
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: var(--amber-hot);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.conceptLabelMuted { color: var(--text-dim); }
+
+.conceptText {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.85;
+}
+
+.conceptTextMuted { color: var(--text-dim); }
+
+.conceptText strong { color: var(--amber-hot); font-weight: 400; }
+.strongOnDim { color: var(--text); font-weight: 400; }
+
+/* ─── UNAT examples grid ─────────────────────────────────── */
+.unatExamples {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.unatChip {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  padding: 12px 14px;
+  border: 1px solid var(--border-dim);
+  line-height: 1.5;
+}
+
+.unatChip strong {
+  display: block;
+  font-family: var(--font-card);
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--text);
+  font-weight: 400;
+  margin-bottom: 4px;
 }
 
 /* ─── Critical callout ───────────────────────────────────── */
 .criticalBox {
   border: 1px solid var(--amber);
   background: rgba(139,115,85,0.05);
-  padding: 24px 28px;
-  margin-bottom: 48px;
+  padding: 18px 18px;
+  margin-bottom: 32px;
 }
 
 .criticalLabel {
   font-family: var(--font-card);
-  font-size: 15px;
-  letter-spacing: 4px;
+  font-size: 12px;
+  letter-spacing: 3px;
   color: var(--amber);
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  line-height: 1.4;
 }
 
 .criticalText {
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: 15px;
   color: var(--text-dim);
-  line-height: 1.9;
+  line-height: 1.75;
 }
 
 .criticalText strong { color: var(--text); font-weight: 400; }
@@ -76,13 +148,39 @@
 
 .inlineLink:hover { color: var(--amber-hot); }
 
+/* ─── Beta note (payment skip) ───────────────────────────── */
+.betaNote {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px dashed var(--amber-hot);
+  background: rgba(180,255,111,0.04);
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.65;
+}
+.betaNote strong {
+  color: var(--amber-hot);
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+
+.noteInline {
+  display: block;
+  margin-top: 6px;
+  font-style: normal;
+  font-size: 13px;
+  color: var(--amber-hot);
+  opacity: 0.85;
+}
+
 /* ─── Sections ───────────────────────────────────────────── */
 .section {
   display: grid;
-  grid-template-columns: 40px 1fr;
-  gap: 24px;
-  margin-bottom: 56px;
-  padding-bottom: 56px;
+  grid-template-columns: 28px 1fr;
+  gap: 12px;
+  margin-bottom: 40px;
+  padding-bottom: 40px;
   border-bottom: 1px solid var(--border-dim);
 }
 
@@ -90,74 +188,78 @@
 
 .sectionNum {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 22px;
   color: var(--border);
   line-height: 1;
-  padding-top: 4px;
+  padding-top: 6px;
 }
-
-.sectionBody {}
 
 .sectionTitle {
   font-family: var(--font-display);
-  font-size: 32px;
-  letter-spacing: 3px;
+  font-size: 22px;
+  letter-spacing: 2px;
   color: var(--text);
-  margin-bottom: 8px;
+  margin: 0 0 8px;
+  line-height: 1.15;
+  word-wrap: break-word;
 }
 
 .sectionNote {
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: 14px;
   color: var(--text-dim);
-  margin-bottom: 20px;
+  margin: 0 0 18px;
   line-height: 1.6;
 }
 
-/* ─── Table ──────────────────────────────────────────────── */
-.table {
-  width: 100%;
-  border-collapse: collapse;
+/* ─── Numbered rules list ────────────────────────────────── */
+.rulesList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
   border: 1px solid var(--border-dim);
 }
 
-.td {
-  font-family: var(--font-body);
-  font-size: 16px;
-  color: var(--text-dim);
-  padding: 10px 14px;
+.rulesItem {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 12px;
+  padding: 14px 14px;
   border-bottom: 1px solid var(--border-dim);
-  vertical-align: top;
-  line-height: 1.6;
+  align-items: start;
 }
 
-tr:last-child .td { border-bottom: none; }
+.rulesItem:last-child { border-bottom: none; }
 
-tr .td:first-child {
-  font-family: var(--font-card);
-  color: var(--text);
+.rulesNum {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--border);
+  line-height: 1.2;
+  text-align: right;
+}
+
+.rulesText {
+  font-family: var(--font-body);
   font-size: 15px;
-  letter-spacing: 1px;
-  white-space: nowrap;
-  width: 240px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  min-width: 0;
 }
 
-/* ─── Pepe Council grid ──────────────────────────────────── */
+.rulesText strong { color: var(--text); font-weight: 400; }
+
+/* ─── Council grid ───────────────────────────────────────── */
 .councilGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: 1fr;
+  gap: 10px;
   margin-bottom: 24px;
-}
-
-/* Last card full-width if odd count (5 cards → card V spans both cols) */
-.councilCard:last-child:nth-child(odd) {
-  grid-column: 1 / -1;
 }
 
 .councilCard {
   border: 1px solid var(--border);
-  padding: 20px 20px 18px;
+  padding: 18px 18px 16px;
   background: rgba(255,255,255,0.01);
   transition: border-color 0.15s, background 0.15s;
   position: relative;
@@ -170,7 +272,6 @@ tr .td:first-child {
 
 .councilCardAccent {
   border-color: var(--amber);
-  border-opacity: 0.4;
   background: rgba(139,115,85,0.04);
 }
 
@@ -185,11 +286,11 @@ tr .td:first-child {
 
 .councilNum {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 22px;
   letter-spacing: 2px;
   color: var(--border);
   line-height: 1;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .councilCardAccent .councilNum {
@@ -199,31 +300,33 @@ tr .td:first-child {
 
 .councilName {
   font-family: var(--font-card);
-  font-size: 16px;
-  letter-spacing: 3px;
+  font-size: 15px;
+  letter-spacing: 2px;
   color: var(--text);
   margin-bottom: 4px;
   line-height: 1.2;
+  word-wrap: break-word;
 }
 
 .councilTitle {
   font-family: var(--font-body);
-  font-size: 15px;
-  letter-spacing: 2px;
+  font-size: 12px;
+  letter-spacing: 1.5px;
   color: var(--amber);
   text-transform: uppercase;
-  margin-bottom: 12px;
-  opacity: 0.75;
+  margin-bottom: 10px;
+  opacity: 0.8;
+  line-height: 1.4;
 }
 
 .councilBio {
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: 14px;
   color: var(--text-dim);
-  line-height: 1.75;
+  line-height: 1.7;
 }
 
-/* ─── Judge list (legacy — keep for admin panel compat) ──── */
+/* ─── Legacy judge list (admin compat) ───────────────────── */
 .judgeList {
   display: flex;
   flex-direction: column;
@@ -234,9 +337,9 @@ tr .td:first-child {
 
 .judgeRow {
   display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 16px;
-  padding: 12px 16px;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--border-dim);
 }
 
@@ -244,21 +347,17 @@ tr .td:first-child {
 
 .judgeName {
   font-family: var(--font-card);
-  font-size: 15px;
+  font-size: 14px;
   letter-spacing: 2px;
   color: var(--amber);
-  align-self: center;
 }
 
 .judgeRole {
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: 14px;
   color: var(--text-dim);
   line-height: 1.6;
-  align-self: center;
 }
-
-/* ─── Responsive ────────────────────────────────────────── */
 
 /* ─── Rubric ─────────────────────────────────────────────── */
 .rubricBlock {
@@ -268,180 +367,82 @@ tr .td:first-child {
 
 .rubricTitle {
   font-family: var(--font-card);
-  font-size: 15px;
-  letter-spacing: 4px;
+  font-size: 12px;
+  letter-spacing: 3px;
   color: var(--text-dim);
-  padding: 10px 16px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--border-dim);
   text-transform: uppercase;
 }
 
 .rubricRow {
-  display: flex;
-  gap: 16px;
-  padding: 10px 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--border-dim);
-  align-items: baseline;
 }
 
 .rubricRow:last-child { border-bottom: none; }
 
 .rubricCat {
   font-family: var(--font-card);
-  font-size: 15px;
+  font-size: 13px;
   letter-spacing: 2px;
   color: var(--text);
-  min-width: 120px;
 }
 
 .rubricDesc {
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: 14px;
   color: var(--text-dim);
-}
-
-.infoNote {
-  font-family: var(--font-body);
-  font-size: 16px;
-  color: var(--text-dim);
-  padding-left: 16px;
-  border-left: 2px solid var(--border);
   line-height: 1.6;
 }
+
+/* ─── Info note (left-bar) ───────────────────────────────── */
+.infoNote {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dim);
+  padding-left: 14px;
+  border-left: 2px solid var(--border);
+  line-height: 1.65;
+}
+
+.infoNoteSpaced { margin-top: 18px; }
+.infoNoteTight { margin-top: 14px; }
 
 /* ─── Outcome blocks ─────────────────────────────────────── */
 .outcomeBlock {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-@media (max-width: 640px) {
-  /* Inner padding */
-  .inner {
-    padding: 40px 16px 60px;
-  }
-
-  /* Header */
-  .title {
-    font-size: 36px;
-    letter-spacing: 2px;
-  }
-
-  /* Section layout — collapse the number column on very small screens */
-  .section {
-    grid-template-columns: 28px 1fr;
-    gap: 12px;
-  }
-
-  .sectionTitle {
-    font-size: 24px;
-    letter-spacing: 2px;
-  }
-
-  /* Tables — stack rows instead of two columns */
-  .table,
-  .table tbody,
-  .table tr {
-    display: block;
-    width: 100%;
-  }
-
-  .table tr {
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border-dim);
-  }
-
-  .table tr:last-child {
-    border-bottom: none;
-  }
-
-  .td {
-    display: block;
-    padding: 2px 0;
-    border-bottom: none;
-  }
-
-  /* First cell becomes a label */
-  tr .td:first-child {
-    width: auto;
-    font-size: 15px;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-    opacity: 0.7;
-    white-space: normal;
-    margin-bottom: 2px;
-  }
-
-  /* Council grid — single column */
-  .councilGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .councilCard:last-child:nth-child(odd) {
-    grid-column: auto;
-  }
-
-  /* Judge rows — stack */
-  .judgeRow {
-    grid-template-columns: 1fr;
-    gap: 4px;
-  }
-
-  /* Rubric rows — wrap */
-  .rubricRow {
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-
-  .rubricCat {
-    min-width: 0;
-    width: 100%;
-  }
-
-  /* Outcome block — single column */
-  .outcomeBlock {
-    grid-template-columns: 1fr;
-  }
-
-  /* CTA button full width */
-  .ctaBtn {
-    display: block;
-    width: 100%;
-    text-align: center;
-    box-sizing: border-box;
-  }
-
-  /* UNAT examples — 2 cols on mobile */
-  .unatExamples {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  /* Numbered rules list */
-  .rulesItem {
-    grid-template-columns: 28px 1fr;
-    gap: 10px;
-  }
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
 .outcomeApproved {
   border: 1px solid var(--amber-hot);
-  padding: 20px;
+  padding: 18px;
 }
+
+.outcomeAmber { border-color: var(--amber); }
 
 .outcomeRejected {
   border: 1px solid var(--red);
-  padding: 20px;
+  padding: 18px;
 }
+
+.outcomeFull { grid-column: 1 / -1; }
 
 .outcomeLabel {
   font-family: var(--font-card);
-  font-size: 15px;
-  letter-spacing: 3px;
+  font-size: 13px;
+  letter-spacing: 2px;
   margin-bottom: 12px;
+  line-height: 1.3;
 }
 
 .outcomeApproved .outcomeLabel { color: var(--green); }
+.outcomeLabelAmber { color: var(--amber) !important; }
 .outcomeRejected .outcomeLabel { color: var(--red); }
 
 .outcomeList {
@@ -455,11 +456,11 @@ tr .td:first-child {
 
 .outcomeList li {
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: 14px;
   color: var(--text-dim);
   padding-left: 14px;
   position: relative;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .outcomeList li::before {
@@ -469,6 +470,44 @@ tr .td:first-child {
   color: var(--text-dim);
 }
 
+/* ─── Fee table ──────────────────────────────────────────── */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border-dim);
+  display: block;
+}
+
+.table tbody { display: block; width: 100%; }
+.table tr {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-dim);
+}
+.table tr:last-child { border-bottom: none; }
+
+.td {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dim);
+  display: block;
+  padding: 2px 0;
+  line-height: 1.55;
+}
+
+tr .td:first-child {
+  font-family: var(--font-card);
+  color: var(--text-dim);
+  font-size: 12px;
+  letter-spacing: 2px;
+  opacity: 0.85;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  width: auto;
+  white-space: normal;
+}
+
 /* ─── CTA ────────────────────────────────────────────────── */
 .cta {
   text-align: center;
@@ -476,104 +515,174 @@ tr .td:first-child {
 }
 
 .ctaBtn {
-  display: inline-block;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
   font-family: var(--font-card);
-  font-size: 15px;
-  letter-spacing: 4px;
+  font-size: 14px;
+  letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--bg);
   background: var(--amber);
-  padding: 14px 36px;
+  padding: 14px 24px;
   text-decoration: none;
+  text-align: center;
   transition: background 0.15s;
 }
 
 .ctaBtn:hover { background: var(--amber-hot); }
 
-/* ─── Concept box ────────────────────────────────────────── */
-.conceptBox {
-  border: 1px solid var(--amber-hot);
-  background: rgba(180,255,111,0.03);
-  padding: 28px 32px;
-  margin-bottom: 24px;
+/* ─────────────────────────────────────────────────────────
+   Tablet — 640px and up
+   ───────────────────────────────────────────────────────── */
+@media (min-width: 640px) {
+  .inner {
+    padding: 48px 28px 72px;
+  }
+
+  .header {
+    margin-bottom: 44px;
+    padding-bottom: 36px;
+  }
+
+  .eyebrow { font-size: 14px; letter-spacing: 5px; }
+  .title { font-size: 44px; letter-spacing: 3px; }
+  .subtitle { font-size: 16px; }
+
+  .conceptBox { padding: 24px 26px; }
+  .conceptLabel { font-size: 13px; letter-spacing: 5px; }
+  .conceptText { font-size: 16px; line-height: 1.95; }
+
+  .unatExamples {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .criticalBox { padding: 22px 26px; }
+  .criticalLabel { font-size: 14px; letter-spacing: 4px; }
+  .criticalText { font-size: 16px; line-height: 1.85; }
+
+  .section {
+    grid-template-columns: 36px 1fr;
+    gap: 18px;
+    margin-bottom: 50px;
+    padding-bottom: 50px;
+  }
+  .sectionNum { font-size: 26px; }
+  .sectionTitle { font-size: 28px; letter-spacing: 3px; }
+  .sectionNote { font-size: 15px; }
+
+  .rulesItem {
+    grid-template-columns: 36px 1fr;
+    gap: 16px;
+    padding: 16px 18px;
+  }
+  .rulesNum { font-size: 22px; }
+  .rulesText { font-size: 16px; line-height: 1.75; }
+
+  .councilGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .councilCard { padding: 20px 20px 18px; }
+  .councilNum { font-size: 26px; }
+  .councilName { font-size: 16px; letter-spacing: 3px; }
+  .councilTitle { font-size: 13px; letter-spacing: 2px; }
+  .councilBio { font-size: 15px; }
+
+  .rubricRow {
+    grid-template-columns: 160px 1fr;
+    gap: 16px;
+    padding: 12px 16px;
+    align-items: start;
+  }
+  .rubricTitle { font-size: 13px; letter-spacing: 4px; padding: 12px 16px; }
+  .rubricCat { font-size: 14px; }
+  .rubricDesc { font-size: 15px; }
+
+  .outcomeBlock {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .outcomeLabel { font-size: 14px; letter-spacing: 3px; }
+  .outcomeList li { font-size: 15px; }
+
+  /* Restore real table at >=640px */
+  .table { display: table; }
+  .table tbody { display: table-row-group; }
+  .table tr { display: table-row; padding: 0; }
+  .table tr:not(:last-child) { border-bottom: none; }
+  .td {
+    display: table-cell;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-dim);
+    vertical-align: top;
+    font-size: 15px;
+  }
+  tr:last-child .td { border-bottom: none; }
+  tr .td:first-child {
+    font-size: 14px;
+    letter-spacing: 1px;
+    color: var(--text);
+    opacity: 1;
+    white-space: nowrap;
+    width: 200px;
+    text-transform: none;
+    margin: 0;
+  }
+
+  .infoNote { font-size: 15px; padding-left: 16px; }
+  .betaNote { font-size: 15px; padding: 14px 18px; }
+  .noteInline { font-size: 14px; }
+
+  .ctaBtn {
+    display: inline-block;
+    width: auto;
+    font-size: 15px;
+    letter-spacing: 4px;
+    padding: 14px 36px;
+  }
 }
 
-.conceptLabel {
-  font-family: var(--font-card);
-  font-size: 13px;
-  letter-spacing: 5px;
-  color: var(--amber-hot);
-  text-transform: uppercase;
-  margin-bottom: 16px;
+/* ─────────────────────────────────────────────────────────
+   Desktop — 900px and up
+   ───────────────────────────────────────────────────────── */
+@media (min-width: 900px) {
+  .inner {
+    padding: 56px 32px 80px;
+  }
+
+  .header {
+    margin-bottom: 48px;
+    padding-bottom: 40px;
+  }
+
+  .title { font-size: 52px; letter-spacing: 4px; }
+  .eyebrow { font-size: 15px; }
+
+  .section {
+    grid-template-columns: 40px 1fr;
+    gap: 24px;
+    margin-bottom: 56px;
+    padding-bottom: 56px;
+  }
+  .sectionNum { font-size: 28px; padding-top: 4px; }
+  .sectionTitle { font-size: 32px; }
+
+  .unatExamples { grid-template-columns: repeat(3, 1fr); }
+
+  .conceptText { font-size: 17px; line-height: 2; }
+
+  .rulesText { font-size: 16px; }
+  .councilBio { font-size: 16px; line-height: 1.75; }
+
+  .rubricRow { grid-template-columns: 200px 1fr; }
+  .rubricCat { font-size: 15px; }
+  .rubricDesc { font-size: 16px; }
+
+  .td { font-size: 16px; }
+  tr .td:first-child { width: 240px; font-size: 15px; }
+
+  .outcomeList li { font-size: 16px; }
+  .infoNote { font-size: 16px; }
 }
-
-.conceptText {
-  font-family: var(--font-body);
-  font-size: 17px;
-  color: var(--text);
-  line-height: 2;
-}
-
-.conceptText strong { color: var(--amber-hot); font-weight: 400; }
-
-/* ─── UNAT examples grid ─────────────────────────────────── */
-.unatExamples {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 24px;
-}
-
-.unatChip {
-  font-family: var(--font-body);
-  font-size: 14px;
-  color: var(--text-dim);
-  padding: 12px 14px;
-  border: 1px solid var(--border-dim);
-  line-height: 1.5;
-}
-
-.unatChip strong {
-  display: block;
-  font-family: var(--font-card);
-  font-size: 13px;
-  letter-spacing: 2px;
-  color: var(--text);
-  font-weight: 400;
-  margin-bottom: 4px;
-}
-
-/* ─── Numbered rules list ────────────────────────────────── */
-.rulesList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  border: 1px solid var(--border-dim);
-}
-
-.rulesItem {
-  display: grid;
-  grid-template-columns: 36px 1fr;
-  gap: 16px;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-dim);
-  align-items: baseline;
-}
-
-.rulesItem:last-child { border-bottom: none; }
-
-.rulesNum {
-  font-family: var(--font-display);
-  font-size: 22px;
-  color: var(--border);
-  line-height: 1.4;
-}
-
-.rulesText {
-  font-family: var(--font-body);
-  font-size: 16px;
-  color: var(--text-dim);
-  line-height: 1.75;
-}
-
-.rulesText strong { color: var(--text); font-weight: 400; }

@@ -100,13 +100,13 @@ export default function RulesPage() {
           </div>
 
           {/* ── WHAT TO CREATE ── */}
-          <div className={styles.conceptBox} style={{borderColor:'var(--border)', background:'transparent', marginBottom:48}}>
-            <div className={styles.conceptLabel} style={{color:'var(--text-dim)'}}>what to create</div>
-            <div className={styles.conceptText} style={{color:'var(--text-dim)'}}>
+          <div className={`${styles.conceptBox} ${styles.conceptBoxMuted}`}>
+            <div className={`${styles.conceptLabel} ${styles.conceptLabelMuted}`}>what to create</div>
+            <div className={`${styles.conceptText} ${styles.conceptTextMuted}`}>
               Take something that already exists. Make it Pepe.<br /><br />
               A historical figure. A meme. A musician. A Bitcoin legend. A moment from culture.
               Your own face. Your enemy&apos;s face. Whatever has energy right now.<br /><br />
-              The concept is the UNAT framing &mdash; <strong style={{color:'var(--text)'}}>you are not that thing, but you are a Pepe version of it.</strong><br /><br />
+              The concept is the UNAT framing &mdash; <strong className={styles.strongOnDim}>you are not that thing, but you are a Pepe version of it.</strong><br /><br />
               Pepe must be present or clearly referenced. That&apos;s the only creative requirement.
               Everything else is yours.
             </div>
@@ -148,7 +148,7 @@ export default function RulesPage() {
                 </li>
                 <li className={styles.rulesItem}>
                   <span className={styles.rulesNum}>3</span>
-                  <span className={styles.rulesText}><strong>Submit your art</strong> — return to <Link href="/submit" className={styles.inlineLink}>/submit</Link>, upload your Pepe art, sign with the issuing address, pay the submission fee.</span>
+                  <span className={styles.rulesText}><strong>Submit your art</strong> — return to <Link href="/submit" className={styles.inlineLink}>/submit</Link>, upload your Pepe art, and sign with the issuing address. <em className={styles.noteInline}>Beta note: if a payment step appears, skip it — submissions are free during the beta window.</em></span>
                 </li>
                 <li className={styles.rulesItem}>
                   <span className={styles.rulesNum}>4</span>
@@ -186,19 +186,19 @@ export default function RulesPage() {
                   <span className={styles.rulesText}><strong>Original work only.</strong> No copying existing Pepes. Our scientists check. Referencing and remixing is fine &mdash; straight copies are not.</span>
                 </li>
                 <li className={styles.rulesItem}>
-                  <span className={styles.rulesNum}>5</span>
+                  <span className={styles.rulesNum}>6</span>
                   <span className={styles.rulesText}><strong>No NSFW content.</strong> Keep it light. If you&apos;re asking yourself if it&apos;s okay, it&apos;s probably not.</span>
                 </li>
                 <li className={styles.rulesItem}>
-                  <span className={styles.rulesNum}>6</span>
+                  <span className={styles.rulesNum}>7</span>
                   <span className={styles.rulesText}><strong>No websites, QR codes, or shill content in the art.</strong> The art is the art. Leave the marketing out of the image.</span>
                 </li>
                 <li className={styles.rulesItem}>
-                  <span className={styles.rulesNum}>7</span>
+                  <span className={styles.rulesNum}>8</span>
                   <span className={styles.rulesText}><strong>Art must be complete and intentional.</strong> 400&times;560px recommended (portrait, trading card ratio). PNG · GIF · JPEG · WebP. Max 15 MB. No placeholders, no drafts.</span>
                 </li>
                 <li className={styles.rulesItem}>
-                  <span className={styles.rulesNum}>8</span>
+                  <span className={styles.rulesNum}>9</span>
                   <span className={styles.rulesText}><strong>Make sure your Pepe is dank.</strong> Check the directory. Compare. The council has seen a lot of Pepes.</span>
                 </li>
               </ol>
@@ -252,8 +252,8 @@ export default function RulesPage() {
                     <li>You may now distribute your tokens</li>
                   </ul>
                 </div>
-                <div className={styles.outcomeApproved} style={{borderColor:'var(--amber)'}}>
-                  <div className={styles.outcomeLabel} style={{color:'var(--amber)'}}>IN DIRECTORY — NO STAMP</div>
+                <div className={`${styles.outcomeApproved} ${styles.outcomeAmber}`}>
+                  <div className={`${styles.outcomeLabel} ${styles.outcomeLabelAmber}`}>IN DIRECTORY — NO STAMP</div>
                   <ul className={styles.outcomeList}>
                     <li>Passed hard rules, scored below threshold</li>
                     <li>Art is public and wallets see it</li>
@@ -262,7 +262,7 @@ export default function RulesPage() {
                     <li>You may now distribute your tokens</li>
                   </ul>
                 </div>
-                <div className={styles.outcomeRejected} style={{gridColumn:'1/-1'}}>
+                <div className={`${styles.outcomeRejected} ${styles.outcomeFull}`}>
                   <div className={styles.outcomeLabel}>REJECTED ✗</div>
                   <ul className={styles.outcomeList}>
                     <li>Hard rule violated — NSFW, no Pepe, shill content, or plagiarism</li>
@@ -273,7 +273,7 @@ export default function RulesPage() {
                 </div>
               </div>
 
-              <div className={styles.infoNote} style={{marginTop:20}}>
+              <div className={`${styles.infoNote} ${styles.infoNoteSpaced}`}>
                 Being in the directory without a stamp is not a failure — the council saw it, let it in, and had opinions.
                 Rejection is reserved for work that has no business being here.
               </div>
@@ -293,7 +293,10 @@ export default function RulesPage() {
                   <tr><td className={styles.td}>PEPECASH</td><td className={styles.td}>Counterparty community token</td></tr>
                 </tbody>
               </table>
-              <div className={styles.infoNote} style={{marginTop:16}}>Specific fee amounts published at launch.</div>
+              <div className={`${styles.infoNote} ${styles.infoNoteTight}`}>Specific fee amounts published at launch.</div>
+              <div className={styles.betaNote}>
+                <strong>Beta:</strong> submissions are currently free. If a payment step appears in the wizard, skip it &mdash; no fee is required during the beta window.
+              </div>
             </div>
           </section>
 
