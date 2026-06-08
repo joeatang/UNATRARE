@@ -418,7 +418,9 @@ export default function CashBurnPanel({ authToken }) {
       // Build the burn tx
       const owner = new web3.PublicKey(connected.pubkey);
       const burnIx = buildBurnIx(web3, cashAcct.address, CASH_MINT, connected.pubkey, rawAmt, cashAcct.tokenProgram);
-      const { blockhash, lastValidBlockHeight } = await rpc('getLatestBlockhash', [{ commitment: 'finalized' }]);
+      // getLatestBlockhash returns { context, value: { blockhash, lastValidBlockHeight } } — unwrap value
+      const { blockhash, lastValidBlockHeight } = await rpc('getLatestBlockhash', [{ commitment: 'finalized' }])
+        .then(r => ({ blockhash: r.value.blockhash, lastValidBlockHeight: r.value.lastValidBlockHeight }));
       const tx = new web3.Transaction({ recentBlockhash: blockhash, feePayer: owner }).add(burnIx);
 
       // Sign + send via wallet
