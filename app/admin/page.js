@@ -329,10 +329,12 @@ function TokenRow({ token, authToken, onAction }) {
               </button>
               <button
                 className={`${styles.actionBtn} ${styles.judgeBtn}`}
-                onClick={() => act('judge')}
+                onClick={() => act(token.status === 'pending' ? 'judge' : 'rejudge')}
                 disabled={!!loading}
               >
-                {loading === 'judge' ? 'judging...' : '⚡ re-judge'}
+                {loading === 'judge' || loading === 'rejudge'
+                  ? (token.status === 'pending' ? 'judging...' : 're-judging...')
+                  : (token.status === 'pending' ? '⚡ judge' : '⚡ re-judge')}
               </button>
               <button
                 className={`${styles.actionBtn} ${styles.genesisBtn}`}

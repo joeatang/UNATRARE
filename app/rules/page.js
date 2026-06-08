@@ -312,7 +312,6 @@ export default function RulesPage() {
                 <tbody>
                   <tr><td className={styles.td}>NAT</td><td className={styles.td}>Preferred — supports the NAT ecosystem</td></tr>
                   <tr><td className={styles.td}>BTC</td><td className={styles.td}>Always accepted</td></tr>
-                  <tr><td className={styles.td}>PEPECASH</td><td className={styles.td}>Counterparty community token</td></tr>
                 </tbody>
               </table>
               <div className={`${styles.infoNote} ${styles.infoNoteTight}`}>Specific fee amounts published at launch.</div>

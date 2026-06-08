@@ -306,6 +306,21 @@ export default async function CardPage({ params }) {
 
             <SalutePanel cardName={token.token_name} />
 
+            <div className={styles.cashLinks}>
+              <a
+                href="https://nat.fun/?refId=c69c9108f52b"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.cashLink}
+              >
+                need $CASH? get it on nat.fun ↗
+              </a>
+              <span className={styles.cashLinkSep} aria-hidden="true">·</span>
+              <Link href="/about/salutes" className={styles.cashLink}>
+                learn about $CASH ↗
+              </Link>
+            </div>
+
             {token.description && (
               <div className={styles.description}>
                 {token.description}
