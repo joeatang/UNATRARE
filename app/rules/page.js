@@ -120,6 +120,28 @@ export default function RulesPage() {
             </div>
           </div>
 
+          {/* ── THE LOOK (style suggestion, not a rule) ── */}
+          <div className={styles.lookBox}>
+            <div className={styles.lookLabel}>· the look · a starting point ·</div>
+            <div className={styles.lookFigure}>
+              <img
+                src="/rules/style-example.png"
+                alt="Block-structured Pepe — flat shapes, geometric head, big eyes."
+                className={styles.lookImg}
+                width={600}
+                height={600}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <p className={styles.lookText}>
+              Block-structured Pepes &mdash; flat shapes, geometric heads, bold outlines &mdash; are our house dialect.
+              They read clean from wallet thumbnail to banner. <strong>Consider it a starting point, not a requirement.</strong>{' '}
+              Painterly, pixel, collage, hand-drawn, AI-assisted, your own thing entirely &mdash; all welcome,
+              as long as the Pepe is unmistakable.
+            </p>
+          </div>
+
           {/* ── DO THIS FIRST ── */}
           <div className={styles.criticalBox}>
             <div className={styles.criticalLabel}>⚠ do this before you create your token</div>
