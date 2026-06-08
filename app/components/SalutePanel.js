@@ -1033,7 +1033,7 @@ export default function SalutePanel({ cardName }) {
           New here? <a href="/about/salutes" style={{ color: 'var(--amber)' }}>What is a salute? →</a>
           <br />
           Need $CASH first? Buy on{' '}
-          <a href="https://nat.fun" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>
+          <a href="https://nat.fun/?refId=c69c9108f52b" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>
             nat.fun
           </a>
           .
@@ -1057,7 +1057,7 @@ export default function SalutePanel({ cardName }) {
           </summary>
           <div style={{ marginTop: 10 }}>
             $CASH is a <strong style={{ color: 'var(--text)' }}>new Solana SPL Token-2022</strong> minted on{' '}
-            <a href="https://nat.fun" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>nat.fun</a>.
+            <a href="https://nat.fun/?refId=c69c9108f52b" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>nat.fun</a>.
             Because it's young and the ticker is generic, Phantom / Solflare / Backpack may show an
             <em> &ldquo;unverified token&rdquo;</em> or <em>&ldquo;low-trust&rdquo;</em> warning. That is normal for any new token —
             it is not evidence of a scam.
@@ -1237,7 +1237,7 @@ export default function SalutePanel({ cardName }) {
                   <button style={{ ...S.pctBtn, padding: '8px 14px', color: 'var(--green)', borderColor: 'var(--green)' }} onClick={refreshBalance}>
                     ↻ REFRESH BALANCE
                   </button>
-                  <a href="https://nat.fun" target="_blank" rel="noopener noreferrer" style={{ ...S.pctBtn, padding: '8px 14px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+                  <a href="https://nat.fun/?refId=c69c9108f52b" target="_blank" rel="noopener noreferrer" style={{ ...S.pctBtn, padding: '8px 14px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
                     BUY $CASH →
                   </a>
                 </div>
@@ -1365,7 +1365,7 @@ export default function SalutePanel({ cardName }) {
             <div style={{ ...S.hint, marginTop: 10 }}>
               Burn is verified on Solana mainnet. Any Solana wallet works - Phantom, Solflare, Backpack, and others.
               {' '}To purchase $CASH, use{' '}
-              <a href="https://nat.fun" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>
+              <a href="https://nat.fun/?refId=c69c9108f52b" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>
                 nat.fun
               </a>
               .

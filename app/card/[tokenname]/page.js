@@ -404,6 +404,18 @@ export default async function CardPage({ params }) {
                   </a>
                 </div>
               )}
+              <div className={styles.metaRow}>
+                <span className={styles.metaKey}>Salute Token</span>
+                <a
+                  href="https://nat.fun/?refId=c69c9108f52b"
+                  target="_blank" rel="noopener noreferrer"
+                  className={styles.metaVal}
+                  style={{ color: 'var(--amber-hot)', textDecoration: 'none' }}
+                  title="Get $CASH (NATCASH) on nat.fun — required to salute this card"
+                >
+                  $CASH on nat.fun ↗
+                </a>
+              </div>
               {token.artist_sol_address && token.artist_sol_verified_at && (
                 <div className={styles.metaRow}>
                   <span className={styles.metaKey}>Artist Payout</span>

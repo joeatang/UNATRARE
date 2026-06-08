@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Nav from '../../components/Nav';
+import BuyCash from '../../components/BuyCash';
 import { getDb } from '../../../lib/db';
 import { BURN_TIERS, CHARACTER_BY_KEY, tierForBurn, fmtFull, fmtCompact } from '../../../lib/cashBurn';
 import styles from './burn.module.css';
@@ -180,6 +181,12 @@ export default function BurnDetailPage({ params }) {
             </div>
           </div>
         )}
+
+        <BuyCash
+          variant="compact"
+          headline={burn.status === 'active' ? 'Want to join the next ceremony?' : 'Want to be in the next ceremony?'}
+          subline="Cash-burn ceremonies happen periodically. Hold $CASH ahead of time so you can climb the leaderboard the moment one opens."
+        />
 
         <div className={styles.shareBar}>
           <a href={tweetUrl} target="_blank" rel="noopener noreferrer" className={styles.shareBtn}>share on 𝕏</a>

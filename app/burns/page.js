@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Nav from '../components/Nav';
+import BuyCash from '../components/BuyCash';
 import { getDb } from '../../lib/db';
 import { fmtCash, tierFor, truncateWallet } from '../../lib/saluteDisplay';
 import { fmtCompact, fmtFull, CHARACTER_BY_KEY } from '../../lib/cashBurn';
@@ -206,6 +207,12 @@ export default function BurnsPage({ searchParams }) {
             <div className={styles.statLabel}>cards</div>
           </div>
         </div>
+
+        <BuyCash
+          variant="full"
+          headline="GET $CASH TO ENTER THE LEDGER"
+          subline="Every salute on this page is a real $CASH burn on Solana. Hold $CASH first, then salute any certified card to land permanently on the leaderboard."
+        />
 
         {/* ── Window pills ── */}
         <div className={styles.pillRow}>

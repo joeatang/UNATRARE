@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Nav from '../../components/Nav';
+import BuyCash from '../../components/BuyCash';
 import { getDb } from '../../../lib/db';
 import { fmtCash, getSitewideBurnTotals } from '../../../lib/saluteDisplay';
 import styles from './page.module.css';
@@ -93,7 +94,7 @@ export default function AboutSalutesPage() {
           <h2>Why $CASH? Why burn?</h2>
           <p>
             $CASH is a Solana SPL Token-2022 minted on{' '}
-            <a href="https://nat.fun" target="_blank" rel="noopener noreferrer">nat.fun</a>
+            <a href="https://nat.fun/?refId=c69c9108f52b" target="_blank" rel="noopener noreferrer">nat.fun</a>
             {' '}— a fast, low-fee token with no permission gate. It&apos;s the engagement layer for the UNATPEPE / DMT culture stack.
           </p>
           <p>
@@ -102,6 +103,8 @@ export default function AboutSalutesPage() {
           <p>
             We use a custom Anchor program on Solana so every burn is verifiable and auditable. The program ID is in your wallet&apos;s approval prompt; mismatch = don&apos;t sign.
           </p>
+
+          <BuyCash variant="full" />
         </section>
 
         <section className={styles.section}>

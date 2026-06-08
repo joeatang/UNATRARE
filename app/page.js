@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Nav from './components/Nav';
 import PathCards from './components/PathCards';
 import CeremonyRail from './components/CeremonyRail';
+import BuyCash from './components/BuyCash';
 import styles from './page.module.css';
 import { getDb } from '../lib/db';
 import { fmtCash, getSitewideBurnTotals } from '../lib/saluteDisplay';
@@ -143,6 +144,12 @@ export default function LandingPage() {
               <span className={styles.saluteBannerArrow}>see the ledger →</span>
             </Link>
           )}
+
+          <BuyCash
+            variant="compact"
+            headline="Get $CASH to join the fire"
+            subline="$CASH is the engagement token of UNATRARE. Salutes burn it on Solana — your wallet shows up on the leaderboard forever."
+          />
 
           <div className={styles.heroBeta}>
             · experimental · in beta · art is permanent, process is evolving ·
