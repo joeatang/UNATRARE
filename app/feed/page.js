@@ -119,13 +119,14 @@ function formatDate(ts) {
 }
 
 function toRoman(n) {
+  if (n === 0) return '0';
   const map = [[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],
                [50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
   return map.reduce((s,[v,r]) => { while(n>=v){s+=r;n-=v;} return s; }, '');
 }
 
 function cardLabel(series, cardNumber) {
-  if (!series || !cardNumber) return '';
+  if (series === null || series === undefined || !cardNumber) return '';
   return `Series ${toRoman(series)} · Card #${String(cardNumber).padStart(3,'0')}`;
 }
 

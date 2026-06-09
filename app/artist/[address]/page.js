@@ -18,6 +18,7 @@ function domainOf(url) {
 }
 
 function toRoman(n) {
+  if (n === 0) return '0';
   const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
   const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
   let out = '';
@@ -117,7 +118,7 @@ export default async function ArtistPage({ params }) {
     ? profile.past_projects.split('\n').map(l => l.trim()).filter(Boolean)
     : [];
 
-  const seriesSet = [...new Set(approved.map(t => t.series).filter(Boolean))].sort();
+  const seriesSet = [...new Set(approved.map(t => t.series).filter(s => s !== null && s !== undefined))].sort((a, b) => a - b);
 
   return (
     <>
