@@ -317,8 +317,25 @@ export default function PayPage({ params }) {
           </div>
         )}
 
+        {/* Enrollment fee not yet activated. To activate: restore <PaymentForm> here. */}
         {pageState === 'approved' && (
-          <PaymentForm tokenData={tokenData} tokenName={tokenName} />
+          <div className={styles.stepBox}>
+            <div className={styles.stepEyebrow}>Coming Soon</div>
+            <h2 className={styles.stepTitle}>ENR<span>O</span>LLMENT</h2>
+            <p className={styles.stepDesc}>
+              <strong>{tokenName}</strong> is certified DANK.<br />
+              Enrollment fee activation is coming soon — your spot is reserved.
+            </p>
+            <div style={{marginTop:24}}>
+              <Link href="/" style={{
+                fontFamily:'var(--font-card)', fontSize:'11px', letterSpacing:'3px',
+                color:'var(--text-dim)', textDecoration:'none',
+                border:'1px solid var(--border)', padding:'10px 20px',
+              }}>
+                ← back to mempool
+              </Link>
+            </div>
+          </div>
         )}
       </main>
     </>

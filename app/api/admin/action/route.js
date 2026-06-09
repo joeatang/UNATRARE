@@ -61,7 +61,7 @@ export async function POST(request) {
   const name = tokenName.toUpperCase().trim();
   const actions = ['approve', 'reject', 'judge', 'rejudge', 'genesis', 'purge', 'reveal',
                    'hide_from_directory', 'show_in_directory',
-                   'certify_stamp', 'decertify_stamp'];
+                   'certify_stamp', 'decertify_stamp', 'set_series'];
   if (!actions.includes(action)) {
     return NextResponse.json({ error: 'invalid action' }, { status: 400 });
   }
@@ -252,6 +252,22 @@ export async function POST(request) {
       }
 
       return NextResponse.json({ ok: true, action: 'rejected' });
+    }
+
+    if (action === 'set_series') {
+      if (token.status !== 'approved') {
+        return NextResponse.json({ error: 'token must be approved to reassign series' }, { status: 400 });
+      }
+      const targetSeries = parseInt(seriesOverride, 10);
+      if (isNaN(targetSeries) || targetSeries < 0) {
+        return NextResponse.json({ error: 'series must be a number ≥ 0' }, { status: 400 });
+      }
+      const last = db.prepare(
+        "SELECT MAX(card_number) as mx FROM tokens WHERE status='approved' AND series=? AND token_name != ?"
+      ).get(targetSeries, name);
+      const newCardNumber = (last?.mx ?? 0) + 1;
+      db.prepare('UPDATE tokens SET series=?, card_number=? WHERE token_name=?').run(targetSeries, newCardNumber, name);
+      return NextResponse.json({ ok: true, action: 'set_series', series: targetSeries, card_number: newCardNumber });
     }
 
     if (action === 'purge') {

@@ -952,17 +952,7 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
       {/* Score bar */}
       {sub.judgeScore != null && <ScoreBar score={sub.judgeScore} />}
 
-      {/* Approved: payment CTA */}
-      {sub.status === 'approved' && sub.payUrl && (
-        <div className={styles.payStrip}>
-          <div className={styles.payLabel}>
-            Your art was certified. Complete your listing to go live in the directory.
-          </div>
-          <Link href={sub.payUrl} className={styles.payBtn}>
-            complete listing →
-          </Link>
-        </div>
-      )}
+      {/* Approved: payment CTA — disabled until enrollment fee is activated */}
 
       {/* Rejected: reason */}
       {sub.status === 'rejected' && sub.rejectionReason && (

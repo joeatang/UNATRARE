@@ -65,6 +65,7 @@ function TokenRow({ token, authToken, onAction }) {
   const [announceCopied, setAnnounceCopied] = useState(false);
   const [dirHidden, setDirHidden] = useState(!!token.directory_hidden);
   const [stamped, setStamped] = useState(!!token.council_certified);
+  const [moveSeries, setMoveSeries] = useState('');
 
   async function act(action, extra = {}) {
     setLoading(action);
@@ -115,6 +116,9 @@ function TokenRow({ token, authToken, onAction }) {
           `#Counterparty #UNATPEPE #RarePepe`,
         ].filter(Boolean).join('\n');
         setAnnounceText(tweet);
+      } else if (action === 'set_series') {
+        alert(`Moved to Series ${json.series} · Card #${String(json.card_number).padStart(3,'0')}`);
+        onAction(token.token_name, action);
       } else {
         onAction(token.token_name, action);
       }
@@ -171,18 +175,12 @@ function TokenRow({ token, authToken, onAction }) {
           {approvalResult && (
             <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px',
               color:'var(--green)', marginTop:4}}>
-              ✓ CERTIFIED — send payment link to artist
+              ✓ CERTIFIED — copy message for artist
             </div>
           )}
         </div>
         <div style={{display:'flex', alignItems:'center', gap:8}}>
-          {token.status === 'approved' && !token.revealed_at && !approvalResult && (
-            <span style={{
-              fontFamily:'var(--font-card)', fontSize:'8px', letterSpacing:'2px',
-              color:'var(--amber)', border:'1px solid var(--amber)',
-              padding:'2px 6px', whiteSpace:'nowrap',
-            }}>⬡ DROP NEEDED</span>
-          )}
+
           <div className={styles.rowToggle}>{approvalResult ? '✉' : expanded ? '▲' : '▼'}</div>
         </div>
       </div>
@@ -312,6 +310,46 @@ function TokenRow({ token, authToken, onAction }) {
                 (blank = auto-assign)
               </span>
             </div>
+            {token.status === 'approved' && token.card_number && (
+              <div style={{display:'flex', alignItems:'center', gap:8, marginBottom:8}}>
+                <span style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px', color:'var(--text-dim)', whiteSpace:'nowrap'}}>
+                  MOVE SERIES
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={moveSeries}
+                  onChange={e => setMoveSeries(e.target.value)}
+                  placeholder="0"
+                  style={{
+                    width:60, padding:'5px 8px',
+                    background:'var(--bg)', border:'1px solid var(--border)',
+                    color:'var(--text)', fontFamily:'var(--font-card)', fontSize:'11px',
+                    letterSpacing:'2px',
+                  }}
+                />
+                <button
+                  onClick={() => {
+                    if (moveSeries === '') return;
+                    if (confirm(`Move ${token.token_name} to Series ${moveSeries}? Card number will be reassigned.`)) {
+                      act('set_series', { series: parseInt(moveSeries, 10) });
+                    }
+                  }}
+                  disabled={!!loading || moveSeries === ''}
+                  style={{
+                    fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px',
+                    padding:'5px 10px', border:'1px solid var(--border-dim)',
+                    background:'transparent', color:'var(--text-dim)', cursor:'pointer',
+                  }}
+                >
+                  {loading === 'set_series' ? '…' : 'move →'}
+                </button>
+                <span style={{fontFamily:'var(--font-body)', fontSize:'10px', color:'var(--text-dim)'}}>
+                  now: s{token.series} #{String(token.card_number).padStart(3,'0')}
+                </span>
+              </div>
+            )}
             <div className={styles.actionBtns}>
               <button
                 className={`${styles.actionBtn} ${styles.approveBtn}`}
@@ -344,29 +382,7 @@ function TokenRow({ token, authToken, onAction }) {
               >
                 {loading === 'genesis' ? 'certifying...' : '★ genesis'}
               </button>
-              {/* DROP button — only show for approved tokens not yet revealed */}
-              {token.status === 'approved' && (
-                revealed ? (
-                  <span
-                    className={styles.actionBtn}
-                    style={{ background: 'var(--green)', color: 'var(--bg)', fontWeight: 700, cursor: 'default', opacity: 1 }}
-                    title="Art is live publicly"
-                  >
-                    ● LIVE
-                  </span>
-                ) : (
-                  <button
-                    className={`${styles.actionBtn} ${styles.dropBtn}`}
-                    onClick={() => {
-                      if (confirm(`Drop art for ${token.token_name} publicly? This will reveal the art on the homepage and to wallets.`)) act('reveal');
-                    }}
-                    disabled={!!loading}
-                    title="Release art publicly — homepage + wallets can now see it"
-                  >
-                    {loading === 'reveal' ? 'dropping...' : '⬡ drop art'}
-                  </button>
-                )
-              )}
+
               <button
                 className={`${styles.actionBtn} ${styles.purgeBtn}`}
                 onClick={() => {
@@ -428,9 +444,9 @@ function TokenRow({ token, authToken, onAction }) {
 
       {/* Branded approval message — shown after certify */}
       {approvalResult && (() => {
-        const payUrl = approvalResult.payUrl || `https://unatrare.wtf/pay/${token.token_name}`;
         const series = approvalResult.series ?? '—';
         const cardNum = approvalResult.card_number ?? '—';
+        const cardNumStr = cardNum !== '—' ? String(cardNum).padStart(3, '0') : '—';
         const msg = [
           '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
           '✦  UNATRARE — CERTIFIED DANK  ✦',
@@ -438,15 +454,11 @@ function TokenRow({ token, authToken, onAction }) {
           `${token.token_name} has been evaluated by the`,
           'UNATRARE Pepe Council and certified DANK.',
           '',
-          'Your art has earned a place in the directory.',
+          `Series ${series} · Card #${cardNumStr}`,
           '',
-          'Complete your enrollment:',
-          `→ ${payUrl}`,
+          `→ unatrare.wtf/card/${token.token_name}`,
+          '→ Add Solana payout address: unatrare.wtf/status',
           '',
-          'Submit the fee to take your official position',
-          'in the collection.',
-          '',
-          `Series ${series} · Card #${cardNum}`,
           '— The UNATRARE Scientist Panel',
           '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
         ].join('\n');
