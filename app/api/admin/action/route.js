@@ -262,11 +262,26 @@ export async function POST(request) {
       if (isNaN(targetSeries) || targetSeries < 0) {
         return NextResponse.json({ error: 'series must be a number ≥ 0' }, { status: 400 });
       }
+      if (targetSeries === token.series) {
+        return NextResponse.json({ ok: true, action: 'set_series', series: token.series, card_number: token.card_number });
+      }
+      const sourceSeries = token.series;
+      const sourceCardNumber = token.card_number;
+
+      // Assign next card_number in target series
       const last = db.prepare(
         "SELECT MAX(card_number) as mx FROM tokens WHERE status='approved' AND series=? AND token_name != ?"
       ).get(targetSeries, name);
       const newCardNumber = (last?.mx ?? 0) + 1;
+
+      // Move the card
       db.prepare('UPDATE tokens SET series=?, card_number=? WHERE token_name=?').run(targetSeries, newCardNumber, name);
+
+      // Compact source series: close the gap left behind
+      db.prepare(
+        "UPDATE tokens SET card_number = card_number - 1 WHERE status='approved' AND series=? AND card_number > ?"
+      ).run(sourceSeries, sourceCardNumber);
+
       return NextResponse.json({ ok: true, action: 'set_series', series: targetSeries, card_number: newCardNumber });
     }
 
