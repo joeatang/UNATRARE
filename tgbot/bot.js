@@ -96,6 +96,11 @@ db.exec(`
     file_id     TEXT NOT NULL,
     sent_at     INTEGER NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS tg_submission_announce (
+    token_name    TEXT PRIMARY KEY,
+    announced_at  INTEGER NOT NULL
+  );
 `);
 
 const selWatchedTokens = db.prepare(`
@@ -140,6 +145,29 @@ const upsertDispenser = db.prepare(`
     last_announced_kind = COALESCE(excluded.last_announced_kind, dispenser_state.last_announced_kind)
 `);
 const selDispenserByHash = db.prepare('SELECT * FROM dispenser_state WHERE tx_hash = ?');
+
+// New pending submissions worth announcing:
+//   - status still 'pending' (AI judge hasn't auto-rejected)
+//   - submitted at least 60s ago (judge had a chance to run)
+//   - we haven't announced this token before
+//   - submitted within the last 24h (don't backfill ancient ones on first run)
+const selFreshSubmissions = db.prepare(`
+  SELECT t.token_name, t.artist_handle, t.artist_address, t.submitted_at,
+         t.category, t.subcategory
+  FROM tokens t
+  LEFT JOIN tg_submission_announce a ON a.token_name = t.token_name
+  WHERE t.status = 'pending'
+    AND t.submitted_at IS NOT NULL
+    AND t.submitted_at <= unixepoch() - 60
+    AND t.submitted_at >= unixepoch() - 86400
+    AND a.token_name IS NULL
+  ORDER BY t.submitted_at ASC
+  LIMIT 5
+`);
+const markSubmissionAnnounced = db.prepare(`
+  INSERT INTO tg_submission_announce (token_name, announced_at) VALUES (?, ?)
+  ON CONFLICT(token_name) DO NOTHING
+`);
 const selFileId = db.prepare('SELECT file_id FROM tg_photo_cache WHERE cache_key = ?');
 const upsertFileId = db.prepare(`
   INSERT INTO tg_photo_cache (cache_key, token_name, file_id, sent_at)
@@ -573,15 +601,91 @@ async function updatesLoop() {
   }
 }
 
+// ── Submission teasers ──────────────────────────────────────────────────────
+// Every minute, look for new pending submissions. Text-only post in the spirit
+// of the "art hidden until verdict" mystery card. Pings the channel to build
+// anticipation and pings the admin (Joe) that there's something to review.
+//
+// Grace window: only announces if the submission has been pending for 60+ sec.
+// This avoids announcing tokens that the AI judge auto-rejects in seconds.
+//
+// Backfill safety: only looks at the last 24h, so this loop won't spam the
+// channel with old historical submissions on first run.
+const SUBMISSION_SCAN_INTERVAL_MS = 60 * 1000;
+let submissionFirstRun = true;
+
+function captionForSubmission(row) {
+  const who = row.artist_handle ? `@${row.artist_handle}` : shortAddr(row.artist_address);
+  const cat = row.category ? row.category : '';
+  const sub = row.subcategory ? row.subcategory : '';
+  const tag = [cat, sub].filter(Boolean).join(' · ');
+  return clean([
+    `🐸 <b>NEW SUBMISSION — UNDER REVIEW</b>`,
+    '',
+    `<code>${row.token_name}</code> · by <b>${who}</b>`,
+    tag ? `<i>${tag}</i>` : '',
+    '',
+    `▓▒░ <b>?</b> ░▒▓`,
+    `<i>art hidden until verdict</i>`,
+    '',
+    `the council deliberates · stay ready to salute`,
+    '',
+    `<a href="${SITE_BASE}/card/${row.token_name}">Watch this card →</a>`,
+  ].filter(Boolean).join('\n'));
+}
+
+async function submissionScanOnce() {
+  let rows;
+  try { rows = selFreshSubmissions.all(); }
+  catch (e) { warn('[tgbot] submission query failed:', e.message); return; }
+  if (!rows.length) return;
+
+  // First run after a fresh deploy: silently mark anything older than 5 min as
+  // already-announced so we don't backfill stale pendings into the channel.
+  if (submissionFirstRun) {
+    const cutoff = Math.floor(Date.now() / 1000) - 5 * 60;
+    let baselined = 0;
+    for (const r of rows) {
+      if (r.submitted_at < cutoff) {
+        markSubmissionAnnounced.run(r.token_name, Math.floor(Date.now() / 1000));
+        baselined++;
+      }
+    }
+    if (baselined) log(`[tgbot] submission baseline: silenced ${baselined} stale pending(s)`);
+    submissionFirstRun = false;
+    rows = rows.filter(r => r.submitted_at >= cutoff);
+  }
+
+  for (const r of rows) {
+    try {
+      await sendMessage(captionForSubmission(r));
+      markSubmissionAnnounced.run(r.token_name, Math.floor(Date.now() / 1000));
+      log(`[tgbot] teased submission ${r.token_name}`);
+    } catch (e) {
+      warn(`[tgbot] submission teaser ${r.token_name} failed:`, e.message);
+    }
+    await sleep(800); // soft stagger if multiple at once
+  }
+}
+
+async function submissionLoop() {
+  while (true) {
+    try { await submissionScanOnce(); }
+    catch (e) { warn('[tgbot] submission scan error:', e.message); }
+    await sleep(SUBMISSION_SCAN_INTERVAL_MS);
+  }
+}
+
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // ── Boot ────────────────────────────────────────────────────────────────────
 log(`[tgbot] starting — chat=${CHAT_ID} db=${DB_PATH}`);
-log(`[tgbot] scan every ${SCAN_INTERVAL_MS/1000}s · /u rate limit ${RATE_LIMIT_MS/1000}s/user`);
+log(`[tgbot] scan every ${SCAN_INTERVAL_MS/1000}s · /u rate limit ${RATE_LIMIT_MS/1000}s/user · submission scan ${SUBMISSION_SCAN_INTERVAL_MS/1000}s`);
 
-// Run both loops in parallel — neither blocks the other
+// Run all loops in parallel — none blocks the others
 updatesLoop();
 scanLoop();
+submissionLoop();
 
 // Prevent crash on unhandled rejections
 process.on('unhandledRejection', (err) => {
