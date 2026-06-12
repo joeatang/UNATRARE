@@ -89,6 +89,13 @@ db.exec(`
     last_announced_kind TEXT
   );
   CREATE INDEX IF NOT EXISTS idx_dispenser_state_asset ON dispenser_state(asset);
+
+  CREATE TABLE IF NOT EXISTS tg_photo_cache (
+    cache_key   TEXT PRIMARY KEY,
+    token_name  TEXT NOT NULL,
+    file_id     TEXT NOT NULL,
+    sent_at     INTEGER NOT NULL
+  );
 `);
 
 const selWatchedTokens = db.prepare(`
@@ -133,6 +140,15 @@ const upsertDispenser = db.prepare(`
     last_announced_kind = COALESCE(excluded.last_announced_kind, dispenser_state.last_announced_kind)
 `);
 const selDispenserByHash = db.prepare('SELECT * FROM dispenser_state WHERE tx_hash = ?');
+const selFileId = db.prepare('SELECT file_id FROM tg_photo_cache WHERE cache_key = ?');
+const upsertFileId = db.prepare(`
+  INSERT INTO tg_photo_cache (cache_key, token_name, file_id, sent_at)
+  VALUES (?, ?, ?, ?)
+  ON CONFLICT(cache_key) DO UPDATE SET
+    file_id = excluded.file_id,
+    sent_at = excluded.sent_at
+`);
+const delFileId = db.prepare('DELETE FROM tg_photo_cache WHERE cache_key = ?');
 
 // ── Telegram helpers ─────────────────────────────────────────────────────────
 async function tgPost(method, body) {
@@ -147,6 +163,24 @@ async function tgPost(method, body) {
     throw new Error(`tg ${method} ${res.status}: ${err.slice(0, 200)}`);
   }
   return res.json();
+}
+
+async function sendPhotoByFileId(fileId, caption, chatId = CHAT_ID, replyToId = null) {
+  // Reuse a previously-uploaded photo. ~instant for Telegram, no bytes leave us.
+  return tgPost('sendPhoto', {
+    chat_id: chatId,
+    photo: fileId,
+    caption,
+    parse_mode: 'HTML',
+    ...(replyToId ? { reply_to_message_id: replyToId } : {}),
+  });
+}
+
+// Pulls the largest photo's file_id from a sendPhoto API response.
+function extractFileId(tgResult) {
+  const photos = tgResult?.result?.photo;
+  if (!Array.isArray(photos) || !photos.length) return null;
+  return photos[photos.length - 1].file_id || null;
 }
 
 async function sendPhotoFile(filePath, caption, chatId = CHAT_ID, replyToId = null) {
@@ -189,15 +223,47 @@ async function sendMessage(text, chatId = CHAT_ID, replyToId = null) {
   });
 }
 
-async function sendPhotoOrText(image, caption, chatId = CHAT_ID, replyToId = null) {
-  if (image?.filePath && existsSync(image.filePath)) {
-    try { return await sendPhotoFile(image.filePath, caption, chatId, replyToId); }
-    catch (e) { warn('[tgbot] sendPhotoFile failed:', e.message); }
+async function sendPhotoOrText(image, caption, chatId = CHAT_ID, replyToId = null, cacheKey = null) {
+  // 1) Cached file_id — fastest path. Telegram serves from its CDN, no upload.
+  if (cacheKey) {
+    const cached = selFileId.get(cacheKey);
+    if (cached?.file_id) {
+      const t0 = Date.now();
+      try {
+        const r = await sendPhotoByFileId(cached.file_id, caption, chatId, replyToId);
+        log(`[tgbot] sendPhoto cached ${cacheKey} ${Date.now()-t0}ms`);
+        return r;
+      } catch (e) {
+        // file_id can expire/become invalid — drop and fall through to upload
+        warn(`[tgbot] cached file_id failed (${cacheKey}):`, e.message);
+        delFileId.run(cacheKey);
+      }
+    }
   }
+
+  // 2) Multipart upload — first time we see this card. Slow but reliable.
+  if (image?.filePath && existsSync(image.filePath)) {
+    const t0 = Date.now();
+    try {
+      const r = await sendPhotoFile(image.filePath, caption, chatId, replyToId);
+      const fid = extractFileId(r);
+      if (fid && cacheKey) {
+        upsertFileId.run(cacheKey, cacheKey, fid, Math.floor(Date.now() / 1000));
+      }
+      log(`[tgbot] sendPhoto upload ${cacheKey || basename(image.filePath)} ${Date.now()-t0}ms`);
+      return r;
+    } catch (e) {
+      warn('[tgbot] sendPhotoFile failed:', e.message);
+    }
+  }
+
+  // 3) URL-based — fallback for external photoUrls (rare, our /uploads is rejected by Telegram)
   if (image?.photoUrl) {
     try { return await sendPhotoByUrl(image.photoUrl, caption, chatId, replyToId); }
     catch (e) { warn('[tgbot] sendPhotoByUrl failed:', e.message); }
   }
+
+  // 4) Plain text — never silent
   return sendMessage(caption, chatId, replyToId);
 }
 
@@ -277,6 +343,11 @@ function captionForCard(token) {
   ].join('\n'));
 }
 
+function cacheKeyForToken(token) {
+  // Invalidates automatically if the artist's art_url changes (rare).
+  return `${token.token_name}|${token.art_url || token.art_cover_url || ''}`;
+}
+
 async function handleUCommand(msg, arg) {
   const userId = msg.from?.id;
   const chatId = msg.chat?.id;
@@ -303,7 +374,7 @@ async function handleUCommand(msg, arg) {
   }
 
   const img = getArtImage(token);
-  await sendPhotoOrText(img, captionForCard(token), chatId, messageId)
+  await sendPhotoOrText(img, captionForCard(token), chatId, messageId, cacheKeyForToken(token))
     .catch(e => warn('[tgbot] /u send failed:', e.message));
   log(`[tgbot] /u → ${token.token_name} (user=${userId})`);
 }
@@ -382,7 +453,7 @@ function announceDispenserOpened(token, d) {
     '',
     `<a href="${SITE_BASE}/card/${d.asset}">View Card →</a>  ·  <a href="https://xchain.io/dispenser/${d.tx_hash}">Buy on Counterparty ↗</a>`,
   ].filter(Boolean).join('\n'));
-  return sendPhotoOrText(img, caption);
+  return sendPhotoOrText(img, caption, CHAT_ID, null, cacheKeyForToken(token));
 }
 
 function announceSale(token, d, soldUnits, prevRemaining) {
@@ -396,7 +467,7 @@ function announceSale(token, d, soldUnits, prevRemaining) {
     '',
     `<a href="${SITE_BASE}/card/${d.asset}">View Card →</a>  ·  <a href="https://xchain.io/dispenser/${d.tx_hash}">Buy on Counterparty ↗</a>`,
   ].join('\n'));
-  return sendPhotoOrText(img, caption);
+  return sendPhotoOrText(img, caption, CHAT_ID, null, cacheKeyForToken(token));
 }
 
 function announceDispenserClosed(token, d, prev) {
@@ -415,7 +486,7 @@ function announceDispenserClosed(token, d, prev) {
     '',
     `<a href="${SITE_BASE}/card/${d.asset}">View Card →</a>`,
   ].join('\n'));
-  return sendPhotoOrText(img, caption);
+  return sendPhotoOrText(img, caption, CHAT_ID, null, cacheKeyForToken(token));
 }
 
 let firstScanComplete = false;
