@@ -5,6 +5,7 @@
  *   - unatrare          : Next.js production server
  *   - unatrare-seeder   : Hyperswarm art archive seeder (art p2p distribution)
  *   - unatrare-peer     : Trac Intercom peer (SC-Bridge for verdict broadcast)
+ *   - unatrare-tgbot    : Telegram /u command + dispenser scanner (isolated)
  *
  * USAGE:
  *   pm2 start ecosystem.config.cjs              # start all
@@ -75,6 +76,20 @@ module.exports = {
       max_restarts: 10,
       watch: false,
       autorestart: true,
+    },
+    {
+      // Telegram bot — /u random card command + dispenser scanner.
+      // Fully isolated: own process, own subfolder, own deps. Crash here
+      // never affects the website or existing notifications. Kill anytime
+      // with `pm2 stop unatrare-tgbot` if behavior gets weird.
+      name: 'unatrare-tgbot',
+      script: '/var/www/unatrare/tgbot/bot.js',
+      interpreter: 'node',
+      cwd: '/var/www/unatrare/tgbot',
+      env: { NODE_ENV: 'production' },
+      restart_delay: 5000,
+      max_restarts: 10,
+      watch: false,
     },
   ],
 };

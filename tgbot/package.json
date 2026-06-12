@@ -1,0 +1,16 @@
+{
+  "name": "unatrare-tgbot",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "UNATRARE Telegram bot — /u command + dispenser scanner. Read-mostly, isolated from website.",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.3.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
