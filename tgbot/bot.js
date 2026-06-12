@@ -108,8 +108,7 @@ const selWatchedTokens = db.prepare(`
          art_url, art_mime, art_cover_url, series, card_number
   FROM tokens
   WHERE status = 'approved'
-    AND dispenser_address IS NOT NULL
-    AND dispenser_address != ''
+    AND directory_hidden = 0
 `);
 const selRandomApproved = db.prepare(`
   SELECT token_name, artist_handle, artist_address, art_url, art_mime, art_cover_url,
@@ -471,10 +470,14 @@ function announceDispenserOpened(token, d) {
   const total = Number(d.escrow_quantity);
   const card = (token.series && token.card_number)
     ? `Series ${token.series} · #${token.card_number}` : '';
+  const isArtist = d.source && token.artist_address && d.source === token.artist_address;
+  const sellerLabel = isArtist
+    ? `by <b>${artistLine(token)}</b>`
+    : `art by <b>${artistLine(token)}</b> · dispenser by <code>${shortAddr(d.source)}</code>`;
   const caption = clean([
     `🟢 <b>NEW DISPENSER</b>  ·  <code>${d.asset}</code>`,
     card,
-    `by <b>${artistLine(token)}</b>`,
+    sellerLabel,
     '',
     `<b>${units}</b> available · <b>${fmtBtc(d.satoshirate)}</b> per dispense`,
     total !== units ? `(${total} total escrowed)` : '',
@@ -486,9 +489,13 @@ function announceDispenserOpened(token, d) {
 
 function announceSale(token, d, soldUnits, prevRemaining) {
   const img = getArtImage(token);
+  const isArtist = d.source && token.artist_address && d.source === token.artist_address;
+  const sellerLabel = isArtist
+    ? `art by <b>${artistLine(token)}</b>`
+    : `art by <b>${artistLine(token)}</b> · sold by <code>${shortAddr(d.source)}</code>`;
   const caption = clean([
     `🔥 <b>SALE</b>  ·  <code>${d.asset}</code>`,
-    `by <b>${artistLine(token)}</b>`,
+    sellerLabel,
     '',
     `${soldUnits} ${soldUnits === 1 ? 'unit' : 'units'} sold @ <b>${fmtBtc(d.satoshirate)}</b>`,
     `<b>${d.give_remaining}</b> left`,
@@ -522,18 +529,20 @@ let firstScanComplete = false;
 async function scanOnce() {
   const tokens = selWatchedTokens.all();
   if (!tokens.length) {
-    log('[tgbot] scan: no watched dispensers');
+    log('[tgbot] scan: no approved tokens to watch');
     firstScanComplete = true;
     return;
   }
 
-  log(`[tgbot] scan: ${tokens.length} watched token(s)`);
+  log(`[tgbot] scan: ${tokens.length} approved token(s)`);
   for (const token of tokens) {
     const dispensers = await fetchDispensersForAsset(token.token_name);
     if (!dispensers) continue;
-    // Only consider dispensers from THIS artist's declared dispenser_address
-    const ours = dispensers.filter(d => d.source === token.dispenser_address);
-    for (const d of ours) {
+    // Watch every dispenser of this asset, no matter who's the source.
+    // Counterparty asset names are globally unique — if the asset is in our
+    // directory and someone has a dispenser open for it, that's a real sale
+    // of an unatrare-listed asset.
+    for (const d of dispensers) {
       const prev = selDispenserByHash.get(d.tx_hash);
       const now = Math.floor(Date.now() / 1000);
 
