@@ -101,6 +101,14 @@ db.exec(`
     token_name    TEXT PRIMARY KEY,
     announced_at  INTEGER NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS tg_token_state (
+    token_name    TEXT PRIMARY KEY,
+    status        TEXT NOT NULL,
+    teased_at     INTEGER,
+    approved_at   INTEGER,
+    last_seen_at  INTEGER NOT NULL
+  );
 `);
 
 const selWatchedTokens = db.prepare(`
@@ -145,24 +153,34 @@ const upsertDispenser = db.prepare(`
 `);
 const selDispenserByHash = db.prepare('SELECT * FROM dispenser_state WHERE tx_hash = ?');
 
-// New pending submissions worth announcing:
-//   - status still 'pending' (AI judge hasn't auto-rejected)
-//   - submitted at least 60s ago (judge had a chance to run)
-//   - we haven't announced this token before
-//   - submitted within the last 24h (don't backfill ancient ones on first run)
-const selFreshSubmissions = db.prepare(`
+// State-diff approach: snapshot every recent token's status, compare to last
+// scan, fire announcements on transitions. Replaces the old pending-only query
+// which had visibility issues across separate DB connections.
+//
+// We pull the last 7 days of tokens (covers any reasonable backfill window
+// without scanning the whole table). Anything older than that is assumed
+// settled and irrelevant for live announcements.
+const selRecentTokens = db.prepare(`
   SELECT t.token_name, t.artist_handle, t.artist_address, t.submitted_at,
-         t.category, t.subcategory
+         t.judged_at, t.status, t.judge_score, t.council_certified,
+         t.series, t.card_number, t.art_url, t.art_mime, t.art_cover_url,
+         t.category, t.subcategory, t.judge_notes, t.directory_hidden
   FROM tokens t
-  LEFT JOIN tg_submission_announce a ON a.token_name = t.token_name
-  WHERE t.status = 'pending'
-    AND t.submitted_at IS NOT NULL
-    AND t.submitted_at <= unixepoch() - 60
-    AND t.submitted_at >= unixepoch() - 86400
-    AND a.token_name IS NULL
+  WHERE t.submitted_at >= unixepoch() - 7 * 86400
   ORDER BY t.submitted_at ASC
-  LIMIT 5
 `);
+const selTokenState = db.prepare('SELECT * FROM tg_token_state WHERE token_name = ?');
+const upsertTokenState = db.prepare(`
+  INSERT INTO tg_token_state (token_name, status, teased_at, approved_at, last_seen_at)
+  VALUES (?, ?, ?, ?, ?)
+  ON CONFLICT(token_name) DO UPDATE SET
+    status        = excluded.status,
+    teased_at     = COALESCE(tg_token_state.teased_at,   excluded.teased_at),
+    approved_at   = COALESCE(tg_token_state.approved_at, excluded.approved_at),
+    last_seen_at  = excluded.last_seen_at
+`);
+// Legacy table — keep the prepared statement for compatibility with first-run
+// migration if needed. Not used by the new state-diff path.
 const markSubmissionAnnounced = db.prepare(`
   INSERT INTO tg_submission_announce (token_name, announced_at) VALUES (?, ?)
   ON CONFLICT(token_name) DO NOTHING
@@ -610,18 +628,17 @@ async function updatesLoop() {
   }
 }
 
-// ── Submission teasers ──────────────────────────────────────────────────────
-// Every minute, look for new pending submissions. Text-only post in the spirit
-// of the "art hidden until verdict" mystery card. Pings the channel to build
-// anticipation and pings the admin (Joe) that there's something to review.
+// ── Token state watcher (teasers + approval reveals) ────────────────────────
+// State-diff approach: snapshot every recent token's status into tg_token_state,
+// compare to last scan, fire announcements on transitions:
+//   * (new row, pending)     → mystery teaser
+//   * (pending → approved)   → full reveal with art + judge score
+//   * (pending → rejected)   → silent state update only
 //
-// Grace window: only announces if the submission has been pending for 60+ sec.
-// This avoids announcing tokens that the AI judge auto-rejects in seconds.
-//
-// Backfill safety: only looks at the last 24h, so this loop won't spam the
-// channel with old historical submissions on first run.
-const SUBMISSION_SCAN_INTERVAL_MS = 60 * 1000;
-let submissionFirstRun = true;
+// First run after deploy baselines all existing tokens silently so we don't
+// backfill historical state into the channel.
+const TOKEN_SCAN_INTERVAL_MS = 30 * 1000;
+let tokenFirstRun = true;
 
 function captionForSubmission(row) {
   const who = row.artist_handle ? `@${row.artist_handle}` : shortAddr(row.artist_address);
@@ -643,45 +660,130 @@ function captionForSubmission(row) {
   ].filter(Boolean).join('\n'));
 }
 
-async function submissionScanOnce() {
-  let rows;
-  try { rows = selFreshSubmissions.all(); }
-  catch (e) { warn('[tgbot] submission query failed:', e.message); return; }
-  if (!rows.length) return;
+function captionForApproval(row) {
+  const who = row.artist_handle ? `@${row.artist_handle}` : shortAddr(row.artist_address);
+  const cardRef = (row.series && row.card_number) ? `Series ${row.series} · #${row.card_number}` : '';
+  const score = row.judge_score ? `  ·  <b>${Number(row.judge_score).toFixed(1)}</b>/69` : '';
+  const stamp = row.council_certified ? '\n<b>⭐ COUNCIL STAMP — CERTIFIED DANK</b>' : '';
+  // Pull a single quote from the AI judge notes if present
+  let quote = '';
+  if (row.judge_notes) {
+    try {
+      const arr = JSON.parse(row.judge_notes);
+      const pick = Array.isArray(arr) ? arr.find(j => j?.reasoning) : null;
+      if (pick?.reasoning && pick?.display_name) {
+        const r = String(pick.reasoning).slice(0, 280);
+        quote = `\n\n🎙️ <i>${pick.display_name}:</i> "${r}"`;
+      }
+    } catch {}
+  }
+  return clean([
+    `🐸 <b>APPROVED — UNATRARE DIRECTORY</b>${stamp}`,
+    '',
+    `<code>${row.token_name}</code>  ${cardRef}${score}`,
+    `by <b>${who}</b>`,
+    quote,
+    '',
+    `<a href="${SITE_BASE}/card/${row.token_name}">View Card →</a>`,
+  ].join('\n'));
+}
 
-  // First run after a fresh deploy: silently mark anything older than 5 min as
-  // already-announced so we don't backfill stale pendings into the channel.
-  if (submissionFirstRun) {
-    const cutoff = Math.floor(Date.now() / 1000) - 5 * 60;
+async function tokenScanOnce() {
+  let rows;
+  try { rows = selRecentTokens.all(); }
+  catch (e) { warn('[tgbot] token scan query failed:', e.message); return; }
+
+  const now = Math.floor(Date.now() / 1000);
+
+  // First run after a fresh deploy: snapshot everything silently so we don't
+  // re-announce historical pendings or approvals into the channel.
+  if (tokenFirstRun) {
     let baselined = 0;
     for (const r of rows) {
-      if (r.submitted_at < cutoff) {
-        markSubmissionAnnounced.run(r.token_name, Math.floor(Date.now() / 1000));
+      const prev = selTokenState.get(r.token_name);
+      if (!prev) {
+        upsertTokenState.run(
+          r.token_name, r.status,
+          r.status === 'pending' ? null : r.submitted_at,
+          r.status === 'approved' ? (r.judged_at || now) : null,
+          now
+        );
         baselined++;
       }
     }
-    if (baselined) log(`[tgbot] submission baseline: silenced ${baselined} stale pending(s)`);
-    submissionFirstRun = false;
-    rows = rows.filter(r => r.submitted_at >= cutoff);
+    if (baselined) log(`[tgbot] token baseline: silenced ${baselined} existing token(s)`);
+    tokenFirstRun = false;
+    return;
   }
 
   for (const r of rows) {
-    try {
-      await sendMessage(captionForSubmission(r));
-      markSubmissionAnnounced.run(r.token_name, Math.floor(Date.now() / 1000));
-      log(`[tgbot] teased submission ${r.token_name}`);
-    } catch (e) {
-      warn(`[tgbot] submission teaser ${r.token_name} failed:`, e.message);
+    if (r.directory_hidden) {
+      // Always update state but never announce hidden tokens
+      upsertTokenState.run(r.token_name, r.status, null, null, now);
+      continue;
     }
-    await sleep(800); // soft stagger if multiple at once
+    const prev = selTokenState.get(r.token_name);
+
+    // 1) Brand new row → teaser if pending, silent if already approved/rejected
+    if (!prev) {
+      if (r.status === 'pending') {
+        try {
+          await sendMessage(captionForSubmission(r));
+          upsertTokenState.run(r.token_name, 'pending', now, null, now);
+          log(`[tgbot] teased new submission ${r.token_name}`);
+        } catch (e) {
+          warn(`[tgbot] teaser ${r.token_name} failed:`, e.message);
+          // Still record state so we don't loop on the same row forever
+          upsertTokenState.run(r.token_name, 'pending', null, null, now);
+        }
+        await sleep(800);
+      } else if (r.status === 'approved') {
+        // Bot was down during submission — announce approval directly
+        try {
+          await sendPhotoOrText(getArtImage(r), captionForApproval(r), CHAT_ID, null, cacheKeyForToken(r));
+          upsertTokenState.run(r.token_name, 'approved', null, r.judged_at || now, now);
+          log(`[tgbot] announced approval ${r.token_name} (no prior teaser)`);
+        } catch (e) {
+          warn(`[tgbot] approval ${r.token_name} failed:`, e.message);
+          upsertTokenState.run(r.token_name, 'approved', null, r.judged_at || now, now);
+        }
+        await sleep(800);
+      } else {
+        // rejected — silent
+        upsertTokenState.run(r.token_name, r.status, null, null, now);
+      }
+      continue;
+    }
+
+    // 2) Existing row, status changed
+    if (prev.status !== r.status) {
+      if (r.status === 'approved') {
+        try {
+          await sendPhotoOrText(getArtImage(r), captionForApproval(r), CHAT_ID, null, cacheKeyForToken(r));
+          upsertTokenState.run(r.token_name, 'approved', prev.teased_at, r.judged_at || now, now);
+          log(`[tgbot] revealed approval ${r.token_name}`);
+        } catch (e) {
+          warn(`[tgbot] approval reveal ${r.token_name} failed:`, e.message);
+          upsertTokenState.run(r.token_name, 'approved', prev.teased_at, r.judged_at || now, now);
+        }
+        await sleep(800);
+      } else {
+        // Any other transition (e.g. rejected): silent state update
+        upsertTokenState.run(r.token_name, r.status, prev.teased_at, prev.approved_at, now);
+      }
+      continue;
+    }
+
+    // 3) Same status — just refresh last_seen_at
+    upsertTokenState.run(r.token_name, r.status, prev.teased_at, prev.approved_at, now);
   }
 }
 
-async function submissionLoop() {
+async function tokenLoop() {
   while (true) {
-    try { await submissionScanOnce(); }
-    catch (e) { warn('[tgbot] submission scan error:', e.message); }
-    await sleep(SUBMISSION_SCAN_INTERVAL_MS);
+    try { await tokenScanOnce(); }
+    catch (e) { warn('[tgbot] token scan error:', e.message); }
+    await sleep(TOKEN_SCAN_INTERVAL_MS);
   }
 }
 
@@ -689,12 +791,12 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // ── Boot ────────────────────────────────────────────────────────────────────
 log(`[tgbot] starting — chat=${CHAT_ID} db=${DB_PATH}`);
-log(`[tgbot] scan every ${SCAN_INTERVAL_MS/1000}s · /u rate limit ${RATE_LIMIT_MS/1000}s/user · submission scan ${SUBMISSION_SCAN_INTERVAL_MS/1000}s`);
+log(`[tgbot] scan every ${SCAN_INTERVAL_MS/1000}s · /u rate limit ${RATE_LIMIT_MS/1000}s/user · token scan ${TOKEN_SCAN_INTERVAL_MS/1000}s`);
 
 // Run all loops in parallel — none blocks the others
 updatesLoop();
 scanLoop();
-submissionLoop();
+tokenLoop();
 
 // Prevent crash on unhandled rejections
 process.on('unhandledRejection', (err) => {
