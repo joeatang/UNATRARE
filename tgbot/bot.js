@@ -636,12 +636,14 @@ async function updatesLoop() {
   }
 }
 
-// ── Token state watcher (mystery teaser + admin-certified reveal) ──────────
+// ── Token state watcher (mystery teaser only) ─────────────────────────────
 // State-diff approach: snapshot every recent token's (status, council_certified)
 // into tg_token_state, compare to last scan, fire announcements on transitions:
 //   * (new pending row)              → mystery teaser (immediate, art hidden)
-//   * (any → approved, not certified) → mystery teaser (still awaiting admin)
-//   * (council_certified 0 → 1)      → full reveal with art + judge score
+//   * (pending → approved, no cert)  → mystery teaser (art hidden, awaiting admin)
+//   * (council_certified 0 → 1)     → STATE-ONLY UPDATE
+//                                       (the website's notifyCertification
+//                                        posts the reveal when admin certifies)
 //   * (any → rejected)               → silent state update only
 //
 // First run after deploy baselines all existing tokens silently so we don't
@@ -778,16 +780,11 @@ async function tokenScanOnce() {
         }
         await sleep(800);
       } else if (r.status === 'approved' && cert) {
-        // Bot was offline through both AI approval AND admin stamp — reveal directly
-        try {
-          await sendPhotoOrText(getArtImage(r), captionForApproval(r), CHAT_ID, null, cacheKeyForToken(r));
-          upsertTokenState.run(r.token_name, 'approved', 1, null, r.judged_at || now, r.judged_at || now, now);
-          log(`[tgbot] revealed ${r.token_name} (no prior teaser, already certified)`);
-        } catch (e) {
-          warn(`[tgbot] reveal ${r.token_name} failed:`, e.message);
-          upsertTokenState.run(r.token_name, 'approved', 1, null, r.judged_at || now, r.judged_at || now, now);
-        }
-        await sleep(800);
+        // Bot was offline through both AI approval AND admin stamp — silent
+        // baseline. Website's notifyCertification already posted the reveal
+        // when admin pressed certify; we don't double-post here.
+        upsertTokenState.run(r.token_name, 'approved', 1, null, r.judged_at || now, r.judged_at || now, now);
+        log(`[tgbot] silent baseline ${r.token_name} (already certified)`);
       } else {
         // rejected — silent
         upsertTokenState.run(r.token_name, r.status, cert, null, null, null, now);
@@ -814,16 +811,12 @@ async function tokenScanOnce() {
     }
 
     // 2b) Council stamp landed (council_certified flipped 0 → 1)
-    if (prev.council_certified === 0 && cert === 1 && !prev.revealed_at) {
-      try {
-        await sendPhotoOrText(getArtImage(r), captionForApproval(r), CHAT_ID, null, cacheKeyForToken(r));
-        upsertTokenState.run(r.token_name, r.status, 1, prev.teased_at, prev.approved_at, now, now);
-        log(`[tgbot] revealed ${r.token_name} (council stamp landed)`);
-      } catch (e) {
-        warn(`[tgbot] reveal ${r.token_name} failed:`, e.message);
-        upsertTokenState.run(r.token_name, r.status, 1, prev.teased_at, prev.approved_at, now, now);
-      }
-      await sleep(800);
+    //     The website's notifyCertification already posts the full reveal when
+    //     admin presses certify. Bot just records the state so it doesn't
+    //     re-tease later.
+    if (prev.council_certified === 0 && cert === 1) {
+      upsertTokenState.run(r.token_name, r.status, 1, prev.teased_at, prev.approved_at, now, now);
+      log(`[tgbot] state-only: ${r.token_name} certified by admin (website handles reveal)`);
       continue;
     }
 
