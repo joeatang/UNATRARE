@@ -776,7 +776,10 @@ function Step3({ data, onNext, onBack }) {
   const [subcategory, setSubcategory] = useState(data.subcategory || '');
   const [inscription, setInscription] = useState(data.ordInscription || '');
   const [allocQty, setAllocQty] = useState(data.unatpepeAllocQty ? String(data.unatpepeAllocQty) : '');
+  const [solAddr, setSolAddr] = useState(data.artistSolAddress || '');
   const [errMsg, setErrMsg] = useState('');
+
+  const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
   const [audioResult, setAudioResult]     = useState(
     data.audioUrl ? { url: data.audioUrl, hash: data.audioHash || '', mime: data.audioMime || '' } : null
@@ -839,6 +842,11 @@ function Step3({ data, onNext, onBack }) {
       setErrMsg('Inscription ID must be 64 hex characters (the reveal txid)');
       return;
     }
+    const trimmedSol = solAddr.trim();
+    if (trimmedSol && !SOL_ADDR_RE.test(trimmedSol)) {
+      setErrMsg('Invalid Solana address — leave blank to skip, or paste a valid Solana wallet address');
+      return;
+    }
     onNext({
       ...data,
       artistHandle:      handle.trim().replace(/^@/, '').slice(0, 64),
@@ -853,6 +861,7 @@ function Step3({ data, onNext, onBack }) {
       videoMime:         videoResult?.mime || '',
       videoHash:         videoResult?.hash || '',
       unatpepeAllocQty:  Math.max(0, parseInt(allocQty, 10) || 0),
+      artistSolAddress:  trimmedSol,
     });
   }
 
@@ -1007,6 +1016,42 @@ function Step3({ data, onNext, onBack }) {
         )}
         <div className={styles.inputHint}>
           Stored on the UNATRARE network · appears in wallets that support video cards (like PEPELEVANDAL)
+        </div>
+      </div>
+
+      {/* ── Artist $CASH payout (optional Solana address) ── */}
+      <div style={{ marginTop: 8, marginBottom: 20 }}>
+        <div style={{
+          fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px',
+          color: 'var(--text-dim)', marginBottom: 10,
+        }}>
+          ★ ARTIST $CASH PAYOUT · OPTIONAL
+        </div>
+        <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 10 }}>
+          When fans salute your card by burning $CASH, a portion routes to you. Paste the Solana address where you want that share sent. Skip if you don&apos;t have one — you can add it anytime from your card&apos;s status page.
+        </div>
+        <input
+          type="text"
+          value={solAddr}
+          onChange={e => { setSolAddr(e.target.value); setErrMsg(''); }}
+          placeholder="your solana wallet address (optional)"
+          maxLength={48}
+          autoComplete="off"
+          spellCheck={false}
+          style={{
+            width: '100%', boxSizing: 'border-box',
+            padding: '10px 12px',
+            background: 'var(--bg-card)', border: '1px solid var(--border)',
+            color: 'var(--text)', fontFamily: 'var(--font-card)', fontSize: 12,
+            letterSpacing: '1px', outline: 'none',
+          }}
+        />
+        <div style={{ marginTop: 8, fontSize: '10px', color: 'var(--text-dim)', lineHeight: 1.5 }}>
+          Don&apos;t have a Solana wallet?{' '}
+          <a href="https://phantom.app" target="_blank" rel="noopener noreferrer"
+             style={{ color: 'var(--amber)', textDecoration: 'none' }}>
+            Get Phantom (free, 2 min) ↗
+          </a>
         </div>
       </div>
 
@@ -1363,6 +1408,7 @@ function Step5({ data }) {
             unatpepeAllocQty: data.unatpepeAllocQty || 0,
             burnTxid:         data.burnTxid         || '',
             coverUrl:         data.coverUrl         || '',
+            artistSolAddress: data.artistSolAddress || '',
           }),
         });
         const json = await res.json();
@@ -1461,6 +1507,16 @@ function Step5({ data }) {
           </div>
         </div>
       </div>
+
+      {data.artistSolAddress && (
+        <div style={{
+          textAlign:'center', marginTop:-8, marginBottom:16,
+          fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px',
+          color:'var(--text-dim)',
+        }}>
+          payout: <span style={{color:'var(--green)'}}>{data.artistSolAddress.slice(0,6)}…{data.artistSolAddress.slice(-4)}</span>
+        </div>
+      )}
 
       <p className={styles.stepDesc}>
         <strong>{data.tokenName}</strong> is now in the Pepempool.<br />
