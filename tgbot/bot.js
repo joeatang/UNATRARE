@@ -103,13 +103,19 @@ db.exec(`
   );
 
   CREATE TABLE IF NOT EXISTS tg_token_state (
-    token_name    TEXT PRIMARY KEY,
-    status        TEXT NOT NULL,
-    teased_at     INTEGER,
-    approved_at   INTEGER,
-    last_seen_at  INTEGER NOT NULL
+    token_name        TEXT PRIMARY KEY,
+    status            TEXT NOT NULL,
+    council_certified INTEGER NOT NULL DEFAULT 0,
+    teased_at         INTEGER,
+    approved_at       INTEGER,
+    revealed_at       INTEGER,
+    last_seen_at      INTEGER NOT NULL
   );
 `);
+
+// Add column for upgrades from earlier schema (no-op if already there)
+try { db.exec('ALTER TABLE tg_token_state ADD COLUMN council_certified INTEGER NOT NULL DEFAULT 0'); } catch {}
+try { db.exec('ALTER TABLE tg_token_state ADD COLUMN revealed_at INTEGER'); } catch {}
 
 const selWatchedTokens = db.prepare(`
   SELECT token_name, artist_handle, artist_address, dispenser_address,
@@ -171,13 +177,15 @@ const selRecentTokens = db.prepare(`
 `);
 const selTokenState = db.prepare('SELECT * FROM tg_token_state WHERE token_name = ?');
 const upsertTokenState = db.prepare(`
-  INSERT INTO tg_token_state (token_name, status, teased_at, approved_at, last_seen_at)
-  VALUES (?, ?, ?, ?, ?)
+  INSERT INTO tg_token_state (token_name, status, council_certified, teased_at, approved_at, revealed_at, last_seen_at)
+  VALUES (?, ?, ?, ?, ?, ?, ?)
   ON CONFLICT(token_name) DO UPDATE SET
-    status        = excluded.status,
-    teased_at     = COALESCE(tg_token_state.teased_at,   excluded.teased_at),
-    approved_at   = COALESCE(tg_token_state.approved_at, excluded.approved_at),
-    last_seen_at  = excluded.last_seen_at
+    status            = excluded.status,
+    council_certified = excluded.council_certified,
+    teased_at         = COALESCE(tg_token_state.teased_at,    excluded.teased_at),
+    approved_at       = COALESCE(tg_token_state.approved_at,  excluded.approved_at),
+    revealed_at       = COALESCE(tg_token_state.revealed_at,  excluded.revealed_at),
+    last_seen_at      = excluded.last_seen_at
 `);
 // Legacy table — keep the prepared statement for compatibility with first-run
 // migration if needed. Not used by the new state-diff path.
@@ -628,12 +636,13 @@ async function updatesLoop() {
   }
 }
 
-// ── Token state watcher (teasers + approval reveals) ────────────────────────
-// State-diff approach: snapshot every recent token's status into tg_token_state,
-// compare to last scan, fire announcements on transitions:
-//   * (new row, pending)     → mystery teaser
-//   * (pending → approved)   → full reveal with art + judge score
-//   * (pending → rejected)   → silent state update only
+// ── Token state watcher (mystery teaser + admin-certified reveal) ──────────
+// State-diff approach: snapshot every recent token's (status, council_certified)
+// into tg_token_state, compare to last scan, fire announcements on transitions:
+//   * (new pending row)              → mystery teaser (immediate, art hidden)
+//   * (any → approved, not certified) → mystery teaser (still awaiting admin)
+//   * (council_certified 0 → 1)      → full reveal with art + judge score
+//   * (any → rejected)               → silent state update only
 //
 // First run after deploy baselines all existing tokens silently so we don't
 // backfill historical state into the channel.
@@ -645,14 +654,17 @@ function captionForSubmission(row) {
   const cat = row.category ? row.category : '';
   const sub = row.subcategory ? row.subcategory : '';
   const tag = [cat, sub].filter(Boolean).join(' · ');
+  const headline = row.status === 'approved'
+    ? `🐸 <b>NEW SUBMISSION — UNDER COUNCIL REVIEW</b>`
+    : `🐸 <b>NEW SUBMISSION — UNDER REVIEW</b>`;
   return clean([
-    `🐸 <b>NEW SUBMISSION — UNDER REVIEW</b>`,
+    headline,
     '',
     `<code>${row.token_name}</code> · by <b>${who}</b>`,
     tag ? `<i>${tag}</i>` : '',
     '',
     `▓▒░ <b>?</b> ░▒▓`,
-    `<i>art hidden until verdict</i>`,
+    `<i>art hidden until council stamps verdict</i>`,
     '',
     `the council deliberates · stay ready to salute`,
     '',
@@ -702,13 +714,23 @@ async function tokenScanOnce() {
     for (const r of rows) {
       const prev = selTokenState.get(r.token_name);
       if (!prev) {
+        const cert = r.council_certified ? 1 : 0;
         upsertTokenState.run(
-          r.token_name, r.status,
+          r.token_name, r.status, cert,
           r.status === 'pending' ? null : r.submitted_at,
-          r.status === 'approved' ? (r.judged_at || now) : null,
+          (r.status === 'approved' || r.status === 'rejected') ? (r.judged_at || now) : null,
+          cert ? (r.judged_at || now) : null,
           now
         );
         baselined++;
+      } else if (prev.council_certified === undefined || prev.council_certified === null) {
+        // Migrate existing rows from older schema — sync cert state silently
+        upsertTokenState.run(
+          r.token_name, r.status, r.council_certified ? 1 : 0,
+          prev.teased_at, prev.approved_at,
+          r.council_certified ? (r.judged_at || now) : null,
+          now
+        );
       }
     }
     if (baselined) log(`[tgbot] token baseline: silenced ${baselined} existing token(s)`);
@@ -718,64 +740,83 @@ async function tokenScanOnce() {
 
   for (const r of rows) {
     if (r.directory_hidden) {
-      // Always update state but never announce hidden tokens
-      upsertTokenState.run(r.token_name, r.status, null, null, now);
+      upsertTokenState.run(r.token_name, r.status, r.council_certified ? 1 : 0, null, null, null, now);
       continue;
     }
     const prev = selTokenState.get(r.token_name);
+    const cert = r.council_certified ? 1 : 0;
 
-    // 1) Brand new row → teaser if pending, silent if already approved/rejected
+    // 1) Brand new row
     if (!prev) {
-      if (r.status === 'pending') {
+      if (r.status === 'pending' || (r.status === 'approved' && !cert)) {
+        // Either: still pending judge, or AI approved but admin hasn't stamped
         try {
           await sendMessage(captionForSubmission(r));
-          upsertTokenState.run(r.token_name, 'pending', now, null, now);
-          log(`[tgbot] teased new submission ${r.token_name}`);
+          upsertTokenState.run(
+            r.token_name, r.status, cert,
+            now,
+            r.status === 'approved' ? (r.judged_at || now) : null,
+            null,
+            now
+          );
+          log(`[tgbot] teased ${r.token_name} (status=${r.status}, certified=${cert})`);
         } catch (e) {
           warn(`[tgbot] teaser ${r.token_name} failed:`, e.message);
-          // Still record state so we don't loop on the same row forever
-          upsertTokenState.run(r.token_name, 'pending', null, null, now);
+          upsertTokenState.run(r.token_name, r.status, cert, null, null, null, now);
         }
         await sleep(800);
-      } else if (r.status === 'approved') {
-        // Bot was down during submission — announce approval directly
+      } else if (r.status === 'approved' && cert) {
+        // Bot was offline through both AI approval AND admin stamp — reveal directly
         try {
           await sendPhotoOrText(getArtImage(r), captionForApproval(r), CHAT_ID, null, cacheKeyForToken(r));
-          upsertTokenState.run(r.token_name, 'approved', null, r.judged_at || now, now);
-          log(`[tgbot] announced approval ${r.token_name} (no prior teaser)`);
+          upsertTokenState.run(r.token_name, 'approved', 1, null, r.judged_at || now, r.judged_at || now, now);
+          log(`[tgbot] revealed ${r.token_name} (no prior teaser, already certified)`);
         } catch (e) {
-          warn(`[tgbot] approval ${r.token_name} failed:`, e.message);
-          upsertTokenState.run(r.token_name, 'approved', null, r.judged_at || now, now);
+          warn(`[tgbot] reveal ${r.token_name} failed:`, e.message);
+          upsertTokenState.run(r.token_name, 'approved', 1, null, r.judged_at || now, r.judged_at || now, now);
         }
         await sleep(800);
       } else {
         // rejected — silent
-        upsertTokenState.run(r.token_name, r.status, null, null, now);
+        upsertTokenState.run(r.token_name, r.status, cert, null, null, null, now);
       }
       continue;
     }
 
-    // 2) Existing row, status changed
-    if (prev.status !== r.status) {
-      if (r.status === 'approved') {
-        try {
-          await sendPhotoOrText(getArtImage(r), captionForApproval(r), CHAT_ID, null, cacheKeyForToken(r));
-          upsertTokenState.run(r.token_name, 'approved', prev.teased_at, r.judged_at || now, now);
-          log(`[tgbot] revealed approval ${r.token_name}`);
-        } catch (e) {
-          warn(`[tgbot] approval reveal ${r.token_name} failed:`, e.message);
-          upsertTokenState.run(r.token_name, 'approved', prev.teased_at, r.judged_at || now, now);
-        }
-        await sleep(800);
-      } else {
-        // Any other transition (e.g. rejected): silent state update
-        upsertTokenState.run(r.token_name, r.status, prev.teased_at, prev.approved_at, now);
+    // 2) Existing row — detect transitions
+
+    // 2a) Status changed pending → approved (AI just approved, admin hasn't stamped yet)
+    //     → mystery teaser, even if AI happened to also stamp in the same DB transaction
+    //     (because we'll catch the stamp transition in the next scan tick)
+    if (prev.status === 'pending' && r.status === 'approved' && !prev.teased_at) {
+      try {
+        await sendMessage(captionForSubmission(r));
+        upsertTokenState.run(r.token_name, 'approved', cert, now, r.judged_at || now, null, now);
+        log(`[tgbot] teased ${r.token_name} (council review pending)`);
+      } catch (e) {
+        warn(`[tgbot] teaser ${r.token_name} failed:`, e.message);
+        upsertTokenState.run(r.token_name, 'approved', cert, null, r.judged_at || now, null, now);
       }
+      await sleep(800);
       continue;
     }
 
-    // 3) Same status — just refresh last_seen_at
-    upsertTokenState.run(r.token_name, r.status, prev.teased_at, prev.approved_at, now);
+    // 2b) Council stamp landed (council_certified flipped 0 → 1)
+    if (prev.council_certified === 0 && cert === 1 && !prev.revealed_at) {
+      try {
+        await sendPhotoOrText(getArtImage(r), captionForApproval(r), CHAT_ID, null, cacheKeyForToken(r));
+        upsertTokenState.run(r.token_name, r.status, 1, prev.teased_at, prev.approved_at, now, now);
+        log(`[tgbot] revealed ${r.token_name} (council stamp landed)`);
+      } catch (e) {
+        warn(`[tgbot] reveal ${r.token_name} failed:`, e.message);
+        upsertTokenState.run(r.token_name, r.status, 1, prev.teased_at, prev.approved_at, now, now);
+      }
+      await sleep(800);
+      continue;
+    }
+
+    // 2c) Status changed but to rejected, or other no-op transition — silent
+    upsertTokenState.run(r.token_name, r.status, cert, prev.teased_at, prev.approved_at, prev.revealed_at, now);
   }
 }
 
