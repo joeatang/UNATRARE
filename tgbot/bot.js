@@ -708,13 +708,18 @@ async function tokenScanOnce() {
   const now = Math.floor(Date.now() / 1000);
 
   // First run after a fresh deploy: snapshot everything silently so we don't
-  // re-announce historical pendings or approvals into the channel.
+  // re-announce historical pendings or approvals into the channel. This loop
+  // runs once and is also responsible for migrating older state rows that
+  // pre-date the council_certified column (ALTER TABLE defaults to 0, but the
+  // actual token may already be certified — we sync silently to avoid
+  // re-firing the 0→1 transition logic on the next tick).
   if (tokenFirstRun) {
     let baselined = 0;
+    let migrated = 0;
     for (const r of rows) {
       const prev = selTokenState.get(r.token_name);
+      const cert = r.council_certified ? 1 : 0;
       if (!prev) {
-        const cert = r.council_certified ? 1 : 0;
         upsertTokenState.run(
           r.token_name, r.status, cert,
           r.status === 'pending' ? null : r.submitted_at,
@@ -723,17 +728,24 @@ async function tokenScanOnce() {
           now
         );
         baselined++;
-      } else if (prev.council_certified === undefined || prev.council_certified === null) {
-        // Migrate existing rows from older schema — sync cert state silently
-        upsertTokenState.run(
-          r.token_name, r.status, r.council_certified ? 1 : 0,
-          prev.teased_at, prev.approved_at,
-          r.council_certified ? (r.judged_at || now) : null,
-          now
+      } else if (prev.council_certified !== cert || prev.status !== r.status) {
+        // State drift between bot's last snapshot and current DB — sync silently
+        db.prepare(`
+          UPDATE tg_token_state
+          SET status = ?, council_certified = ?,
+              revealed_at = COALESCE(revealed_at, ?),
+              last_seen_at = ?
+          WHERE token_name = ?
+        `).run(
+          r.status, cert,
+          cert ? (r.judged_at || now) : null,
+          now, r.token_name
         );
+        migrated++;
       }
     }
     if (baselined) log(`[tgbot] token baseline: silenced ${baselined} existing token(s)`);
+    if (migrated)  log(`[tgbot] token baseline: synced ${migrated} drifted state row(s)`);
     tokenFirstRun = false;
     return;
   }
