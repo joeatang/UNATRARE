@@ -1,0 +1,374 @@
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+  font-family: var(--font-body);
+  color: var(--text);
+}
+
+/* ─── hero ─────────────────────────────────────────── */
+.hero {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 32px 28px;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+}
+.heroEyebrow {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--amber);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.heroTitle {
+  font-family: var(--font-display);
+  font-size: 96px;
+  letter-spacing: 6px;
+  color: var(--text-strong);
+  margin: 0;
+  line-height: 0.95;
+}
+.heroTitle span { color: var(--amber); }
+.heroSub {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-top: 14px;
+  letter-spacing: 0.5px;
+  max-width: 720px;
+  line-height: 1.6;
+}
+.heroLive {
+  display: inline-block;
+  margin-top: 18px;
+  padding: 6px 12px;
+  border: 1px solid var(--amber);
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--amber);
+  text-transform: uppercase;
+}
+.heroLive::before {
+  content: '●';
+  color: #ff3b3b;
+  margin-right: 8px;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+
+/* ─── stat strip ───────────────────────────────────── */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+@media (max-width: 720px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .heroTitle { font-size: 64px; }
+}
+.stat {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 18px 14px;
+  text-align: center;
+}
+.statValue {
+  font-family: var(--font-display);
+  font-size: 40px;
+  color: var(--amber-hot);
+  letter-spacing: 1px;
+  line-height: 1;
+}
+.statLabel {
+  font-family: var(--font-card);
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 8px;
+}
+
+/* ─── section ──────────────────────────────────────── */
+.section {
+  margin-bottom: 36px;
+}
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+.sectionTag {
+  font-family: var(--font-card);
+  font-size: 11px;
+  color: var(--amber);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 32px;
+  color: var(--text-strong);
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+/* ─── about cards ─────────────────────────────────── */
+.aboutGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+@media (max-width: 720px) { .aboutGrid { grid-template-columns: 1fr; } }
+.aboutCard {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 18px;
+}
+.aboutCardHead {
+  font-family: var(--font-card);
+  font-size: 11px;
+  color: var(--amber);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.aboutCardTitle {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--text-strong);
+  letter-spacing: 1px;
+  margin: 0 0 8px 0;
+}
+.aboutCardBody {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ─── archetype grid ──────────────────────────────── */
+.archGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+@media (max-width: 900px) { .archGrid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 600px) { .archGrid { grid-template-columns: repeat(3, 1fr); } }
+.archCell {
+  border: 1px solid var(--border);
+  background: #0a0a0a;
+  padding: 12px;
+  text-align: center;
+  position: relative;
+}
+.archImg {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.archIdx {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-family: var(--font-card);
+  font-size: 10px;
+  color: var(--amber);
+  letter-spacing: 1px;
+}
+.archName {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--text-strong);
+  letter-spacing: 1px;
+  margin-top: 8px;
+}
+.archDenom {
+  font-family: var(--font-card);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+/* ─── series tier bars ────────────────────────────── */
+.seriesList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.seriesRow {
+  display: grid;
+  grid-template-columns: 200px 1fr 80px 110px;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+@media (max-width: 720px) {
+  .seriesRow { grid-template-columns: 1fr 70px; grid-template-rows: auto auto; }
+  .seriesBar { grid-column: 1 / 3; }
+  .seriesLabel { grid-column: 1 / 3; }
+}
+.seriesName {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--text-strong);
+  letter-spacing: 2px;
+}
+.seriesBar {
+  height: 14px;
+  background: #0a0a0a;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.seriesFill {
+  height: 100%;
+  background: var(--amber);
+}
+.seriesPct {
+  font-family: var(--font-card);
+  font-size: 14px;
+  color: var(--amber-hot);
+  text-align: right;
+}
+.seriesLabel {
+  font-family: var(--font-card);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* ─── rarity table ─────────────────────────────────── */
+.rarityWrap {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+@media (max-width: 720px) { .rarityWrap { grid-template-columns: 1fr; } }
+.rarityCol {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 16px;
+}
+.rarityTier {
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 2px;
+  margin: 0 0 10px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--border);
+}
+.tierGod      { color: #ff5e5e; }
+.tierUltra    { color: var(--amber-hot); }
+.tierCommon   { color: var(--text-strong); }
+.tierCer      { color: #6ec56a; }
+.rarityRow {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 12px;
+  border-bottom: 1px dotted var(--border-dim);
+}
+.rarityName {
+  font-family: var(--font-display);
+  color: var(--text-strong);
+  letter-spacing: 1px;
+}
+.rarityWhy {
+  color: var(--text-dim);
+}
+
+/* ─── denoms ───────────────────────────────────────── */
+.denomGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width: 720px) { .denomGrid { grid-template-columns: 1fr; } }
+.denomCard {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 16px;
+}
+.denomTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--amber);
+  letter-spacing: 2px;
+  margin: 0 0 8px 0;
+}
+.denomList {
+  font-family: var(--font-card);
+  font-size: 13px;
+  color: var(--text);
+  letter-spacing: 1px;
+  line-height: 1.8;
+}
+.denomNote {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* ─── specimen blocks ─────────────────────────────── */
+.specList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.specRow {
+  display: grid;
+  grid-template-columns: 140px 200px 1fr;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: var(--font-card);
+  font-size: 12px;
+}
+@media (max-width: 720px) {
+  .specRow { grid-template-columns: 1fr; gap: 4px; padding: 12px; }
+}
+.specBlock {
+  color: var(--amber-hot);
+  letter-spacing: 1px;
+}
+.specType {
+  color: var(--text-strong);
+  letter-spacing: 2px;
+}
+.specWhy { color: var(--text-dim); }
+
+/* ─── footer ───────────────────────────────────────── */
+.footer {
+  margin-top: 40px;
+  padding: 20px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  color: var(--text-dim);
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+.footer code {
+  font-family: var(--font-body);
+  color: var(--amber);
+  font-size: 11px;
+  letter-spacing: 0;
+}

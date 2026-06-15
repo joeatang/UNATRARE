@@ -24,6 +24,7 @@ export default function Nav() {
         <ul className={styles['nav-links']}>
           <li><Link href="/directory">Directory</Link></li>
           <li><Link href="/vault">Vault</Link></li>
+          <li><Link href="/danknotes" className={styles['nav-paper']}>$CASH</Link></li>
           <li><Link href="/burns">🔥 Burns</Link></li>
           <li><Link href="/about#artist-incentive-flow">Artist Flow</Link></li>
           <li><Link href="/archive">Archive</Link></li>
@@ -74,6 +75,7 @@ export default function Nav() {
         </div>
         <ul className={styles.drawerLinks} onClick={() => setOpen(false)}>
           <li><Link href="/directory">Directory</Link></li>
+          <li><Link href="/danknotes" className={styles.drawerPaperLink}>$CASH · DANKNOTES</Link></li>
           <li><Link href="/archive">Archive</Link></li>
           <li><Link href="/council">Council</Link></li>
           <li><Link href="/nodes">Nodes</Link></li>
