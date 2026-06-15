@@ -29,7 +29,7 @@ const ARCHETYPES = [
   ['09_hair',     'THE HAIR',     '5M'],
   ['10_gox',      'THE GOX',      '69M'],
   ['11_flooney',  'THE LOONEY',   '10M'],
-  ['12_Djpepe',   'THE DJ',       '30M'],
+  ['12_djpepe',   'THE DJ',       '30M'],
   ['13_bane',     'THE BANE',     '$256'],
   ['14_classic2', 'NAKAMOTO',     '2M'],
   ['15_cool',     'PEPE IS LOVE', '69K'],
