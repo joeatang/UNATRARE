@@ -118,10 +118,7 @@ export default function VaultUploadPage() {
       ...(f.twitter?.trim() ? { website_social_twitter: f.twitter.trim() } : {}),
 
       ...(social.length > 0 && { social }),
-      images: [
-        { type: 'icon', size: '48x48', name, data: icon_url, hash: HASH },
-        { type: 'large',               name, data: art_url,  hash: HASH },
-      ],
+      // images[] omitted — image field already carries the 48×48 icon
     };
     return out;
   }

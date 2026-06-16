@@ -67,12 +67,9 @@ export async function GET(req, { params }) {
       // independently, causing duplicate Twitter rows.
       ...(social.length > 0 && { social }),
 
-      // v2.0.0 images array — icon entry only (with size + hash metadata).
-      // image_large (v1 above) already covers the large art URL.
-      // Including type:'large' here causes tokenscan to show two "Large" rows.
-      images: [
-        { type: 'icon', size: '48x48', name, data: icon_url, hash },
-      ],
+      // images[] intentionally omitted.
+      // `image` above already points to the 48×48 icon; adding it again in
+      // images[] causes Freewallet/tokenscan to see two conflicting icon sources.
     };
 
     return NextResponse.json(json, {
