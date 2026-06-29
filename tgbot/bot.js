@@ -53,6 +53,10 @@ const TG_API     = 'https://api.telegram.org';
 
 const MYSTERY_CARD_PATH = join(PUBLIC_DIR, 'mystery-card.png');
 const MYSTERY_CACHE_KEY = 'mystery-card-v1';
+const MYSTERY_IMAGE = {
+  filePath: MYSTERY_CARD_PATH,
+  photoUrl: 'https://unatrare.wtf/mystery-card.png',
+};
 
 // Polling cadence
 const SCAN_INTERVAL_MS  = 2 * 60 * 1000;   // 2 min — dispenser polling
@@ -660,16 +664,17 @@ function captionForSubmission(row) {
   const sub = row.subcategory ? row.subcategory : '';
   const tag = [cat, sub].filter(Boolean).join(' · ');
   const cardRef = (row.series && row.card_number)
-    ? `S${row.series} · #${String(row.card_number).padStart(3, '0')}`
+    ? `SERIES ${row.series} · CARD #${String(row.card_number).padStart(3, '0')}`
     : '';
   const headline = row.status === 'approved'
     ? `🐸 <b>NEW SUBMISSION — UNDER COUNCIL REVIEW</b>`
     : `🐸 <b>NEW SUBMISSION — UNDER REVIEW</b>`;
   return clean([
     headline,
+    cardRef ? `<b>${cardRef}</b>` : '',
     '',
     `<code>${row.token_name}</code> · by <b>${who}</b>`,
-    cardRef ? `<i>${cardRef}${tag ? ' · ' + tag : ''}</i>` : (tag ? `<i>${tag}</i>` : ''),
+    tag ? `<i>${tag}</i>` : '',
     '',
     `<i>art hidden until council stamps verdict</i>`,
     `the council deliberates · stay ready to salute`,
@@ -766,22 +771,24 @@ async function tokenScanOnce() {
 
     // 1) Brand new row
     if (!prev) {
-      if (r.status === 'pending' || (r.status === 'approved' && !cert)) {
-        // Either: still pending judge, or AI approved but admin hasn't stamped
+      // Only tease once the AI judge has approved and assigned series/card_number.
+      // Brand-new pending rows (no card_number yet) are baselined silently;
+      // they'll be picked up by branch 2a when status flips to approved.
+      if (r.status === 'approved' && !cert && r.card_number) {
         try {
           await sendPhotoOrText(
-            { filePath: MYSTERY_CARD_PATH },
+            MYSTERY_IMAGE,
             captionForSubmission(r),
             CHAT_ID, null, MYSTERY_CACHE_KEY,
           );
           upsertTokenState.run(
             r.token_name, r.status, cert,
             now,
-            r.status === 'approved' ? (r.judged_at || now) : null,
+            r.judged_at || now,
             null,
             now
           );
-          log(`[tgbot] teased ${r.token_name} (status=${r.status}, certified=${cert})`);
+          log(`[tgbot] teased ${r.token_name} (S${r.series} #${r.card_number}, awaiting stamp)`);
         } catch (e) {
           warn(`[tgbot] teaser ${r.token_name} failed:`, e.message);
           upsertTokenState.run(r.token_name, r.status, cert, null, null, null, now);
@@ -808,12 +815,12 @@ async function tokenScanOnce() {
     if (prev.status === 'pending' && r.status === 'approved' && !prev.teased_at) {
       try {
         await sendPhotoOrText(
-          { filePath: MYSTERY_CARD_PATH },
+          MYSTERY_IMAGE,
           captionForSubmission(r),
           CHAT_ID, null, MYSTERY_CACHE_KEY,
         );
         upsertTokenState.run(r.token_name, 'approved', cert, now, r.judged_at || now, null, now);
-        log(`[tgbot] teased ${r.token_name} (council review pending)`);
+        log(`[tgbot] teased ${r.token_name} (S${r.series} #${r.card_number}, council review pending)`);
       } catch (e) {
         warn(`[tgbot] teaser ${r.token_name} failed:`, e.message);
         upsertTokenState.run(r.token_name, 'approved', cert, null, r.judged_at || now, null, now);
