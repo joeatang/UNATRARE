@@ -51,6 +51,9 @@ const PUBLIC_DIR = join(__dirname, '..', 'public');
 const SITE_BASE  = 'https://unatrare.wtf';
 const TG_API     = 'https://api.telegram.org';
 
+const MYSTERY_CARD_PATH = join(PUBLIC_DIR, 'mystery-card.png');
+const MYSTERY_CACHE_KEY = 'mystery-card-v1';
+
 // Polling cadence
 const SCAN_INTERVAL_MS  = 2 * 60 * 1000;   // 2 min — dispenser polling
 const UPDATES_TIMEOUT_S = 30;              // 30s long-poll for /u commands
@@ -656,6 +659,9 @@ function captionForSubmission(row) {
   const cat = row.category ? row.category : '';
   const sub = row.subcategory ? row.subcategory : '';
   const tag = [cat, sub].filter(Boolean).join(' · ');
+  const cardRef = (row.series && row.card_number)
+    ? `S${row.series} · #${String(row.card_number).padStart(3, '0')}`
+    : '';
   const headline = row.status === 'approved'
     ? `🐸 <b>NEW SUBMISSION — UNDER COUNCIL REVIEW</b>`
     : `🐸 <b>NEW SUBMISSION — UNDER REVIEW</b>`;
@@ -663,11 +669,9 @@ function captionForSubmission(row) {
     headline,
     '',
     `<code>${row.token_name}</code> · by <b>${who}</b>`,
-    tag ? `<i>${tag}</i>` : '',
+    cardRef ? `<i>${cardRef}${tag ? ' · ' + tag : ''}</i>` : (tag ? `<i>${tag}</i>` : ''),
     '',
-    `▓▒░ <b>?</b> ░▒▓`,
     `<i>art hidden until council stamps verdict</i>`,
-    '',
     `the council deliberates · stay ready to salute`,
     '',
     `<a href="${SITE_BASE}/card/${row.token_name}">Watch this card →</a>`,
@@ -765,7 +769,11 @@ async function tokenScanOnce() {
       if (r.status === 'pending' || (r.status === 'approved' && !cert)) {
         // Either: still pending judge, or AI approved but admin hasn't stamped
         try {
-          await sendMessage(captionForSubmission(r));
+          await sendPhotoOrText(
+            { filePath: MYSTERY_CARD_PATH },
+            captionForSubmission(r),
+            CHAT_ID, null, MYSTERY_CACHE_KEY,
+          );
           upsertTokenState.run(
             r.token_name, r.status, cert,
             now,
@@ -799,7 +807,11 @@ async function tokenScanOnce() {
     //     (because we'll catch the stamp transition in the next scan tick)
     if (prev.status === 'pending' && r.status === 'approved' && !prev.teased_at) {
       try {
-        await sendMessage(captionForSubmission(r));
+        await sendPhotoOrText(
+          { filePath: MYSTERY_CARD_PATH },
+          captionForSubmission(r),
+          CHAT_ID, null, MYSTERY_CACHE_KEY,
+        );
         upsertTokenState.run(r.token_name, 'approved', cert, now, r.judged_at || now, null, now);
         log(`[tgbot] teased ${r.token_name} (council review pending)`);
       } catch (e) {

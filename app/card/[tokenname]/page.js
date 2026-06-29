@@ -8,7 +8,6 @@ import styles from './card.module.css';
 import { getDb } from '../../../lib/db';
 
 function toRoman(n) {
-  if (n === 0) return '0';
   const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
   const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
   let out = '';
@@ -305,22 +304,17 @@ export default async function CardPage({ params }) {
               <SaluteCeremonySpotlight cardName={token.token_name} />
             )}
 
-            <SalutePanel cardName={token.token_name} />
-
-            <div className={styles.cashLinks}>
-              <a
-                href="https://nat.fun/?refId=c69c9108f52b"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.cashLink}
-              >
-                need $CASH? get it on nat.fun ↗
-              </a>
-              <span className={styles.cashLinkSep} aria-hidden="true">·</span>
-              <Link href="/about/salutes" className={styles.cashLink}>
-                learn about $CASH ↗
-              </Link>
-            </div>
+            {token.council_certified === 1 && token.revealed_at ? (
+              <SalutePanel cardName={token.token_name} />
+            ) : (
+              <div style={{
+                fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px',
+                color: 'var(--text-dim)', textAlign: 'center', padding: '24px 0',
+                border: '1px dashed #2a2a2a', margin: '12px 0',
+              }}>
+                ○ SALUTES OPEN AFTER COUNCIL STAMPS THIS CARD
+              </div>
+            )}
 
             {token.description && (
               <div className={styles.description}>
@@ -417,35 +411,6 @@ export default async function CardPage({ params }) {
                     title={token.dispenser_address}
                   >
                     dispenser ↗
-                  </a>
-                </div>
-              )}
-              <div className={styles.metaRow}>
-                <span className={styles.metaKey}>Salute Token</span>
-                <a
-                  href="https://nat.fun/?refId=c69c9108f52b"
-                  target="_blank" rel="noopener noreferrer"
-                  className={styles.metaVal}
-                  style={{ color: 'var(--amber-hot)', textDecoration: 'none' }}
-                  title="Get $CASH (NATCASH) on nat.fun — required to salute this card"
-                >
-                  $CASH on nat.fun ↗
-                </a>
-              </div>
-              {token.artist_sol_address && token.artist_sol_verified_at && (
-                <div className={styles.metaRow}>
-                  <span className={styles.metaKey}>Artist Payout</span>
-                  <a
-                    href={`https://solscan.io/account/${token.artist_sol_address}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className={styles.metaVal}
-                    style={{ color: 'var(--green)', textDecoration: 'none' }}
-                    title={`Salute split active — ${token.artist_sol_address}`}
-                  >
-                    <span className={styles.addressTrunc}>
-                      {token.artist_sol_address.slice(0,6)}…{token.artist_sol_address.slice(-4)}
-                    </span>
-                    <span style={{ marginLeft: 6 }}>↗</span>
                   </a>
                 </div>
               )}
