@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <!-- Auto-return: when maintenance lifts, visitors are bounced back automatically. -->
+  <meta http-equiv="refresh" content="30" />
+  <title>UNATRARE — Tuning Up</title>
+  <style>
+    :root {
+      --bg: #080808;
+      --panel: #0f0f0f;
+      --border: #2a2a2a;
+      --amber: #C9A84C;
+      --amber-worn: #8B7355;
+      --text: #d4d4d4;
+      --muted: #666;
+      --green: #3d9e3d;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      background: var(--bg); color: var(--text);
+      font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .wrap {
+      min-height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%; max-width: 520px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 40px 32px;
+    }
+    .strip {
+      font-size: 12px; letter-spacing: 2px; color: var(--amber-worn);
+      border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-family: "VT323", ui-monospace, monospace;
+      font-size: 40px; line-height: 1.05; margin: 0 0 12px;
+      color: var(--amber); font-weight: 400;
+    }
+    p { margin: 0 0 16px; font-size: 15px; line-height: 1.6; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .rule { border: 0; border-top: 1px solid var(--border); margin: 24px 0; }
+    .ok { color: var(--green); }
+    .dot {
+      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--amber); margin-right: 8px;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    ul { margin: 8px 0 0; padding-left: 18px; }
+    li { margin-bottom: 6px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="strip">UNATRARE · MAINTENANCE</div>
+      <h1><span class="dot"></span>Tuning up.</h1>
+      <p>We're deploying an update to the directory. The site will be back in a few minutes — this page refreshes itself automatically.</p>
+      <hr class="rule" />
+      <p class="ok">Your art and tokens are unaffected.</p>
+      <ul>
+        <li>Certified art keeps serving in wallets and marketplaces.</li>
+        <li>Nothing on Bitcoin changes. Your tokens are yours.</li>
+        <li>No submissions, salutes, or edits are lost — just paused.</li>
+      </ul>
+      <hr class="rule" />
+      <p class="muted">Please hold off on submitting or editing until this page clears. Thanks for the patience.</p>
+    </div>
+  </div>
+</body>
+</html>
