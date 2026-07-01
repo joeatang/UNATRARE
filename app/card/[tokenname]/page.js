@@ -7,6 +7,7 @@ import SaluteCeremonySpotlight from '../../components/SaluteCeremonySpotlight';
 import styles from './card.module.css';
 import { getDb } from '../../../lib/db';
 import { fmtCash, tierFor, truncateWallet } from '../../../lib/saluteDisplay';
+import { resolveIdentities, displayFor } from '../../../lib/torchbearerIdentity';
 
 function toRoman(n) {
   const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
@@ -75,7 +76,7 @@ function getCampaignData(tokenName) {
       WHERE card_name = ?
       GROUP BY sol_wallet
       ORDER BY total_burned DESC, salute_count DESC, first_burned_at ASC
-      LIMIT 5
+      LIMIT 8
     `).all(tokenName);
 
     const recentSalutes = db.prepare(`
@@ -94,6 +95,20 @@ function getCampaignData(tokenName) {
       LIMIT 4
     `).all(tokenName);
 
+    // Anon-aware display labels for every wallet shown on this card.
+    const idMap = resolveIdentities([
+      ...topTorchbearers.map(t => t.sol_wallet),
+      ...recentSalutes.map(s => s.sol_wallet),
+      ...(firstSaluter ? [firstSaluter.sol_wallet] : []),
+    ]);
+    const labelFor = (w) => displayFor(idMap.get(w), w).label;
+    // Honor "hide from leaderboards" on the ranked list, backfill to 5.
+    const visibleTop = topTorchbearers
+      .filter(t => !idMap.get(t.sol_wallet)?.hidden)
+      .slice(0, 5);
+    for (const t of visibleTop) t.label = labelFor(t.sol_wallet);
+    for (const s of recentSalutes) s.label = labelFor(s.sol_wallet);
+
     return {
       totals: totals || {
         total_burned: 0,
@@ -105,7 +120,8 @@ function getCampaignData(tokenName) {
         last_burned_at: null,
       },
       firstSaluter: firstSaluter || null,
-      topTorchbearers,
+      firstSaluterLabel: firstSaluter ? labelFor(firstSaluter.sol_wallet) : null,
+      topTorchbearers: visibleTop,
       recentSalutes,
       artistUpdates,
     };
@@ -472,7 +488,7 @@ export default async function CardPage({ params }) {
                   <span className={styles.campaignStatLabel}>latest signal</span>
                   <span className={styles.campaignStatValue}>{relTime(campaign.totals.last_burned_at)}</span>
                   <span className={styles.campaignStatSub}>
-                    {campaign.firstSaluter ? `genesis by ${truncateWallet(campaign.firstSaluter.sol_wallet)}` : 'awaiting first salute'}
+                    {campaign.firstSaluter ? `genesis by ${campaign.firstSaluterLabel}` : 'awaiting first salute'}
                   </span>
                 </div>
               </div>
@@ -493,7 +509,7 @@ export default async function CardPage({ params }) {
                             <div className={styles.campaignRowLeft}>
                               <span className={styles.campaignRank}>#{index + 1}</span>
                               <div className={styles.campaignSupporterMeta}>
-                                <span className={styles.campaignWallet}>{truncateWallet(torchbearer.sol_wallet)}</span>
+                                <span className={styles.campaignWallet}>{torchbearer.label}</span>
                                 <span className={styles.campaignSupporterSub}>
                                   {torchbearer.salute_count} salute{torchbearer.salute_count === 1 ? '' : 's'}
                                   {isGenesis ? ' · genesis' : ''}
@@ -520,7 +536,7 @@ export default async function CardPage({ params }) {
                         <Link key={salute.tx_sig} href={`/torchbearer/${salute.sol_wallet}`} className={`${styles.campaignRow} ${styles.campaignRowLink}`}>
                           <div className={styles.campaignRowLeft}>
                             <div className={styles.campaignSupporterMeta}>
-                              <span className={styles.campaignWallet}>{truncateWallet(salute.sol_wallet)}</span>
+                              <span className={styles.campaignWallet}>{salute.label}</span>
                               <span className={styles.campaignSupporterSub}>{relTime(salute.burned_at)}</span>
                             </div>
                           </div>

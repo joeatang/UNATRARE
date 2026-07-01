@@ -4,6 +4,7 @@ import Nav from '../../components/Nav';
 import styles from './torchbearer.module.css';
 import { getDb } from '../../../lib/db';
 import { fmtCash, tierFor, truncateWallet } from '../../../lib/saluteDisplay';
+import { getTorchbearer, displayFor } from '../../../lib/torchbearerIdentity';
 
 const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
@@ -118,6 +119,8 @@ export default async function TorchbearerPage({ params }) {
   if (!data.stats || Number(data.stats.salute_count || 0) === 0) notFound();
 
   const tier = tierFor(data.stats.total_burned);
+  const identity = getTorchbearer(wallet);
+  const disp = displayFor(identity, wallet);
 
   return (
     <>
@@ -127,10 +130,32 @@ export default async function TorchbearerPage({ params }) {
 
         <header className={styles.header}>
           <div className={styles.eyebrow}>torchbearer ledger</div>
-          <h1 className={styles.title}>{truncateWallet(wallet)}</h1>
-          <div className={styles.wallet}>{wallet}</div>
+          {disp.avatar && (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={disp.avatar} alt={disp.label} className={styles.avatar} loading="lazy" />
+          )}
+          <h1 className={styles.title}>{disp.label}</h1>
+          {disp.handle && disp.name && <div className={styles.displayName}>{disp.name}</div>}
+          {disp.showWallet ? (
+            <div className={styles.wallet}>{wallet}</div>
+          ) : (
+            <div className={styles.wallet}>{truncateWallet(wallet)} · <span className={styles.anonTag}>anon</span></div>
+          )}
+          {disp.block != null && (
+            <div className={styles.blockBadge}>⛓ Genesis Block #{disp.block.toLocaleString()}</div>
+          )}
+          {disp.bio && <p className={styles.bio}>{disp.bio}</p>}
+          {(disp.twitter || disp.website) && (
+            <div className={styles.socials}>
+              {disp.twitter && <a href={`https://x.com/${disp.twitter}`} target="_blank" rel="noopener noreferrer">@{disp.twitter}</a>}
+              {disp.website && <a href={disp.website} target="_blank" rel="noopener noreferrer">website ↗</a>}
+            </div>
+          )}
           <div className={styles.tier} style={{ color: tier.color, borderColor: `${tier.color}55` }}>
             {tier.label}
+          </div>
+          <div className={styles.claimHint}>
+            <Link href="/torchbearer/claim">{disp.claimed ? 'this is you? edit your profile →' : 'this is you? claim your handle →'}</Link>
           </div>
         </header>
 
@@ -210,7 +235,6 @@ export default async function TorchbearerPage({ params }) {
                       href={`https://solscan.io/tx/${row.tx_sig}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
                       className={styles.solscan}
                     >
                       proof ↗

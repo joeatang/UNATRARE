@@ -47,6 +47,84 @@
   word-break: break-all;
 }
 
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.displayName {
+  margin-top: 6px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--text);
+}
+
+.anonTag {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.blockBadge {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 5px 12px;
+  border: 1px solid rgba(255, 176, 0, 0.5);
+  border-radius: 999px;
+  background: rgba(255, 176, 0, 0.06);
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: var(--amber);
+}
+
+.bio {
+  margin: 12px 0 0;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text);
+  max-width: 620px;
+}
+
+.socials {
+  display: flex;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.socials a {
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  text-decoration: none;
+}
+
+.socials a:hover { color: var(--amber); }
+
+.claimHint {
+  margin-top: 14px;
+}
+
+.claimHint a {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-decoration: none;
+}
+
+.claimHint a:hover { color: var(--amber); }
+
 .tier {
   display: inline-block;
   margin-top: 14px;

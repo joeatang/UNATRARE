@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Nav from '../components/Nav';
 import { getDb } from '../../lib/db';
 import { fmtCash, tierFor, truncateWallet } from '../../lib/saluteDisplay';
+import { resolveIdentities, displayFor } from '../../lib/torchbearerIdentity';
 import styles from './burns.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -101,6 +102,22 @@ export default function BurnsPage({ searchParams }) {
   const cards   = tab === 'cards'   ? getTopCards(db, since)   : [];
   const wallets = tab === 'wallets' ? getTopWallets(db, since) : [];
   const recent  = tab === 'recent'  ? getRecent(db)            : [];
+
+  // Torchbearer identities (anon lane): render handles, and honor the
+  // "hide from leaderboards" flag on the ranked wallets tab.
+  if (wallets.length) {
+    const m = resolveIdentities(wallets.map(w => w.sol_wallet));
+    for (const w of wallets) {
+      const id = m.get(w.sol_wallet);
+      w.hidden = !!id?.hidden;
+      w.label = displayFor(id, w.sol_wallet).label;
+    }
+  }
+  const visibleWallets = wallets.filter(w => !w.hidden);
+  if (recent.length) {
+    const m = resolveIdentities(recent.map(r => r.sol_wallet));
+    for (const r of recent) r.label = displayFor(m.get(r.sol_wallet), r.sol_wallet).label;
+  }
 
   let activeCeremony = null;
   try {
@@ -272,9 +289,9 @@ export default function BurnsPage({ searchParams }) {
 
         {safeTab === 'wallets' && (
           <div className={styles.list}>
-            {wallets.length === 0 ? (
+            {visibleWallets.length === 0 ? (
               <div className={styles.empty}>No burners in this window yet.</div>
-            ) : wallets.map((row, i) => {
+            ) : visibleWallets.map((row, i) => {
               const tier = tierFor(row.total_burned);
               return (
                 <Link key={row.sol_wallet} href={`/torchbearer/${row.sol_wallet}`} className={styles.cardRow} style={{ borderColor: i < 3 ? tier.color : 'var(--border-dim)' }}>
@@ -285,7 +302,7 @@ export default function BurnsPage({ searchParams }) {
                     <div className={styles.thumbBlank}>◉</div>
                   </div>
                   <div className={styles.cardMeta}>
-                    <div className={styles.cardTitle}>{truncateWallet(row.sol_wallet)}</div>
+                    <div className={styles.cardTitle}>{row.label}</div>
                     <div className={styles.cardSub}>
                       {row.cards_saluted} card{row.cards_saluted === 1 ? '' : 's'} saluted
                       {' · '}{row.burn_count} salute{row.burn_count === 1 ? '' : 's'}
@@ -314,12 +331,11 @@ export default function BurnsPage({ searchParams }) {
                   <div className={styles.cardMeta}>
                     <div className={styles.cardTitle}>{row.display_title}</div>
                     <div className={styles.cardSub}>
-                      {truncateWallet(row.sol_wallet)} · {relTime(row.burned_at)} ·{' '}
+                      {row.label} · {relTime(row.burned_at)} ·{' '}
                       <a
                         href={`https://solscan.io/tx/${row.tx_sig}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
                         className={styles.solscan}
                       >
                         solscan ↗
@@ -339,6 +355,7 @@ export default function BurnsPage({ searchParams }) {
         <div className={styles.footnote}>
           Salutes are real on-chain $CASH burns on Solana. Permanent and verifiable. Saluting never closes — every card stays open forever.
           {' '}New here? <Link href="/directory">Pick a card</Link> and light it up.
+          {' '}Already saluting? <Link href="/torchbearer/claim">Claim your torchbearer handle →</Link>
         </div>
 
       </main>
