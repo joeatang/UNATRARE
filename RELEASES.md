@@ -21,6 +21,15 @@ Bitcoin block-claim supporter identity — "Bitcoin is the source of truth."
 - **Fixed:** server-component crash from illegal `onClick` on solscan links in
   `/burns` and the torchbearer profile.
 
+### Phase 3.1 — returning-supporter hooks  ·  build `wqDH9_actYM2qHg47WK71`  ·  2026-07-01
+
+- **Nav CTA** "🔥 Claim Block" (desktop + mobile drawer) — always-visible path.
+- **Welcome-back banner** (`ClaimBanner`): silently reconnects a previously-approved
+  wallet (`onlyIfTrusted`, no popup) and shows a dismissible "claim your block"
+  banner to supporters who've saluted but not yet claimed.
+- `GET /api/torchbearer/claim` now reports `eligible` + `saluteCount` for
+  unclaimed wallets so the banner knows who to nudge.
+
 ## Phase 2 — "Studio"  ·  build `_XN6SFmWLMpTAwZh1rCCX`  ·  2026-07-01
 
 Artist Studio consolidation + emergency stabilization.
