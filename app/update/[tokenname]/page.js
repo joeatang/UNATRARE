@@ -15,7 +15,7 @@ export default async function UpdatePage({ params }) {
   try {
     const db = getDb();
     token = db.prepare(`
-      SELECT token_name, display_title, artist_handle, description,
+      SELECT token_name, display_title, artist_handle, description, official_signal,
              category, subcategory, art_url, art_mime,
              audio_url, video_url, artist_address, owner_address
       FROM tokens WHERE token_name = ?
@@ -36,6 +36,7 @@ export default async function UpdatePage({ params }) {
     display_title: token.display_title || token.token_name,
     artist_handle: token.artist_handle || '',
     description:   token.description   || '',
+    official_signal: token.official_signal || '',
     category:      token.category      || '',
     subcategory:   token.subcategory   || '',
     audio_url:     token.audio_url     || '',

@@ -14,8 +14,8 @@ export default function UpdateForm({ initialData }) {
 
   const [displayTitle,  setDisplayTitle]  = useState(initialData.display_title);
   const [artistHandle,  setArtistHandle]  = useState(initialData.artist_handle);
-  const [description,   setDescription]  = useState(initialData.description);
-  const [officialSignal, setOfficialSignal] = useState(initialData.official_signal);
+  const [description,   setDescription]  = useState(initialData.description || '');
+  const [officialSignal, setOfficialSignal] = useState(initialData.official_signal || '');
   const [campaignUpdate, setCampaignUpdate] = useState('');
   const [category,      setCategory]     = useState(initialData.category);
   const [subcategory,   setSubcategory]  = useState(initialData.subcategory);
