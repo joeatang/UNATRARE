@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# ops/notify.sh — send a message to the UNATRARE Telegram alert channel.
+# ops/notify.sh — send an OPS alert to the private UNATRARE alert chat.
 # Usage: ops/notify.sh "message (HTML allowed)"
-# Reads TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID from .env.local (never printed).
+#
+# Chat selection (never printed):
+#   TELEGRAM_ALERT_CHAT_ID  — PRIVATE ops/health channel (preferred)
+#   TELEGRAM_CHAT_ID        — public channel (fallback only, to avoid noise)
+# Both read from .env.local.
 set -u
 
 ENV_FILE="${UNAT_ENV_FILE:-/var/www/unatrare/.env.local}"
@@ -18,7 +22,9 @@ MSG="${1:-}"
 [ -n "$MSG" ] || { echo "[notify] empty message" >&2; exit 0; }
 
 TOKEN="$(read_env TELEGRAM_BOT_TOKEN)"
-CHAT="$(read_env TELEGRAM_CHAT_ID)"
+# Prefer the private alert chat; fall back to the public channel only if unset.
+CHAT="$(read_env TELEGRAM_ALERT_CHAT_ID)"
+[ -n "$CHAT" ] || CHAT="$(read_env TELEGRAM_CHAT_ID)"
 
 if [ -z "$TOKEN" ] || [ -z "$CHAT" ]; then
   echo "[notify] Telegram not configured — would have sent: $MSG" >&2
