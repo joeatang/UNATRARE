@@ -7,6 +7,20 @@ Naming: **Phase N — "Codename"** · build ID (Next.js `BUILD_ID`) · date.
 
 ---
 
+## Phase 3 — "Torchbearer"  ·  build `zazKYKbUJQB7vjh93peDC`  ·  2026-07-01
+
+Bitcoin block-claim supporter identity — "Bitcoin is the source of truth."
+
+- Supporters who salute a card can claim an identity; Bitcoin **randomly deals
+  them a genesis block** (provably-fair, hash-seeded), claimed exactly once.
+- Handle + profile fields are **optional** — anons show as `Block #N`.
+- Identity resolved by handle/block across the card, `/burns`, and
+  `/torchbearer/[wallet]` profile pages (hidden-aware).
+- `torchbearers` table gains `genesis_block`, `claim_seed_hash`,
+  `claim_seed_height` (additive migration; existing data preserved).
+- **Fixed:** server-component crash from illegal `onClick` on solscan links in
+  `/burns` and the torchbearer profile.
+
 ## Phase 2 — "Studio"  ·  build `_XN6SFmWLMpTAwZh1rCCX`  ·  2026-07-01
 
 Artist Studio consolidation + emergency stabilization.
