@@ -1541,12 +1541,12 @@ function Step5({ data }) {
         }}>
           ← back to pepempool
         </Link>
-        <Link href={`/status?token=${encodeURIComponent(data.tokenName)}`} style={{
+        <Link href={`/studio?token=${encodeURIComponent(data.tokenName)}`} style={{
           fontFamily:'var(--font-card)', fontSize:'11px', letterSpacing:'3px',
           color:'var(--amber)', textDecoration:'none',
           border:'1px solid var(--amber)', padding:'10px 20px',
         }}>
-          check status →
+          open artist studio →
         </Link>
       </div>
     </div>

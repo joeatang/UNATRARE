@@ -534,6 +534,7 @@ export default function CashBurnPanel({ authToken }) {
       setMsg(action === 'close'   ? '🏁 ceremony closed — Telegram fired'
             : action === 'repost'  ? '↻ reposted to Telegram'
             : action === 'archive' ? '📦 archived'
+            : action === 'open'    ? `🔥 ceremony #${String(json.burn?.ordinal || '').padStart(3, '0')} opened`
             : 'ok');
       await refresh();
       return json.burn;
@@ -542,6 +543,25 @@ export default function CashBurnPanel({ authToken }) {
       return null;
     } finally {
       setBusy(false);
+    }
+  }
+
+  // Open a community-driven ceremony with NO admin seed. amount=0 and the
+  // server skips tx_sig / admin_wallet verification entirely. The leaderboard
+  // is then built purely from cash_burn_contributions.
+  async function openCommunityOnly() {
+    if (active) { setMsg('close the current ceremony first'); return; }
+    if (!form.character_key) { setMsg('character required'); return; }
+    if (!confirm('Open a community-only ceremony? No admin seed will be burned — community contributions only.')) return;
+    const burn = await postAction('open', {
+      character_key: form.character_key,
+      card_name:     form.card_name,
+      headline:      form.headline,
+      quote:         form.quote,
+    });
+    if (burn) {
+      setForm({ character_key: form.character_key, amount: '', card_name: '', headline: '', quote: '' });
+      setPreviewUrl('');
     }
   }
 
@@ -769,6 +789,9 @@ export default function CashBurnPanel({ authToken }) {
             </button>
             <button onClick={signAndOpen} disabled={!canSign} style={btn('var(--green)', { disabled: !canSign })}>
               {burnLabel}
+            </button>
+            <button onClick={openCommunityOnly} disabled={busy || !form.character_key || !!active} style={btn('var(--text-dim)', { disabled: busy || !form.character_key || !!active })}>
+              {busy ? '…' : '🪔 open community-only (no seed)'}
             </button>
           </div>
 

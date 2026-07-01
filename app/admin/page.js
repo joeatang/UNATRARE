@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import styles from './admin.module.css';
-import CashBurnPanel from './CashBurnPanel';
 
 // ── Admin password gate ────────────────────────────────────────
 function LoginGate({ onAuth }) {
@@ -65,11 +64,10 @@ function TokenRow({ token, authToken, onAction }) {
   const [announceCopied, setAnnounceCopied] = useState(false);
   const [dirHidden, setDirHidden] = useState(!!token.directory_hidden);
   const [stamped, setStamped] = useState(!!token.council_certified);
-  const [moveSeries, setMoveSeries] = useState('');
 
-  async function act(action, extra = {}) {
+  async function act(action) {
     setLoading(action);
-    const body = { tokenName: token.token_name, action, note, ...extra };
+    const body = { tokenName: token.token_name, action, note };
     if ((action === 'approve' || action === 'genesis') && targetSeries !== '') body.series = targetSeries;
     const res = await fetch('/api/admin/action', {
       method: 'POST',
@@ -89,11 +87,6 @@ function TokenRow({ token, authToken, onAction }) {
       } else if (action === 'certify_stamp') {
         setStamped(true);
         setRevealed(true); // certify_stamp auto-reveals server-side
-        if (json.already_certified && !json.reannounced) {
-          alert('Already certified — no announcement re-sent. Use "re-announce" to repost on Telegram.');
-        } else if (json.reannounced) {
-          alert('Council stamp re-announced on Telegram.');
-        }
       } else if (action === 'decertify_stamp') {
         setStamped(false);
       } else if (action === 'approve' || action === 'genesis') {
@@ -116,9 +109,6 @@ function TokenRow({ token, authToken, onAction }) {
           `#Counterparty #UNATPEPE #RarePepe`,
         ].filter(Boolean).join('\n');
         setAnnounceText(tweet);
-      } else if (action === 'set_series') {
-        alert(`Moved to Series ${json.series} · Card #${String(json.card_number).padStart(3,'0')}`);
-        onAction(token.token_name, action);
       } else {
         onAction(token.token_name, action);
       }
@@ -175,12 +165,18 @@ function TokenRow({ token, authToken, onAction }) {
           {approvalResult && (
             <div style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px',
               color:'var(--green)', marginTop:4}}>
-              ✓ CERTIFIED — copy message for artist
+              ✓ CERTIFIED — send payment link to artist
             </div>
           )}
         </div>
         <div style={{display:'flex', alignItems:'center', gap:8}}>
-
+          {token.status === 'approved' && !token.revealed_at && !approvalResult && (
+            <span style={{
+              fontFamily:'var(--font-card)', fontSize:'8px', letterSpacing:'2px',
+              color:'var(--amber)', border:'1px solid var(--amber)',
+              padding:'2px 6px', whiteSpace:'nowrap',
+            }}>⬡ DROP NEEDED</span>
+          )}
           <div className={styles.rowToggle}>{approvalResult ? '✉' : expanded ? '▲' : '▼'}</div>
         </div>
       </div>
@@ -310,46 +306,6 @@ function TokenRow({ token, authToken, onAction }) {
                 (blank = auto-assign)
               </span>
             </div>
-            {token.status === 'approved' && token.card_number && (
-              <div style={{display:'flex', alignItems:'center', gap:8, marginBottom:8}}>
-                <span style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px', color:'var(--text-dim)', whiteSpace:'nowrap'}}>
-                  MOVE SERIES
-                </span>
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={moveSeries}
-                  onChange={e => setMoveSeries(e.target.value)}
-                  placeholder="0"
-                  style={{
-                    width:60, padding:'5px 8px',
-                    background:'var(--bg)', border:'1px solid var(--border)',
-                    color:'var(--text)', fontFamily:'var(--font-card)', fontSize:'11px',
-                    letterSpacing:'2px',
-                  }}
-                />
-                <button
-                  onClick={() => {
-                    if (moveSeries === '') return;
-                    if (confirm(`Move ${token.token_name} to Series ${moveSeries}? Card number will be reassigned.`)) {
-                      act('set_series', { series: parseInt(moveSeries, 10) });
-                    }
-                  }}
-                  disabled={!!loading || moveSeries === ''}
-                  style={{
-                    fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px',
-                    padding:'5px 10px', border:'1px solid var(--border-dim)',
-                    background:'transparent', color:'var(--text-dim)', cursor:'pointer',
-                  }}
-                >
-                  {loading === 'set_series' ? '…' : 'move →'}
-                </button>
-                <span style={{fontFamily:'var(--font-body)', fontSize:'10px', color:'var(--text-dim)'}}>
-                  now: s{token.series} #{String(token.card_number).padStart(3,'0')}
-                </span>
-              </div>
-            )}
             <div className={styles.actionBtns}>
               <button
                 className={`${styles.actionBtn} ${styles.approveBtn}`}
@@ -367,12 +323,10 @@ function TokenRow({ token, authToken, onAction }) {
               </button>
               <button
                 className={`${styles.actionBtn} ${styles.judgeBtn}`}
-                onClick={() => act(token.status === 'pending' ? 'judge' : 'rejudge')}
+                onClick={() => act('judge')}
                 disabled={!!loading}
               >
-                {loading === 'judge' || loading === 'rejudge'
-                  ? (token.status === 'pending' ? 'judging...' : 're-judging...')
-                  : (token.status === 'pending' ? '⚡ judge' : '⚡ re-judge')}
+                {loading === 'judge' ? 'judging...' : '⚡ re-judge'}
               </button>
               <button
                 className={`${styles.actionBtn} ${styles.genesisBtn}`}
@@ -382,7 +336,29 @@ function TokenRow({ token, authToken, onAction }) {
               >
                 {loading === 'genesis' ? 'certifying...' : '★ genesis'}
               </button>
-
+              {/* DROP button — only show for approved tokens not yet revealed */}
+              {token.status === 'approved' && (
+                revealed ? (
+                  <span
+                    className={styles.actionBtn}
+                    style={{ background: 'var(--green)', color: 'var(--bg)', fontWeight: 700, cursor: 'default', opacity: 1 }}
+                    title="Art is live publicly"
+                  >
+                    ● LIVE
+                  </span>
+                ) : (
+                  <button
+                    className={`${styles.actionBtn} ${styles.dropBtn}`}
+                    onClick={() => {
+                      if (confirm(`Drop art for ${token.token_name} publicly? This will reveal the art on the homepage and to wallets.`)) act('reveal');
+                    }}
+                    disabled={!!loading}
+                    title="Release art publicly — homepage + wallets can now see it"
+                  >
+                    {loading === 'reveal' ? 'dropping...' : '⬡ drop art'}
+                  </button>
+                )
+              )}
               <button
                 className={`${styles.actionBtn} ${styles.purgeBtn}`}
                 onClick={() => {
@@ -423,20 +399,6 @@ function TokenRow({ token, authToken, onAction }) {
                     : stamped ? '⬟ stamped' : '⬟ stamp'}
                 </button>
               )}
-              {token.status === 'approved' && stamped && (
-                <button
-                  className={styles.actionBtn}
-                  onClick={() => act('certify_stamp', { reannounce: true })}
-                  disabled={!!loading}
-                  title="Re-post council stamp announcement on Telegram + Discord (no DB change)"
-                  style={{
-                    border: '1px solid var(--amber)',
-                    color: 'var(--amber)',
-                  }}
-                >
-                  {loading === 'certify_stamp' ? '...' : '📣 re-announce'}
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -444,9 +406,9 @@ function TokenRow({ token, authToken, onAction }) {
 
       {/* Branded approval message — shown after certify */}
       {approvalResult && (() => {
+        const payUrl = approvalResult.payUrl || `https://unatrare.wtf/pay/${token.token_name}`;
         const series = approvalResult.series ?? '—';
         const cardNum = approvalResult.card_number ?? '—';
-        const cardNumStr = cardNum !== '—' ? String(cardNum).padStart(3, '0') : '—';
         const msg = [
           '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
           '✦  UNATRARE — CERTIFIED DANK  ✦',
@@ -454,11 +416,15 @@ function TokenRow({ token, authToken, onAction }) {
           `${token.token_name} has been evaluated by the`,
           'UNATRARE Pepe Council and certified DANK.',
           '',
-          `Series ${series} · Card #${cardNumStr}`,
+          'Your art has earned a place in the directory.',
           '',
-          `→ unatrare.wtf/card/${token.token_name}`,
-          '→ Add Solana payout address: unatrare.wtf/status',
+          'Complete your enrollment:',
+          `→ ${payUrl}`,
           '',
+          'Submit the fee to take your official position',
+          'in the collection.',
+          '',
+          `Series ${series} · Card #${cardNum}`,
           '— The UNATRARE Scientist Panel',
           '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
         ].join('\n');
@@ -1904,41 +1870,13 @@ function ArtistProfilePanel({ authToken }) {
 }
 
 // ── Salute ceremonies management panel ────────────────────────
-function effectiveCeremonyStatus(row, nowSec) {
-  if (!row) return 'none';
-  if (row.status === 'archived') return 'archived';
-  if (row.status === 'closed') return 'closed';
-  if (row.starts_at && nowSec < row.starts_at) return 'scheduled';
-  if (row.ends_at && nowSec >= row.ends_at) return row.status === 'active' ? 'closed' : row.status;
-  if (row.status === 'scheduled' && row.starts_at && nowSec >= row.starts_at) return 'active';
-  return row.status;
-}
-function humanDelta(targetSec, nowSec) {
-  if (!targetSec) return '';
-  const d = Math.abs(targetSec - nowSec);
-  const h = Math.floor(d / 3600);
-  const m = Math.floor((d % 3600) / 60);
-  if (h >= 24) return `${Math.floor(h / 24)}d ${h % 24}h`;
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
-}
 function SaluteCeremoniesPanel({ authToken }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
   const [rows, setRows] = useState([]);
-  const [envRequireSplitTx, setEnvRequireSplitTx] = useState(false);
-  const [nowTick, setNowTick] = useState(() => Math.floor(Date.now() / 1000));
-  const [policy, setPolicy] = useState({
-    enforceWindow: false,
-    strictConfiguredOnly: false,
-    burnFloor: 69,
-    spotlightHours: 48,
-    splitPresets: [
-      { key: 'phase1_artist_31', label: '69 burn / 31 artist', burn_pct: 69, artist_pct: 31, node_pct: 0 },
-    ],
-  });
+  const [policy, setPolicy] = useState({ enforceWindow: false, strictConfiguredOnly: false });
   const [loadedFromRow, setLoadedFromRow] = useState(false);
   const [msg, setMsg] = useState('');
   const [form, setForm] = useState({
@@ -1946,11 +1884,6 @@ function SaluteCeremoniesPanel({ authToken }) {
     headline: 'Burn to Salute',
     subtitle: 'Voluntary community ritual · proof of appreciation',
     theme_key: 'ember',
-    split_preset: 'phase1_artist_31',
-    distribution_mode: 'none',
-    distribution_asset: '',
-    distribution_rule: '',
-    artist_sol_address: '',
     status: 'draft',
     starts_at: '',
     ends_at: '',
@@ -1981,16 +1914,10 @@ function SaluteCeremoniesPanel({ authToken }) {
         return;
       }
       setRows(json.ceremonies || []);
-      setEnvRequireSplitTx(!!(json.env && json.env.requireSplitTx));
       if (json.policy) {
         setPolicy({
           enforceWindow: !!json.policy.enforceWindow,
           strictConfiguredOnly: !!json.policy.strictConfiguredOnly,
-          burnFloor: Number(json.policy.burnFloor || 69),
-          spotlightHours: Number(json.policy.spotlightHours || 48),
-          splitPresets: Array.isArray(json.policy.splitPresets) && json.policy.splitPresets.length
-            ? json.policy.splitPresets
-            : [{ key: 'phase1_artist_31', label: '69 burn / 31 artist', burn_pct: 69, artist_pct: 31, node_pct: 0 }],
         });
       }
       setMsg('');
@@ -2004,23 +1931,12 @@ function SaluteCeremoniesPanel({ authToken }) {
     fetchCeremonies();
   }, [open, statusFilter]);
 
-  useEffect(() => {
-    if (!open) return;
-    const id = setInterval(() => setNowTick(Math.floor(Date.now() / 1000)), 30000);
-    return () => clearInterval(id);
-  }, [open]);
-
   function loadRowIntoForm(row) {
     setForm({
       card_name: row.card_name || '',
       headline: row.headline || 'Burn to Salute',
       subtitle: row.subtitle || 'Voluntary community ritual · proof of appreciation',
       theme_key: row.theme_key || 'ember',
-      split_preset: row.split_preset || 'phase1_artist_31',
-      distribution_mode: row.distribution_mode || 'none',
-      distribution_asset: row.distribution_asset || '',
-      distribution_rule: row.distribution_rule || '',
-      artist_sol_address: row.artist_sol_address || '',
       status: row.status || 'draft',
       starts_at: toInputTime(row.starts_at),
       ends_at: toInputTime(row.ends_at),
@@ -2029,8 +1945,8 @@ function SaluteCeremoniesPanel({ authToken }) {
     setMsg(`loaded ${row.card_name}`);
   }
 
-  async function postAction(action, overrides = {}) {
-    if (!form.card_name.trim() && !overrides.card_name) {
+  async function postAction(action) {
+    if (!form.card_name.trim()) {
       setMsg('card_name required');
       return;
     }
@@ -2038,18 +1954,13 @@ function SaluteCeremoniesPanel({ authToken }) {
     try {
       const body = {
         action,
-        card_name: (overrides.card_name || form.card_name).toUpperCase().trim(),
+        card_name: form.card_name.toUpperCase().trim(),
         headline: form.headline,
         subtitle: form.subtitle,
         theme_key: form.theme_key,
-        split_preset: form.split_preset,
-        distribution_mode: form.distribution_mode,
-        distribution_asset: form.distribution_asset,
-        distribution_rule: form.distribution_rule,
-        artist_sol_address: overrides.artist_sol_address !== undefined ? overrides.artist_sol_address : form.artist_sol_address,
-        status: overrides.status || form.status,
-        starts_at: overrides.starts_at !== undefined ? overrides.starts_at : fromInputTime(form.starts_at),
-        ends_at: overrides.ends_at !== undefined ? overrides.ends_at : fromInputTime(form.ends_at),
+        status: form.status,
+        starts_at: fromInputTime(form.starts_at),
+        ends_at: fromInputTime(form.ends_at),
       };
 
       const res = await fetch('/api/admin/salute-ceremonies', {
@@ -2062,13 +1973,7 @@ function SaluteCeremoniesPanel({ authToken }) {
       });
       const json = await res.json();
       if (!res.ok || !json.ok) {
-        if (json.error === 'missing_artist_sol') {
-          const card = body.card_name;
-          const btc = json.artist_btc_address || '(unknown)';
-          setMsg(`⚠ ${card} has no artist SOL payout address yet.\n\nFix path A (preferred — keeps artist sovereign):\n  • Send the artist this link: ${typeof window !== 'undefined' ? window.location.origin : 'https://unatrare.wtf'}/status\n  • They enter their submission BTC address (${btc}), open the Manage section on the ${card} card, paste their Solana address, and sign the BIP-137 message with that BTC wallet.\n\nFix path B (admin override — only with their permission):\n  • Open ⚙️ ADVANCED below\n  • Paste the SOL address into ARTIST SOL ADDRESS (override)\n  • Click ▶ ENABLE LIVE CEREMONY again`);
-          return;
-        }
-        setMsg(json.message || json.error || 'save failed');
+        setMsg(json.error || 'save failed');
         return;
       }
       setMsg(`✓ ${action} saved for ${body.card_name}`);
@@ -2099,21 +2004,6 @@ function SaluteCeremoniesPanel({ authToken }) {
 
       {open && (
         <div style={{ padding: '0 20px 20px' }}>
-          {/* ── Sticky message banner — top of panel so feedback is unmissable ── */}
-          {msg && (
-            <div style={{
-              position: 'sticky', top: 0, zIndex: 5,
-              marginTop: 8, marginBottom: 12, padding: '10px 12px',
-              border: `1px solid ${msg.startsWith('✓') ? 'var(--green)' : 'var(--amber)'}`,
-              background: msg.startsWith('✓') ? 'rgba(180,255,111,0.07)' : 'rgba(255,180,0,0.07)',
-              fontFamily: 'var(--font-body)', fontSize: 13, color: msg.startsWith('✓') ? 'var(--green)' : 'var(--amber)',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
-            }}>
-              <span style={{ whiteSpace: 'pre-line', flex: 1, lineHeight: 1.5 }}>{msg}</span>
-              <button onClick={() => setMsg('')} style={{ background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: 0 }}>×</button>
-            </div>
-          )}
-
           <div style={{
             marginTop: 2,
             marginBottom: 12,
@@ -2128,133 +2018,32 @@ function SaluteCeremoniesPanel({ authToken }) {
             POLICY · WINDOW GATE: <span style={{ color: policy.enforceWindow ? 'var(--amber)' : 'var(--green)' }}>{policy.enforceWindow ? 'ON' : 'OFF'}</span>
             {' · '}
             STRICT CONFIGURED-ONLY: <span style={{ color: policy.strictConfiguredOnly ? 'var(--amber)' : 'var(--green)' }}>{policy.strictConfiguredOnly ? 'ON' : 'OFF'}</span>
-            {' · '}
-            BURN FLOOR: <span style={{ color: 'var(--amber)' }}>{policy.burnFloor}%</span>
-            {' · '}
-            SPOTLIGHT: <span style={{ color: 'var(--amber)' }}>{policy.spotlightHours}h fixed</span>
-            {' · '}
-            SPLIT-TX ENFORCEMENT: <span style={{ color: envRequireSplitTx ? 'var(--green)' : 'var(--amber)' }}>{envRequireSplitTx ? 'ON' : 'OFF (env SALUTE_REQUIRE_ARTIST_SPLIT_TX=0)'}</span>
           </div>
 
-          {!envRequireSplitTx && (
-            <div style={{ marginBottom: 12, padding: '8px 10px', border: '1px solid var(--amber)', background: 'rgba(255,180,0,0.05)', fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--amber)', lineHeight: 1.5 }}>
-              ⚠ Split-tx enforcement is OFF. Ceremonies will run, but the salute panel will show <strong>&ldquo;no live ceremony · 100% burn&rdquo;</strong> because wallets won&apos;t actually route an artist payout. To enable split salutes site-wide, set <code>SALUTE_REQUIRE_ARTIST_SPLIT_TX=1</code> in <code>.env</code> and restart pm2 with <code>--update-env</code>.
-            </div>
-          )}
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)', marginBottom: 14, lineHeight: 1.6 }}>
+            Configure per-card burn ritual windows, themes, and ceremony copy. This is additive and does not alter existing salute records.
+          </div>
 
-          {/* ══ PRIMARY ACTION — go live in one field ════════════════════════ */}
-          <div style={{ marginBottom: 16, padding: '14px 14px 12px', border: '1px solid var(--green)', background: 'rgba(180,255,111,0.04)' }}>
-            <div style={{ fontFamily: 'var(--font-card)', fontSize: 10, letterSpacing: '2px', color: 'var(--green)', marginBottom: 10 }}>
-              ▶ GO LIVE NOW · 48h SPLIT SALUTE
-            </div>
-            <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: 12 }}>
-              One field. Click the button. Ceremony goes live for {policy.spotlightHours}h with 69% burn / 31% to artist. The artist must already have set their SOL payout address on their <code>/status</code> page (they sign with their submission BTC wallet). If they haven&apos;t, you&apos;ll see a clear notice and can paste it under <em>Advanced</em> below.
-            </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
             <div>
-              <span style={label}>CARD NAME *</span>
+              <span style={label}>CARD NAME</span>
               <input
                 style={input}
                 value={form.card_name}
-                onChange={e => { setLoadedFromRow(false); setForm(f => ({ ...f, card_name: e.target.value.toUpperCase() })); }}
-                placeholder="DRAWNATPEPE"
+                onChange={e => {
+                  setLoadedFromRow(false);
+                  setForm(f => ({ ...f, card_name: e.target.value.toUpperCase() }));
+                }}
+                placeholder="TOKENNAME"
               />
             </div>
-            <button
-              onClick={() => {
-                if (!form.card_name.trim()) { setMsg('card name required'); return; }
-                postAction('activate', { starts_at: null, ends_at: null });
-              }}
-              disabled={saving}
-              style={{
-                marginTop: 12, width: '100%', padding: '12px 16px',
-                border: '1px solid var(--green)', background: 'rgba(180,255,111,0.10)',
-                color: 'var(--green)', cursor: saving ? 'wait' : 'pointer',
-                fontFamily: 'var(--font-card)', fontSize: 11, letterSpacing: '3px',
-              }}
-            >
-              {saving ? 'WORKING…' : `▶ ENABLE LIVE CEREMONY (${policy.spotlightHours}h)`}
-            </button>
-          </div>
-
-          <details style={{ marginBottom: 12, border: '1px solid var(--border-dim)', padding: '8px 12px', background: 'rgba(255,255,255,0.01)' }}>
-            <summary style={{ cursor: 'pointer', fontFamily: 'var(--font-card)', fontSize: 10, letterSpacing: '2px', color: 'var(--text-dim)' }}>
-              ⚙️ ADVANCED — only open if scheduling for later, customizing split %, or editing headline/theme
-            </summary>
-            <div style={{ marginTop: 12 }}>
-
-          <div style={{ marginBottom: 12, padding: '8px 10px', border: '1px dashed var(--amber)', background: 'rgba(255,180,0,0.04)' }}>
-            <span style={label}>ARTIST SOL ADDRESS (override)</span>
-            <input
-              style={input}
-              value={form.artist_sol_address}
-              onChange={e => setForm(f => ({ ...f, artist_sol_address: e.target.value.trim() }))}
-              placeholder="leave blank — artist sets this themselves on /status"
-            />
-            {form.artist_sol_address && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(form.artist_sol_address) && (
-              <div style={{ marginTop: 4, fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--amber)' }}>not a valid Solana address</div>
-            )}
-            <div style={{ marginTop: 6, fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.5 }}>
-              Artists own this field. They set it on their <code>/status</code> page and sign with their submission BTC wallet (verified server-side). Use this override only when the artist needs help and has confirmed the address with you out-of-band. When supplied here on save / activate, it&rsquo;s written to <code>tokens.artist_sol_address</code> for that card.
-            </div>
-          </div>
-
-          <div className={styles.ceremonyGrid2}>
-            <div>
-              <span style={label}>SPLIT PRESET</span>
-              <select style={input} value={form.split_preset} onChange={e => setForm(f => ({ ...f, split_preset: e.target.value }))}>
-                {policy.splitPresets.map(p => (
-                  <option key={p.key} value={p.key}>{p.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <span style={label}>DISTRIBUTION LOGIC</span>
-              <select style={input} value={form.distribution_mode} onChange={e => setForm(f => ({ ...f, distribution_mode: e.target.value }))}>
-                <option value="none">none (salute only)</option>
-                <option value="top_burners">top burners</option>
-                <option value="weighted_burners">weighted burners</option>
-                <option value="raffle_burners">raffle burners</option>
-                <option value="manual_curated">manual curated</option>
-              </select>
-            </div>
-          </div>
-
-          <div className={styles.ceremonyGrid2}>
-            <div>
-              <span style={label}>DISTRIBUTION ASSET</span>
-              <input
-                style={input}
-                value={form.distribution_asset}
-                onChange={e => setForm(f => ({ ...f, distribution_asset: e.target.value.toUpperCase() }))}
-                placeholder="TOKENNAME / NFT / reward note"
-              />
-            </div>
-            <div>
-              <span style={label}>RULE NOTES</span>
-              <input
-                style={input}
-                value={form.distribution_rule}
-                onChange={e => setForm(f => ({ ...f, distribution_rule: e.target.value }))}
-                placeholder="ex: top 10 burners, weighted by total burn"
-              />
-            </div>
-          </div>
-
-          <div className={styles.ceremonyGrid2}>
             <div>
               <span style={label}>THEME</span>
-              <div style={{ ...input, display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-dim)', cursor: 'default' }}>
-                🎲 randomized per activation
-              </div>
-            </div>
-            <div>
-              <span style={label}>STATUS (manual)</span>
-              <select style={input} value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
-                <option value="draft">draft</option>
-                <option value="scheduled">scheduled</option>
-                <option value="active">active</option>
-                <option value="closed">closed</option>
-                <option value="archived">archived</option>
+              <select style={input} value={form.theme_key} onChange={e => setForm(f => ({ ...f, theme_key: e.target.value }))}>
+                <option value="ember">ember</option>
+                <option value="flame">flame</option>
+                <option value="inferno">inferno</option>
+                <option value="legendary">legendary</option>
               </select>
             </div>
           </div>
@@ -2269,7 +2058,17 @@ function SaluteCeremoniesPanel({ authToken }) {
             <input style={input} value={form.subtitle} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))} placeholder="Voluntary community ritual · proof of appreciation" />
           </div>
 
-          <div className={styles.ceremonyGrid2}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 12 }}>
+            <div>
+              <span style={label}>STATUS</span>
+              <select style={input} value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
+                <option value="draft">draft</option>
+                <option value="scheduled">scheduled</option>
+                <option value="active">active</option>
+                <option value="closed">closed</option>
+                <option value="archived">archived</option>
+              </select>
+            </div>
             <div>
               <span style={label}>STARTS AT</span>
               <input type="datetime-local" style={input} value={form.starts_at} onChange={e => setForm(f => ({ ...f, starts_at: e.target.value }))} />
@@ -2280,38 +2079,30 @@ function SaluteCeremoniesPanel({ authToken }) {
             </div>
           </div>
 
-          <div style={{ marginTop: -4, marginBottom: 12, padding: '8px 10px', border: '1px dashed var(--border-dim)', fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.6 }}>
-            <div style={{ color: 'var(--text)', marginBottom: 4, fontFamily: 'var(--font-card)', letterSpacing: '1.5px', fontSize: 10 }}>WHEN DO I USE THIS SECTION?</div>
-            Only when you need to <em>schedule</em> a ceremony for a future date, customize the headline/distribution, or save settings <strong>without going live yet</strong>. For a normal &ldquo;start it right now for {policy.spotlightHours}h&rdquo; ceremony, just use the green button above &mdash; you don&rsquo;t need anything down here.
-            <br /><br />
-            <strong style={{ color: 'var(--text)' }}>Dates:</strong> leave <code>STARTS AT</code> blank to go live <em>immediately</em> on activate. A future <code>STARTS AT</code> keeps it in <em>scheduled</em> state until that moment (panel shows 100% burn until it flips live).
-          </div>
-
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
-            <button onClick={() => postAction('upsert')} disabled={saving} style={btn('var(--green)')} title="save settings to DB; does NOT activate">{saving ? 'saving…' : '💾 save draft (no activation)'}</button>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+            <button onClick={() => postAction('upsert')} disabled={saving} style={btn('var(--green)')}>{saving ? 'saving…' : 'save / upsert'}</button>
             <button
               onClick={() => postAction('activate')}
-              disabled={saving}
-              style={btn('var(--amber)')}
-              title={`save + activate using STARTS AT / ENDS AT above (or now+${policy.spotlightHours}h if blank)`}
+              disabled={saving || (policy.strictConfiguredOnly && !loadedFromRow)}
+              style={
+                (policy.strictConfiguredOnly && !loadedFromRow)
+                  ? { ...btn('var(--border)'), opacity: 0.55, cursor: 'not-allowed' }
+                  : btn('var(--amber)')
+              }
+              title={policy.strictConfiguredOnly && !loadedFromRow ? 'strict mode: load an existing ceremony row first' : 'activate 48h'}
             >
-              📅 save + activate (custom dates)
+              activate 48h
             </button>
-            <button onClick={() => postAction('close')} disabled={saving} style={btn('var(--text-dim)')} title="end the ceremony immediately">close now</button>
-            <button onClick={() => postAction('archive')} disabled={saving} style={btn('var(--text-dim)')} title="hide from active listings">archive</button>
-            <button onClick={() => postAction('draft')} disabled={saving} style={btn('var(--text-dim)')} title="reset status to draft (un-activate)">back to draft</button>
-          </div>
-          <div style={{ marginBottom: 14, fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--text-dim)', lineHeight: 1.5 }}>
-            <strong style={{ color: 'var(--text)' }}>save draft</strong> = persist settings only, ceremony stays inactive ·&nbsp;
-            <strong style={{ color: 'var(--text)' }}>save + activate</strong> = persist + flip to active using your dates above ·&nbsp;
-            <strong style={{ color: 'var(--text)' }}>close</strong> = stop a live ceremony ·&nbsp;
-            <strong style={{ color: 'var(--text)' }}>archive</strong> / <strong style={{ color: 'var(--text)' }}>back to draft</strong> = lifecycle housekeeping
+            <button onClick={() => postAction('close')} disabled={saving} style={btn('var(--text-dim)')}>close</button>
+            <button onClick={() => postAction('archive')} disabled={saving} style={btn('var(--text-dim)')}>archive</button>
+            <button onClick={() => postAction('draft')} disabled={saving} style={btn('var(--text-dim)')}>back to draft</button>
           </div>
 
-
-
+          {policy.strictConfiguredOnly && !loadedFromRow && (
+            <div style={{ marginTop: -4, marginBottom: 12, fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)' }}>
+              strict mode is ON: click edit on an existing ceremony row before activating.
             </div>
-          </details>
+          )}
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <span style={{ ...label, marginBottom: 0 }}>CEREMONY LIST</span>
@@ -2332,336 +2123,23 @@ function SaluteCeremoniesPanel({ authToken }) {
             {rows.length === 0 && !loading && (
               <div style={{ padding: '10px', fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)' }}>no ceremonies yet</div>
             )}
-            {rows.map(r => {
-              const eff = effectiveCeremonyStatus(r, nowTick);
-              const hasArtistSol = !!(r.artist_sol_address && r.artist_sol_address.trim());
-              const willShowLive = eff === 'active' && envRequireSplitTx && Number(r.artist_pct || 0) > 0 && hasArtistSol;
-              const pillColor = eff === 'active' ? 'var(--green)' : eff === 'scheduled' ? 'var(--amber)' : 'var(--text-dim)';
-              const pillBg = eff === 'active' ? 'rgba(180,255,111,0.10)' : eff === 'scheduled' ? 'rgba(255,180,0,0.08)' : 'transparent';
-              let timing = '';
-              if (eff === 'scheduled' && r.starts_at) timing = `starts in ${humanDelta(r.starts_at, nowTick)}`;
-              else if (eff === 'active' && r.ends_at) timing = `ends in ${humanDelta(r.ends_at, nowTick)}`;
-              else if (eff === 'closed' && r.ends_at) timing = `ended ${humanDelta(r.ends_at, nowTick)} ago`;
-              return (
-                <div key={r.card_name} style={{ padding: '12px', borderBottom: '1px solid var(--border-dim)', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'baseline', justifyContent: 'space-between' }}>
-                    <div style={{ minWidth: 0, flex: '1 1 220px' }}>
-                      <div style={{ fontFamily: 'var(--font-card)', fontSize: 11, letterSpacing: '2px', color: 'var(--text)' }}>{r.card_name}</div>
-                      <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {r.headline || 'Burn to Salute'}
-                      </div>
-                      <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, color: 'var(--green)', letterSpacing: '1px', marginTop: 2 }}>
-                        {r.burn_pct ?? 69}% burn · {r.artist_pct ?? 31}% artist{(r.node_pct ?? 0) > 0 ? ` · ${r.node_pct}% nodes` : ''}
-                      </div>
-                    </div>
-                    <span style={{ display: 'inline-block', padding: '3px 8px', border: `1px solid ${pillColor}`, color: pillColor, background: pillBg, fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '2px' }}>
-                      {eff}{timing ? ` · ${timing}` : ''}
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', flexWrap: 'nowrap', gap: 14, fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }}>
-                    <span style={{ color: eff === 'active' ? 'var(--green)' : 'var(--amber)', whiteSpace: 'nowrap' }}>
-                      {eff === 'active' ? '✓' : '✗'} status: <strong>{eff}</strong>
-                    </span>
-                    <span style={{ color: envRequireSplitTx ? 'var(--green)' : 'var(--amber)', whiteSpace: 'nowrap' }}>
-                      {envRequireSplitTx ? '✓' : '✗'} split-tx env
-                    </span>
-                    <span style={{ color: hasArtistSol ? 'var(--green)' : 'var(--amber)', whiteSpace: 'nowrap' }}>
-                      {hasArtistSol ? '✓' : '✗'} artist SOL set
-                    </span>
-                    <span style={{ color: willShowLive ? 'var(--green)' : 'var(--text-dim)', whiteSpace: 'nowrap' }}>
-                      {willShowLive ? '✓ panel: LIVE · SPLIT' : '○ panel: 100% burn'}
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    <button onClick={() => loadRowIntoForm(r)} style={btn('var(--amber)')}>edit</button>
-                    {eff !== 'active' && (
-                      <button
-                        onClick={() => postAction('activate', { card_name: r.card_name, starts_at: null, ends_at: null })}
-                        disabled={saving}
-                        style={btn('var(--green)')}
-                        title={`activate now for ${policy.spotlightHours}h`}
-                      >
-                        ▶ go live now ({policy.spotlightHours}h)
-                      </button>
-                    )}
-                    {eff === 'active' && (
-                      <button
-                        onClick={() => postAction('close', { card_name: r.card_name })}
-                        disabled={saving}
-                        style={btn('var(--text-dim)')}
-                      >
-                        close now
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function SaluteVerificationPanel({ authToken }) {
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState('');
-  const [copiedSig, setCopiedSig] = useState('');
-  const [rows, setRows] = useState([]);
-  const [counts, setCounts] = useState([]);
-  const [severityCounts, setSeverityCounts] = useState({ high: 0, medium: 0, low: 0 });
-  const [filters, setFilters] = useState({
-    split_only: true,
-    event: '',
-    card: '',
-    window: '24h',
-    limit: '100',
-  });
-
-  const panelStyle = { margin: '24px 0', border: '1px solid var(--border-dim)', background: 'rgba(255,175,80,0.03)' };
-  const btn = (c = 'var(--text-dim)') => ({
-    padding: '6px 12px', border: `1px solid ${c}`, background: 'transparent', color: c,
-    fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', cursor: 'pointer',
-  });
-  const input = { width: '100%', padding: '7px 9px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 12, boxSizing: 'border-box' };
-  const label = { fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: 4, display: 'block' };
-
-  function short(v) {
-    if (!v) return '—';
-    if (v.length <= 14) return v;
-    return `${v.slice(0, 6)}…${v.slice(-4)}`;
-  }
-
-  function severityColor(severity) {
-    if (severity === 'high') return '#ff6666';
-    if (severity === 'medium') return 'var(--amber)';
-    return 'var(--text-dim)';
-  }
-
-  async function copyTxSig(sig) {
-    if (!sig) return;
-    try {
-      await navigator.clipboard.writeText(sig);
-      setCopiedSig(sig);
-      setMsg('');
-    } catch {
-      setMsg('failed to copy tx signature');
-    }
-  }
-
-  useEffect(() => {
-    if (!copiedSig) return;
-    const timer = setTimeout(() => setCopiedSig(''), 1400);
-    return () => clearTimeout(timer);
-  }, [copiedSig]);
-
-  async function fetchAudit(overrideFilters = null) {
-    const active = overrideFilters ? { ...filters, ...overrideFilters } : filters;
-    if (overrideFilters) setFilters(active);
-    setLoading(true);
-    try {
-      const sp = new URLSearchParams();
-      sp.set('split_only', active.split_only ? '1' : '0');
-      sp.set('limit', active.limit || '100');
-      sp.set('window', active.window || '24h');
-      if (active.event.trim()) sp.set('event', active.event.trim());
-      if (active.card.trim()) sp.set('card', active.card.trim().toUpperCase());
-      const res = await fetch(`/api/admin/salute-verifications?${sp.toString()}`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
-      const json = await res.json();
-      if (!res.ok || !json.ok) {
-        setMsg(json.error || 'failed to load salute verifications');
-        return;
-      }
-      setRows(json.rows || []);
-      setCounts(json.counts || []);
-      setSeverityCounts(json.severityCounts || { high: 0, medium: 0, low: 0 });
-      setMsg('');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    if (!open) return;
-    fetchAudit();
-  }, [open]);
-
-  return (
-    <div style={panelStyle}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        style={{ width: '100%', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '3px', color: 'var(--amber)' }}
-      >
-        <span>🧪 SALUTE VERIFICATION AUDIT</span>
-        <span style={{ color: 'var(--text-dim)' }}>{open ? '▲' : '▼'}</span>
-      </button>
-
-      {open && (
-        <div style={{ padding: '0 20px 20px' }}>
-          <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)', marginBottom: 12, lineHeight: 1.6 }}>
-            Review split verification failures without tailing logs. Default view shows split-only events.
-          </div>
-
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
-            <button onClick={() => fetchAudit({ split_only: true, event: '', window: '24h' })} disabled={loading} style={btn('var(--amber)')}>last 24h split</button>
-            <button onClick={() => fetchAudit({ split_only: true, event: 'split_ratio_mismatch', window: '24h' })} disabled={loading} style={btn('#ff6666')}>ratio mismatches</button>
-            <button onClick={() => fetchAudit({ split_only: true, event: 'split_missing_artist_leg', window: '24h' })} disabled={loading} style={btn('var(--amber)')}>missing artist leg</button>
-            <button onClick={() => fetchAudit({ split_only: true, event: 'split_missing_artist_address', window: '7d' })} disabled={loading} style={btn('var(--text-dim)')}>missing artist address 7d</button>
-            <button onClick={() => fetchAudit({ split_only: false, event: '', window: '24h' })} disabled={loading} style={btn('var(--text-dim)')}>all events 24h</button>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px 120px auto', gap: 10, alignItems: 'end', marginBottom: 10 }}>
-            <div>
-              <span style={label}>CARD FILTER</span>
-              <input
-                style={input}
-                value={filters.card}
-                onChange={e => setFilters(f => ({ ...f, card: e.target.value.toUpperCase() }))}
-                placeholder="TOKENNAME"
-              />
-            </div>
-            <div>
-              <span style={label}>EVENT FILTER</span>
-              <input
-                style={input}
-                value={filters.event}
-                onChange={e => setFilters(f => ({ ...f, event: e.target.value }))}
-                placeholder="split_ratio_mismatch"
-              />
-            </div>
-            <div>
-              <span style={label}>WINDOW</span>
-              <select
-                style={input}
-                value={filters.window}
-                onChange={e => setFilters(f => ({ ...f, window: e.target.value }))}
-              >
-                <option value="1h">1h</option>
-                <option value="24h">24h</option>
-                <option value="48h">48h</option>
-                <option value="7d">7d</option>
-                <option value="all">all</option>
-              </select>
-            </div>
-            <div>
-              <span style={label}>LIMIT</span>
-              <input
-                style={input}
-                value={filters.limit}
-                onChange={e => setFilters(f => ({ ...f, limit: e.target.value.replace(/[^0-9]/g, '') }))}
-                placeholder="100"
-              />
-            </div>
-            <button onClick={fetchAudit} disabled={loading} style={btn('var(--amber)')}>{loading ? 'loading…' : 'refresh'}</button>
-          </div>
-
-          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)' }}>
-            <input
-              type="checkbox"
-              checked={filters.split_only}
-              onChange={e => setFilters(f => ({ ...f, split_only: e.target.checked }))}
-            />
-            split-only events
-          </label>
-
-          {counts.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
-              <span style={{ border: '1px solid #402020', padding: '3px 8px', fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: '#ff6666' }}>
-                high · {severityCounts.high || 0}
-              </span>
-              <span style={{ border: '1px solid #4a3a1f', padding: '3px 8px', fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--amber)' }}>
-                medium · {severityCounts.medium || 0}
-              </span>
-              <span style={{ border: '1px solid var(--border-dim)', padding: '3px 8px', fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text-dim)' }}>
-                low · {severityCounts.low || 0}
-              </span>
-              {counts.map(c => (
-                <span key={c.event} style={{ border: '1px solid var(--border-dim)', padding: '3px 8px', fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text-dim)' }}>
-                  {c.event} · {c.n}
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div style={{ border: '1px solid var(--border-dim)', background: 'rgba(255,255,255,0.01)' }}>
-            {rows.length === 0 && !loading && (
-              <div style={{ padding: '10px', fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)' }}>no matching verification events</div>
-            )}
             {rows.map(r => (
-              <div key={r.id} style={{ display: 'grid', gridTemplateColumns: '140px 180px 120px 120px 140px 1fr', gap: 8, alignItems: 'start', padding: '8px 10px', borderBottom: '1px solid var(--border-dim)' }}>
-                <div style={{ fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--text-dim)' }}>
-                  {new Date((r.created_at || 0) * 1000).toISOString().slice(0, 19).replace('T', ' ')}
-                </div>
-                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: severityColor(r.severity) }}>
-                  {r.event}
-                  <span style={{ color: 'var(--text-dim)', marginLeft: 6 }}>{r.severity || 'low'}</span>
-                </div>
-                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text)' }} title={r.card_name || ''}>{r.card_name || '—'}</div>
-                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text-dim)' }} title={r.sol_wallet || ''}>{short(r.sol_wallet)}</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: '1px', color: 'var(--text-dim)' }} title={r.tx_sig || ''}>{short(r.tx_sig)}</div>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    <button
-                      onClick={() => copyTxSig(r.tx_sig)}
-                      style={{
-                        padding: '2px 6px',
-                        border: '1px solid var(--border-dim)',
-                        background: 'transparent',
-                        color: 'var(--text-dim)',
-                        fontFamily: 'var(--font-card)',
-                        fontSize: 8,
-                        letterSpacing: '1px',
-                        cursor: 'pointer',
-                      }}
-                      disabled={!r.tx_sig}
-                    >
-                      copy
-                    </button>
-                    {copiedSig && copiedSig === r.tx_sig && (
-                      <span style={{
-                        padding: '2px 6px',
-                        border: '1px solid var(--green)',
-                        color: 'var(--green)',
-                        fontFamily: 'var(--font-card)',
-                        fontSize: 8,
-                        letterSpacing: '1px',
-                      }}>
-                        copied
-                      </span>
-                    )}
-                    {r.tx_sig && (
-                      <a
-                        href={`https://solscan.io/tx/${r.tx_sig}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          padding: '2px 6px',
-                          border: '1px solid var(--amber)',
-                          color: 'var(--amber)',
-                          textDecoration: 'none',
-                          fontFamily: 'var(--font-card)',
-                          fontSize: 8,
-                          letterSpacing: '1px',
-                        }}
-                      >
-                        solscan ↗
-                      </a>
-                    )}
+              <div key={r.card_name} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 10, alignItems: 'center', padding: '8px 10px', borderBottom: '1px solid var(--border-dim)' }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontFamily: 'var(--font-card)', fontSize: 10, letterSpacing: '2px', color: 'var(--text)' }}>{r.card_name}</div>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {r.headline || 'Burn to Salute'}
                   </div>
                 </div>
-                <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)' }}>{r.message || '—'}</div>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, color: 'var(--amber)', letterSpacing: '1px' }}>{r.status}</div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--text-dim)' }}>{r.ends_at ? new Date(r.ends_at * 1000).toISOString().slice(0, 16).replace('T', ' ') : '—'}</div>
+                <button onClick={() => loadRowIntoForm(r)} style={btn('var(--amber)')}>edit</button>
               </div>
             ))}
           </div>
 
           {msg && (
-            <div style={{ marginTop: 10, fontFamily: 'var(--font-card)', fontSize: 10, letterSpacing: '1px', color: 'var(--amber)' }}>
+            <div style={{ marginTop: 10, fontFamily: 'var(--font-card)', fontSize: 10, letterSpacing: '1px', color: msg.startsWith('✓') ? 'var(--green)' : 'var(--amber)' }}>
               {msg}
             </div>
           )}
@@ -2987,9 +2465,7 @@ export default function AdminPage() {
       <div className={styles.queue}>
         {tab === 'tools' ? (
           <>
-            <CashBurnPanel authToken={authToken} />
             <SaluteCeremoniesPanel authToken={authToken} />
-            <SaluteVerificationPanel authToken={authToken} />
             <TelegramRegistrationsPanel authToken={authToken} />
             <GenesisGrantsPanel authToken={authToken} />
             <DropsPanel authToken={authToken} />

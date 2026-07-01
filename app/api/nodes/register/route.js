@@ -7,7 +7,7 @@
  * ─────────────────────────────────────────────
  * - Genesis is granted per XCP *address*, not per node pubkey.
  *   One person running 10 nodes with the same XCP address gets 1 genesis grant.
- * - The first 100 unique XCP addresses to register + complete 7 days of
+ * - The first 21 unique XCP addresses to register + complete 7 days of
  *   continuous heartbeats earn confirmed GENESIS status.
  * - Registration puts the XCP address in "provisional" status immediately
  *   (slot reserved, not yet confirmed). If the node goes dark before 7 days,
@@ -27,7 +27,7 @@ import { NextResponse } from 'next/server';
 import { getDb } from '../../../../lib/db';
 import { refreshUnatpepeNodeTier } from '../../../../lib/tapApi.js';
 
-const GENESIS_CAP     = 100;
+const GENESIS_CAP     = 21;
 const MAX_ADDR_LEN    = 100;
 const IP_LIMIT_COUNT  = 3;
 const IP_LIMIT_WINDOW = 24 * 60 * 60 * 1000; // 24 hours ms

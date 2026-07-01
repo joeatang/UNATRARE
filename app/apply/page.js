@@ -119,7 +119,7 @@ export default function ApplyPage() {
               <strong className={styles.truthTitle}>Pepe Node. Your art in a live P2P archive.</strong>
               <p className={styles.truthBody}>
                 Certified art is written to a Hyperdrive — Holepunch stack, same infrastructure as TAP.
-                The node network is running. Genesis nodes (100 slots, first nodes get 2× weight) earn
+                The node network is running. Genesis nodes (21 slots, first nodes get 2× weight) earn
                 a share of platform revenue for keeping the archive alive.
                 A CIP-25 v2 metadata record is generated at{' '}
                 <code>unatrare.wtf/c/YOURTOKEN</code> — wallet-readable, travels with the token forever.
@@ -160,7 +160,7 @@ export default function ApplyPage() {
               </p>
               <p className={styles.successBody} style={{ marginTop: '16px', borderTop: '1px solid var(--border-dim)', paddingTop: '16px' }}>
                 Already submitted art?{' '}
-                <a href="/profile">Set up your artist profile →</a>
+                <a href="/studio/profile">Set up your artist profile →</a>
               </p>
             </div>
           ) : (

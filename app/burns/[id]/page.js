@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Nav from '../../components/Nav';
 import BuyCash from '../../components/BuyCash';
+import CeremonyLive from '../../components/CeremonyLive';
 import { getDb } from '../../../lib/db';
 import { BURN_TIERS, CHARACTER_BY_KEY, tierForBurn, fmtFull, fmtCompact } from '../../../lib/cashBurn';
 import styles from './burn.module.css';
@@ -12,6 +13,52 @@ function getBurn(db, id) {
   return db
     .prepare(`SELECT * FROM cash_burns WHERE id = ? AND status != 'archived' LIMIT 1`)
     .get(Number(id));
+}
+
+function loadInitialCeremonyState(db, burn) {
+  let agg = { contributions_total: 0, contribution_count: 0, contributor_count: 0 };
+  let leaderboard = [];
+  try {
+    agg = db.prepare(`
+      SELECT
+        COALESCE(SUM(amount_display), 0) AS contributions_total,
+        COUNT(*)                          AS contribution_count,
+        COUNT(DISTINCT sol_wallet)        AS contributor_count
+      FROM cash_burn_contributions
+      WHERE cash_burn_id = ?
+    `).get(burn.id) || agg;
+    leaderboard = db.prepare(`
+      SELECT sol_wallet, SUM(amount_display) AS amount, COUNT(*) AS burns,
+             MIN(burned_at) AS first_burn_at, MAX(burned_at) AS last_burn_at
+        FROM cash_burn_contributions
+       WHERE cash_burn_id = ?
+       GROUP BY sol_wallet
+       ORDER BY amount DESC, first_burn_at ASC
+       LIMIT 25
+    `).all(burn.id);
+  } catch { /* table may not exist on cold deploys */ }
+
+  const seed = Number(burn.amount || 0);
+  const community = Number(agg.contributions_total || 0);
+  return {
+    id:                  burn.id,
+    ordinal:             burn.ordinal,
+    status:              burn.status,
+    character_key:       burn.character_key,
+    card_name:           burn.card_name,
+    headline:            burn.headline,
+    quote:               burn.quote,
+    opened_at:           burn.opened_at,
+    closed_at:           burn.closed_at,
+    admin_seed_amount:   seed,
+    contributions_total: community,
+    final_total:         seed + community,
+    contribution_count:  Number(agg.contribution_count || 0),
+    contributor_count:   Number(agg.contributor_count || 0),
+    min_contribution:    69,
+    leaderboard,
+    recent: [],
+  };
 }
 
 function relTime(unixSec) {
@@ -28,17 +75,26 @@ export async function generateMetadata({ params }) {
   const { id } = params || {};
   if (!id) return {};
   let burn;
+  let totalForMeta = 0;
   try {
-    burn = getBurn(getDb(), id);
+    const db = getDb();
+    burn = getBurn(db, id);
+    if (burn) {
+      const agg = db.prepare(`
+        SELECT COALESCE(SUM(amount_display), 0) AS t
+          FROM cash_burn_contributions WHERE cash_burn_id = ?
+      `).get(burn.id);
+      totalForMeta = Number(burn.amount || 0) + Number(agg?.t || 0);
+    }
   } catch {
     return {};
   }
   if (!burn) return {};
   const ordinal = String(burn.ordinal).padStart(3, '0');
-  const title = `Cash Burn #${ordinal} · ${fmtCompact(burn.amount)} $CASH burned · UNATRARE`;
+  const title = `Cash Burn #${ordinal} · ${fmtCompact(totalForMeta)} $CASH burned · UNATRARE`;
   const description = burn.quote
-    ? `"${burn.quote}" — ${fmtFull(burn.amount)} $CASH committed to the fire.`
-    : `${fmtFull(burn.amount)} $CASH committed to the fire. For the culture.`;
+    ? `"${burn.quote}" — ${fmtFull(totalForMeta)} $CASH committed to the fire.`
+    : `${fmtFull(totalForMeta)} $CASH committed to the fire. For the culture.`;
   const imageUrl = `/api/og/cash-burn/${burn.id}`;
   return {
     title,
@@ -62,13 +118,8 @@ export default function BurnDetailPage({ params }) {
   if (!burn) notFound();
 
   const character = CHARACTER_BY_KEY[burn.character_key] || null;
-  const tier = tierForBurn(burn.amount);
-
-  let topBurners = [];
-  try {
-    if (burn.top_burners) topBurners = JSON.parse(burn.top_burners) || [];
-  } catch { topBurners = []; }
-  if (!Array.isArray(topBurners)) topBurners = [];
+  const initialCeremonyState = loadInitialCeremonyState(db, burn);
+  const tier = tierForBurn(initialCeremonyState.final_total);
 
   const ordinal = String(burn.ordinal).padStart(3, '0');
   const headline = burn.headline || 'CASH BURN CEREMONY';
@@ -82,7 +133,7 @@ export default function BurnDetailPage({ params }) {
 
   const shareUrl = `https://unatrare.wtf/burns/${burn.id}`;
   const tweetText = encodeURIComponent(
-    `🔥 Cash Burn #${ordinal} — ${fmtCompact(burn.amount)} $CASH committed to the fire ${dedicationLine}. ${quote ? `"${quote}"` : ''}`.trim()
+    `🔥 Cash Burn #${ordinal} — ${fmtCompact(initialCeremonyState.final_total)} $CASH committed to the fire ${dedicationLine}. ${quote ? `"${quote}"` : ''}`.trim()
   );
   const tweetUrl = `https://twitter.com/intent/tweet?text=${tweetText}&url=${encodeURIComponent(shareUrl)}`;
 
@@ -102,16 +153,14 @@ export default function BurnDetailPage({ params }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`/api/og/cash-burn/${burn.id}`}
-            alt={`Cash Burn ceremony #${ordinal} — ${fmtCompact(burn.amount)} $CASH`}
+            alt={`Cash Burn ceremony #${ordinal} — ${fmtCompact(initialCeremonyState.final_total)} $CASH`}
             className={styles.heroImage}
           />
         </div>
 
+        <CeremonyLive initialState={initialCeremonyState} />
+
         <div className={styles.statsGrid}>
-          <div className={styles.stat}>
-            <div className={styles.statValue}>{fmtFull(burn.amount)}</div>
-            <div className={styles.statLabel}>$CASH burned</div>
-          </div>
           <div className={styles.stat}>
             <div className={styles.statValue} style={{ color: tier.color }}>{tier.label}</div>
             <div className={styles.statLabel}>tier</div>
@@ -163,21 +212,6 @@ export default function BurnDetailPage({ params }) {
             )}
             <div className={styles.proofNote}>
               This $CASH was burned on Solana. The transaction is permanent and publicly verifiable.
-            </div>
-          </div>
-        )}
-
-        {topBurners.length > 0 && (
-          <div className={styles.ledger}>
-            <h2 className={styles.sectionTitle}>top burners · ledger</h2>
-            <div className={styles.list}>
-              {topBurners.slice(0, 10).map((b, i) => (
-                <div key={i} className={styles.row}>
-                  <span className={styles.rank}>{i + 1}</span>
-                  <span className={styles.wallet}>{b.wallet || b.address || b.name || '—'}</span>
-                  <span className={styles.amt}>{fmtCompact(Number(b.amount || b.total || 0))} $CASH</span>
-                </div>
-              ))}
             </div>
           </div>
         )}

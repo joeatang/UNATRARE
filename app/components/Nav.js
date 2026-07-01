@@ -24,7 +24,6 @@ export default function Nav() {
         <ul className={styles['nav-links']}>
           <li><Link href="/directory">Directory</Link></li>
           <li><Link href="/vault">Vault</Link></li>
-          <li><Link href="/danknotes" className={styles['nav-paper']}>$CASH</Link></li>
           <li><Link href="/burns">🔥 Burns</Link></li>
           <li><Link href="/about#artist-incentive-flow">Artist Flow</Link></li>
           <li><Link href="/archive">Archive</Link></li>
@@ -35,8 +34,8 @@ export default function Nav() {
         </ul>
 
         <div className={styles.navRight}>
-          <Link href="/status" className={styles['nav-status']}>
-            Artist Status
+          <Link href="/studio" className={styles['nav-status']}>
+            Artist Studio
           </Link>
           <Link href="/submit" className={styles['nav-submit']}>
             Submit
@@ -75,7 +74,6 @@ export default function Nav() {
         </div>
         <ul className={styles.drawerLinks} onClick={() => setOpen(false)}>
           <li><Link href="/directory">Directory</Link></li>
-          <li><Link href="/danknotes" className={styles.drawerPaperLink}>$CASH · DANKNOTES</Link></li>
           <li><Link href="/archive">Archive</Link></li>
           <li><Link href="/council">Council</Link></li>
           <li><Link href="/nodes">Nodes</Link></li>
@@ -91,8 +89,8 @@ export default function Nav() {
           <li><Link href="/wallets" className={styles.drawerSecondaryLink}>Wallets</Link></li>
           <li><Link href="/drops" className={styles.drawerSecondaryLink}>Drops</Link></li>
           <li><Link href="/rules" className={styles.drawerSecondaryLink}>Rules</Link></li>
-          <li><Link href="/status" className={styles.drawerSecondaryLink}>Artist Status</Link></li>
-          <li><Link href="/status/sol-payout-help" className={styles.drawerSecondaryLink}>SOL Payout Help</Link></li>
+          <li><Link href="/studio" className={styles.drawerSecondaryLink}>Artist Studio</Link></li>
+          <li><Link href="/studio/sol-payout-help" className={styles.drawerSecondaryLink}>SOL Payout Help</Link></li>
           <li><Link href="/submit" className={styles.drawerSubmit}>Submit Your Token →</Link></li>
         </ul>
       </div>

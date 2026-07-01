@@ -1,0 +1,126 @@
+.wrap { margin: 28px 0; }
+
+.statsSheet {
+  border: 1px solid #2a2a2a;
+  background: #0a0a0a;
+  padding: 18px 18px 16px;
+  margin: 18px 0 14px;
+  text-align: center;
+}
+
+.statsHeader {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  text-transform: lowercase;
+}
+
+.bigNum {
+  font-family: var(--font-display, var(--font-card));
+  font-size: 38px;
+  letter-spacing: 1px;
+  color: #ff8844;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.bigNumUnit {
+  font-family: var(--font-card);
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  margin-left: 6px;
+}
+
+.breakdown {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 4px;
+}
+.sep { opacity: 0.5; }
+
+.ledger {
+  margin-top: 18px;
+  border: 1px solid #1e1e1e;
+}
+
+.ledgerTitle {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  padding: 10px 14px;
+  border-bottom: 1px solid #1e1e1e;
+  background: #080808;
+}
+
+.list { display: flex; flex-direction: column; }
+
+.row {
+  display: grid;
+  grid-template-columns: 28px 1fr auto auto;
+  gap: 10px;
+  align-items: baseline;
+  padding: 9px 14px;
+  border-bottom: 1px solid #141414;
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.row:last-child { border-bottom: none; }
+
+.rank { color: var(--text-dim); font-size: 9px; }
+
+.wallet {
+  color: var(--text);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wallet:hover { color: var(--green); }
+
+.amt {
+  color: #ff8844;
+  text-decoration: none;
+  font-size: 11px;
+}
+.amt:hover { color: #ffaa66; text-decoration: underline; }
+
+.when {
+  color: var(--text-dim);
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+
+.empty {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 14px;
+  border: 1px dashed #1e1e1e;
+  margin-top: 14px;
+  line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+  .bigNum { font-size: 28px; }
+  .row {
+    grid-template-columns: 22px 1fr auto;
+    grid-template-areas: "rank wallet amt" ". when when";
+    column-gap: 8px;
+    row-gap: 2px;
+  }
+  .rank { grid-area: rank; }
+  .wallet { grid-area: wallet; }
+  .amt { grid-area: amt; }
+  .when { grid-area: when; text-align: right; }
+}

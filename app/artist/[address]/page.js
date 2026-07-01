@@ -189,7 +189,7 @@ export default async function ArtistPage({ params }) {
           <section className={styles.section}>
             <div className={styles.claimBanner}>
               <div className={styles.claimText}>This your work? Set up your artist profile.</div>
-              <Link href={`/profile?address=${encodeURIComponent(address)}`} className={styles.claimBtn}>
+              <Link href={`/studio/profile?address=${encodeURIComponent(address)}`} className={styles.claimBtn}>
                 CLAIM PROFILE →
               </Link>
             </div>

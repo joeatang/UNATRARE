@@ -79,8 +79,8 @@ export default function AboutPage() {
           <div className={styles.flowRow}>
             <Link href="/rules" className={styles.flowCard}>1) learn submission rules</Link>
             <Link href="/submit" className={styles.flowCard}>2) submit your card</Link>
-            <Link href="/status" className={styles.flowCard}>3) track verdict + listing</Link>
-            <Link href="/status/sol-payout-help" className={styles.flowCard}>4) set SOL payout address</Link>
+            <Link href="/studio" className={styles.flowCard}>3) open artist studio</Link>
+            <Link href="/studio/sol-payout-help" className={styles.flowCard}>4) set SOL payout address</Link>
             <Link href="/burns" className={styles.flowCard}>5) monitor salutes + momentum</Link>
           </div>
         </section>

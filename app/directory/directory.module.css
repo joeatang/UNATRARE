@@ -111,6 +111,123 @@
   margin: 0 4px;
 }
 
+/* ─── Momentum strip ─────────────────────────────────────── */
+.momentumStrip {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 22px 32px 8px;
+}
+
+.momentumHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.momentumEyebrow {
+  font-family: var(--font-card);
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: var(--amber-hot);
+  text-transform: uppercase;
+}
+
+.momentumSub {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.momentumGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.momentumCard {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--border-dim);
+  background: linear-gradient(180deg, rgba(255, 200, 0, 0.04) 0%, rgba(180, 255, 111, 0.03) 100%);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.momentumCard:hover {
+  border-color: var(--amber);
+  background: linear-gradient(180deg, rgba(255, 200, 0, 0.08) 0%, rgba(180, 255, 111, 0.04) 100%);
+}
+
+.momentumThumb {
+  width: 56px;
+  aspect-ratio: 5 / 7;
+  overflow: hidden;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.momentumThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.momentumThumbBlank {
+  font-size: 20px;
+  color: var(--text-dim);
+}
+
+.momentumMeta {
+  min-width: 0;
+}
+
+.momentumName {
+  font-family: var(--font-card);
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: var(--text);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.momentumCardSub {
+  margin-top: 2px;
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+}
+
+.momentumFire {
+  text-align: right;
+}
+
+.momentumFireNow {
+  font-family: var(--font-display);
+  font-size: 24px;
+  letter-spacing: 1px;
+}
+
+.momentumFireLabel {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
 /* ─── Grid ───────────────────────────────────────────────── */
 .grid {
   max-width: 1440px;
@@ -189,13 +306,10 @@
   font-size: 10px;
   letter-spacing: 1px;
   text-transform: uppercase;
-  line-height: 1.25;
-  /* allow 2-line wrap so AWAITING SALUTE stays readable in narrow cells */
-  white-space: normal;
+  line-height: 1.3;
+  white-space: nowrap;
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
 }
 
 /* Amber top edge on each card — certified dank mark */
@@ -297,6 +411,8 @@
   .filterSep { flex-shrink: 0; }
 
   .grid { padding: 20px 16px; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+  .momentumStrip { padding: 18px 16px 4px; }
+  .momentumGrid { grid-template-columns: 1fr; }
   .seriesHeader { padding: 16px 16px 0; }
   .seriesLabel { font-size: 20px; letter-spacing: 2px; }
   .empty { padding: 48px 16px; }
@@ -305,12 +421,9 @@
 
 @media (max-width: 480px) {
   .title { font-size: 28px; }
-  /* 2-column grid on phones — token names like UNATTHRILLER / GODMOLECULE need room to breathe */
-  .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  /* allow long token names to wrap to 2 lines instead of ellipsis-truncating */
-  .cardName { white-space: normal; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word; }
-  /* 44px+ tap target on filter buttons — Apple HIG / Material 3 */
-  .filterBtn { padding: 12px 16px; font-size: 15px; min-height: 44px; display: inline-flex; align-items: center; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+  /* Min 44px touch target on filter buttons */
+  .filterBtn { padding: 9px 14px; font-size: 15px; }
 }
 
 /* ─── Stats row (directory header) ──────────────────────────── */

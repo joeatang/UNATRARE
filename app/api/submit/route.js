@@ -25,7 +25,6 @@ function checkIpLimit(ip) {
 }
 const BASE64_RE = /^[A-Za-z0-9+/=]{87,88}$/; // 65 bytes base64, may end with =
 const TXID_RE   = /^[0-9a-fA-F]{64}$/;
-const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 const BURN_ADDRESS = '1CounterpartyXXXXXXXXXXXXXXXUWLpVr';
 
 export async function POST(request) {
@@ -70,7 +69,6 @@ export async function POST(request) {
     videoHash         = '',
     unatpepeAllocQty  = 0,
     burnTxid          = '',
-    artistSolAddress  = '',
   } = body || {};
 
   // ── Required field checks ───────────────────────────────────
@@ -229,26 +227,14 @@ export async function POST(request) {
       ? ordInscription.trim()
       : '';
 
-    // Validate optional artist Solana payout address
-    const rawSolAddr = typeof artistSolAddress === 'string' ? artistSolAddress.trim() : '';
-    if (rawSolAddr && !SOL_ADDR_RE.test(rawSolAddr)) {
-      return NextResponse.json(
-        { ok: false, error: 'Invalid SOL payout address — must be a valid Solana public key' },
-        { status: 422 }
-      );
-    }
-    const safeSolAddr      = rawSolAddr;
-    const safeSolVerifiedAt = rawSolAddr ? Math.floor(Date.now() / 1000) : null;
-
     db.prepare(`
       INSERT INTO tokens
         (token_name, display_title, artist_address, artist_handle,
          description, category, subcategory, status, art_url, art_mime, art_hash,
          supply, cp_version, ord_inscription, submitted_at, series0_code_used,
          audio_url, audio_hash, audio_mime, video_url, video_hash, video_mime,
-         unatpepe_alloc_qty, softpwar_burn_txid,
-         artist_sol_address, artist_sol_verified_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, unixepoch(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         unatpepe_alloc_qty, softpwar_burn_txid)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, unixepoch(), ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       normalized,
       normalized,
@@ -273,8 +259,6 @@ export async function POST(request) {
       videoMime.slice(0, 50),
       Math.max(0, parseInt(unatpepeAllocQty, 10) || 0),
       safeBurnTxid,
-      safeSolAddr,
-      safeSolVerifiedAt,
     );
 
     // Consume invite code if used

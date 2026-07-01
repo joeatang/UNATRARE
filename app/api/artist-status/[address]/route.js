@@ -16,7 +16,7 @@ export async function GET(request, { params }) {
       SELECT
         token_name, status, submitted_at, judged_at,
         judge_score, judge_notes, rejection_reason,
-        art_url, art_mime, art_cover_url, artist_handle, display_title, description,
+        art_url, art_mime, art_cover_url, artist_handle, display_title, description, official_signal,
         audio_url, video_url, category, subcategory,
         series, card_number, supply,
         unatpepe_alloc_qty, dispenser_address,
@@ -67,6 +67,7 @@ export async function GET(request, { params }) {
         artistHandle:     r.artist_handle,
         displayTitle:     r.display_title || '',
         description:      r.description,
+        officialSignal:   r.official_signal || '',
         audioUrl:         r.audio_url || '',
         videoUrl:         r.video_url || '',
         category:         r.category || '',

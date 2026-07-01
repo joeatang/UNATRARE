@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '../../../../lib/db';
-import { getSitewideBurnTotals } from '../../../../lib/saluteDisplay';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,9 +33,6 @@ export async function GET(request) {
       COALESCE(t.display_title, s.card_name) AS display_title,
       COALESCE(t.artist_handle, '') AS artist_handle,
       SUM(s.amount_display) AS total_burned,
-      SUM(s.artist_amount_display) AS total_artist,
-      SUM(s.node_amount_display) AS total_node,
-      SUM(s.amount_display + s.artist_amount_display + s.node_amount_display) AS total_ritual,
       COUNT(*) AS burn_count,
       COUNT(DISTINCT s.sol_wallet) AS unique_burners,
       MIN(s.burned_at) AS first_burn_at,
@@ -52,8 +48,6 @@ export async function GET(request) {
   const stats = db.prepare(`
     SELECT
       SUM(amount_display) AS total_burned,
-      SUM(artist_amount_display) AS total_artist,
-      SUM(node_amount_display) AS total_node,
       COUNT(*) AS burn_count,
       COUNT(DISTINCT sol_wallet) AS unique_burners,
       COUNT(DISTINCT card_name) AS cards_participating
@@ -67,14 +61,9 @@ export async function GET(request) {
     now,
     stats: {
       totalBurned: stats?.total_burned ?? 0,
-      totalArtist: stats?.total_artist ?? 0,
-      totalNode: stats?.total_node ?? 0,
-      totalRitual: (stats?.total_burned ?? 0) + (stats?.total_artist ?? 0) + (stats?.total_node ?? 0),
       burnCount: stats?.burn_count ?? 0,
       uniqueBurners: stats?.unique_burners ?? 0,
       cardsParticipating: stats?.cards_participating ?? 0,
-      // Site-wide breakdown — salutes + cash-burn ceremonies = sitewide.total
-      sitewide: getSitewideBurnTotals(db),
     },
     leaderboard: rows,
   });

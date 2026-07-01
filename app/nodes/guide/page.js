@@ -70,7 +70,7 @@ export default function NodeGuidePage() {
           When the NAT reward system launches, heartbeat count determines your share.
         </p>
         <p className={styles.body}>
-          The first 100 nodes to register earn permanent <strong className={styles.amber}>GENESIS</strong> status —
+          The first 21 nodes to register earn permanent <strong className={styles.amber}>GENESIS</strong> status —
           an on-chain record that cannot be faked or granted later. Genesis nodes receive 2× reward
           weight for their first year.
         </p>
@@ -198,7 +198,7 @@ export default function NodeGuidePage() {
           'Sidechannel: ready',
           '[unatrare] Node registered: abc123... (GENESIS)',
         ]} />
-        <Good>If you see GENESIS — you are in the first 100. Congratulations.</Good>
+        <Good>If you see GENESIS — you are in the first 21. Congratulations.</Good>
 
         <h3 className={styles.step}>Step 5 — Keep it running with PM2</h3>
         <p className={styles.body}>

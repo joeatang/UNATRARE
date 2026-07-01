@@ -17,21 +17,19 @@
 .eyebrow {
   font-family: var(--font-card);
   font-size: 13px;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   color: var(--text-dim);
   text-transform: uppercase;
   margin-bottom: 16px;
-  text-wrap: balance;
 }
 
 .heroTitle {
   font-family: var(--font-display);
-  font-size: clamp(24px, 6vw, 32px);
+  font-size: 32px;
   color: var(--text);
   letter-spacing: 0.5px;
   line-height: 1.15;
   margin-bottom: 16px;
-  text-wrap: balance;
 }
 
 .heroTitle span { color: var(--amber-hot); }
@@ -84,11 +82,10 @@
 
 .heroBeta {
   font-family: var(--font-card);
-  font-size: 12px;
-  letter-spacing: 2px;
-  color: var(--amber);
-  opacity: 0.9;
-  text-wrap: balance;
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  opacity: 0.65;
 }
 
 .saluteBanner {
@@ -123,175 +120,44 @@
 }
 @media (max-width: 600px) {
   .saluteBanner { font-size: 12px; gap: 8px; padding: 10px 14px; flex-wrap: wrap; justify-content: center; text-align: center; }
-  .saluteBannerArrow { font-size: 10px; }
+  .saluteBannerArrow { font-size: 10px; width: 100%; }
 }
 
-.artistJourneyRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.artistJourneyLink {
-  font-family: var(--font-card);
-  font-size: 10px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  text-decoration: none;
-  border: 1px solid var(--border-dim);
-  padding: 7px 10px;
-  background: var(--surface);
-  transition: border-color 0.15s, color 0.15s;
-}
-
-.artistJourneyLink:hover {
-  border-color: var(--amber-hot);
-  color: var(--amber-hot);
-}
-
-.burnBoardSection {
-  margin: 24px 20px 0;
-  border: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(168, 144, 96, 0.06) 0%, rgba(8, 8, 8, 0.96) 68%);
-  padding: 16px;
-}
-
-.burnBoardHead {
-  margin-bottom: 12px;
-}
-
-.burnBoardEyebrow {
-  font-family: var(--font-card);
-  font-size: 11px;
-  letter-spacing: 3px;
-  color: var(--amber);
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-.burnBoardSub {
-  font-family: var(--font-body);
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--text-dim);
-}
-
-.burnBoardFlowline {
-  margin-top: 8px;
-  font-family: var(--font-body);
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--text-dim);
-}
-
-.burnBoardFlowline a {
-  color: var(--amber-hot);
-  text-decoration: none;
-}
-
-.burnBoardFlowline a:hover {
-  color: var(--amber);
-}
-
-.burnBoardTable {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.burnBoardRow {
-  display: grid;
-  grid-template-columns: 34px 1fr auto;
+.liveCeremonyStrip {
+  display: inline-flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid var(--border-dim);
-  background: rgba(8, 8, 8, 0.82);
-  text-decoration: none;
-  color: inherit;
-  padding: 10px 12px;
-  transition: border-color 0.15s, transform 0.15s;
-}
-
-.burnBoardRow:hover {
-  border-color: var(--amber);
-  transform: translateY(-1px);
-}
-
-.burnBoardRank {
-  font-family: var(--font-display);
-  font-size: 24px;
-  color: var(--amber);
-  text-align: center;
-  line-height: 1;
-}
-
-.burnBoardCard {
-  min-width: 0;
-}
-
-.burnBoardTitle {
-  font-family: var(--font-card);
-  font-size: 15px;
-  letter-spacing: 1px;
-  color: var(--text);
-  text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.burnBoardMeta {
-  font-family: var(--font-body);
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-top: 2px;
-}
-
-.burnBoardAmount {
-  font-family: var(--font-display);
-  font-size: 22px;
-  color: var(--amber-hot);
-  letter-spacing: 1px;
-  text-align: right;
-}
-
-.burnBoardCtas {
-  display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.burnBoardCtaPrimary,
-.burnBoardCtaSecondary {
+  justify-content: center;
+  margin: 22px auto 0;
+  padding: 11px 18px;
+  border: 1px solid rgba(255,100,0,0.55);
+  background: rgba(255,80,0,0.07);
   font-family: var(--font-card);
   font-size: 11px;
   letter-spacing: 2px;
-  text-transform: uppercase;
+  color: var(--text);
   text-decoration: none;
-  padding: 9px 12px;
+  text-transform: uppercase;
+  max-width: 100%;
+  transition: background 0.18s, box-shadow 0.18s;
 }
-
-.burnBoardCtaPrimary {
-  color: var(--bg);
-  background: var(--amber-hot);
-  border: 1px solid var(--amber-hot);
+.liveCeremonyStrip:hover {
+  background: rgba(255,80,0,0.14);
+  box-shadow: 0 0 14px rgba(255,120,0,0.18);
 }
-
-.burnBoardCtaPrimary:hover {
-  background: var(--amber);
+.liveCeremonyDot {
+  color: #ff5544;
+  animation: liveCeremonyPulse 1.6s ease-in-out infinite;
 }
-
-.burnBoardCtaSecondary {
-  color: var(--amber);
-  border: 1px solid var(--amber);
-}
-
-.burnBoardCtaSecondary:hover {
-  color: var(--amber-hot);
-  border-color: var(--amber-hot);
+@keyframes liveCeremonyPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+.liveCeremonyLabel { color: #ff8844; font-weight: 600; }
+.liveCeremonySep   { color: var(--text-dim); opacity: 0.5; }
+.liveCeremonyTotal { color: var(--green); }
+.liveCeremonyCount { color: var(--text-dim); }
+.liveCeremonyCta   { color: var(--amber-hot, var(--amber)); }
+@media (max-width: 600px) {
+  .liveCeremonyStrip { font-size: 10px; letter-spacing: 1.5px; padding: 10px 14px; }
 }
 
 /* ─── THESIS ─────────────────────────────────────────────── */
@@ -303,11 +169,10 @@
 .thesisEyebrow {
   font-family: var(--font-card);
   font-size: 13px;
-  letter-spacing: 3px;
+  letter-spacing: 4px;
   color: var(--text-dim);
   text-transform: uppercase;
   margin-bottom: 20px;
-  text-wrap: balance;
 }
 
 .thesisBody {
@@ -357,11 +222,10 @@
 .pathsEyebrow {
   font-family: var(--font-card);
   font-size: 13px;
-  letter-spacing: 3px;
+  letter-spacing: 4px;
   color: var(--text-dim);
   text-transform: uppercase;
   margin-bottom: 8px;
-  text-wrap: balance;
 }
 
 .pathsSub {
@@ -498,11 +362,10 @@
 .councilEyebrow {
   font-family: var(--font-card);
   font-size: 13px;
-  letter-spacing: 3px;
+  letter-spacing: 4px;
   color: var(--text-dim);
   text-transform: uppercase;
   margin-bottom: 16px;
-  text-wrap: balance;
 }
 
 .councilTitle {
@@ -708,33 +571,6 @@
     padding: 13px 28px;
   }
 
-  .artistJourneyLink {
-    font-size: 11px;
-    padding: 8px 12px;
-  }
-
-  .burnBoardSection {
-    margin: 28px 28px 0;
-    padding: 18px;
-  }
-
-  .burnBoardRow {
-    grid-template-columns: 44px 1fr auto;
-    padding: 12px 14px;
-  }
-
-  .burnBoardRank {
-    font-size: 28px;
-  }
-
-  .burnBoardTitle {
-    font-size: 16px;
-  }
-
-  .burnBoardAmount {
-    font-size: 24px;
-  }
-
   .thesisBody p:first-child { font-size: 24px; }
   .thesisBody p              { font-size: 16px; }
 
@@ -772,25 +608,6 @@
   .heroTitle { font-size: 58px; letter-spacing: 2px; }
   .heroSub   { font-size: 17px; max-width: 560px; }
   .heroCtaPrimary, .heroCtaSecondary { font-size: 15px; padding: 13px 32px; }
-
-  .burnBoardSection {
-    max-width: 1100px;
-    margin: 30px auto 0;
-    padding: 20px;
-  }
-
-  .burnBoardSub,
-  .burnBoardFlowline {
-    font-size: 14px;
-  }
-
-  .burnBoardRow {
-    padding: 14px 16px;
-  }
-
-  .burnBoardAmount {
-    font-size: 26px;
-  }
 
   .thesisBody p:first-child { font-size: 26px; letter-spacing: 1px; }
   .thesisBody p              { font-size: 17px; }

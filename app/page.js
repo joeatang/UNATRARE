@@ -4,11 +4,9 @@
 import Link from 'next/link';
 import Nav from './components/Nav';
 import PathCards from './components/PathCards';
-import CeremonyRail from './components/CeremonyRail';
-import BuyCash from './components/BuyCash';
 import styles from './page.module.css';
 import { getDb } from '../lib/db';
-import { fmtCash, getSitewideBurnTotals } from '../lib/saluteDisplay';
+import { fmtCash } from '../lib/saluteDisplay';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,40 +49,45 @@ function getLandingStats() {
       'SELECT art_hash, art_mime FROM vault_assets ORDER BY uploaded_at DESC LIMIT 4'
     ).all();
     const saluteAgg = db.prepare(`
-      SELECT COALESCE(SUM(amount_display), 0)        AS total_burned,
-             COALESCE(SUM(artist_amount_display), 0) AS total_artist,
-             COUNT(DISTINCT card_name)               AS cards_saluted,
-             COUNT(DISTINCT sol_wallet)              AS unique_saluters
+      SELECT COALESCE(SUM(amount_display), 0) AS total_burned,
+             COUNT(DISTINCT card_name)        AS cards_saluted,
+             COUNT(DISTINCT sol_wallet)       AS unique_saluters
       FROM card_salutes
     `).get();
-    const burnBoard = db.prepare(`
-      SELECT
-        s.card_name,
-        COALESCE(t.display_title, s.card_name) AS display_title,
-        COALESCE(t.artist_handle, '')          AS artist_handle,
-        SUM(s.amount_display)                  AS total_burned,
-        COUNT(DISTINCT s.sol_wallet)           AS unique_saluters
-      FROM card_salutes s
-      LEFT JOIN tokens t ON t.token_name = s.card_name
-      GROUP BY s.card_name
-      ORDER BY total_burned DESC
-      LIMIT 6
-    `).all();
+
+    let activeCeremony = null;
+    try {
+      const cer = db.prepare(`
+        SELECT id, ordinal, amount FROM cash_burns
+         WHERE status = 'active' ORDER BY ordinal DESC LIMIT 1
+      `).get();
+      if (cer) {
+        const agg = db.prepare(`
+          SELECT COALESCE(SUM(amount_display), 0) AS t,
+                 COUNT(DISTINCT sol_wallet)       AS c
+            FROM cash_burn_contributions WHERE cash_burn_id = ?
+        `).get(cer.id) || { t: 0, c: 0 };
+        activeCeremony = {
+          id: cer.id,
+          ordinal: cer.ordinal,
+          runningTotal: Number(cer.amount || 0) + Number(agg.t || 0),
+          contributors: Number(agg.c || 0),
+        };
+      }
+    } catch { /* cash_burn_contributions may not exist on cold deploys */ }
+
     return {
       certified, nodes, vault, archived, promoUsed, promoMax, cryptThumbs,
       saluteTotal:    saluteAgg?.total_burned    || 0,
-      saluteArtist:   saluteAgg?.total_artist    || 0,
       saluteCards:    saluteAgg?.cards_saluted   || 0,
       saluteSaluters: saluteAgg?.unique_saluters || 0,
-      burnBoard,
-      sitewide:       getSitewideBurnTotals(db),
+      activeCeremony,
     };
   } catch {
     return {
       certified: 0, nodes: 0, vault: 0, archived: 0, promoUsed: 0, promoMax: 500, cryptThumbs: [],
-      saluteTotal: 0, saluteArtist: 0, saluteCards: 0, saluteSaluters: 0,
-      burnBoard: [],
-      sitewide: { total: 0, salutes: 0, ceremonies: 0, ceremonyCount: 0 },
+      saluteTotal: 0, saluteCards: 0, saluteSaluters: 0,
+      activeCeremony: null,
     };
   }
 }
@@ -123,82 +126,40 @@ export default function LandingPage() {
             </a>
           </div>
 
-          {stats.sitewide.total > 0 && (
+          {stats.activeCeremony && (
+            <Link href={`/burns/${stats.activeCeremony.id}`} className={styles.liveCeremonyStrip}>
+              <span className={styles.liveCeremonyDot}>●</span>
+              <span className={styles.liveCeremonyLabel}>LIVE · CEREMONY #{String(stats.activeCeremony.ordinal).padStart(3, '0')}</span>
+              <span className={styles.liveCeremonySep}>·</span>
+              <span className={styles.liveCeremonyTotal}>{fmtCash(stats.activeCeremony.runningTotal)} $CASH burning</span>
+              {stats.activeCeremony.contributors > 0 && (
+                <>
+                  <span className={styles.liveCeremonySep}>·</span>
+                  <span className={styles.liveCeremonyCount}>
+                    {stats.activeCeremony.contributors} {stats.activeCeremony.contributors === 1 ? 'wallet' : 'wallets'}
+                  </span>
+                </>
+              )}
+              <span className={styles.liveCeremonyCta}>join the burn →</span>
+            </Link>
+          )}
+
+          {stats.saluteTotal > 0 && (
             <Link href="/burns" className={styles.saluteBanner}>
               <span className={styles.saluteBannerFlame}>🔥</span>
               <span>
-                <strong>{fmtCash(stats.sitewide.total)} $CASH</strong> burned ·{' '}
-                <strong>{fmtCash(stats.saluteArtist)} $CASH</strong> to artists ·{' '}
+                <strong>{fmtCash(stats.saluteTotal)} $CASH</strong> saluted across{' '}
                 <strong>{stats.saluteCards}</strong> card{stats.saluteCards === 1 ? '' : 's'} ·{' '}
                 <strong>{stats.saluteSaluters}</strong> saluter{stats.saluteSaluters === 1 ? '' : 's'}
-                {stats.sitewide.ceremonies > 0 && (
-                  <>
-                    {' · '}
-                    <strong>{fmtCash(stats.sitewide.ceremonies)} $CASH</strong>{' '}
-                    via{' '}
-                    <strong>{stats.sitewide.ceremonyCount}</strong>{' '}
-                    cash-burn ceremon{stats.sitewide.ceremonyCount === 1 ? 'y' : 'ies'}
-                  </>
-                )}
               </span>
               <span className={styles.saluteBannerArrow}>see the ledger →</span>
             </Link>
           )}
 
-          <BuyCash
-            variant="compact"
-            headline="Get $CASH to join the fire"
-            subline="$CASH is the engagement token of UNATRARE. Salutes burn it on Solana — your wallet shows up on the leaderboard forever."
-          />
-
           <div className={styles.heroBeta}>
             · experimental · in beta · art is permanent, process is evolving ·
           </div>
-
-          <div className={styles.artistJourneyRow}>
-            <Link href="/rules" className={styles.artistJourneyLink}>1) rules</Link>
-            <Link href="/submit" className={styles.artistJourneyLink}>2) submit</Link>
-            <Link href="/status" className={styles.artistJourneyLink}>3) check status</Link>
-            <Link href="/status/sol-payout-help" className={styles.artistJourneyLink}>4) set SOL payout</Link>
-            <Link href="/burns" className={styles.artistJourneyLink}>5) watch salutes</Link>
-          </div>
         </section>
-
-        <CeremonyRail variant="home" />
-
-        {stats.burnBoard.length > 0 && (
-          <section className={styles.burnBoardSection}>
-            <div className={styles.burnBoardHead}>
-              <div className={styles.burnBoardEyebrow}>LIVE BURN BOARD</div>
-              <div className={styles.burnBoardSub}>Top saluted cards right now. Live on-chain $CASH ritual data.</div>
-              <div className={styles.burnBoardFlowline}>
-                Artist talking point: salutes drive public momentum and leaderboard visibility.
-                {' '}Need the full incentive path? <Link href="/about#artist-incentive-flow">start here</Link>.
-              </div>
-            </div>
-
-            <div className={styles.burnBoardTable}>
-              {stats.burnBoard.map((row, i) => (
-                <Link key={row.card_name} href={`/card/${row.card_name}`} className={styles.burnBoardRow}>
-                  <div className={styles.burnBoardRank}>{i + 1}</div>
-                  <div className={styles.burnBoardCard}>
-                    <div className={styles.burnBoardTitle}>{row.display_title}</div>
-                    <div className={styles.burnBoardMeta}>
-                      {row.artist_handle ? `@${row.artist_handle} · ` : ''}
-                      {row.unique_saluters} saluter{row.unique_saluters === 1 ? '' : 's'}
-                    </div>
-                  </div>
-                  <div className={styles.burnBoardAmount}>🔥 {fmtCash(row.total_burned)}</div>
-                </Link>
-              ))}
-            </div>
-
-            <div className={styles.burnBoardCtas}>
-              <Link href="/burns" className={styles.burnBoardCtaPrimary}>open full burn ledger →</Link>
-              <Link href="/about/salutes" className={styles.burnBoardCtaSecondary}>what is a salute? →</Link>
-            </div>
-          </section>
-        )}
 
         {/* ─────────────────────────────────────────────────────
             THE THESIS
@@ -354,7 +315,7 @@ export default function LandingPage() {
 
           <div className={styles.numberStat}>
             <div className={styles.numberVal}>{stats.vault}</div>
-            <div className={styles.numberLabel}>vault<br />assets</div>
+            <div className={styles.numberLabel}>crypt<br />assets</div>
           </div>
         </div>
 
@@ -372,25 +333,17 @@ export default function LandingPage() {
           <div className={styles.finalCtaLinks}>
             <Link href="/directory">directory</Link>
             <span>·</span>
-            <Link href="/vault">vault</Link>
-            <span>·</span>
-            <Link href="/burns">burns</Link>
-            <span>·</span>
-            <Link href="/feed">feed</Link>
+            <Link href="/feed">the feed</Link>
             <span>·</span>
             <Link href="/archive">archive</Link>
             <span>·</span>
             <Link href="/council">council</Link>
-            <span>·</span>
-            <Link href="/nodes">nodes</Link>
             <span>·</span>
             <Link href="/rules">rules</Link>
             <span>·</span>
             <Link href="/terms">terms</Link>
             <span>·</span>
             <Link href="/about">about</Link>
-            <span>·</span>
-            <Link href="/status">artist status</Link>
           </div>
         </div>
 

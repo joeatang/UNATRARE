@@ -6,6 +6,7 @@ import SalutePanel from '../../components/SalutePanel';
 import SaluteCeremonySpotlight from '../../components/SaluteCeremonySpotlight';
 import styles from './card.module.css';
 import { getDb } from '../../../lib/db';
+import { fmtCash, tierFor, truncateWallet } from '../../../lib/saluteDisplay';
 
 function toRoman(n) {
   const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
@@ -35,6 +36,109 @@ function getDrop(tokenName) {
   } catch {
     return null;
   }
+}
+
+function getCampaignData(tokenName) {
+  try {
+    const db = getDb();
+    const since24h = Math.floor(Date.now() / 1000) - 86400;
+
+    const totals = db.prepare(`
+      SELECT
+        COALESCE(SUM(amount_display), 0) AS total_burned,
+        COUNT(*) AS burn_count,
+        COUNT(DISTINCT sol_wallet) AS unique_saluters,
+        COALESCE(SUM(CASE WHEN burned_at >= ? THEN amount_display ELSE 0 END), 0) AS total_24h,
+        COUNT(DISTINCT CASE WHEN burned_at >= ? THEN sol_wallet END) AS saluters_24h,
+        MIN(burned_at) AS first_burned_at,
+        MAX(burned_at) AS last_burned_at
+      FROM card_salutes
+      WHERE card_name = ?
+    `).get(since24h, since24h, tokenName);
+
+    const firstSaluter = db.prepare(`
+      SELECT sol_wallet, burned_at
+      FROM card_salutes
+      WHERE card_name = ?
+      ORDER BY burned_at ASC, id ASC
+      LIMIT 1
+    `).get(tokenName);
+
+    const topTorchbearers = db.prepare(`
+      SELECT
+        sol_wallet,
+        SUM(amount_display) AS total_burned,
+        COUNT(*) AS salute_count,
+        MIN(burned_at) AS first_burned_at,
+        MAX(burned_at) AS last_burned_at
+      FROM card_salutes
+      WHERE card_name = ?
+      GROUP BY sol_wallet
+      ORDER BY total_burned DESC, salute_count DESC, first_burned_at ASC
+      LIMIT 5
+    `).all(tokenName);
+
+    const recentSalutes = db.prepare(`
+      SELECT sol_wallet, amount_display, burned_at, tx_sig
+      FROM card_salutes
+      WHERE card_name = ?
+      ORDER BY burned_at DESC, id DESC
+      LIMIT 6
+    `).all(tokenName);
+
+    const artistUpdates = db.prepare(`
+      SELECT body, created_at
+      FROM card_updates
+      WHERE card_name = ?
+      ORDER BY created_at DESC, id DESC
+      LIMIT 4
+    `).all(tokenName);
+
+    return {
+      totals: totals || {
+        total_burned: 0,
+        burn_count: 0,
+        unique_saluters: 0,
+        total_24h: 0,
+        saluters_24h: 0,
+        first_burned_at: null,
+        last_burned_at: null,
+      },
+      firstSaluter: firstSaluter || null,
+      topTorchbearers,
+      recentSalutes,
+      artistUpdates,
+    };
+  } catch {
+    return {
+      totals: {
+        total_burned: 0,
+        burn_count: 0,
+        unique_saluters: 0,
+        total_24h: 0,
+        saluters_24h: 0,
+        first_burned_at: null,
+        last_burned_at: null,
+      },
+      firstSaluter: null,
+      topTorchbearers: [],
+      recentSalutes: [],
+      artistUpdates: [],
+    };
+  }
+}
+
+function relTime(unixSec) {
+  if (!unixSec) return '—';
+  const diff = Math.max(0, Math.floor(Date.now() / 1000) - Number(unixSec));
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+  return new Date(Number(unixSec) * 1000).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 export async function generateMetadata({ params }) {
@@ -125,6 +229,8 @@ export default async function CardPage({ params }) {
   }
 
   const drop = getDrop(token.token_name);
+  const campaign = getCampaignData(token.token_name);
+  const campaignTier = tierFor(campaign.totals.total_burned);
 
   const xcpUrl   = `https://tokenscan.io/asset/${token.token_name}`;
   const ordUrl   = token.ord_inscription
@@ -262,6 +368,18 @@ export default async function CardPage({ params }) {
               </div>
             )}
 
+            {token.official_signal && (
+              <section className={styles.signalSection}>
+                <div className={styles.signalEyebrow}>official artist signal</div>
+                <blockquote className={styles.signalQuote}>
+                  “{token.official_signal}”
+                </blockquote>
+                <div className={styles.signalSub}>
+                  {token.artist_handle ? `From @${token.artist_handle}` : 'From the artist'} · the line torchbearers can carry forward
+                </div>
+              </section>
+            )}
+
             {/* ── UNATPEPE drop section ── */}
             {drop && (
               <div style={{
@@ -315,6 +433,140 @@ export default async function CardPage({ params }) {
                 ○ SALUTES OPEN AFTER COUNCIL STAMPS THIS CARD
               </div>
             )}
+
+            <section className={styles.campaignSection}>
+              <div className={styles.campaignHeader}>
+                <div>
+                  <div className={styles.campaignEyebrow}>campaign pulse</div>
+                  <h2 className={styles.campaignTitle}>Support Lives On This Page</h2>
+                </div>
+                <div
+                  className={styles.campaignTier}
+                  style={{ color: campaignTier.color, borderColor: `${campaignTier.color}55` }}
+                >
+                  {campaignTier.label}
+                </div>
+              </div>
+
+              <div className={styles.campaignStats}>
+                <div className={styles.campaignStat}>
+                  <span className={styles.campaignStatLabel}>total burned</span>
+                  <span className={styles.campaignStatValue}>🔥 {fmtCash(campaign.totals.total_burned)}</span>
+                  <span className={styles.campaignStatSub}>$CASH saluted into this card</span>
+                </div>
+                <div className={styles.campaignStat}>
+                  <span className={styles.campaignStatLabel}>torchbearers</span>
+                  <span className={styles.campaignStatValue}>{campaign.totals.unique_saluters}</span>
+                  <span className={styles.campaignStatSub}>
+                    {campaign.totals.burn_count} salute{campaign.totals.burn_count === 1 ? '' : 's'} recorded
+                  </span>
+                </div>
+                <div className={styles.campaignStat}>
+                  <span className={styles.campaignStatLabel}>last 24h</span>
+                  <span className={styles.campaignStatValue}>{fmtCash(campaign.totals.total_24h)}</span>
+                  <span className={styles.campaignStatSub}>
+                    {campaign.totals.saluters_24h} saluter{campaign.totals.saluters_24h === 1 ? '' : 's'} active
+                  </span>
+                </div>
+                <div className={styles.campaignStat}>
+                  <span className={styles.campaignStatLabel}>latest signal</span>
+                  <span className={styles.campaignStatValue}>{relTime(campaign.totals.last_burned_at)}</span>
+                  <span className={styles.campaignStatSub}>
+                    {campaign.firstSaluter ? `genesis by ${truncateWallet(campaign.firstSaluter.sol_wallet)}` : 'awaiting first salute'}
+                  </span>
+                </div>
+              </div>
+
+              <div className={styles.campaignColumns}>
+                <div className={styles.campaignColumn}>
+                  <div className={styles.campaignColumnLabel}>top torchbearers</div>
+                  {campaign.topTorchbearers.length === 0 ? (
+                    <div className={styles.campaignEmpty}>
+                      No one has claimed the founding slot yet. First salute becomes the genesis mark on this card.
+                    </div>
+                  ) : (
+                    <div className={styles.campaignList}>
+                      {campaign.topTorchbearers.map((torchbearer, index) => {
+                        const isGenesis = torchbearer.sol_wallet === campaign.firstSaluter?.sol_wallet;
+                        return (
+                          <Link key={torchbearer.sol_wallet} href={`/torchbearer/${torchbearer.sol_wallet}`} className={`${styles.campaignRow} ${styles.campaignRowLink}`}>
+                            <div className={styles.campaignRowLeft}>
+                              <span className={styles.campaignRank}>#{index + 1}</span>
+                              <div className={styles.campaignSupporterMeta}>
+                                <span className={styles.campaignWallet}>{truncateWallet(torchbearer.sol_wallet)}</span>
+                                <span className={styles.campaignSupporterSub}>
+                                  {torchbearer.salute_count} salute{torchbearer.salute_count === 1 ? '' : 's'}
+                                  {isGenesis ? ' · genesis' : ''}
+                                </span>
+                              </div>
+                            </div>
+                            <span className={styles.campaignAmount}>🔥 {fmtCash(torchbearer.total_burned)}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.campaignColumn}>
+                  <div className={styles.campaignColumnLabel}>recent activity</div>
+                  {campaign.recentSalutes.length === 0 ? (
+                    <div className={styles.campaignEmpty}>
+                      This page is already the campaign home. What it needs now is its first permanent torchbearer signal.
+                    </div>
+                  ) : (
+                    <div className={styles.campaignList}>
+                      {campaign.recentSalutes.map((salute) => (
+                        <Link key={salute.tx_sig} href={`/torchbearer/${salute.sol_wallet}`} className={`${styles.campaignRow} ${styles.campaignRowLink}`}>
+                          <div className={styles.campaignRowLeft}>
+                            <div className={styles.campaignSupporterMeta}>
+                              <span className={styles.campaignWallet}>{truncateWallet(salute.sol_wallet)}</span>
+                              <span className={styles.campaignSupporterSub}>{relTime(salute.burned_at)}</span>
+                            </div>
+                          </div>
+                          <span className={styles.campaignAmount}>+{fmtCash(salute.amount_display)}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className={styles.campaignUpdates}>
+                <div className={styles.campaignColumnLabel}>artist updates</div>
+                {campaign.artistUpdates.length === 0 ? (
+                  <div className={styles.campaignEmpty}>
+                    No artist updates yet. This section becomes the campaign journal as the work evolves.
+                  </div>
+                ) : (
+                  <div className={styles.updateList}>
+                    {campaign.artistUpdates.map((update, index) => (
+                      <div key={`${update.created_at}-${index}`} className={styles.updateRow}>
+                        <div className={styles.updateMeta}>
+                          <span className={styles.updateStamp}>{relTime(update.created_at)}</span>
+                          <span className={styles.updateAuthor}>
+                            {token.artist_handle ? `@${token.artist_handle}` : 'artist'}
+                          </span>
+                        </div>
+                        <p className={styles.updateBody}>{update.body}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.campaignPaths}>
+                <Link href="/directory?sort=momentum" className={styles.campaignPathLink}>
+                  browse live momentum →
+                </Link>
+                <Link href="/burns?tab=wallets" className={styles.campaignPathLink}>
+                  view top torchbearers →
+                </Link>
+                <Link href="/burns?tab=recent" className={styles.campaignPathLink}>
+                  watch recent salutes →
+                </Link>
+              </div>
+            </section>
 
             {token.description && (
               <div className={styles.description}>
@@ -431,11 +683,11 @@ export default async function CardPage({ params }) {
               <Link href={`/c/${token.token_name}.json`} className={styles.actionBtnSecondary}>
                 metadata json →
               </Link>
-              <Link href={`/update/${token.token_name}`} className={styles.actionBtnSecondary}>
+              <Link href={`/studio/update/${token.token_name}`} className={styles.actionBtnSecondary}>
                 artist: update card →
               </Link>
-              <Link href={`/status?token=${token.token_name}`} className={styles.actionBtnSecondary}>
-                artist: manage drop →
+              <Link href={`/studio?token=${token.token_name}`} className={styles.actionBtnSecondary}>
+                artist: open studio →
               </Link>
             </div>
 

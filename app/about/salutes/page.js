@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import Nav from '../../components/Nav';
-import BuyCash from '../../components/BuyCash';
 import { getDb } from '../../../lib/db';
-import { fmtCash, getSitewideBurnTotals } from '../../../lib/saluteDisplay';
+import { fmtCash } from '../../../lib/saluteDisplay';
 import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -23,13 +22,9 @@ function getSiteSaluteStats() {
              COUNT(*)                         AS salute_count
       FROM card_salutes
     `).get();
-    const sitewide = getSitewideBurnTotals(db);
-    return { ...(r || { total_burned: 0, cards_saluted: 0, unique_saluters: 0, salute_count: 0 }), sitewide };
+    return r || { total_burned: 0, cards_saluted: 0, unique_saluters: 0, salute_count: 0 };
   } catch {
-    return {
-      total_burned: 0, cards_saluted: 0, unique_saluters: 0, salute_count: 0,
-      sitewide: { total: 0, salutes: 0, ceremonies: 0, ceremonyCount: 0 },
-    };
+    return { total_burned: 0, cards_saluted: 0, unique_saluters: 0, salute_count: 0 };
   }
 }
 
@@ -48,18 +43,11 @@ export default function AboutSalutesPage() {
           You burn $CASH on Solana — and your wallet is forever attributed to that card on the public ledger.
         </p>
 
-        {(s.salute_count > 0 || s.sitewide.ceremonies > 0) && (
+        {s.salute_count > 0 && (
           <div className={styles.statsRow}>
             <div className={styles.stat}>
-              <div className={styles.statValue}>{fmtCash(s.sitewide.total)}</div>
-              <div className={styles.statLabel}>
-                $CASH burned
-                {s.sitewide.ceremonies > 0 && s.salute_count > 0 && (
-                  <span style={{ display: 'block', fontSize: '0.85em', opacity: 0.7, marginTop: 2 }}>
-                    {fmtCash(s.total_burned)} salutes · {fmtCash(s.sitewide.ceremonies)} ceremonies
-                  </span>
-                )}
-              </div>
+              <div className={styles.statValue}>{fmtCash(s.total_burned)}</div>
+              <div className={styles.statLabel}>$CASH burned</div>
             </div>
             <div className={styles.stat}>
               <div className={styles.statValue}>{s.salute_count.toLocaleString()}</div>
@@ -94,7 +82,7 @@ export default function AboutSalutesPage() {
           <h2>Why $CASH? Why burn?</h2>
           <p>
             $CASH is a Solana SPL Token-2022 minted on{' '}
-            <a href="https://nat.fun/?refId=c69c9108f52b" target="_blank" rel="noopener noreferrer">nat.fun</a>
+            <a href="https://nat.fun" target="_blank" rel="noopener noreferrer">nat.fun</a>
             {' '}— a fast, low-fee token with no permission gate. It&apos;s the engagement layer for the UNATPEPE / DMT culture stack.
           </p>
           <p>
@@ -103,8 +91,6 @@ export default function AboutSalutesPage() {
           <p>
             We use a custom Anchor program on Solana so every burn is verifiable and auditable. The program ID is in your wallet&apos;s approval prompt; mismatch = don&apos;t sign.
           </p>
-
-          <BuyCash variant="full" />
         </section>
 
         <section className={styles.section}>

@@ -1,0 +1,1 @@
+export { default, generateMetadata } from '../../../update/[tokenname]/page';

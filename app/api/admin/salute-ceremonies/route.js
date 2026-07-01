@@ -263,7 +263,7 @@ export async function POST(request) {
       if (!tokRow?.artist_sol_address) {
         return NextResponse.json({
           error: 'missing_artist_sol',
-          message: `${cardName} has no artist SOL payout address. Ask the artist to set it on their /status page (they must sign with their submission BTC address), OR paste it under ⚙️ ADVANCED → ARTIST SOL ADDRESS to set it on their behalf.`,
+          message: `${cardName} has no artist SOL payout address. Ask the artist to set it on their Artist Studio page (they must sign with their submission BTC address), OR paste it under ⚙️ ADVANCED → ARTIST SOL ADDRESS to set it on their behalf.`,
           artist_btc_address: tokRow?.artist_address || null,
         }, { status: 422 });
       }
@@ -342,7 +342,7 @@ export async function POST(request) {
     const ceremony = db.prepare('SELECT * FROM salute_ceremonies WHERE card_name = ?').get(cardName);
     try {
       const tokenRow = db.prepare(
-        'SELECT token_name, display_title, art_url, art_mime, art_cover_url, artist_handle, artist_address FROM tokens WHERE token_name = ?'
+        'SELECT token_name, display_title, art_url, artist_handle, artist_address FROM tokens WHERE token_name = ?'
       ).get(cardName);
       if (tokenRow) notifyCeremonyOpen(tokenRow, ceremony);
     } catch {}
@@ -361,7 +361,7 @@ export async function POST(request) {
     if (action === 'close') {
       try {
         const tokenRow = db.prepare(
-          'SELECT token_name, display_title, art_url, art_mime, art_cover_url, artist_handle, artist_address FROM tokens WHERE token_name = ?'
+          'SELECT token_name, display_title, art_url, artist_handle, artist_address FROM tokens WHERE token_name = ?'
         ).get(cardName);
         const summary = db.prepare(`
           SELECT COALESCE(SUM(amount_display),0) AS total,

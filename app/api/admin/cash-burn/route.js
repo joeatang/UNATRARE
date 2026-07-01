@@ -180,7 +180,9 @@ export async function POST(request) {
     });
   }
 
-  // ── OPEN — verify on-chain $CASH burn, create ceremony, fire Telegram ─
+  // ── OPEN — create ceremony, fire Telegram. Admin seed is optional:
+  // a ceremony can be opened with amount=0 (community-driven), or with a
+  // verified on-chain $CASH burn signed by admin_wallet as the founding seed.
   if (action === 'open') {
     const character_key = String(body?.character_key || '').trim();
     const amount        = safeNumber(body?.amount);
@@ -190,16 +192,21 @@ export async function POST(request) {
     if (!isValidCharacterKey(character_key)) {
       return NextResponse.json({ error: 'invalid character_key' }, { status: 422 });
     }
-    if (!isPositiveFiniteNumber(amount) || amount > MAX_AMOUNT) {
-      return NextResponse.json({ error: 'invalid amount' }, { status: 422 });
+
+    // Seed is optional: amount=0 OR missing/blank means a community-driven
+    // ceremony with no admin burn at open time. Any positive amount MUST be
+    // backed by a confirmed on-chain burn signed by admin_wallet.
+    const hasSeed = Number.isFinite(amount) && amount > 0;
+    if (Number.isFinite(amount) && amount > MAX_AMOUNT) {
+      return NextResponse.json({ error: 'amount exceeds sanity cap' }, { status: 422 });
     }
-    if (!SOL_SIG_RE.test(tx_sig)) {
-      return NextResponse.json({ error: 'tx_sig required — must be a valid Solana transaction signature' }, { status: 422 });
+    if (hasSeed && !SOL_SIG_RE.test(tx_sig)) {
+      return NextResponse.json({ error: 'tx_sig required when seeding — must be a valid Solana transaction signature' }, { status: 422 });
     }
-    if (!SOL_ADDR_RE.test(admin_wallet)) {
-      return NextResponse.json({ error: 'admin_wallet required — must be a valid Solana address' }, { status: 422 });
+    if (hasSeed && !SOL_ADDR_RE.test(admin_wallet)) {
+      return NextResponse.json({ error: 'admin_wallet required when seeding — must be a valid Solana address' }, { status: 422 });
     }
-    if (CBC_ADMIN_WALLETS.length > 0 && !CBC_ADMIN_WALLETS.includes(admin_wallet)) {
+    if (CBC_ADMIN_WALLETS.length > 0 && hasSeed && !CBC_ADMIN_WALLETS.includes(admin_wallet)) {
       return NextResponse.json({ error: 'admin_wallet is not authorized to fire cash-burn ceremonies' }, { status: 403 });
     }
 
@@ -212,38 +219,52 @@ export async function POST(request) {
       }, { status: 409 });
     }
 
-    // Refuse if this tx_sig is already recorded.
-    const dup = db.prepare('SELECT id, ordinal FROM cash_burns WHERE tx_sig = ?').get(tx_sig);
-    if (dup) {
-      return NextResponse.json({
-        error: `this Solana transaction is already recorded as ceremony #${dup.ordinal}`,
-        existing_id: dup.id,
-      }, { status: 409 });
+    let burnInfoSeed = null;
+
+    if (hasSeed) {
+      // Cross-table dedupe: this tx_sig must not be claimed elsewhere.
+      const dupBurn = db.prepare('SELECT id, ordinal FROM cash_burns WHERE tx_sig = ?').get(tx_sig);
+      if (dupBurn) {
+        return NextResponse.json({
+          error: `this Solana transaction is already recorded as ceremony #${dupBurn.ordinal}`,
+          existing_id: dupBurn.id,
+        }, { status: 409 });
+      }
+      const dupContrib = db.prepare('SELECT id FROM cash_burn_contributions WHERE tx_sig = ?').get(tx_sig);
+      if (dupContrib) {
+        return NextResponse.json({ error: 'this transaction is already recorded as a ceremony contribution' }, { status: 409 });
+      }
+      try {
+        const dupSalute = db.prepare('SELECT id FROM card_salutes WHERE tx_sig = ?').get(tx_sig);
+        if (dupSalute) {
+          return NextResponse.json({ error: 'this transaction is already recorded as a card salute' }, { status: 409 });
+        }
+      } catch { /* card_salutes may not exist in some envs */ }
+
+      // Verify the burn on Solana mainnet — same logic as /api/salute/route.js.
+      try {
+        burnInfoSeed = await verifyCashBurnTx(tx_sig, admin_wallet);
+      } catch (err) {
+        return NextResponse.json({ error: `on-chain verification failed: ${err.message}` }, { status: 422 });
+      }
+      if (!burnInfoSeed) {
+        return NextResponse.json({
+          error: 'transaction is not a confirmed $CASH burn authorized by this wallet',
+        }, { status: 422 });
+      }
+
+      // Confirm on-chain raw amount matches the entered amount (1-unit rounding tolerance).
+      const expectedRaw = BigInt(Math.round(amount * Math.pow(10, burnInfoSeed.decimals)));
+      const actualRaw   = BigInt(burnInfoSeed.rawAmount);
+      if (actualRaw < expectedRaw - 1n || actualRaw > expectedRaw + 1n) {
+        const actualDisplay = Number(actualRaw) / Math.pow(10, burnInfoSeed.decimals);
+        return NextResponse.json({
+          error: `on-chain amount mismatch: tx burned ${actualDisplay} $CASH but form says ${amount}`,
+        }, { status: 422 });
+      }
     }
 
-    // Verify the burn on Solana mainnet — same logic as /api/salute/route.js.
-    let burnInfo;
-    try {
-      burnInfo = await verifyCashBurnTx(tx_sig, admin_wallet);
-    } catch (err) {
-      return NextResponse.json({ error: `on-chain verification failed: ${err.message}` }, { status: 422 });
-    }
-    if (!burnInfo) {
-      return NextResponse.json({
-        error: 'transaction is not a confirmed $CASH burn authorized by this wallet',
-      }, { status: 422 });
-    }
-
-    // Confirm on-chain raw amount matches the entered amount (1-unit rounding tolerance).
-    const expectedRaw = BigInt(Math.round(amount * Math.pow(10, burnInfo.decimals)));
-    const actualRaw   = BigInt(burnInfo.rawAmount);
-    if (actualRaw < expectedRaw - 1n || actualRaw > expectedRaw + 1n) {
-      const actualDisplay = Number(actualRaw) / Math.pow(10, burnInfo.decimals);
-      return NextResponse.json({
-        error: `on-chain amount mismatch: tx burned ${actualDisplay} $CASH but form says ${amount}`,
-      }, { status: 422 });
-    }
-
+    const seedAmount = hasSeed ? amount : 0;
     const ordinal   = nextOrdinal(db);
     const card_name = normalizeCardName(body?.card_name);
     const headline  = normalizeText(body?.headline, 60);
@@ -254,7 +275,7 @@ export async function POST(request) {
     // Render image to disk first — if this fails the DB row never gets written.
     const absPath = absImagePathFor(ordinal);
     await renderCashBurnImageToFile({
-      ordinal, character_key, amount, card_name, headline, quote, burned_at: burnedAt,
+      ordinal, character_key, amount: seedAmount, card_name, headline, quote, burned_at: burnedAt,
     }, absPath);
 
     const imagePath = publicImagePathFor(ordinal);
@@ -265,14 +286,19 @@ export async function POST(request) {
         status, image_path, txids, burned_at, opened_at, opened_by,
         tx_sig, admin_wallet, amount_raw, decimals
       ) VALUES (?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, 'admin', ?, ?, ?, ?)
-    `).run(ordinal, character_key, amount, card_name, headline, quote,
-           imagePath, JSON.stringify(txids), burnedAt, burnedAt,
-           tx_sig, admin_wallet, burnInfo.rawAmount, burnInfo.decimals);
+    `).run(
+      ordinal, character_key, seedAmount, card_name, headline, quote,
+      imagePath, JSON.stringify(txids), burnedAt, burnedAt,
+      hasSeed ? tx_sig : '',
+      hasSeed ? admin_wallet : '',
+      hasSeed ? burnInfoSeed.rawAmount : '0',
+      hasSeed ? burnInfoSeed.decimals : 0
+    );
 
     const row = db.prepare('SELECT * FROM cash_burns WHERE ordinal = ?').get(ordinal);
     const character = CHARACTER_BY_KEY[character_key];
-    const tier      = tierForBurn(amount);
-    const amountDisplay = displayAmountForGraphic(amount).primary;
+    const tier      = tierForBurn(seedAmount);
+    const amountDisplay = displayAmountForGraphic(seedAmount).primary;
     const serial    = makeSerial(character_key, ordinal);
 
     // Fire Telegram (best-effort — failure does NOT roll back the ceremony)
@@ -281,15 +307,16 @@ export async function POST(request) {
       telegramMsgId = await notifyCashBurnOpen({
         id:             row.id,
         ordinal,
-        amount,
+        amount: seedAmount,
         amountDisplay,
         tierLabel:      tier.label,
         characterTitle: character.title,
         serial,
         card_name,
         quote: quote || character.quote,
-        tx_sig,
-        admin_wallet,
+        tx_sig: hasSeed ? tx_sig : '',
+        admin_wallet: hasSeed ? admin_wallet : '',
+        community_only: !hasSeed,
       }, absPath);
     } catch (e) {
       console.warn('[cash-burn] telegram open failed:', e.message);
@@ -366,12 +393,39 @@ export async function POST(request) {
       return NextResponse.json({ error: 'ceremony is not active' }, { status: 409 });
     }
     const closedAt = Math.floor(Date.now() / 1000);
-    const topBurners = Array.isArray(body?.top_burners)
-      ? body.top_burners.slice(0, 10).map(b => ({
-          wallet: String(b?.wallet || b?.address || '').slice(0, 80),
-          amount: Number(b?.amount || 0),
-        }))
-      : [];
+
+    // Auto-build top burners from cash_burn_contributions table — no manual
+    // body input. Community contributions become the canonical leaderboard.
+    let contribRows = [];
+    let contribTotal = 0;
+    let contributorCount = 0;
+    try {
+      contribRows = db.prepare(`
+        SELECT sol_wallet AS wallet, amount_display AS amount
+          FROM cash_burn_contributions
+         WHERE cash_burn_id = ?
+         ORDER BY amount_display DESC, burned_at ASC
+         LIMIT 10
+      `).all(id);
+      const agg = db.prepare(`
+        SELECT COALESCE(SUM(amount_display), 0) AS total,
+               COUNT(DISTINCT sol_wallet)       AS contributors
+          FROM cash_burn_contributions
+         WHERE cash_burn_id = ?
+      `).get(id);
+      contribTotal     = Number(agg?.total) || 0;
+      contributorCount = Number(agg?.contributors) || 0;
+    } catch (e) {
+      console.warn('[cash-burn] contribution aggregate failed:', e.message);
+    }
+
+    const topBurners = contribRows.map(r => ({
+      wallet: String(r.wallet || '').slice(0, 80),
+      amount: Number(r.amount) || 0,
+    }));
+
+    // Final total = admin seed + community sum.
+    const finalTotal = Number(existing.amount || 0) + contribTotal;
 
     db.prepare(`
       UPDATE cash_burns
@@ -381,15 +435,34 @@ export async function POST(request) {
 
     const fresh = db.prepare('SELECT * FROM cash_burns WHERE id = ?').get(id);
     const character = CHARACTER_BY_KEY[existing.character_key] || CHARACTER_BY_KEY.classic;
-    const tier      = tierForBurn(existing.amount);
-    const amountDisplay = displayAmountForGraphic(existing.amount).primary;
+    const tier      = tierForBurn(finalTotal);
+    const amountDisplay = displayAmountForGraphic(finalTotal).primary;
+
+    // Re-render the ceremony image with the final total so the keepsake
+    // reflects what actually burned (admin seed + community).
+    try {
+      await renderCashBurnImageToFile({
+        ordinal:       existing.ordinal,
+        character_key: existing.character_key,
+        amount:        finalTotal,
+        card_name:     existing.card_name,
+        headline:      existing.headline,
+        quote:         existing.quote,
+        burned_at:     existing.burned_at,
+      }, absImagePathFor(existing.ordinal));
+    } catch (e) {
+      console.warn('[cash-burn] close re-render failed:', e.message);
+    }
 
     let telegramMsgId = null;
     try {
       telegramMsgId = await notifyCashBurnClose({
         id:             fresh.id,
         ordinal:        fresh.ordinal,
-        amount:         fresh.amount,
+        amount:         finalTotal,
+        seedAmount:     Number(existing.amount || 0),
+        contribTotal,
+        contributorCount,
         amountDisplay,
         tierLabel:      tier.label,
         characterTitle: character.title,
@@ -401,7 +474,13 @@ export async function POST(request) {
       console.warn('[cash-burn] telegram close failed:', e.message);
     }
 
-    return NextResponse.json({ ok: true, burn: rowToRecord(fresh), telegram_close_msg_id: telegramMsgId });
+    return NextResponse.json({
+      ok: true,
+      burn: rowToRecord(fresh),
+      final_total: finalTotal,
+      contributor_count: contributorCount,
+      telegram_close_msg_id: telegramMsgId,
+    });
   }
 
   if (action === 'repost') {

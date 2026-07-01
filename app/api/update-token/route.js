@@ -11,6 +11,8 @@ import { getDb } from '../../../lib/db';
  *
  * Updatable fields: display_title, artist_handle, description,
  *   category, subcategory, audio_url, video_url,
+ *   official_signal,
+ *   campaign_update,
  *   art_url / art_hash / art_mime (optional art replacement),
  *   artist_sol_address (optional payout binding)
  *
@@ -39,6 +41,8 @@ export async function POST(request) {
     displayTitle,
     artistHandle,
     description,
+    officialSignal,
+    campaignUpdate,
     category,
     subcategory,
     audioUrl,
@@ -132,6 +136,9 @@ export async function POST(request) {
   if (typeof description === 'string') {
     updates.description = description.trim().slice(0, 2000);
   }
+  if (typeof officialSignal === 'string') {
+    updates.official_signal = officialSignal.trim().slice(0, 280);
+  }
   if (typeof category === 'string') {
     updates.category = category.trim().slice(0, 64);
   }
@@ -218,7 +225,11 @@ export async function POST(request) {
     }
   }
 
-  if (Object.keys(updates).length === 0) {
+  const updateNote = typeof campaignUpdate === 'string'
+    ? campaignUpdate.trim().slice(0, 500)
+    : '';
+
+  if (Object.keys(updates).length === 0 && !updateNote) {
     return NextResponse.json(
       { ok: false, error: 'No valid fields provided' },
       { status: 400 }
@@ -226,13 +237,22 @@ export async function POST(request) {
   }
 
   // ── Apply updates ────────────────────────────────────────────────────
-  const setClauses = Object.keys(updates).map(k => `${k} = ?`).join(', ');
-  const values = [...Object.values(updates), name];
-  db.prepare(`UPDATE tokens SET ${setClauses} WHERE token_name = ?`).run(...values);
+  if (Object.keys(updates).length > 0) {
+    const setClauses = Object.keys(updates).map(k => `${k} = ?`).join(', ');
+    const values = [...Object.values(updates), name];
+    db.prepare(`UPDATE tokens SET ${setClauses} WHERE token_name = ?`).run(...values);
+  }
+
+  if (updateNote) {
+    db.prepare(`
+      INSERT INTO card_updates (card_name, artist_address, body)
+      VALUES (?, ?, ?)
+    `).run(name, artistAddress, updateNote);
+  }
 
   return NextResponse.json({
     ok: true,
     tokenName: name,
-    updated: Object.keys(updates),
+    updated: [...Object.keys(updates), ...(updateNote ? ['campaign_update'] : [])],
   });
 }

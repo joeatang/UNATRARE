@@ -141,7 +141,7 @@ export default function PathCards() {
           <div className={styles.pathTitle}>Run a Node</div>
           <div className={styles.pathDesc}>
             Help preserve Bitcoin meme art. Seed the archive network. Genesis window is open —
-            first 100 nodes get permanent genesis status.
+            first 21 nodes get permanent genesis status.
           </div>
           <div className={styles.pathNodeCta}>explore nodes →</div>
         </Link>

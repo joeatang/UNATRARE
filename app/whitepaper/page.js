@@ -130,15 +130,15 @@ Each node sends a heartbeat every hour.
 The heartbeat count is the ledger. It cannot be faked.`}</pre>
           </section>
 
-          {/* IV. THE ELEVEN */}
+          {/* IV. THE TWENTY-ONE */}
           <section className={styles.section}>
-            <h2 className={styles.sectionLabel}>IV. THE ELEVEN</h2>
+            <h2 className={styles.sectionLabel}>IV. THE TWENTY-ONE</h2>
             <pre className={styles.block}>{`The genesis of any network is not its size —
 it's the commitment of the first ones who ran it
 when running it meant nothing yet.
 
-The eleven genesis node operators hold numbered seats.
-Seat #1 through Seat #11.
+The 21 genesis node operators hold numbered seats.
+Seat #1 through Seat #21.
 These seats are not purchased. They are earned by running.
 They are kept by running.
 
@@ -166,8 +166,8 @@ This is not punishment. This is the protocol.
 The network rewards presence.
 Absence is just absence.
 
-There will only ever be eleven genesis seats.
-The window is open until all eleven are confirmed.
+There will only ever be 21 genesis seats.
+The window is open until all 21 are confirmed.
 Then it closes. Forever.`}</pre>
           </section>
 

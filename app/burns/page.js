@@ -1,9 +1,7 @@
 import Link from 'next/link';
 import Nav from '../components/Nav';
-import BuyCash from '../components/BuyCash';
 import { getDb } from '../../lib/db';
 import { fmtCash, tierFor, truncateWallet } from '../../lib/saluteDisplay';
-import { fmtCompact, fmtFull, CHARACTER_BY_KEY } from '../../lib/cashBurn';
 import styles from './burns.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -82,20 +80,6 @@ function getRecent(db, limit = 50) {
   `).all(limit);
 }
 
-function getActiveBurn(db) {
-  try {
-    return db.prepare(`
-      SELECT id, ordinal, character_key, amount, card_name, headline, quote, image_path, burned_at
-      FROM cash_burns
-      WHERE status = 'active'
-      ORDER BY burned_at DESC
-      LIMIT 1
-    `).get() || null;
-  } catch {
-    return null;
-  }
-}
-
 function relTime(unixSec) {
   if (!unixSec) return '';
   const diff = Math.max(0, Math.floor(Date.now() / 1000) - Number(unixSec));
@@ -114,10 +98,33 @@ export default function BurnsPage({ searchParams }) {
 
   const db = getDb();
   const stats = getStats(db, since);
-  const activeBurn = getActiveBurn(db);
   const cards   = tab === 'cards'   ? getTopCards(db, since)   : [];
   const wallets = tab === 'wallets' ? getTopWallets(db, since) : [];
   const recent  = tab === 'recent'  ? getRecent(db)            : [];
+
+  let activeCeremony = null;
+  try {
+    const row = db.prepare(`
+      SELECT id, ordinal, amount, character_key, card_name, opened_at
+        FROM cash_burns
+       WHERE status = 'active'
+       ORDER BY ordinal DESC
+       LIMIT 1
+    `).get();
+    if (row) {
+      const agg = db.prepare(`
+        SELECT COALESCE(SUM(amount_display), 0) AS t,
+               COUNT(DISTINCT sol_wallet)       AS c
+          FROM cash_burn_contributions
+         WHERE cash_burn_id = ?
+      `).get(row.id) || { t: 0, c: 0 };
+      activeCeremony = {
+        ...row,
+        runningTotal: Number(row.amount || 0) + Number(agg.t || 0),
+        contributors: Number(agg.c || 0),
+      };
+    }
+  } catch { /* ignore */ }
 
   const safeTab = ['cards', 'wallets', 'recent'].includes(tab) ? tab : 'cards';
 
@@ -144,49 +151,23 @@ export default function BurnsPage({ searchParams }) {
           </div>
         </div>
 
-        {activeBurn && (
-          <Link href={`/burns/${activeBurn.id}`} className={styles.cbcBanner}>
-            {activeBurn.image_path ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={`/api/og/cash-burn/${activeBurn.id}`}
-                alt={`Cash Burn Ceremony #${String(activeBurn.ordinal).padStart(3, '0')}`}
-                className={styles.cbcBannerImg}
-              />
-            ) : <div className={styles.cbcBannerImg} style={{ aspectRatio: '1200 / 630' }} />}
-            <div className={styles.cbcBannerBody}>
-              <div className={styles.cbcBannerEyebrow}>
-                live · cash burn ceremony #{String(activeBurn.ordinal).padStart(3, '0')}
-              </div>
-              <h2 className={styles.cbcBannerTitle}>
-                {fmtCompact(activeBurn.amount)} $CASH
-              </h2>
-              <div className={styles.cbcBannerLine}>
-                {fmtFull(activeBurn.amount)} burned ·{' '}
-                {activeBurn.card_name ? <>for <strong>{activeBurn.card_name}</strong></> : 'for the culture'}
-              </div>
-              {(activeBurn.quote || CHARACTER_BY_KEY[activeBurn.character_key]?.quote) && (
-                <p className={styles.cbcBannerQuote}>
-                  &ldquo;{activeBurn.quote || CHARACTER_BY_KEY[activeBurn.character_key]?.quote}&rdquo;
-                </p>
-              )}
-              <div className={styles.cbcBannerCta}>view ceremony →</div>
-            </div>
+        {activeCeremony && (
+          <Link href={`/burns/${activeCeremony.id}`} className={styles.liveStrip}>
+            <span className={styles.liveDot}>●</span>
+            <span className={styles.liveLabel}>LIVE CEREMONY #{String(activeCeremony.ordinal).padStart(3, '0')}</span>
+            <span className={styles.liveSep}>·</span>
+            <span className={styles.liveTotal}>{fmtCash(activeCeremony.runningTotal)} $CASH burned</span>
+            {activeCeremony.contributors > 0 && (
+              <>
+                <span className={styles.liveSep}>·</span>
+                <span className={styles.liveCount}>
+                  {activeCeremony.contributors} {activeCeremony.contributors === 1 ? 'wallet' : 'wallets'} joined
+                </span>
+              </>
+            )}
+            <span className={styles.liveCta}>join the burn →</span>
           </Link>
         )}
-
-        <div className={styles.flowCallout}>
-          <div className={styles.flowCalloutTitle}>ARTIST INCENTIVE MODEL</div>
-          <div className={styles.flowCalloutBody}>
-            Salutes are social proof and ranking momentum for certified cards. When split ceremonies are active,
-            artist routing can happen in the same on-chain ritual.
-          </div>
-          <div className={styles.flowCalloutLinks}>
-            <Link href="/about#artist-incentive-flow">full artist flow →</Link>
-            <Link href="/status/sol-payout-help">set payout in 1 minute →</Link>
-            <Link href="/status">open artist status →</Link>
-          </div>
-        </div>
 
         {/* ── Top-line stats ── */}
         <div className={styles.statsRow}>
@@ -208,11 +189,20 @@ export default function BurnsPage({ searchParams }) {
           </div>
         </div>
 
-        <BuyCash
-          variant="full"
-          headline="GET $CASH TO ENTER THE LEDGER"
-          subline="Every salute on this page is a real $CASH burn on Solana. Hold $CASH first, then salute any certified card to land permanently on the leaderboard."
-        />
+        <div className={styles.pathStrip}>
+          <div className={styles.pathStripLabel}>follow the fire</div>
+          <div className={styles.pathStripLinks}>
+            <Link href="/directory?sort=momentum" className={styles.pathStripLink}>
+              browse momentum →
+            </Link>
+            <Link href="/burns?tab=wallets" className={styles.pathStripLink}>
+              see top torchbearers →
+            </Link>
+            <Link href="/burns?tab=recent" className={styles.pathStripLink}>
+              watch recent salutes →
+            </Link>
+          </div>
+        </div>
 
         {/* ── Window pills ── */}
         <div className={styles.pillRow}>
@@ -232,7 +222,7 @@ export default function BurnsPage({ searchParams }) {
         <div className={styles.tabRow}>
           {[
             { key: 'cards',   label: 'MOST SALUTED' },
-            { key: 'wallets', label: 'TOP SALUTERS' },
+            { key: 'wallets', label: 'TOP TORCHBEARERS' },
             { key: 'recent',  label: 'RECENT SALUTES' },
           ].map(t => (            <Link
               key={t.key}
@@ -287,7 +277,7 @@ export default function BurnsPage({ searchParams }) {
             ) : wallets.map((row, i) => {
               const tier = tierFor(row.total_burned);
               return (
-                <div key={row.sol_wallet} className={styles.cardRow} style={{ borderColor: i < 3 ? tier.color : 'var(--border-dim)' }}>
+                <Link key={row.sol_wallet} href={`/torchbearer/${row.sol_wallet}`} className={styles.cardRow} style={{ borderColor: i < 3 ? tier.color : 'var(--border-dim)' }}>
                   <div className={styles.rank} style={{ color: i < 3 ? tier.color : 'var(--text-dim)' }}>
                     {i === 0 ? '👑' : i === 1 ? '◆' : i === 2 ? '◈' : `#${i + 1}`}
                   </div>
@@ -306,7 +296,7 @@ export default function BurnsPage({ searchParams }) {
                     <div className={styles.amountValue}>🔥 {fmtCash(row.total_burned)}</div>
                     <div className={styles.amountLabel}>$CASH · {tier.label}</div>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
@@ -319,12 +309,7 @@ export default function BurnsPage({ searchParams }) {
             ) : recent.map((row) => {
               const tier = tierFor(row.amount_display);
               return (
-                <div key={row.tx_sig} className={styles.cardRow} style={{ position: 'relative' }}>
-                  <Link
-                    href={`/card/${row.card_name}`}
-                    aria-label={row.display_title}
-                    style={{ position: 'absolute', inset: 0, zIndex: 1 }}
-                  />
+                <Link key={row.tx_sig} href={`/card/${row.card_name}`} className={styles.cardRow}>
                   <div className={styles.rank}>🔥</div>
                   <div className={styles.cardMeta}>
                     <div className={styles.cardTitle}>{row.display_title}</div>
@@ -334,8 +319,8 @@ export default function BurnsPage({ searchParams }) {
                         href={`https://solscan.io/tx/${row.tx_sig}`}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
                         className={styles.solscan}
-                        style={{ position: 'relative', zIndex: 2 }}
                       >
                         solscan ↗
                       </a>
@@ -345,7 +330,7 @@ export default function BurnsPage({ searchParams }) {
                     <div className={styles.amountValue}>{fmtCash(row.amount_display)}</div>
                     <div className={styles.amountLabel}>$CASH</div>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>

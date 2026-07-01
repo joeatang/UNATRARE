@@ -1,19 +1,15 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const CASH_MINT   = 'oMhwtzE6KeovcRMFAsFocEA6GcZUTAYFdvQ7tpJfnat';
 const TOKEN_PROG  = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const TOKEN_2022_PROG = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
-const ASSOCIATED_TOKEN_PROGRAM_ID = 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
-const SYSTEM_PROGRAM_ID = '11111111111111111111111111111111';
 const SALUTE_BURN_PROGRAM_ID = process.env.NEXT_PUBLIC_SALUTE_BURN_PROGRAM_ID || '';
 const RPC_URL_RAW = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || '/api/solana/rpc';
 const WEB3_CDN    = 'https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.0/lib/index.iife.min.js';
 const SOL_SIG_RE  = /^[1-9A-HJ-NP-Za-km-z]{64,100}$/;
 const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
-
-const pendingSigKey = (card) => `unatrare:pendingSalute:${(card || '').toUpperCase()}`;
 
 function resolveRpcUrl(url) {
   if (!url) return 'https://api.mainnet-beta.solana.com';
@@ -67,57 +63,6 @@ function buildBurnIx(web3, tokenAcct, mint, owner, rawAmt, tokenProgramId) {
       { pubkey: new web3.PublicKey(owner),     isSigner: true,  isWritable: false },
     ],
     data,
-  });
-}
-
-// Build SPL Token transfer instruction manually.
-function buildTransferIx(web3, sourceAcct, destinationAcct, owner, rawAmt, tokenProgramId) {
-  const data = new Uint8Array(9);
-  data[0] = 3; // Transfer instruction index
-  let n = rawAmt;
-  for (let i = 1; i <= 8; i++) { data[i] = Number(n & 0xFFn); n >>= 8n; }
-  const programId = tokenProgramId === TOKEN_2022_PROG ? TOKEN_2022_PROG : TOKEN_PROG;
-  return new web3.TransactionInstruction({
-    programId: new web3.PublicKey(programId),
-    keys: [
-      { pubkey: new web3.PublicKey(sourceAcct),      isSigner: false, isWritable: true },
-      { pubkey: new web3.PublicKey(destinationAcct), isSigner: false, isWritable: true },
-      { pubkey: new web3.PublicKey(owner),           isSigner: true,  isWritable: false },
-    ],
-    data,
-  });
-}
-
-// Derive the canonical Associated Token Account address for (owner, mint, tokenProgram).
-// The address is a deterministic PDA — anyone can compute it offline. Cannot be spoofed.
-function deriveAta(web3, ownerPubkey, mintPubkey, tokenProgramId) {
-  const [pda] = web3.PublicKey.findProgramAddressSync(
-    [
-      new web3.PublicKey(ownerPubkey).toBuffer(),
-      new web3.PublicKey(tokenProgramId).toBuffer(),
-      new web3.PublicKey(mintPubkey).toBuffer(),
-    ],
-    new web3.PublicKey(ASSOCIATED_TOKEN_PROGRAM_ID),
-  );
-  return pda.toString();
-}
-
-// Build the canonical "create ATA idempotent" instruction. If the ATA already
-// exists this becomes a no-op on-chain (no rent charged twice). The payer pays
-// ~0.00203 SOL rent the first time only. The payer gets ZERO authority over
-// the new account — ownership is set to `owner` on creation by the ATA program.
-function buildCreateAtaIdempotentIx(web3, payer, ataAddress, owner, mint, tokenProgramId) {
-  return new web3.TransactionInstruction({
-    programId: new web3.PublicKey(ASSOCIATED_TOKEN_PROGRAM_ID),
-    keys: [
-      { pubkey: new web3.PublicKey(payer),         isSigner: true,  isWritable: true },
-      { pubkey: new web3.PublicKey(ataAddress),    isSigner: false, isWritable: true },
-      { pubkey: new web3.PublicKey(owner),         isSigner: false, isWritable: false },
-      { pubkey: new web3.PublicKey(mint),          isSigner: false, isWritable: false },
-      { pubkey: new web3.PublicKey(SYSTEM_PROGRAM_ID), isSigner: false, isWritable: false },
-      { pubkey: new web3.PublicKey(tokenProgramId), isSigner: false, isWritable: false },
-    ],
-    data: new Uint8Array([1]), // 1 = CreateIdempotent
   });
 }
 
@@ -326,7 +271,7 @@ const S = {
   tdRight:     { fontFamily: 'var(--font-card)', fontSize: '10px', color: 'var(--green)', textAlign: 'right', padding: '7px 0 7px 0', borderBottom: '1px solid #141414' },
   genesisTag:  { fontFamily: 'var(--font-card)', fontSize: '7px', letterSpacing: '2px', color: 'var(--amber)', marginLeft: 7, padding: '1px 5px', border: '1px solid rgba(168,144,96,0.35)', verticalAlign: 'middle' },
   label:       { display: 'block', fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '3px', color: 'var(--text-dim)', marginBottom: 5, marginTop: 10 },
-  input:       { width: '100%', padding: '10px 12px', boxSizing: 'border-box', background: '#0a0a0a', border: '1px solid #262626', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 16, outline: 'none' },
+  input:       { width: '100%', padding: '9px 11px', boxSizing: 'border-box', background: '#0a0a0a', border: '1px solid #262626', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 12, outline: 'none' },
   hint:        { fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', lineHeight: 1.5, marginTop: 4, marginBottom: 14 },
   cancelBtn:   { fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px', padding: '10px 16px', border: '1px solid #262626', background: 'transparent', color: 'var(--text-dim)', cursor: 'pointer' },
   error:       { fontFamily: 'var(--font-body)', fontSize: '11px', color: '#ff5555', marginTop: 8, lineHeight: 1.5 },
@@ -373,37 +318,6 @@ export default function SalutePanel({ cardName }) {
   const [burnErr,    setBurnErr]    = useState('');
   const [burnResult, setBurnResult] = useState(null); // { displayAmount, rank }
   const [burnSig,    setBurnSig]    = useState('');   // tx sig — for explorer link + timeout errors
-  const successRef = useRef(null);
-  useEffect(() => {
-    if (phase === 'success' && successRef.current) {
-      // Defer until next paint so layout settles before we scroll.
-      requestAnimationFrame(() => {
-        successRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      });
-    }
-  }, [phase]);
-  const [ceremonySplit, setCeremonySplit] = useState({
-    burnPct: 100,
-    artistPct: 0,
-    requireArtistSplitTx: false,
-    artistSolAddress: '',
-    status: 'none',
-    themeKey: 'ember',
-  });
-
-  // Theme palette — server picks one randomly per activation; we just paint with it.
-  const THEME_PALETTE = {
-    ember:     { color: '#ffb347', label: 'EMBER',     glyph: '🪵' },
-    flame:     { color: '#ff7a3d', label: 'FLAME',     glyph: '🔥' },
-    inferno:   { color: '#ff3d3d', label: 'INFERNO',   glyph: '🌋' },
-    legendary: { color: '#d4af37', label: 'LEGENDARY', glyph: '👑' },
-    frost:     { color: '#7adfff', label: 'FROST',     glyph: '❄️' },
-    neon:      { color: '#b4ff6f', label: 'NEON',      glyph: '⚡' },
-    void:      { color: '#b87aff', label: 'VOID',      glyph: '🌌' },
-    gold:      { color: '#ffd24a', label: 'GOLD',      glyph: '✨' },
-  };
-  const themePalette = THEME_PALETTE[ceremonySplit.themeKey] || THEME_PALETTE.ember;
-  const ceremonyLive = ceremonySplit.status === 'active' && ceremonySplit.requireArtistSplitTx && ceremonySplit.artistPct > 0;
 
   // ── Manual TxID fallback ─────────────────────────────────────────────────
   const [showManual,   setShowManual]   = useState(false);
@@ -438,66 +352,6 @@ export default function SalutePanel({ cardName }) {
   }, [cardName]);
 
   useEffect(() => { fetchLb(); }, [fetchLb]);
-
-  // ── Recover any pending tx_sig that never made it to the server ──────────
-  // If a previous salute burned on-chain but the POST failed (site down,
-  // network blip, tab closed mid-submit), retry it transparently on next
-  // visit. The server is idempotent on tx_sig (UNIQUE), so this is safe.
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    let cancelled = false;
-    (async () => {
-      let pending;
-      try {
-        const raw = localStorage.getItem(pendingSigKey(cardName));
-        if (!raw) return;
-        pending = JSON.parse(raw);
-      } catch { return; }
-      if (!pending?.sig || !SOL_SIG_RE.test(pending.sig)) {
-        try { localStorage.removeItem(pendingSigKey(cardName)); } catch {}
-        return;
-      }
-      try {
-        const resp = await fetch('/api/salute', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ card_name: cardName, sol_wallet: pending.wallet, tx_sig: pending.sig }),
-        });
-        const json = await resp.json().catch(() => ({}));
-        // Clear on success OR on duplicate (already recorded). Keep on transient errors so we can retry next visit.
-        const dup = /already been recorded/i.test(json?.error || '');
-        if (resp.ok || dup) {
-          try { localStorage.removeItem(pendingSigKey(cardName)); } catch {}
-          if (!cancelled) fetchLb();
-        }
-      } catch {
-        // network down — leave the pending entry for next visit
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [cardName, fetchLb]);
-
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const res = await fetch(`/api/salute/ceremony?card=${encodeURIComponent(cardName)}`, { cache: 'no-store' });
-        const json = await res.json();
-        if (!res.ok || !json?.ceremony || !active) return;
-        setCeremonySplit({
-          burnPct: Number(json?.ceremony?.burnPct ?? 100),
-          artistPct: Number(json?.ceremony?.artistPct ?? 0),
-          requireArtistSplitTx: !!json?.ceremony?.requireArtistSplitTx,
-          status: String(json?.ceremony?.status || 'none'),
-          artistSolAddress: String(json?.ceremony?.artistSolAddress || '').trim(),
-          themeKey: String(json?.ceremony?.themeKey || 'ember'),
-        });
-      } catch {
-        // Keep burn-only as the safe default when ceremony metadata cannot be fetched.
-      }
-    })();
-    return () => { active = false; };
-  }, [cardName]);
 
   // ── Connect wallet ───────────────────────────────────────────────────────
   async function connectWallet(w) {
@@ -549,7 +403,7 @@ export default function SalutePanel({ cardName }) {
         setBurnErr(
           'Wallet connection was denied. ' +
           (mobile
-            ? "In Phantom's in-app browser, tap the connect request that appears and approve it, then try again. Or use the manual transaction form below - burn from your wallet first, then paste the transaction ID here."
+            ? "In Phantom's in-app browser, tap the connect request that appears and approve it, then try again. Or use the manual TxID form below - burn from your wallet first, then paste the transaction ID here."
             : 'Please approve the connection request in your wallet and try again.')
         );
         if (mobile) setShowManual(true);
@@ -609,46 +463,9 @@ export default function SalutePanel({ cardName }) {
     if (!web3 || !connected || !cashAcct) return;
     setBurnErr('');
 
-    const totalRawAmt = parseToRaw(burnAmount, cashAcct.decimals);
-    if (totalRawAmt <= 0n) { setBurnErr('Enter a salute amount.'); return; }
-
-    const burnPct = Number(ceremonySplit.burnPct || 100);
-    const artistPct = Number(ceremonySplit.artistPct || 0);
-    // Always honor the configured split when the card has a payout address.
-    // We don't gate on `requireArtistSplitTx` — that flag now only controls
-    // whether the *server* rejects salutes missing the artist leg. The
-    // frontend should always pay the artist when a split is in effect.
-    const requiresArtistSplit = artistPct > 0 && SOL_ADDR_RE.test(ceremonySplit.artistSolAddress || '');
-
-    // Default: no split — the entire amount is burned.
-    let burnRawAmt = totalRawAmt;
-    let artistRawAmt = 0n;
-
-    if (requiresArtistSplit) {
-      if (!SOL_ADDR_RE.test(ceremonySplit.artistSolAddress || '')) {
-        setBurnErr('Artist payout address is not configured for this ceremony yet. Try again shortly.');
-        return;
-      }
-      // Split the amount the user entered: artist gets `artistPct` of total,
-      // burn gets `burnPct` of total. Any rounding residue (≤ 1 raw unit) goes
-      // to burn so the artist never receives a higher percentage than declared
-      // and total spend never exceeds the entered amount.
-      artistRawAmt = (totalRawAmt * BigInt(artistPct)) / 100n;
-      burnRawAmt = totalRawAmt - artistRawAmt;
-      if (artistRawAmt <= 0n) {
-        setBurnErr('Salute amount is too small to split. Increase the amount.');
-        return;
-      }
-      if (burnRawAmt <= 0n) {
-        setBurnErr('Salute amount is too small to burn. Increase the amount.');
-        return;
-      }
-    }
-
-    if (totalRawAmt > cashAcct.rawBalance) {
-      setBurnErr('Amount exceeds your $CASH balance.');
-      return;
-    }
+    const rawAmt = parseToRaw(burnAmount, cashAcct.decimals);
+    if (rawAmt <= 0n) { setBurnErr('Enter an amount to burn.'); return; }
+    if (rawAmt > cashAcct.rawBalance) { setBurnErr('Amount exceeds your $CASH balance.'); return; }
 
     setPhase('burning');
     let localSig = ''; // preserve for error messages if confirmation times out
@@ -678,66 +495,28 @@ export default function SalutePanel({ cardName }) {
       const { blockhash, lastValidBlockHeight } = await rpc('getLatestBlockhash', [{ commitment: 'confirmed' }])
         .then(r => ({ blockhash: r.value.blockhash, lastValidBlockHeight: r.value.lastValidBlockHeight }));
 
-      const burnIx = buildBurnIx(
+      const instr = buildBurnIx(
         web3,
         cashAcct.address,
         CASH_MINT,
         connected.pubkey,
-        burnRawAmt,
+        rawAmt,
         cashAcct.tokenProgram,
       );
-
-      let artistTransferIx = null;
-      let createArtistAtaIx = null;
-      if (requiresArtistSplit) {
-        // $CASH is Token-2022. Use the saluter's tokenProgram (same mint = same program).
-        const artistTokenProgram = cashAcct.tokenProgram || TOKEN_2022_PROG;
-        const artistCashAcct = await getCashAccount(ceremonySplit.artistSolAddress);
-        let destAta;
-        if (artistCashAcct?.address) {
-          // Existing ATA found — use it. Server validates by owner+mint, so any
-          // owner-controlled ATA is acceptable.
-          destAta = artistCashAcct.address;
-        } else {
-          // No ATA yet — derive the canonical address and add an idempotent
-          // create instruction. The saluter pays the one-time ~0.002 SOL rent.
-          // The artist pubkey is the only owner; payer has no authority.
-          destAta = deriveAta(web3, ceremonySplit.artistSolAddress, CASH_MINT, artistTokenProgram);
-          createArtistAtaIx = buildCreateAtaIdempotentIx(
-            web3,
-            connected.pubkey,           // payer = saluter
-            destAta,
-            ceremonySplit.artistSolAddress, // owner = artist
-            CASH_MINT,
-            artistTokenProgram,
-          );
-        }
-        artistTransferIx = buildTransferIx(
-          web3,
-          cashAcct.address,
-          destAta,
-          connected.pubkey,
-          artistRawAmt,
-          cashAcct.tokenProgram,
-        );
-      }
-
       const useProgramBurn = !!(SALUTE_BURN_PROGRAM_ID && SOL_ADDR_RE.test(SALUTE_BURN_PROGRAM_ID));
-      const finalBurnIx = useProgramBurn
+      const finalInstr = useProgramBurn
         ? await buildProgramBurnIx(web3, {
             programId: SALUTE_BURN_PROGRAM_ID,
             tokenAcct: cashAcct.address,
             mint: CASH_MINT,
             owner: connected.pubkey,
-            rawAmt: burnRawAmt,
+            rawAmt,
             tokenProgramId: cashAcct.tokenProgram,
             cardName: (cardName || '').toUpperCase().trim(),
           })
-        : burnIx;
+        : instr;
       const tx    = new web3.Transaction({ recentBlockhash: blockhash, feePayer: new web3.PublicKey(connected.pubkey) });
-      if (createArtistAtaIx) tx.add(createArtistAtaIx);
-      if (artistTransferIx) tx.add(artistTransferIx);
-      tx.add(finalBurnIx);
+      tx.add(finalInstr);
 
       // Sign + send via wallet using signTransaction (raw bytes path — avoids wallet token-risk screening).
       let sig;
@@ -746,8 +525,6 @@ export default function SalutePanel({ cardName }) {
       if (!sig) throw new Error('wallet did not return a transaction signature');
       localSig = sig;
       setBurnSig(sig);
-      // Persist tx_sig immediately so a site outage during POST cannot lose it.
-      try { localStorage.setItem(pendingSigKey(cardName), JSON.stringify({ sig, wallet: connected.pubkey, ts: Date.now() })); } catch {}
 
       setPhase('confirming');
       await waitConfirmed(sig, { rawTx: sent.rawB64, lastValidBlockHeight });
@@ -765,8 +542,7 @@ export default function SalutePanel({ cardName }) {
       const json = await resp.json();
       if (!resp.ok || !json.ok) throw new Error(json.error || 'server error');
 
-      try { localStorage.removeItem(pendingSigKey(cardName)); } catch {}
-      setBurnResult({ displayAmount: json.displayAmount, artistDisplay: json.artistDisplay || 0, rank: json.rank });
+      setBurnResult({ displayAmount: json.displayAmount, rank: json.rank });
       setPhase('success');
       // Refresh balance + leaderboard
       getCashAccount(connected.pubkey).then(a => { if (a) setCashAcct(a); });
@@ -796,7 +572,7 @@ export default function SalutePanel({ cardName }) {
         setBurnErr(
           isSolflare
             ? `Solflare is blocking this burn because $CASH is flagged as an unverified token in their system — this is a Solflare policy, not a problem with unatrare.wtf. Switch to Phantom (phantom.app) for a seamless one-click burn.`
-            : `Your wallet declined the request. Open your wallet extension and approve the signing prompt for unatrare.wtf, then try again. If it keeps blocking, use the transaction ID section below.`
+            : `Your wallet declined the request. Open your wallet extension and approve the signing prompt for unatrare.wtf, then try again. If it keeps blocking, use the TxID section below.`
         );
         setShowManual(true);
       } else {
@@ -879,15 +655,10 @@ export default function SalutePanel({ cardName }) {
         }
       `}</style>
       {/* ── Header ── */}
-      <div style={{ ...S.header, ...(ceremonyLive ? { borderTopColor: themePalette.color, boxShadow: `inset 0 1px 0 0 ${themePalette.color}, 0 0 24px ${themePalette.color}22` } : {}) }}>
+      <div style={S.header}>
         <span style={S.headerLabel}>
           <span style={{ fontSize: 14 }}>🔥</span>
           THE SALUTE LEDGER
-          {ceremonyLive && (
-            <span style={{ marginLeft: 8, padding: '2px 8px', border: `1px solid ${themePalette.color}`, color: themePalette.color, fontSize: 9, letterSpacing: '0.18em', textShadow: `0 0 8px ${themePalette.color}88`, animation: 'salutePulse 2.4s ease-in-out infinite' }}>
-              {themePalette.glyph} {themePalette.label} LIVE
-            </span>
-          )}
         </span>
         <span style={S.headerChain}>$CASH · SOLANA</span>
       </div>
@@ -907,19 +678,10 @@ export default function SalutePanel({ cardName }) {
               <div style={S.statBlock}>
                 <span style={S.statLabel}>TOTAL BURNED</span>
                 <span style={S.statValue}>
-                  {fmt(lb.totalBurnDisplay || lb.totalDisplay)}
+                  {fmt(lb.totalDisplay)}
                   <span style={S.statUnit}>$CASH</span>
                 </span>
               </div>
-              {Number(lb.totalArtistDisplay || 0) > 0 && (
-                <div style={S.statBlock}>
-                  <span style={S.statLabel}>TO ARTISTS</span>
-                  <span style={S.statValue}>
-                    {fmt(lb.totalArtistDisplay)}
-                    <span style={S.statUnit}>$CASH</span>
-                  </span>
-                </div>
-              )}
               <div style={S.statBlock}>
                 <span style={S.statLabel}>SALUTERS</span>
                 <span style={S.statValue}>{lb.uniqueSaluters}</span>
@@ -960,85 +722,34 @@ export default function SalutePanel({ cardName }) {
           </div>
         )}
 
+        {/* ── Success after native burn ── */}
+        {phase === 'success' && burnResult && (
+          <div style={{ ...S.successBox, marginBottom: 14 }}>
+            <div style={S.successTxt}>
+              🔥 SALUTE RECORDED — {fmt(burnResult.displayAmount)} $CASH burned · rank #{burnResult.rank}
+            </div>
+            {cashAcct && (
+              <div style={{ ...S.statLabel, marginTop: 6 }}>
+                remaining balance: {fmt(cashAcct.uiBalance)} $CASH
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ══ Native burn section ════════════════════════════════════════════ */}
         <div style={S.sectionDivider} />
 
-        {phase !== 'success' && (
         <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 14 }}>
           <strong style={{ color: 'var(--text)' }}>Salute this card</strong> by burning $CASH on Solana. Permanent. Public. Forever attributed to your wallet — your name lives on this card.
-          {ceremonyLive ? (
-            <>
-              <br />
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  marginTop: 8,
-                  padding: '6px 12px',
-                  border: `1px solid ${themePalette.color}`,
-                  background: `linear-gradient(90deg, ${themePalette.color}26 0%, ${themePalette.color}0A 100%)`,
-                  color: themePalette.color,
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  letterSpacing: '0.14em',
-                  textTransform: 'uppercase',
-                  textShadow: `0 0 10px ${themePalette.color}77`,
-                  boxShadow: `0 0 14px ${themePalette.color}33, inset 0 0 12px ${themePalette.color}1A`,
-                  borderRadius: 2,
-                  animation: 'salutePulse 2.4s ease-in-out infinite',
-                }}
-              >
-                <span aria-hidden style={{ fontSize: 14 }}>{themePalette.glyph}</span>
-                {themePalette.label} CEREMONY · LIVE SPLIT SALUTE
-              </span>
-              <style jsx>{`
-                @keyframes salutePulse {
-                  0%, 100% { box-shadow: 0 0 14px ${themePalette.color}33, inset 0 0 12px ${themePalette.color}1A; }
-                  50%      { box-shadow: 0 0 22px ${themePalette.color}66, inset 0 0 16px ${themePalette.color}2E; }
-                }
-              `}</style>
-              <br />
-              A live ceremony is running for this card. The amount you enter is the total salute: {ceremonySplit.burnPct}% is burned and {ceremonySplit.artistPct}% goes to the artist in the same transaction.
-            </>
-          ) : ceremonySplit.status === 'scheduled' ? (
-            <>
-              <br />
-              <span style={{ display: 'inline-block', marginTop: 6, padding: '2px 8px', border: '1px solid var(--text-dim)', color: 'var(--text-dim)', fontSize: '10px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                ceremony scheduled
-              </span>
-              <br />
-              A ceremony is scheduled — until it starts, the standing split below applies.
-            </>
-          ) : ceremonySplit.requireArtistSplitTx && Number(ceremonySplit.artistPct || 0) > 0 ? (
-            <>
-              <br />
-              <span style={{ display: 'inline-block', marginTop: 6, padding: '2px 8px', border: '1px solid rgba(180,255,111,0.4)', color: 'var(--green)', fontSize: '10px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                standing split · {ceremonySplit.burnPct}% burn / {ceremonySplit.artistPct}% artist
-              </span>
-              <br />
-              The artist has set their payout address — every salute splits {ceremonySplit.burnPct}% to the burn and {ceremonySplit.artistPct}% to the artist in the same transaction.
-            </>
-          ) : (
-            <>
-              <br />
-              <span style={{ display: 'inline-block', marginTop: 6, padding: '2px 8px', border: '1px solid var(--border)', color: 'var(--text-dim)', fontSize: '10px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                100% burn
-              </span>
-              <br />
-              The artist hasn&apos;t set a payout address yet — the full amount you enter is burned.
-            </>
-          )}
           <br />
           New here? <a href="/about/salutes" style={{ color: 'var(--amber)' }}>What is a salute? →</a>
           <br />
           Need $CASH first? Buy on{' '}
-          <a href="https://nat.fun/?refId=c69c9108f52b" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>
+          <a href="https://nat.fun" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>
             nat.fun
           </a>
           .
         </div>
-        )}
 
         {/* ── Security / wallet-warning education ─────────────────────────── */}
         <details style={{
@@ -1057,7 +768,7 @@ export default function SalutePanel({ cardName }) {
           </summary>
           <div style={{ marginTop: 10 }}>
             $CASH is a <strong style={{ color: 'var(--text)' }}>new Solana SPL Token-2022</strong> minted on{' '}
-            <a href="https://nat.fun/?refId=c69c9108f52b" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>nat.fun</a>.
+            <a href="https://nat.fun" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>nat.fun</a>.
             Because it's young and the ticker is generic, Phantom / Solflare / Backpack may show an
             <em> &ldquo;unverified token&rdquo;</em> or <em>&ldquo;low-trust&rdquo;</em> warning. That is normal for any new token —
             it is not evidence of a scam.
@@ -1186,15 +897,6 @@ export default function SalutePanel({ cardName }) {
                 <div style={{ ...S.hint, marginTop: 6, marginBottom: 8 }}>
                   Type any custom amount, or use quick buttons below.
                 </div>
-                {ceremonySplit.requireArtistSplitTx && Number(ceremonySplit.artistPct || 0) > 0 && (
-                  <div style={{ ...S.hint, marginTop: 0, marginBottom: 8, color: 'var(--amber)' }}>
-                    {ceremonySplit.status === 'active' ? 'Split ceremony is active' : 'Standing split is active'}: the amount you enter is the <strong style={{ color: 'var(--text)' }}>total salute</strong>. {ceremonySplit.burnPct}% is burned and {ceremonySplit.artistPct}% routes to the artist — all in one transaction.
-                    <br />
-                    <span style={{ color: 'var(--text-dim)', fontSize: '10px' }}>
-                      First-time salute for this artist may include a ~0.002 SOL one-time setup fee to create their $CASH payout account. Subsequent salutes by anyone are free of this fee.
-                    </span>
-                  </div>
-                )}
                 <div style={S.pctRow}>
                   {[10, 25, 50, 100].map(pct => (
                     <button key={pct} style={S.pctBtn} onClick={() => setPercent(pct)}>
@@ -1237,7 +939,7 @@ export default function SalutePanel({ cardName }) {
                   <button style={{ ...S.pctBtn, padding: '8px 14px', color: 'var(--green)', borderColor: 'var(--green)' }} onClick={refreshBalance}>
                     ↻ REFRESH BALANCE
                   </button>
-                  <a href="https://nat.fun/?refId=c69c9108f52b" target="_blank" rel="noopener noreferrer" style={{ ...S.pctBtn, padding: '8px 14px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+                  <a href="https://nat.fun" target="_blank" rel="noopener noreferrer" style={{ ...S.pctBtn, padding: '8px 14px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
                     BUY $CASH →
                   </a>
                 </div>
@@ -1266,16 +968,11 @@ export default function SalutePanel({ cardName }) {
 
         {/* Connected + success: confirmed result + explorer link + burn again */}
         {!isBusy && connected && phase === 'success' && burnResult && (
-          <div ref={successRef} className="salute-success-box" style={{ padding: '12px 14px', border: '1px solid var(--green)', background: 'rgba(180,255,111,0.05)', marginBottom: 12, scrollMarginTop: '20vh' }}>
+          <div className="salute-success-box" style={{ padding: '12px 14px', border: '1px solid var(--green)', background: 'rgba(180,255,111,0.05)', marginBottom: 12 }}>
             <div style={{ fontFamily: 'var(--font-card)', fontSize: '11px', letterSpacing: '2px', color: 'var(--green)', marginBottom: 6 }}>
               <span className="salute-flame-flicker" style={{ marginRight: 6 }}>🔥</span>
               {fmt(burnResult.displayAmount)} $CASH BURNED · RANK #{burnResult.rank}
             </div>
-            {burnResult.artistDisplay > 0 && (
-              <div style={{ ...S.hint, marginTop: 0, marginBottom: 8, color: 'var(--text)' }}>
-                + {fmt(burnResult.artistDisplay)} $CASH routed to the artist
-              </div>
-            )}
             {burnSig && (
               <div style={{ marginBottom: 10 }}>
                 <a
@@ -1318,7 +1015,7 @@ export default function SalutePanel({ cardName }) {
         {/* ══ Manual TxID fallback ════════════════════════════════════════════ */}
         <div style={S.sectionDivider} />
         <button style={S.manualToggle} onClick={() => { setShowManual(v => !v); setManualErr(''); }}>
-          {showManual ? '↑ hide' : 'already burned in another wallet? paste transaction id →'}
+          {showManual ? '↑ hide' : 'burned in another wallet or CLI? paste TxID →'}
         </button>
 
         {showManual && (
@@ -1336,7 +1033,7 @@ export default function SalutePanel({ cardName }) {
               style={S.input}
               value={manualSig}
               onChange={e => setManualSig(e.target.value)}
-              placeholder="paste your burn transaction ID here..."
+              placeholder="paste your burn TxID here…"
               autoComplete="off"
               spellCheck={false}
             />
@@ -1363,9 +1060,9 @@ export default function SalutePanel({ cardName }) {
             </div>
 
             <div style={{ ...S.hint, marginTop: 10 }}>
-              Burn is verified on Solana mainnet. Any Solana wallet works - Phantom, Solflare, Backpack, and others.
+              Burn is verified on Solana mainnet. Any Solana wallet works — Phantom, Solflare, Backpack, CLI, etc.
               {' '}To purchase $CASH, use{' '}
-              <a href="https://nat.fun/?refId=c69c9108f52b" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>
+              <a href="https://nat.fun" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)' }}>
                 nat.fun
               </a>
               .

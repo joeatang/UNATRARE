@@ -819,6 +819,8 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
   const [displayTitle, setDisplayTitle] = useState(sub.displayTitle || '');
   const [artistHandle, setArtistHandle] = useState(sub.artistHandle || '');
   const [description,  setDescription]  = useState(sub.description || '');
+  const [officialSignal, setOfficialSignal] = useState(sub.officialSignal || '');
+  const [campaignUpdate, setCampaignUpdate] = useState('');
   const [audioUrl,     setAudioUrl]     = useState(sub.audioUrl || '');
   const [videoUrl,     setVideoUrl]     = useState(sub.videoUrl || '');
   // art replacement
@@ -890,6 +892,8 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
         displayTitle:     displayTitle.trim(),
         artistHandle:     artistHandle.trim(),
         description:      description.trim(),
+        officialSignal:   officialSignal.trim(),
+        campaignUpdate:   campaignUpdate.trim(),
         audioUrl:         audioUrl.trim(),
         videoUrl:         videoUrl.trim(),
       };
@@ -952,7 +956,17 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
       {/* Score bar */}
       {sub.judgeScore != null && <ScoreBar score={sub.judgeScore} />}
 
-      {/* Approved: payment CTA — disabled until enrollment fee is activated */}
+      {/* Approved: payment CTA */}
+      {sub.status === 'approved' && sub.payUrl && (
+        <div className={styles.payStrip}>
+          <div className={styles.payLabel}>
+            Your art was certified. Complete your listing to go live in the directory.
+          </div>
+          <Link href={sub.payUrl} className={styles.payBtn}>
+            complete listing →
+          </Link>
+        </div>
+      )}
 
       {/* Rejected: reason */}
       {sub.status === 'rejected' && sub.rejectionReason && (
@@ -1051,6 +1065,48 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
                     outline: 'none',
                   }}
                 />
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: 4 }}>
+                  OFFICIAL ARTIST SIGNAL
+                </div>
+                <textarea
+                  rows={3}
+                  value={officialSignal}
+                  onChange={e => { setOfficialSignal(e.target.value); resetManage(); }}
+                  placeholder="One official message torchbearers can rally around..."
+                  maxLength={280}
+                  style={{
+                    width: '100%', padding: '7px 10px', boxSizing: 'border-box', resize: 'vertical',
+                    background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 12,
+                    outline: 'none',
+                  }}
+                />
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 4 }}>
+                  One permanent campaign message from the artist. Keep it short and shareable.
+                </div>
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '8px', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: 4 }}>
+                  POST ARTIST UPDATE
+                </div>
+                <textarea
+                  rows={3}
+                  value={campaignUpdate}
+                  onChange={e => { setCampaignUpdate(e.target.value); resetManage(); }}
+                  placeholder="Post a short campaign update that will appear on the card page..."
+                  maxLength={500}
+                  style={{
+                    width: '100%', padding: '7px 10px', boxSizing: 'border-box', resize: 'vertical',
+                    background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: 12,
+                    outline: 'none',
+                  }}
+                />
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-dim)', marginTop: 4 }}>
+                  Append-only. Use this for reveals, milestones, context, and artist notes.
+                </div>
               </div>
 
               {/* ── Replace art image ─────────────────────────────────── */}
@@ -1202,7 +1258,7 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
                     </div>
                     <div style={{ marginTop: 8 }}>
                       <Link
-                        href="/status/sol-payout-help"
+                        href="/studio/sol-payout-help"
                         style={{
                           fontFamily: 'var(--font-card)',
                           fontSize: '9px',
@@ -1347,10 +1403,32 @@ export default function StatusPage() {
           {/* Header */}
           <div className={styles.header}>
             <div className={styles.eyebrow}>· artist portal ·</div>
-            <h1 className={styles.title}>SUBMISS<span>I</span>ON STATUS</h1>
+            <h1 className={styles.title}>ARTIST ST<span>U</span>DIO</h1>
             <div className={styles.subtitle}>
-              Enter your Bitcoin address to see the status of your submissions<br />
-              and your Pepe Council verdicts.
+              Enter your Bitcoin address to manage submissions, listings, drops,<br />
+              payout settings, and your Pepe Council verdicts.
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <Link href="/studio" style={{
+                fontFamily: 'var(--font-card)',
+                fontSize: '9px',
+                letterSpacing: '2px',
+                color: 'var(--amber)',
+                textDecoration: 'none',
+                textTransform: 'uppercase',
+              }}>
+                artist studio is the primary entry point →
+              </Link>
+            </div>
+            <div style={{
+              marginTop: 8,
+              fontFamily: 'var(--font-card)',
+              fontSize: '8px',
+              letterSpacing: '2px',
+              textTransform: 'uppercase',
+              color: 'var(--text-dim)',
+            }}>
+              legacy compatibility path for old links
             </div>
           </div>
 
@@ -1373,7 +1451,7 @@ export default function StatusPage() {
                 onClick={handleLookup}
                 disabled={loading || !addrValid}
               >
-                {loading ? 'loading...' : 'check status →'}
+                {loading ? 'loading...' : 'open artist studio →'}
               </button>
             </div>
             {errMsg && <div className={styles.lookupError}>{errMsg}</div>}

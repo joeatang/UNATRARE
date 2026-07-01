@@ -6,103 +6,6 @@
   color: var(--text);
 }
 
-/* ── Active Cash Burn Ceremony banner ── */
-.cbcBanner {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-  margin: 0 0 22px;
-  padding: 12px;
-  border: 1px solid var(--amber-hot, #C9A84C);
-  background:
-    radial-gradient(ellipse at top right, rgba(201, 168, 76, 0.10), transparent 70%),
-    var(--surface);
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.15s, transform 0.15s;
-}
-.cbcBanner:hover { border-color: var(--green); transform: translateY(-1px); }
-
-@media (min-width: 720px) {
-  .cbcBanner { grid-template-columns: 360px 1fr; gap: 20px; padding: 16px; }
-}
-
-.cbcBannerImg {
-  width: 100%;
-  display: block;
-  background: var(--bg);
-  border: 1px solid var(--border-dim);
-}
-
-.cbcBannerBody {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 8px;
-  padding: 4px 6px;
-}
-
-.cbcBannerEyebrow {
-  font-family: var(--font-card);
-  font-size: 11px;
-  letter-spacing: 4px;
-  color: var(--green);
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.cbcBannerEyebrow::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 8px var(--green);
-  animation: cbcPulse 1.6s ease-in-out infinite;
-}
-
-@keyframes cbcPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: 0.4; transform: scale(0.6); }
-}
-
-.cbcBannerTitle {
-  font-family: var(--font-display);
-  font-size: clamp(28px, 6vw, 44px);
-  letter-spacing: 2px;
-  color: var(--amber-hot, #C9A84C);
-  line-height: 1;
-  margin: 0;
-}
-
-.cbcBannerLine {
-  font-family: var(--font-card);
-  font-size: 12px;
-  letter-spacing: 2px;
-  color: var(--text-dim);
-  text-transform: uppercase;
-}
-
-.cbcBannerQuote {
-  font-family: var(--font-body);
-  font-style: italic;
-  font-size: 13px;
-  color: var(--text);
-  line-height: 1.45;
-  margin: 4px 0 0;
-}
-
-.cbcBannerCta {
-  margin-top: 6px;
-  font-family: var(--font-card);
-  font-size: 11px;
-  letter-spacing: 2px;
-  color: var(--green);
-  text-transform: uppercase;
-}
-
 .header { text-align: center; margin-bottom: 28px; }
 .eyebrow {
   font-family: var(--font-card);
@@ -114,8 +17,8 @@
 }
 .title {
   font-family: var(--font-display);
-  font-size: clamp(36px, 8vw, 64px);
-  letter-spacing: clamp(2px, 0.6vw, 6px);
+  font-size: 64px;
+  letter-spacing: 6px;
   color: var(--text);
   margin: 0;
   line-height: 1;
@@ -129,49 +32,6 @@
   letter-spacing: 0.5px;
 }
 
-.flowCallout {
-  border: 1px solid var(--amber);
-  background: rgba(168, 144, 96, 0.08);
-  padding: 12px 14px;
-  margin-bottom: 20px;
-}
-
-.flowCalloutTitle {
-  font-family: var(--font-card);
-  font-size: 10px;
-  letter-spacing: 3px;
-  color: var(--amber);
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-.flowCalloutBody {
-  font-family: var(--font-body);
-  font-size: 12px;
-  color: var(--text-dim);
-  line-height: 1.65;
-}
-
-.flowCalloutLinks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 10px;
-}
-
-.flowCalloutLinks a {
-  font-family: var(--font-card);
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: var(--amber-hot);
-  text-transform: uppercase;
-  text-decoration: none;
-}
-
-.flowCalloutLinks a:hover {
-  color: var(--amber);
-}
-
 .statsRow {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -180,7 +40,40 @@
 }
 @media (max-width: 600px) {
   .statsRow { grid-template-columns: repeat(2, 1fr); }
-  .flowCalloutLinks { flex-direction: column; gap: 8px; }
+  .title { font-size: 48px; }
+}
+
+.liveStrip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border: 1px solid rgba(255,100,0,0.45);
+  background: rgba(255,80,0,0.06);
+  text-decoration: none;
+  margin: 0 0 20px;
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text);
+  transition: background 0.15s;
+}
+.liveStrip:hover { background: rgba(255,80,0,0.12); }
+.liveDot {
+  color: #ff5544;
+  animation: livePulse 1.6s ease-in-out infinite;
+}
+@keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+.liveLabel { color: #ff8844; font-weight: 600; }
+.liveSep   { color: var(--text-dim); opacity: 0.6; }
+.liveTotal { color: var(--green); }
+.liveCount { color: var(--text-dim); }
+.liveCta   { color: var(--amber-hot); margin-left: auto; }
+
+@media (max-width: 600px) {
+  .liveStrip { font-size: 9px; letter-spacing: 1.5px; padding: 10px 12px; }
+  .liveCta { margin-left: 0; width: 100%; text-align: right; }
 }
 .stat {
   border: 1px solid var(--border);
@@ -201,6 +94,45 @@
   text-transform: uppercase;
   letter-spacing: 2px;
   margin-top: 2px;
+}
+
+.pathStrip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-dim);
+  background: rgba(255, 200, 0, 0.03);
+}
+
+.pathStripLabel {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--amber-hot);
+  text-transform: uppercase;
+}
+
+.pathStripLinks {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.pathStripLink {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.pathStripLink:hover {
+  color: var(--amber);
 }
 
 .pillRow, .tabRow {
@@ -363,4 +295,5 @@
   .cardTitle { font-size: 13px; }
   .amountValue { font-size: 16px; }
   .rank { font-size: 18px; }
+  .pathStrip { padding: 10px 12px; }
 }

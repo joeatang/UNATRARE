@@ -15,6 +15,8 @@ export default function UpdateForm({ initialData }) {
   const [displayTitle,  setDisplayTitle]  = useState(initialData.display_title);
   const [artistHandle,  setArtistHandle]  = useState(initialData.artist_handle);
   const [description,   setDescription]  = useState(initialData.description);
+  const [officialSignal, setOfficialSignal] = useState(initialData.official_signal);
+  const [campaignUpdate, setCampaignUpdate] = useState('');
   const [category,      setCategory]     = useState(initialData.category);
   const [subcategory,   setSubcategory]  = useState(initialData.subcategory);
   const [audioUrl,      setAudioUrl]     = useState(initialData.audio_url);
@@ -79,6 +81,8 @@ export default function UpdateForm({ initialData }) {
           displayTitle: displayTitle.trim(),
           artistHandle: artistHandle.trim(),
           description:  description.trim(),
+          officialSignal: officialSignal.trim(),
+          campaignUpdate: campaignUpdate.trim(),
           category:     category.trim(),
           subcategory:  subcategory.trim(),
           audioUrl:     audioUrl.trim(),
@@ -235,6 +239,32 @@ export default function UpdateForm({ initialData }) {
               rows={5}
             />
             <div className={styles.hint}>{description.length} / 2000</div>
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>Official artist signal</label>
+            <textarea
+              className={styles.textarea}
+              value={officialSignal}
+              onChange={e => setOfficialSignal(e.target.value)}
+              maxLength={280}
+              rows={3}
+              placeholder="One official message torchbearers can rally around. Example: Useful for buying rare internet things before Wall Street arrives."
+            />
+            <div className={styles.hint}>{officialSignal.length} / 280</div>
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>Post artist update</label>
+            <textarea
+              className={styles.textarea}
+              value={campaignUpdate}
+              onChange={e => setCampaignUpdate(e.target.value)}
+              maxLength={500}
+              rows={3}
+              placeholder="Post a short campaign update that will appear on the card page activity stream."
+            />
+            <div className={styles.hint}>{campaignUpdate.length} / 500</div>
           </div>
 
           <div className={styles.fieldRow}>
