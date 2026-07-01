@@ -1,0 +1,55 @@
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 1rem;
+  background: linear-gradient(180deg, rgba(255, 176, 32, 0.10), rgba(255, 176, 32, 0.03));
+  border-bottom: 1px solid var(--border, rgba(255, 176, 32, 0.35));
+  font-family: var(--font-body, inherit);
+  font-size: 0.9rem;
+  color: var(--text, #f2e8d5);
+}
+
+.flame {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.text {
+  flex: 1 1 auto;
+  min-width: 12rem;
+}
+
+.cta {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--amber, #ffb020);
+  border-radius: 6px;
+  color: var(--amber, #ffb020);
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.cta:hover {
+  background: var(--amber, #ffb020);
+  color: #1a1206;
+}
+
+.close {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  color: var(--text-dim, #9a8f7a);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.15rem 0.35rem;
+  line-height: 1;
+}
+
+.close:hover {
+  color: var(--text, #f2e8d5);
+}

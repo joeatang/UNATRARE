@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './Nav.module.css';
+import ClaimBanner from './ClaimBanner';
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
@@ -34,6 +35,9 @@ export default function Nav() {
         </ul>
 
         <div className={styles.navRight}>
+          <Link href="/torchbearer/claim" className={styles['nav-status']}>
+            🔥 Claim Block
+          </Link>
           <Link href="/studio" className={styles['nav-status']}>
             Artist Studio
           </Link>
@@ -89,12 +93,14 @@ export default function Nav() {
           <li><Link href="/wallets" className={styles.drawerSecondaryLink}>Wallets</Link></li>
           <li><Link href="/drops" className={styles.drawerSecondaryLink}>Drops</Link></li>
           <li><Link href="/rules" className={styles.drawerSecondaryLink}>Rules</Link></li>
+          <li><Link href="/torchbearer/claim" className={styles.drawerSecondaryLink}>🔥 Claim Your Block</Link></li>
           <li><Link href="/studio" className={styles.drawerSecondaryLink}>Artist Studio</Link></li>
           <li><Link href="/studio/sol-payout-help" className={styles.drawerSecondaryLink}>SOL Payout Help</Link></li>
           <li><Link href="/submit" className={styles.drawerSubmit}>Submit Your Token →</Link></li>
         </ul>
       </div>
       </div>{/* /drawerWrapper */}
+      <ClaimBanner />
     </>
   );
 }

@@ -21,7 +21,17 @@ export async function GET(request) {
     return NextResponse.json({ error: 'invalid wallet' }, { status: 400 });
   }
   const tb = getTorchbearer(wallet);
-  if (!tb) return NextResponse.json({ ok: true, claimed: false, torchbearer: null });
+  if (!tb) {
+    // Not claimed yet. Report whether this wallet is *eligible* (has saluted) so
+    // the site can nudge returning supporters to claim their block.
+    let saluteCount = 0;
+    try {
+      const db = getDb();
+      const row = db.prepare('SELECT COUNT(*) AS n FROM card_salutes WHERE sol_wallet = ?').get(wallet);
+      saluteCount = row?.n || 0;
+    } catch { /* db unavailable — treat as not eligible */ }
+    return NextResponse.json({ ok: true, claimed: false, eligible: saluteCount > 0, saluteCount, torchbearer: null });
+  }
   // Never leak the hidden/show_wallet booleans as anything other than themselves.
   return NextResponse.json({
     ok: true,
