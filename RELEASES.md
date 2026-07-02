@@ -7,7 +7,7 @@ Naming: **Phase N — "Codename"** · build ID (Next.js `BUILD_ID`) · date.
 
 ---
 
-## Phase 5 — "Signal Weight"  ·  build `pending`  ·  2026-07-01
+## Phase 5 — "Signal Weight"  ·  build `vFjDVhg4TO6Cm3H0VZCtG`  ·  2026-07-01
 
 A recomputable trust score per wallet, derived entirely from existing
 on-chain-backed data — rewards conviction that's hard to fake.
