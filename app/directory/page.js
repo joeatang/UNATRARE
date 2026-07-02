@@ -4,6 +4,7 @@ import RarityBar from '../components/RarityBar';
 import styles from './directory.module.css';
 import { getDb } from '../../lib/db';
 import { getSalutesByCardBatch, tierFor, fmtCash } from '../../lib/saluteDisplay';
+import { getCardMomentumBatch } from '../../lib/signalWeight';
 
 function toRoman(n) {
   const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
@@ -64,25 +65,31 @@ export default function DirectoryPage({ searchParams }) {
 
   // One batched query for salute summaries across every visible card.
   let saluteByCard = new Map();
+  // Signal-weighted momentum — a salute from a trusted backer counts for more.
+  let momentumByCard = new Map();
   try {
     const allCardNames = [];
     for (const arr of Object.values(grouped)) for (const t of arr) allCardNames.push(t.token_name);
-    if (allCardNames.length) saluteByCard = getSalutesByCardBatch(getDb(), allCardNames);
+    if (allCardNames.length) {
+      const db = getDb();
+      saluteByCard = getSalutesByCardBatch(db, allCardNames);
+      momentumByCard = getCardMomentumBatch(db, allCardNames);
+    }
   } catch { /* directory still renders if salutes lookup fails */ }
 
   if (sortMode === 'momentum') {
     for (const arr of Object.values(grouped)) {
       arr.sort((a, b) => {
-        const sa = saluteByCard.get(a.token_name);
-        const sb = saluteByCard.get(b.token_name);
-        const a24 = Number(sa?.total_24h || 0);
-        const b24 = Number(sb?.total_24h || 0);
-        if (b24 !== a24) return b24 - a24;
-        const at = Number(sa?.total_burned || 0);
-        const bt = Number(sb?.total_burned || 0);
+        const ma = momentumByCard.get(a.token_name);
+        const mb = momentumByCard.get(b.token_name);
+        const aw = Number(ma?.weighted || 0);
+        const bw = Number(mb?.weighted || 0);
+        if (bw !== aw) return bw - aw;
+        const at = Number(saluteByCard.get(a.token_name)?.total_burned || 0);
+        const bt = Number(saluteByCard.get(b.token_name)?.total_burned || 0);
         if (bt !== at) return bt - at;
-        const ab = Number(sa?.unique_burners || 0);
-        const bb = Number(sb?.unique_burners || 0);
+        const ab = Number(ma?.backers || 0);
+        const bb = Number(mb?.backers || 0);
         if (bb !== ab) return bb - ab;
         return (a.card_number || 0) - (b.card_number || 0);
       });
@@ -94,22 +101,25 @@ export default function DirectoryPage({ searchParams }) {
   const momentumCards = [];
   for (const arr of Object.values(grouped)) {
     for (const token of arr) {
+      const mom = momentumByCard.get(token.token_name);
       const sum = saluteByCard.get(token.token_name);
       momentumCards.push({
         token,
-        total24h: Number(sum?.total_24h || 0),
-        totalBurned: Number(sum?.total_burned || 0),
-        uniqueBurners: Number(sum?.unique_burners || 0),
+        weighted:       Number(mom?.weighted || 0),
+        total24h:       Number(mom?.total_24h || 0),
+        backers:        Number(mom?.backers || 0),
+        trustedBackers: Number(mom?.trusted_backers || 0),
+        totalBurned:    Number(sum?.total_burned || 0),
       });
     }
   }
   momentumCards.sort((a, b) => {
+    if (b.weighted !== a.weighted) return b.weighted - a.weighted;
     if (b.total24h !== a.total24h) return b.total24h - a.total24h;
     if (b.totalBurned !== a.totalBurned) return b.totalBurned - a.totalBurned;
-    if (b.uniqueBurners !== a.uniqueBurners) return b.uniqueBurners - a.uniqueBurners;
     return (a.token.card_number || 0) - (b.token.card_number || 0);
   });
-  const topMomentum = momentumCards.filter(row => row.total24h > 0 || row.totalBurned > 0).slice(0, 3);
+  const topMomentum = momentumCards.filter(row => row.weighted > 0).slice(0, 3);
 
   // Build series list for filter buttons
   let allSeries = [];
@@ -187,13 +197,16 @@ export default function DirectoryPage({ searchParams }) {
         {topMomentum.length > 0 && (
           <div className={styles.momentumStrip}>
             <div className={styles.momentumHeader}>
-              <span className={styles.momentumEyebrow}>community momentum</span>
-              <span className={styles.momentumSub}>live from the current salute ledger</span>
+              <span className={styles.momentumEyebrow}>gaining momentum</span>
+              <span className={styles.momentumSub}>weighted by how trusted each recent backer is</span>
             </div>
             <div className={styles.momentumGrid}>
-              {topMomentum.map(({ token, total24h, totalBurned, uniqueBurners }) => {
+              {topMomentum.map(({ token, total24h, totalBurned, backers, trustedBackers }) => {
                 const tier = tierFor(totalBurned);
                 const thumb = token.art_mime?.startsWith('video/') ? token.art_cover_url : token.art_url;
+                const whyNow = trustedBackers > 0
+                  ? `${trustedBackers} trusted torchbearer${trustedBackers === 1 ? '' : 's'} backing`
+                  : `${backers} torchbearer${backers === 1 ? '' : 's'} this week`;
                 return (
                   <Link key={token.token_name} href={`/card/${token.token_name}`} className={styles.momentumCard}>
                     <div className={styles.momentumThumb}>
@@ -204,10 +217,14 @@ export default function DirectoryPage({ searchParams }) {
                       <div className={styles.momentumCardSub}>
                         S{toRoman(token.series)} · #{String(token.card_number).padStart(3, '0')}
                       </div>
+                      {token.artist_handle && (
+                        <div className={styles.momentumArtist}>by @{token.artist_handle}</div>
+                      )}
+                      <div className={styles.momentumWhy}>{whyNow}</div>
                     </div>
                     <div className={styles.momentumFire} style={{ color: tier.color }}>
                       <div className={styles.momentumFireNow}>+{fmtCash(total24h)}</div>
-                      <div className={styles.momentumFireLabel}>24h · {uniqueBurners} torchbearer{uniqueBurners === 1 ? '' : 's'}</div>
+                      <div className={styles.momentumFireLabel}>last 24h</div>
                     </div>
                   </Link>
                 );
@@ -280,6 +297,9 @@ export default function DirectoryPage({ searchParams }) {
                       <div className={styles.cardMeta}>
                         S{toRoman(token.series)} · #{String(token.card_number).padStart(3,'0')}
                       </div>
+                      {token.revealed_at && token.artist_handle && (
+                        <div className={styles.cardArtist}>by @{token.artist_handle}</div>
+                      )}
                       {token.supply > 0 && (
                         <div className={styles.cardRarity}>
                           <RarityBar supply={token.supply} compact />

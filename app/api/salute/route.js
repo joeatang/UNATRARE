@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '../../../lib/db';
+import { computeSignalWeights } from '../../../lib/signalWeight';
 
 // $CASH Solana SPL token mint address
 const CASH_MINT  = 'oMhwtzE6KeovcRMFAsFocEA6GcZUTAYFdvQ7tpJfnat';
@@ -163,6 +164,13 @@ export async function POST(request) {
     amountRaw: burnInfo.rawAmount,
     amountDisplay: burnInfo.displayAmount,
   });
+
+  // Event-driven Signal Weight refresh: the ledger just changed for this
+  // wallet, so recompute only its score. Non-fatal — scoring must never
+  // block a confirmed on-chain salute.
+  try {
+    computeSignalWeights(db, { wallet: sol_wallet });
+  } catch { /* score will be reconciled by the scheduled recompute */ }
 
   // Return rank for this wallet on this card
   const rankRow = db.prepare(`

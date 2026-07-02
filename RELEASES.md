@@ -7,6 +7,29 @@ Naming: **Phase N — "Codename"** · build ID (Next.js `BUILD_ID`) · date.
 
 ---
 
+## Phase 6 — "Living Directory"  ·  build `pending`  ·  2026-07-01
+
+The directory stops being a static grid and starts telling you *who's behind
+each work* and *what's genuinely rising* — using Signal Weight as a reading
+glass, never a rewrite. Raw on-chain totals stay canonical everywhere.
+
+- **Signal-weighted momentum.** The "momentum" sort + the "Gaining Momentum"
+  strip now weight each recent salute by how trusted its backer is
+  (`getCardMomentumBatch`). A salute from a Keeper of the Flame counts for more
+  than a fresh wallet — so momentum reflects real conviction, not one whale.
+  Gentle, bounded curve (1×–3.5×); unscored wallets fall back to 1×.
+- **"Why now" context.** Momentum cards show who's backing — e.g. "1 trusted
+  torchbearer backing" — the missing *why*, not just a dollar figure.
+- **Artist on every card.** Each directory card now credits its artist
+  (`by @handle`), so the grid is people, not just assets. (Hidden on
+  as-yet-unrevealed mystery cards.)
+- **Event-driven trust refresh (no blind cron).** Scores recompute the moment
+  the ledger changes — on a confirmed salute (that wallet) and on a
+  certification (early backers of that card). Both non-fatal. A thin scheduled
+  reconciliation remains available via `scripts/compute-signal.mjs`.
+- Read-only + additive. Default directory order is unchanged; momentum is an
+  opt-in lens.
+
 ## Phase 5 — "Signal Weight"  ·  build `vFjDVhg4TO6Cm3H0VZCtG`  ·  2026-07-01
 
 A recomputable trust score per wallet, derived entirely from existing

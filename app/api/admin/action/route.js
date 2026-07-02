@@ -4,6 +4,7 @@ import path from 'path';
 import { getDb } from '../../../../lib/db';
 import { verifyAdminToken, makeToken } from '../auth/route';
 import { judgeToken } from '../../../../lib/judge';
+import { computeSignalWeights } from '../../../../lib/signalWeight';
 import { notifyApproval, notifyGenesis, notifyCertification } from '../../../../lib/telegram.js';
 import {
   notifyApproval    as discordApproval,
@@ -172,6 +173,9 @@ export async function POST(request) {
       notifyGenesis(token, { series: genesisSeriesNum, card_number }).catch(e => console.warn('[telegram] genesis:', e.message));
       discordGenesis(token, { series: genesisSeriesNum, card_number }).catch(e => console.warn('[discord] genesis:', e.message));
       fireFullCouncil();
+      // Certification event: everyone who saluted before this moment just earned
+      // their "early backer" bonus — refresh scores. Non-fatal.
+      try { computeSignalWeights(db); } catch { /* reconciled by scheduled recompute */ }
       return NextResponse.json({ ok: true, action: 'genesis', series: genesisSeriesNum, card_number, supply });
     }
 
@@ -232,6 +236,9 @@ export async function POST(request) {
 
       notifyApproval(token, { series, card_number, supply }).catch(e => console.warn('[telegram] approve:', e.message));
       discordApproval(token, { series, card_number, supply }).catch(e => console.warn('[discord] approve:', e.message));
+      // Certification event: refresh scores so early backers of this card gain
+      // their bonus immediately. Non-fatal.
+      try { computeSignalWeights(db); } catch { /* reconciled by scheduled recompute */ }
       return NextResponse.json({ ok: true, action: 'approved', series, card_number, supply, payUrl: `https://unatrare.wtf/pay/${name}` });
     }
 
