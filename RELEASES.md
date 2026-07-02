@@ -7,7 +7,7 @@ Naming: **Phase N — "Codename"** · build ID (Next.js `BUILD_ID`) · date.
 
 ---
 
-## Phase 4 — "The Hall of Fire"  ·  build `pending`  ·  2026-07-01
+## Phase 4 — "The Hall of Fire"  ·  build `UZ5v9FXFLdlKebeU7PXQ4`  ·  2026-07-01
 
 A permanent monument (distinct from the live `/burns` ledger) at `/hall`.
 
