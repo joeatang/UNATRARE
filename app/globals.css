@@ -76,7 +76,9 @@ button {
   letter-spacing: 2px;
 }
 
-input, textarea {
+/* Text-like inputs only — exclude checkbox/radio so they aren't stretched to
+   full width (which squeezes adjacent labels and renders giant boxes). */
+input:not([type="checkbox"]):not([type="radio"]), textarea {
   font-family: var(--font-body);
   font-size: 16px; /* prevent iOS auto-zoom on focus */
   background: var(--surface);
@@ -87,8 +89,17 @@ input, textarea {
   width: 100%;
 }
 
-input:focus, textarea:focus {
+input:not([type="checkbox"]):not([type="radio"]):focus, textarea:focus {
   border-color: var(--amber-hot);
+}
+
+/* Checkboxes & radios keep their native, compact size. */
+input[type="checkbox"], input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  accent-color: var(--amber, #ffb020);
+  cursor: pointer;
 }
 
 /* Scanline overlay — applied to .scanlines wrapper */

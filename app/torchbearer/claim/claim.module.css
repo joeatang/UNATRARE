@@ -20,6 +20,8 @@
   font-size: 42px;
   letter-spacing: 3px;
   line-height: 1.05;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .lede {
@@ -194,7 +196,8 @@
   cursor: pointer;
 }
 
-.toggle input { margin-top: 3px; }
+.toggle input { margin-top: 3px; flex: 0 0 auto; }
+.toggle span { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
 .toggle em { color: var(--text-dim); font-style: italic; }
 
 .privacyNote {
