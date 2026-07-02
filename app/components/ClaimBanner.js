@@ -12,6 +12,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import styles from './ClaimBanner.module.css';
 
 function trustedProvider() {
@@ -30,8 +31,11 @@ const DISMISS_KEY = 'unat_claim_banner_dismissed'; // value = wallet address dis
 export default function ClaimBanner() {
   const [show, setShow] = useState(false);
   const [wallet, setWallet] = useState('');
+  const pathname = usePathname();
+  const onClaimPage = pathname?.startsWith('/torchbearer/claim');
 
   useEffect(() => {
+    if (onClaimPage) return; // never nag on the claim page itself
     let cancelled = false;
 
     async function check() {
@@ -65,7 +69,7 @@ export default function ClaimBanner() {
 
     check();
     return () => { cancelled = true; };
-  }, []);
+  }, [onClaimPage]);
 
   if (!show) return null;
 

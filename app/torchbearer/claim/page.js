@@ -37,6 +37,7 @@ export default function ClaimTorchbearerPage() {
   const [saved, setSaved] = useState(false);
   const [block, setBlock] = useState(null);
   const [freshBlock, setFreshBlock] = useState(false);
+  const [eligible, setEligible] = useState(null); // null=unknown, true, false
 
   const [form, setForm] = useState({
     handle: '', displayName: '', avatarUrl: '', bio: '',
@@ -47,12 +48,27 @@ export default function ClaimTorchbearerPage() {
     const found = detectWallets();
     setWallets(found);
     if (found.length === 1) setProvider(found[0].provider);
-  }, []);
+    // Silent reconnect: if this wallet already trusts the site, recognise the
+    // returning supporter with no popup so they land ready to claim.
+    if (found.length === 1) {
+      const p = found[0].provider;
+      if (p?.connect) {
+        p.connect({ onlyIfTrusted: true })
+          .then(async (resp) => {
+            const addr = (resp?.publicKey || p.publicKey)?.toString?.() || '';
+            if (SOL_ADDR_RE.test(addr)) { setWallet(addr); await loadExisting(addr); }
+          })
+          .catch(() => { /* not trusted yet — user will click Connect */ });
+      }
+    }
+  }, [loadExisting]);
 
   const loadExisting = useCallback(async (addr) => {
     try {
       const res = await fetch(`/api/torchbearer/claim?wallet=${encodeURIComponent(addr)}`, { cache: 'no-store' });
       const json = await res.json();
+      // Claimed torchbearers are always eligible; unclaimed depends on salute history.
+      setEligible(json?.claimed ? true : !!json?.eligible);
       if (json?.claimed && json.torchbearer) {
         const t = json.torchbearer;
         setForm({
@@ -149,6 +165,18 @@ export default function ClaimTorchbearerPage() {
               Connect wallet
             </button>
             {error && <div className={styles.error}>{error}</div>}
+          </section>
+        ) : eligible === false ? (
+          <section className={styles.connectCard}>
+            <div className={styles.walletRow}>
+              <span className={styles.walletLabel}>connected</span>
+              <span className={styles.walletValue}>{wallet.slice(0, 6)}…{wallet.slice(-6)}</span>
+            </div>
+            <p className={styles.connectText}>
+              This wallet hasn&apos;t saluted a card yet, so there&apos;s no fire to name.
+              Salute any card first — Bitcoin deals your block the moment you claim.
+            </p>
+            <Link href="/directory" className={styles.primary}>Find a card to salute →</Link>
           </section>
         ) : saved ? (
           <section className={styles.successCard}>
