@@ -7,6 +7,33 @@ Naming: **Phase N — "Codename"** · build ID (Next.js `BUILD_ID`) · date.
 
 ---
 
+## Phase 7 — "Artist Co-Signs"  ·  build `uQB77cxjtXB4s3Qz3U3WI`  ·  2026-07-01
+
+Trust now flows **from the artists themselves**. A verified artist — a wallet
+that owns an approved, Council-certified token — can publicly vouch for any
+torchbearer, and that endorsement lifts the torchbearer's Signal Weight.
+
+- **Gas-free, provable.** The artist connects their Solana wallet and signs
+  `UNATRARE:COSIGN:<artist>:<torchbearer>` (ed25519 `signMessage`, no gas). The
+  server re-verifies the signature against the artist's own key before recording
+  anything — Bitcoin/Counterparty ownership stays the root of truth.
+- **Bounded weight.** Each distinct artist co-sign adds a fixed amount to Signal
+  Weight, capped so no one wallet can be inflated by a single friend
+  (`cosignPerArtist` × up to `cosignCapArtists`). One co-sign per artist→torchbearer
+  pair (re-signing just updates the note).
+- **On the profile.** Every torchbearer page gains an **"Artist Co-Signs"**
+  section — the list of vouching artists (with optional short notes) and, for
+  verified artists, a one-click **"+ co-sign as an artist"** action. The Signal
+  banner shows an "artist co-signs" count when present.
+- **Honest states.** Non-verified wallets are told plainly they can't co-sign;
+  self-co-signs are rejected; unclaimed torchbearers with zero salutes are an
+  accepted edge case (no Signal row until they salute).
+
+New: `app/api/artist/cosign` (GET verify/list, POST record), `lib/artistCosign.js`,
+`CosignButton` client component. Extended: `signalWeight.js`,
+`torchbearerIdentity.js` (`cosignChallenge`/`verifyCosign`), `db.js`
+(`artist_cosigns` table + `trust_scores.cosigns`/`cosign_count`).
+
 ## Home Refocus  ·  build `3iOY1r7SIwSFmKYb_5fPX`  ·  2026-07-01
 
 The homepage stops asking visitors to "choose a path" as their first decision
