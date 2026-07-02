@@ -7,6 +7,28 @@ Naming: **Phase N — "Codename"** · build ID (Next.js `BUILD_ID`) · date.
 
 ---
 
+## 🔜 Next up (planned — not built)
+
+Queued projects, in order. Nothing here is live; all will ship flag-gated OFF.
+
+- **Scarce-status redesign** (refinement of the badges phase — do BEFORE revealing `reward_badges`).
+  "Founder" is retired as a generic badge — everyone who claims a block already *is* a Torchbearer
+  with a ⛓ Genesis Block, so that's the "you claimed = status." Two **sealed-forever** honors, both
+  capped at **69** and ranked by Bitcoin block height / earliest action (un-gameable):
+  1. First **69** to claim a genesis block — *name TBD* (Founding Flame / Genesis 69 / First Flame).
+  2. First **69** to salute (first burn) — *name TBD* (First Spark / Pioneer).
+  Fixes the currently-live ⛓ founder +15 Signal Weight bonus and Hall of Fire "THE FOUNDERS" section,
+  which today mislabel every claimer.
+- **Rewards P3 — Claim rail** (`reward_claim` 💰). FIRST money-moving phase. Pull-based: users claim
+  accrued rewards. Canary tiny pool + tripwires. Founder funds the treasury once + tops up.
+- **Rewards P4 — Activity + Bitcoin bonus windows** (`reward_activity`). Shared epoch pool split by
+  activity × Signal Weight; opportunistic BTC bonus windows; UNATPEPE/node multipliers (cap 5×).
+- **Rewards P5 — Artist grants + tip rail** (`reward_grants` 💰 / `reward_tip` 💰).
+
+Full economy design: `docs/cash-rewards-economy.md`.
+
+---
+
 ## Rewards P2 — "Fire Spread"  ·  build `0X1-kOYJhtnGakuMqbDge`  ·  2026-07-02
 
 Referral attribution + rebate accrual — **accrue-only, no money moves**, shipped
