@@ -6,6 +6,8 @@ import { getDb } from '../../../lib/db';
 import { fmtCash, tierFor, truncateWallet } from '../../../lib/saluteDisplay';
 import { getTorchbearer, displayFor } from '../../../lib/torchbearerIdentity';
 import { getSignalWeight, signalTier } from '../../../lib/signalWeight';
+import { getCosignsForTorchbearer } from '../../../lib/artistCosign';
+import CosignButton from './CosignButton';
 
 const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
@@ -124,6 +126,7 @@ export default async function TorchbearerPage({ params }) {
   const disp = displayFor(identity, wallet);
   const signal = getSignalWeight(wallet);
   const sigTier = signal ? signalTier(signal.score) : null;
+  const cosigns = getCosignsForTorchbearer(wallet);
 
   return (
     <>
@@ -192,6 +195,12 @@ export default async function TorchbearerPage({ params }) {
                   <span className={styles.signalPartLabel}>founder</span>
                 </div>
               )}
+              {Number(signal.cosign_count || 0) > 0 && (
+                <div className={styles.signalPart}>
+                  <span className={styles.signalPartValue}>{signal.cosign_count}</span>
+                  <span className={styles.signalPartLabel}>artist co-sign{signal.cosign_count === 1 ? '' : 's'}</span>
+                </div>
+              )}
             </div>
             <div className={styles.signalNote}>
               Earned by backing art <strong>early</strong> (before the Council certifies),
@@ -199,6 +208,36 @@ export default async function TorchbearerPage({ params }) {
             </div>
           </section>
         )}
+
+        {/* ── Artist co-signs (Phase 7) ────────────────────────────── */}
+        <section className={styles.cosigns}>
+          <div className={styles.cosignsHead}>
+            <div className={styles.cosignsTitle}>
+              artist co-signs
+              {cosigns.length > 0 && <span className={styles.cosignsCount}>{cosigns.length}</span>}
+            </div>
+            <CosignButton torchbearerWallet={wallet} torchbearerLabel={disp.label} />
+          </div>
+          {cosigns.length > 0 ? (
+            <ul className={styles.cosignsList}>
+              {cosigns.map((c, i) => (
+                <li key={i} className={styles.cosignItem}>
+                  <span className={styles.cosignArtist}>
+                    {c.artist_handle ? `@${c.artist_handle}` : truncateWallet(c.artist_sol_address)}
+                  </span>
+                  {c.note && <span className={styles.cosignNote}>“{c.note}”</span>}
+                  <span className={styles.cosignWhen}>{relTime(c.created_at)}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className={styles.cosignsEmpty}>
+              No co-signs yet. A verified artist can vouch for this torchbearer — a
+              cryptographic endorsement that lifts their Signal Weight.
+            </p>
+          )}
+        </section>
+
 
         <section className={styles.statsGrid}>
           <div className={styles.statCard}>

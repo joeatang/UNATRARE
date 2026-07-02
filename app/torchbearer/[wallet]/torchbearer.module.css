@@ -218,6 +218,146 @@
   .signalScore { font-size: 36px; }
 }
 
+/* ── Artist co-signs (Phase 7) ──────────────────────────────────── */
+.cosigns {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+.cosignsHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.cosignsTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-card);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.cosignsCount {
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--green);
+  border: 1px solid var(--border-dim);
+  padding: 1px 7px;
+}
+.cosignsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cosignItem {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border-dim);
+  padding-top: 10px;
+}
+.cosignItem:first-child { border-top: none; padding-top: 0; }
+.cosignArtist {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--green);
+}
+.cosignNote {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text);
+  font-style: italic;
+}
+.cosignWhen {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-left: auto;
+}
+.cosignsEmpty {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+/* action */
+.cosignOpen,
+.cosignConnect,
+.cosignSubmit {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid var(--green);
+  background: transparent;
+  color: var(--green);
+  padding: 8px 14px;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.cosignOpen:hover,
+.cosignConnect:hover,
+.cosignSubmit:hover { background: var(--green); color: var(--bg); border-color: var(--green-hot); }
+.cosignSubmit:disabled { opacity: .55; cursor: default; }
+.cosignPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  border-top: 1px solid var(--border-dim);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+.cosignLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.cosignInput {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 9px 11px;
+}
+.cosignInput:focus { outline: none; border-color: var(--green); }
+.cosignSubmit { align-self: flex-start; }
+.cosignStatus {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--amber);
+}
+.cosignErr {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--amber-hot);
+}
+.cosignDone {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--green);
+}
+
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
