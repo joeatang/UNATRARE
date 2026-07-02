@@ -7,6 +7,21 @@ Naming: **Phase N — "Codename"** · build ID (Next.js `BUILD_ID`) · date.
 
 ---
 
+## Phase 4 — "The Hall of Fire"  ·  build `pending`  ·  2026-07-01
+
+A permanent monument (distinct from the live `/burns` ledger) at `/hall`.
+
+- **The Founders** — torchbearers who claimed a genesis block, ordered by the
+  **Bitcoin block height at claim time** (earliest wins — Bitcoin keeps the order,
+  not us). Showcases the Phase 3 identity layer. Hidden torchbearers opt out.
+- **Greatest Single Flames** — the largest *single* salutes ever lit (one wallet,
+  one tx), with solscan proof. Distinct from `/burns`, which aggregates.
+- **Most Honored Artists** — per-artist salute rolls (total $CASH across all their
+  cards), each linking to the artist's most-saluted piece.
+- Monument stat line: $CASH enshrined, Bitcoin blocks claimed, torchbearers, artists honored.
+- All-time only — never windowed, never resets. Read-only, additive, low risk.
+- Nav link added (desktop "🏛 Hall" + mobile drawer "🏛 Hall of Fire").
+
 ## Phase 3 — "Torchbearer"  ·  build `zazKYKbUJQB7vjh93peDC`  ·  2026-07-01
 
 Bitcoin block-claim supporter identity — "Bitcoin is the source of truth."
