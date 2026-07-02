@@ -7,6 +7,21 @@ Naming: **Phase N — "Codename"** · build ID (Next.js `BUILD_ID`) · date.
 
 ---
 
+## Home Refocus  ·  build `3iOY1r7SIwSFmKYb_5fPX`  ·  2026-07-01
+
+The homepage stops asking visitors to "choose a path" as their first decision
+and instead offers **two co-equal doors**, decided in one glance:
+
+- **Support the art →** (`/directory`) — for the community: browse and salute.
+- **Submit your art →** (`/submit`) — for artists: issue on Counterparty, get certified.
+
+Both doors carry identical visual weight (amber vs green, same size) — neither
+constituency is demoted. Everything below (thesis, Pepe Vault, Council of 8, live
+numbers, final CTA) keeps its full presence as a guided scroll. The old five
+"path" cards are reframed lower down as a quieter *"where are you coming from?"*
+context row rather than a competing call to action. Mobile-first: doors stack on
+phones, sit 2-up from 640px.
+
 ## Phase 6 — "Living Directory"  ·  build `0FtVH_O2zWVg8fpC4y4uT`  ·  2026-07-01
 
 The directory stops being a static grid and starts telling you *who's behind
