@@ -5,6 +5,7 @@ import styles from './torchbearer.module.css';
 import { getDb } from '../../../lib/db';
 import { fmtCash, tierFor, truncateWallet } from '../../../lib/saluteDisplay';
 import { getTorchbearer, displayFor } from '../../../lib/torchbearerIdentity';
+import { getSignalWeight, signalTier } from '../../../lib/signalWeight';
 
 const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
@@ -121,6 +122,8 @@ export default async function TorchbearerPage({ params }) {
   const tier = tierFor(data.stats.total_burned);
   const identity = getTorchbearer(wallet);
   const disp = displayFor(identity, wallet);
+  const signal = getSignalWeight(wallet);
+  const sigTier = signal ? signalTier(signal.score) : null;
 
   return (
     <>
@@ -158,6 +161,44 @@ export default async function TorchbearerPage({ params }) {
             <Link href="/torchbearer/claim">{disp.claimed ? 'this is you? edit your profile →' : 'this is you? claim your handle →'}</Link>
           </div>
         </header>
+
+        {signal && (
+          <section className={styles.signalBanner} style={{ borderColor: `${sigTier.color}55` }}>
+            <div className={styles.signalMain}>
+              <div className={styles.signalLabel}>signal weight</div>
+              <div className={styles.signalScore} style={{ color: sigTier.color }}>
+                {Math.round(signal.score).toLocaleString()}
+              </div>
+              <div className={styles.signalTier} style={{ color: sigTier.color, borderColor: `${sigTier.color}55` }}>
+                {sigTier.label}
+              </div>
+            </div>
+            <div className={styles.signalParts}>
+              <div className={styles.signalPart}>
+                <span className={styles.signalPartValue}>{signal.early_salutes}</span>
+                <span className={styles.signalPartLabel}>early backs</span>
+              </div>
+              <div className={styles.signalPart}>
+                <span className={styles.signalPartValue}>{signal.artists}</span>
+                <span className={styles.signalPartLabel}>artists backed</span>
+              </div>
+              <div className={styles.signalPart}>
+                <span className={styles.signalPartValue}>{signal.active_days}</span>
+                <span className={styles.signalPartLabel}>active days</span>
+              </div>
+              {signal.founder > 0 && (
+                <div className={styles.signalPart}>
+                  <span className={styles.signalPartValue}>⛓</span>
+                  <span className={styles.signalPartLabel}>founder</span>
+                </div>
+              )}
+            </div>
+            <div className={styles.signalNote}>
+              Earned by backing art <strong>early</strong> (before the Council certifies),
+              <strong> broadly</strong> and <strong>consistently</strong> — not by any single big burn.
+            </div>
+          </section>
+        )}
 
         <section className={styles.statsGrid}>
           <div className={styles.statCard}>

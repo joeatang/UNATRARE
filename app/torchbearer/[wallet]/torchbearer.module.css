@@ -136,6 +136,88 @@
   text-transform: uppercase;
 }
 
+.signalBanner {
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255, 176, 0, 0.05), rgba(255, 176, 0, 0.01));
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: "main parts" "note note";
+  gap: 14px 28px;
+  align-items: center;
+}
+.signalMain {
+  grid-area: main;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.signalLabel {
+  font-family: var(--font-card);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.signalScore {
+  font-family: var(--font-display);
+  font-size: 44px;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+.signalTier {
+  font-family: var(--font-card);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border: 1px solid var(--border-dim);
+  padding: 5px 9px;
+  white-space: nowrap;
+}
+.signalParts {
+  grid-area: parts;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: flex-end;
+}
+.signalPart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 52px;
+}
+.signalPartValue {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--text);
+}
+.signalPartLabel {
+  font-family: var(--font-card);
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 3px;
+}
+.signalNote {
+  grid-area: note;
+  font-family: var(--font-body);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  border-top: 1px solid var(--border-dim);
+  padding-top: 12px;
+}
+.signalNote strong { color: var(--amber); font-weight: 600; }
+
+@media (max-width: 600px) {
+  .signalBanner { grid-template-columns: 1fr; grid-template-areas: "main" "parts" "note"; }
+  .signalParts { justify-content: flex-start; }
+  .signalScore { font-size: 36px; }
+}
+
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

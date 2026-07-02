@@ -7,6 +7,24 @@ Naming: **Phase N — "Codename"** · build ID (Next.js `BUILD_ID`) · date.
 
 ---
 
+## Phase 5 — "Signal Weight"  ·  build `pending`  ·  2026-07-01
+
+A recomputable trust score per wallet, derived entirely from existing
+on-chain-backed data — rewards conviction that's hard to fake.
+
+- New `trust_scores` table (a rebuildable cache; raw truth stays in `card_salutes`).
+- `lib/signalWeight.js` scores each wallet from four signals:
+  **EARLY** (saluted before the Council certified), **BROAD** (many distinct
+  artists), **SUSTAINED** (active across many days), **FOUNDER** (claimed a
+  Bitcoin genesis block), plus a log-scaled base from total $CASH burned.
+- Recompute: `POST /api/admin/signal-weight` (admin) or `scripts/compute-signal.mjs`
+  (cron-friendly). A wallet's score is also computed lazily on first profile view.
+- Torchbearer profile now shows a **Signal Weight banner** — score, tier
+  (Kindling → Steady → Trusted → Pillar → Keeper of the Flame), and the
+  early/broad/sustained/founder breakdown.
+- `resolveSignalWeights()` helper provided for future feed/trending weighting.
+- Read-only + additive. No change to how salutes or claims work.
+
 ## Phase 4 — "The Hall of Fire"  ·  build `UZ5v9FXFLdlKebeU7PXQ4`  ·  2026-07-01
 
 A permanent monument (distinct from the live `/burns` ledger) at `/hall`.
