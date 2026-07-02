@@ -7,7 +7,7 @@ Naming: **Phase N — "Codename"** · build ID (Next.js `BUILD_ID`) · date.
 
 ---
 
-## Phase 6 — "Living Directory"  ·  build `pending`  ·  2026-07-01
+## Phase 6 — "Living Directory"  ·  build `0FtVH_O2zWVg8fpC4y4uT`  ·  2026-07-01
 
 The directory stops being a static grid and starts telling you *who's behind
 each work* and *what's genuinely rising* — using Signal Weight as a reading
