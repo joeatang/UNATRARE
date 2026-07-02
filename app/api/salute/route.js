@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '../../../lib/db';
 import { computeSignalWeights } from '../../../lib/signalWeight';
+import { notifySalute } from '../../../lib/telegram';
 
 // $CASH Solana SPL token mint address
 const CASH_MINT  = 'oMhwtzE6KeovcRMFAsFocEA6GcZUTAYFdvQ7tpJfnat';
@@ -171,6 +172,26 @@ export async function POST(request) {
   try {
     computeSignalWeights(db, { wallet: sol_wallet });
   } catch { /* score will be reconciled by the scheduled recompute */ }
+
+  // Telegram salute announcement (fire-and-forget, never blocks the API).
+  // Burns are already gated to certified + revealed cards above, and
+  // notifySalute additionally swaps in the mystery placeholder for any
+  // uncertified token — so this can never leak hidden art.
+  try {
+    const tokenRow = db.prepare(
+      'SELECT token_name, display_title, art_url, art_mime, art_cover_url, artist_handle, artist_address, council_certified, revealed_at FROM tokens WHERE token_name = ?'
+    ).get(cardNameClean);
+    const totalsRow = db.prepare(
+      'SELECT COUNT(*) AS n, COALESCE(SUM(amount_display),0) AS total FROM card_salutes WHERE card_name = ?'
+    ).get(cardNameClean);
+    if (tokenRow) {
+      notifySalute(
+        tokenRow,
+        { sol_wallet, amount_display: burnInfo.displayAmount, tx_sig },
+        { isFirst: (totalsRow?.n ?? 1) === 1, cardTotal: totalsRow?.total ?? burnInfo.displayAmount },
+      );
+    }
+  } catch { /* notification failures never affect a recorded burn */ }
 
   // Return rank for this wallet on this card
   const rankRow = db.prepare(`
