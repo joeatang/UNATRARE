@@ -44,6 +44,24 @@ export default function ClaimTorchbearerPage() {
     twitter: '', website: '', showWallet: false, hidden: false,
   });
 
+  const loadExisting = useCallback(async (addr) => {
+    try {
+      const res = await fetch(`/api/torchbearer/claim?wallet=${encodeURIComponent(addr)}`, { cache: 'no-store' });
+      const json = await res.json();
+      // Claimed torchbearers are always eligible; unclaimed depends on salute history.
+      setEligible(json?.claimed ? true : !!json?.eligible);
+      if (json?.claimed && json.torchbearer) {
+        const t = json.torchbearer;
+        setForm({
+          handle: t.handle || '', displayName: t.display_name || '', avatarUrl: t.avatar_url || '',
+          bio: t.bio || '', twitter: t.twitter || '', website: t.website || '',
+          showWallet: !!t.show_wallet, hidden: !!t.hidden,
+        });
+        if (t.genesis_block != null) setBlock(t.genesis_block);
+      }
+    } catch { /* ignore — fresh claim */ }
+  }, []);
+
   useEffect(() => {
     const found = detectWallets();
     setWallets(found);
@@ -62,24 +80,6 @@ export default function ClaimTorchbearerPage() {
       }
     }
   }, [loadExisting]);
-
-  const loadExisting = useCallback(async (addr) => {
-    try {
-      const res = await fetch(`/api/torchbearer/claim?wallet=${encodeURIComponent(addr)}`, { cache: 'no-store' });
-      const json = await res.json();
-      // Claimed torchbearers are always eligible; unclaimed depends on salute history.
-      setEligible(json?.claimed ? true : !!json?.eligible);
-      if (json?.claimed && json.torchbearer) {
-        const t = json.torchbearer;
-        setForm({
-          handle: t.handle || '', displayName: t.display_name || '', avatarUrl: t.avatar_url || '',
-          bio: t.bio || '', twitter: t.twitter || '', website: t.website || '',
-          showWallet: !!t.show_wallet, hidden: !!t.hidden,
-        });
-        if (t.genesis_block != null) setBlock(t.genesis_block);
-      }
-    } catch { /* ignore — fresh claim */ }
-  }, []);
 
   async function connect() {
     setError(''); setStatus('');

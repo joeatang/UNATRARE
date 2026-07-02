@@ -3,12 +3,22 @@
   align-items: center;
   gap: 0.65rem;
   flex-wrap: wrap;
-  padding: 0.6rem 1rem;
+  /* The nav is position:fixed, so this banner (first in-flow element) would sit
+     behind it. Pad the top by the nav's height + notch inset so the banner
+     content clears the fixed nav on all devices. */
+  padding: calc(48px + env(safe-area-inset-top, 0px) + 0.6rem) 1rem 0.6rem;
   background: linear-gradient(180deg, rgba(255, 176, 32, 0.10), rgba(255, 176, 32, 0.03));
   border-bottom: 1px solid var(--border, rgba(255, 176, 32, 0.35));
   font-family: var(--font-body, inherit);
   font-size: 0.9rem;
   color: var(--text, #f2e8d5);
+}
+
+/* Mobile nav is taller (56px) — match it so the banner isn't clipped. */
+@media (max-width: 1024px) {
+  .banner {
+    padding-top: calc(56px + env(safe-area-inset-top, 0px) + 0.6rem);
+  }
 }
 
 .flame {
