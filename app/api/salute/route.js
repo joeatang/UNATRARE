@@ -9,6 +9,10 @@ const SOLANA_RPC = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solan
 const STRICT_BURN_INSTRUCTION_REQUIRED = process.env.SALUTE_STRICT_BURN_INSTRUCTION !== '0';
 const SALUTE_BURN_PROGRAM_ID = (process.env.SALUTE_BURN_PROGRAM_ID || '').trim();
 const SALUTE_REQUIRE_PROGRAM_BURN = process.env.SALUTE_REQUIRE_PROGRAM_BURN === '1';
+// Strict split mode: when '1', reject any salute on a payout-enabled card that
+// is missing the artist transfer leg or whose ratio is off. Default OFF so
+// legitimate burn-only paths (CLI / manual TxID) still record honestly.
+const SALUTE_REQUIRE_ARTIST_SPLIT_TX = process.env.SALUTE_REQUIRE_ARTIST_SPLIT_TX === '1';
 const ENFORCE_CEREMONY_WINDOW = process.env.SALUTE_ENFORCE_CEREMONY_WINDOW === '1';
 const ENFORCE_CEREMONY_STRICT = process.env.SALUTE_ENFORCE_CEREMONY_STRICT === '1';
 const RATE_WINDOW_MS = Number(process.env.SALUTE_RATE_LIMIT_WINDOW_MS || 60_000);
@@ -102,7 +106,7 @@ export async function POST(request) {
   }
 
   const card = db.prepare(
-    "SELECT token_name FROM tokens WHERE token_name = ? AND status = 'approved' AND council_certified = 1 AND revealed_at IS NOT NULL"
+    "SELECT token_name, artist_sol_address FROM tokens WHERE token_name = ? AND status = 'approved' AND council_certified = 1 AND revealed_at IS NOT NULL"
   ).get(cardNameClean);
   if (!card) {
     logSaluteEvent(db, 'card_not_found', { clientIp, cardName: cardNameClean, solWallet: sol_wallet, txSig: tx_sig });
@@ -128,6 +132,10 @@ export async function POST(request) {
     return NextResponse.json({ error: 'this transaction has already been recorded' }, { status: 409 });
   }
 
+  // Resolve the configured artist split for this card (ceremony override or
+  // standing 69/31 once the artist has set a payout address).
+  const split = getSplitSnapshot(db, cardNameClean);
+
   // Verify the burn on Solana mainnet
   let burnInfo;
   try {
@@ -150,11 +158,83 @@ export async function POST(request) {
     );
   }
 
-  // Record the salute
+  // ── Artist split verification + honest recording ──────────────────────────
+  // The saluter's transaction should carry a transfer leg paying the artist
+  // their configured %. We record whatever actually happened on-chain: if the
+  // artist leg is present we credit it; if it's missing we downgrade to
+  // burn_only so ledger totals stay honest. In strict mode
+  // (SALUTE_REQUIRE_ARTIST_SPLIT_TX=1) a missing/short artist leg is rejected.
+  let artistRaw = '0';
+  let artistDisplay = 0;
+  let effectiveSplit = split;
+  if (split.artist_pct > 0) {
+    const artistSol = (card.artist_sol_address || '').trim();
+    if (!SOL_ADDR_RE.test(artistSol)) {
+      // Payout address vanished between snapshot and verification — fall back to
+      // burn-only rather than reject; the burn really happened.
+      effectiveSplit = { preset: 'burn_only', burn_pct: 100, artist_pct: 0, node_pct: 0 };
+    } else {
+      const artistGainRaw = ownerGainRaw(burnInfo.tx, artistSol, CASH_MINT);
+
+      if (SALUTE_REQUIRE_ARTIST_SPLIT_TX) {
+        if (artistGainRaw <= 0n) {
+          logSaluteEvent(db, 'split_missing_artist_leg', {
+            clientIp, cardName: cardNameClean, solWallet: sol_wallet, txSig: tx_sig,
+            amountRaw: burnInfo.rawAmount, amountDisplay: burnInfo.displayAmount,
+            message: 'split verification failed: missing artist transfer leg in this salute transaction',
+          });
+          return NextResponse.json(
+            { error: 'split verification failed: missing artist transfer leg in this salute transaction' },
+            { status: 422 }
+          );
+        }
+        const burnRawBig = BigInt(burnInfo.rawAmount);
+        const left = burnRawBig * BigInt(split.artist_pct);
+        const right = artistGainRaw * BigInt(split.burn_pct);
+        const tolerance = BigInt(Math.max(1, split.burn_pct));
+        if (absBigInt(left - right) > tolerance) {
+          logSaluteEvent(db, 'split_ratio_mismatch', {
+            clientIp, cardName: cardNameClean, solWallet: sol_wallet, txSig: tx_sig,
+            amountRaw: burnInfo.rawAmount, amountDisplay: burnInfo.displayAmount,
+            message: `split verification failed: expected ${split.burn_pct}/${split.artist_pct} burn/artist ratio`,
+          });
+          return NextResponse.json(
+            { error: `split verification failed: expected ${split.burn_pct}/${split.artist_pct} burn/artist ratio` },
+            { status: 422 }
+          );
+        }
+      }
+
+      // Record whatever was actually transferred on-chain. If the saluter
+      // skipped the artist leg in lenient mode, the ledger reflects it honestly.
+      if (artistGainRaw > 0n) {
+        artistRaw = artistGainRaw.toString();
+        artistDisplay = Number(artistGainRaw) / Math.pow(10, burnInfo.decimals);
+      } else {
+        effectiveSplit = { preset: 'burn_only', burn_pct: 100, artist_pct: 0, node_pct: 0 };
+      }
+    }
+  }
+
+  // Record the salute (with split columns)
   db.prepare(`
-    INSERT INTO card_salutes (card_name, sol_wallet, amount_raw, amount_display, decimals, tx_sig, cp_address)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(cardNameClean, sol_wallet, burnInfo.rawAmount, burnInfo.displayAmount, burnInfo.decimals, tx_sig, '');
+    INSERT INTO card_salutes (
+      card_name, sol_wallet,
+      amount_raw, amount_display,
+      artist_amount_raw, artist_amount_display,
+      node_amount_raw, node_amount_display,
+      split_preset, burn_pct, artist_pct, node_pct,
+      decimals, tx_sig, cp_address
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    cardNameClean, sol_wallet,
+    burnInfo.rawAmount, burnInfo.displayAmount,
+    artistRaw, artistDisplay,
+    '0', 0,
+    effectiveSplit.preset, effectiveSplit.burn_pct, effectiveSplit.artist_pct, effectiveSplit.node_pct,
+    burnInfo.decimals, tx_sig, '',
+  );
 
   logSaluteEvent(db, 'accepted', {
     clientIp,
@@ -208,6 +288,7 @@ export async function POST(request) {
   return NextResponse.json({
     ok:            true,
     displayAmount: burnInfo.displayAmount,
+    artistDisplay,
     decimals:      burnInfo.decimals,
     rank:          rankRow?.rank ?? 1,
   });
@@ -322,7 +403,7 @@ async function verifySolanaBurn(txSig, expectedWallet) {
       const cashBal   = allBals.find(b => b.mint === CASH_MINT);
       const decimals  = cashBal?.uiTokenAmount?.decimals ?? 6;
       const displayAmount = Number(BigInt(rawAmount)) / Math.pow(10, decimals);
-      return { rawAmount, displayAmount, decimals };
+      return { rawAmount, displayAmount, decimals, tx };
     }
   }
 
@@ -351,8 +432,59 @@ function inferBurnByBalanceDelta(tx, expectedWallet) {
   const decimals = pre[0].uiTokenAmount?.decimals ?? 6;
   const rawAmount = burned.toString();
   const displayAmount = Number(burned) / Math.pow(10, decimals);
-  return { rawAmount, displayAmount, decimals };
+  return { rawAmount, displayAmount, decimals, tx };
 }
+
+// ── Artist split helpers ──────────────────────────────────────────────────
+function getSplitSnapshot(db, cardName) {
+  // 1) An active ceremony always wins — it can override the standing split.
+  const row = getActiveCeremony(db, cardName);
+  if (row) {
+    return {
+      preset: row.split_preset || 'phase1_artist_31',
+      burn_pct: Number(row.burn_pct || 69),
+      artist_pct: Number(row.artist_pct || 31),
+      node_pct: Number(row.node_pct || 0),
+    };
+  }
+  // 2) No ceremony — honor the standing 69/31 split site-wide once the artist
+  //    has set their SOL payout address (setting one up = opting in).
+  const tok = db.prepare(
+    "SELECT artist_sol_address FROM tokens WHERE token_name = ? AND status = 'approved'"
+  ).get(cardName);
+  if (tok && (tok.artist_sol_address || '').trim()) {
+    return { preset: 'phase1_artist_31', burn_pct: 69, artist_pct: 31, node_pct: 0 };
+  }
+  // 3) Otherwise — pure burn.
+  return { preset: 'burn_only', burn_pct: 100, artist_pct: 0, node_pct: 0 };
+}
+
+function getActiveCeremony(db, cardName) {
+  const row = db.prepare(
+    'SELECT status, starts_at, ends_at, split_preset, burn_pct, artist_pct, node_pct FROM salute_ceremonies WHERE card_name = ? LIMIT 1'
+  ).get(cardName);
+  if (!row) return null;
+  const now = Math.floor(Date.now() / 1000);
+  if (row.status !== 'active') return null;
+  if (row.starts_at != null && now < row.starts_at) return null;
+  if (row.ends_at != null && now > row.ends_at) return null;
+  return row;
+}
+
+// How many raw units the `owner` gained in `mint` across this tx (post - pre).
+function ownerGainRaw(tx, owner, mint) {
+  const pre = ownerTokenRaw(tx?.meta?.preTokenBalances || [], owner, mint);
+  const post = ownerTokenRaw(tx?.meta?.postTokenBalances || [], owner, mint);
+  return post - pre;
+}
+
+function ownerTokenRaw(balances, owner, mint) {
+  return balances
+    .filter(b => b?.owner === owner && b?.mint === mint)
+    .reduce((sum, b) => sum + BigInt(b?.uiTokenAmount?.amount ?? '0'), 0n);
+}
+
+function absBigInt(v) { return v < 0n ? -v : v; }
 
 function getClientIp(request) {
   const fwd = request.headers.get('x-forwarded-for') || '';
