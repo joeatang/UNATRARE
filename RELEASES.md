@@ -30,6 +30,19 @@ Bitcoin block-claim supporter identity — "Bitcoin is the source of truth."
 - `GET /api/torchbearer/claim` now reports `eligible` + `saluteCount` for
   unclaimed wallets so the banner knows who to nudge.
 
+### Phase 3.2 — audit hardening  ·  build `ojY9QuUXpuM4z2eV-6_Q_`  ·  2026-07-01
+
+Triple-check pass on redundancy / UX / communication / flow gaps.
+
+- **Flow:** claim page now checks eligibility right after connect — non-supporters
+  see a friendly "salute a card first →" state instead of failing *after* signing.
+- **Flow:** claim page silently reconnects a trusted wallet (`onlyIfTrusted`) so
+  returning supporters arrive pre-recognized (no extra Connect click).
+- **Redundancy:** `ClaimBanner` is suppressed on `/torchbearer/claim` itself.
+- **Security:** avatar URLs restricted to `http(s)` before storage/render.
+- **Anti-abuse:** reserved handles blocked (`admin`, `unatrare`, `satoshi`,
+  `council`, `support`, …) ahead of any public announcement.
+
 ## Phase 2 — "Studio"  ·  build `_XN6SFmWLMpTAwZh1rCCX`  ·  2026-07-01
 
 Artist Studio consolidation + emergency stabilization.
