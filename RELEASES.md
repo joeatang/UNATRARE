@@ -7,6 +7,19 @@ Naming: **Phase N — "Codename"** · build ID (Next.js `BUILD_ID`) · date.
 
 ---
 
+## Phase 8 — "Split Restored"  ·  build `jBf2KHv4kub_CzqUTHBOI`  ·  2026-07-02
+
+Restores the **69/31 artist split** that two July refactors silently broke
+(`b44d13c` dropped the client transfer leg; `0bafdd9` dropped server recording).
+`SalutePanel` again builds the burn + artist-transfer atomically and auto-creates
+the artist ATA; `/api/salute` verifies the artist leg on-chain and records the
+split honestly (lenient by default, `SALUTE_REQUIRE_ARTIST_SPLIT_TX=1` to hard
+reject). Adds `ops/salute-split-monitor.sh` — a ledger tripwire (cron, every
+10 min) that Telegram-alerts if payout-enabled cards start recording burns with
+0 to the artist, so this can never silently regress again.
+
+---
+
 ## Phase 7 — "Artist Co-Signs"  ·  build `uQB77cxjtXB4s3Qz3U3WI`  ·  2026-07-01
 
 Trust now flows **from the artists themselves**. A verified artist — a wallet
