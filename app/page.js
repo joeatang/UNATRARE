@@ -117,13 +117,24 @@ export default function LandingPage() {
             Eight Pepe AI scientists decide what gets listed!
           </p>
 
-          <div className={styles.heroCtas}>
-            <Link href="/directory" className={styles.heroCtaPrimary}>
-              Enter the Directory →
+          <div className={styles.heroDoors}>
+            <Link href="/directory" className={styles.heroDoor}>
+              <span className={styles.heroDoorLabel}>Support the art</span>
+              <span className={styles.heroDoorDesc}>
+                Browse the directory and salute the cards that move you.
+                Your $CASH goes straight to the artists.
+              </span>
+              <span className={styles.heroDoorArrow}>enter the directory →</span>
             </Link>
-            <a href="#paths" className={styles.heroCtaSecondary}>
-              Choose your path ↓
-            </a>
+
+            <Link href="/submit" className={`${styles.heroDoor} ${styles.heroDoorAlt}`}>
+              <span className={styles.heroDoorLabel}>Submit your art</span>
+              <span className={styles.heroDoorDesc}>
+                Issue your token on Counterparty, then let the Council of 8
+                certify it — permanently, on Bitcoin.
+              </span>
+              <span className={styles.heroDoorArrow}>submit your token →</span>
+            </Link>
           </div>
 
           {stats.activeCeremony && (
@@ -197,10 +208,10 @@ export default function LandingPage() {
             Counterparty, DMT/TAP, Node runner (audience context).
             ───────────────────────────────────────────────────── */}
         <section className={styles.paths} id="paths">
-          <div className={styles.pathsEyebrow}>CHOOSE YOUR PATH</div>
+          <div className={styles.pathsEyebrow}>WHERE ARE YOU COMING FROM?</div>
           <p className={styles.pathsSub}>
             Four communities finding the same road from different directions.
-            Where are you coming from?
+            Wherever you start, the two doors above are how you take part.
           </p>
           <PathCards />
         </section>
