@@ -7,6 +7,27 @@ Naming: **Phase N — "Codename"** · build ID (Next.js `BUILD_ID`) · date.
 
 ---
 
+## Rewards P2 — "Fire Spread"  ·  build `0X1-kOYJhtnGakuMqbDge`  ·  2026-07-02
+
+Referral attribution + rebate accrual — **accrue-only, no money moves**, shipped
+**dark** behind the `reward_referral` feature flag (OFF by default, flip in `/admin`).
+
+- New `lib/referrals.js` — first-touch attribution and a 3% rebate ledger. A founder's
+  share link (`?ref=<code>`) is captured in the browser (`Nav.js` → localStorage) and
+  ridden along on the next salute; the salute route resolves the referrer, checks
+  eligibility (referrer ≥ STEADY score 25, referee owns a genesis block, no
+  self-referral) and writes an idempotent row to `referral_accruals`. **No $CASH is
+  transferred** — this only records what *would* be owed once the claim rail opens.
+- New DB tables `referrals` + `referral_accruals` (STRICT, idempotent on `tx_sig`).
+- Torchbearer profile gains a "Fire Spread" panel (share link + referees + accrued),
+  rendered only when the flag is ON.
+
+## Rewards P1.5 — "Feature Flags panel"  ·  build `A4kLPVSmXuZ3vx7yKoAFD`  ·  2026-07-02
+
+Admin visibility for the rewards flag system. New `FeaturesPanel` in the `/admin`
+**⚙ Tools** tab — a collapsible list of every reward flag with ON/OFF toggles.
+Money-moving flags show 💰 and require a confirm before turning on.
+
 ## Rewards P1 — "Identity Badges"  ·  build `LWRHb2ufLVzQpAXeGzq8y`  ·  2026-07-02
 
 First visible slice of the rewards economy — **visual only, no money**, shipped
