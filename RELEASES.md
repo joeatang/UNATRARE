@@ -29,6 +29,12 @@ glass, never a rewrite. Raw on-chain totals stay canonical everywhere.
   reconciliation remains available via `scripts/compute-signal.mjs`.
 - Read-only + additive. Default directory order is unchanged; momentum is an
   opt-in lens.
+- **Patch `XMHcr5OG1HaRlm3mdrkqp` (2026-07-01).** Momentum cards now display the
+  actual 7-day $CASH in the ranking window (labeled "past 7 days") instead of a
+  24h figure that read "+0" whenever recent salutes were 1–7 days old — the
+  number now matches what drives the ranking. Also tightened the card: dropped
+  the catalog sub-line (Sx·#) and shortened the why-now copy ("N trusted
+  torchbearer") so the layout no longer feels lopsided on mobile.
 
 ## Phase 5 — "Signal Weight"  ·  build `vFjDVhg4TO6Cm3H0VZCtG`  ·  2026-07-01
 
