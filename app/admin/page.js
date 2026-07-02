@@ -552,6 +552,106 @@ function StatsBar({ stats }) {
   );
 }
 
+// ── Feature flags panel (reward economy switchboard) ─────────
+function FeaturesPanel({ authToken }) {
+  const [open, setOpen] = useState(true); // open by default — this is where you flip features on
+  const [features, setFeatures] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState(null); // name currently toggling
+
+  async function load() {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/settings', {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const json = await res.json();
+      if (json.ok) setFeatures(json.features || []);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { if (open) load(); }, [open]);
+
+  async function toggle(f) {
+    // Turning ON a money-moving rail always asks first.
+    if (!f.on && f.money &&
+        !confirm(`"${f.label}"\n\nThis rail moves REAL $CASH. Turn it ON now?`)) {
+      return;
+    }
+    setBusy(f.name);
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({ key: `feature:${f.name}`, value: f.on ? '0' : '1' }),
+      });
+      const json = await res.json();
+      if (json.ok) {
+        await load();
+      } else {
+        alert(json.error || 'toggle failed');
+      }
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  const onCount = features.filter(f => f.on).length;
+
+  return (
+    <div style={{ borderBottom: '1px solid var(--border)', marginBottom: 0 }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ width: '100%', textAlign: 'left', padding: '14px 20px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '3px', color: 'var(--amber)' }}
+      >
+        {open ? '▲' : '▼'} ⚑ FEATURE FLAGS · REWARD ECONOMY {features.length ? `· ${onCount}/${features.length} ON` : ''}
+      </button>
+      {open && (
+        <div style={{ padding: '0 20px 20px' }}>
+          {loading && features.length === 0 && (
+            <div style={{ color: 'var(--text-dim)', fontSize: 11 }}>loading...</div>
+          )}
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 14 }}>
+            Everything is OFF by default and ships dark. Flip a switch to make it
+            live instantly — no redeploy. 💰 marks rails where real $CASH moves.
+          </div>
+          {features.map(f => (
+            <div
+              key={f.name}
+              style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderTop: '1px solid var(--border)' }}
+            >
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '1px', color: 'var(--text)' }}>
+                  {f.money && <span title="Moves real $CASH">💰 </span>}{f.name}
+                </div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', marginTop: 2 }}>
+                  {f.label}
+                </div>
+              </div>
+              <button
+                onClick={() => toggle(f)}
+                disabled={busy === f.name}
+                style={{
+                  fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '2px',
+                  padding: '7px 12px', cursor: 'pointer', whiteSpace: 'nowrap',
+                  background: f.on ? 'var(--amber)' : 'transparent',
+                  color: f.on ? 'var(--bg)' : 'var(--amber)',
+                  border: '1px solid var(--amber)',
+                }}
+                title={f.on ? 'Click to turn OFF' : 'Click to turn ON'}
+              >
+                {busy === f.name ? '…' : f.on ? 'ON' : 'OFF'}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Telegram Registrations panel ──────────────────────────────
 function TelegramRegistrationsPanel({ authToken }) {
   const [open,  setOpen]  = useState(false);
@@ -2465,6 +2565,7 @@ export default function AdminPage() {
       <div className={styles.queue}>
         {tab === 'tools' ? (
           <>
+            <FeaturesPanel authToken={authToken} />
             <SaluteCeremoniesPanel authToken={authToken} />
             <TelegramRegistrationsPanel authToken={authToken} />
             <GenesisGrantsPanel authToken={authToken} />
