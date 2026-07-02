@@ -8,6 +8,8 @@ import { getTorchbearer, displayFor } from '../../../lib/torchbearerIdentity';
 import { getSignalWeight, signalTier } from '../../../lib/signalWeight';
 import { getCosignsForTorchbearer } from '../../../lib/artistCosign';
 import { getIdentityBadges } from '../../../lib/identityBadges';
+import { featureEnabled } from '../../../lib/features';
+import { getReferralSummary } from '../../../lib/referrals';
 import CosignButton from './CosignButton';
 import BlockShare from '../../components/BlockShare';
 import IdentityBadges from '../../components/IdentityBadges';
@@ -148,6 +150,7 @@ export default async function TorchbearerPage({ params }) {
   const sigTier = signal ? signalTier(signal.score) : null;
   const cosigns = getCosignsForTorchbearer(wallet);
   const badges = getIdentityBadges(wallet);
+  const referral = featureEnabled('reward_referral') ? getReferralSummary(getDb(), wallet) : null;
 
   return (
     <>
@@ -233,6 +236,62 @@ export default async function TorchbearerPage({ params }) {
               Earned by backing art <strong>early</strong> (before the Council certifies),
               <strong> broadly</strong> and <strong>consistently</strong> — not by any single big burn.
             </div>
+          </section>
+        )}
+
+        {/* ── Fire Spread (Rewards Phase 2) — accrue-only referral ─── */}
+        {referral && (
+          <section
+            style={{
+              margin: '0 0 24px', padding: '18px 20px',
+              border: '1px solid rgba(255, 179, 107, 0.33)', borderRadius: 10,
+              background: 'rgba(255, 143, 90, 0.06)',
+            }}
+          >
+            <div style={{ fontFamily: 'var(--font-card)', fontSize: 11, letterSpacing: 3, color: 'var(--amber)', marginBottom: 10 }}>
+              🔥 FIRE SPREAD
+            </div>
+            {referral.isFounder ? (
+              <>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)', marginBottom: 6 }}>
+                  Share this link. When someone you bring makes a real burn, you accrue a
+                  <strong> 3% rebate</strong>.
+                </div>
+                <div
+                  style={{
+                    fontFamily: 'var(--font-card)', fontSize: 12, color: 'var(--text)',
+                    padding: '8px 12px', border: '1px solid var(--border)', borderRadius: 6,
+                    background: 'var(--surface)', wordBreak: 'break-all', userSelect: 'all',
+                  }}
+                >
+                  https://unatrare.wtf/?ref={referral.code}
+                </div>
+                <div style={{ display: 'flex', gap: 24, marginTop: 14, flexWrap: 'wrap' }}>
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-card)', fontSize: 18, color: 'var(--amber)' }}>{referral.referees}</div>
+                    <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 1, color: 'var(--text-dim)' }}>referred</div>
+                  </div>
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-card)', fontSize: 18, color: 'var(--amber)' }}>{fmtCash(referral.accrued)}</div>
+                    <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 1, color: 'var(--text-dim)' }}>$CASH accrued</div>
+                  </div>
+                </div>
+                {!referral.eligible && (
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', marginTop: 12, lineHeight: 1.6 }}>
+                    Reach <strong>STEADY HAND</strong> (Signal Weight 25+) to start earning rebates —
+                    referrals still count now and begin accruing the moment you qualify.
+                  </div>
+                )}
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--text-dim)', marginTop: 12, lineHeight: 1.6 }}>
+                  Accrued rewards are tracked now and become claimable when the claim rail opens.
+                </div>
+              </>
+            ) : (
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.6 }}>
+                Claim your Bitcoin genesis block to unlock a Fire Spread referral link.{' '}
+                <Link href="/torchbearer/claim" style={{ color: 'var(--amber)' }}>claim your block →</Link>
+              </div>
+            )}
           </section>
         )}
 

@@ -15,6 +15,13 @@ const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
 const pendingSigKey = (card) => `unatrare:pendingSalute:${(card || '').toUpperCase()}`;
 
+// Fire Spread: read the stored referral code (set by Nav on first ?ref= visit).
+// Returns undefined when absent so it's simply omitted from the request body.
+// The server ignores it entirely unless the reward_referral flag is ON.
+function readStoredRef() {
+  try { return localStorage.getItem('unat_ref') || undefined; } catch { return undefined; }
+}
+
 function resolveRpcUrl(url) {
   if (!url) return 'https://api.mainnet-beta.solana.com';
   if (/^https?:\/\//i.test(url)) return url;
@@ -760,6 +767,7 @@ export default function SalutePanel({ cardName }) {
           card_name:  cardName,
           sol_wallet: connected.pubkey,
           tx_sig:     sig,
+          ref:        readStoredRef(),
         }),
       });
       const json = await resp.json();
@@ -825,6 +833,7 @@ export default function SalutePanel({ cardName }) {
           card_name:  cardName,
           sol_wallet: manualWallet.trim(),
           tx_sig:     manualSig.trim(),
+          ref:        readStoredRef(),
         }),
       });
       const json = await resp.json();

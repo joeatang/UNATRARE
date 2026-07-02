@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '../../../lib/db';
 import { computeSignalWeights } from '../../../lib/signalWeight';
+import { featureEnabled } from '../../../lib/features';
+import { recordAttribution, accrueForSalute, currentEpoch } from '../../../lib/referrals';
 import { notifySalute } from '../../../lib/telegram';
 
 // $CASH Solana SPL token mint address
@@ -252,6 +254,23 @@ export async function POST(request) {
   try {
     computeSignalWeights(db, { wallet: sol_wallet });
   } catch { /* score will be reconciled by the scheduled recompute */ }
+
+  // Fire Spread (Rewards Phase 2) — accrue-only referral rebate. Gated behind
+  // the reward_referral flag (OFF by default) and fully non-fatal: attribution
+  // + accrual must NEVER block a confirmed on-chain salute. Moves no money.
+  try {
+    if (featureEnabled('reward_referral')) {
+      if (body.ref) {
+        recordAttribution(db, { referee: sol_wallet, code: String(body.ref), source: 'salute' });
+      }
+      accrueForSalute(db, {
+        refereeWallet: sol_wallet,
+        txSig: tx_sig,
+        burnAmount: burnInfo.displayAmount,
+        epoch: currentEpoch(),
+      });
+    }
+  } catch { /* referral accrual is best-effort; never affects the salute */ }
 
   // Telegram salute announcement (fire-and-forget, never blocks the API).
   // Burns are already gated to certified + revealed cards above, and

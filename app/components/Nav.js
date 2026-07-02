@@ -14,6 +14,18 @@ export default function Nav() {
     return () => { document.body.style.overflow = ''; };
   }, [open]);
 
+  // Fire Spread: capture a ?ref= referral code once and remember it, so a later
+  // salute can attribute it. First-touch only — never overwrite an existing one.
+  // Purely a stored string; the server ignores it unless the flag is ON.
+  useEffect(() => {
+    try {
+      const ref = new URLSearchParams(window.location.search).get('ref');
+      if (ref && !localStorage.getItem('unat_ref')) {
+        localStorage.setItem('unat_ref', ref.trim().slice(0, 64));
+      }
+    } catch { /* no-op */ }
+  }, []);
+
   return (
     <>
       <nav className={styles.nav}>
