@@ -7,6 +7,41 @@ Naming: **Phase N — "Codename"** · build ID (Next.js `BUILD_ID`) · date.
 
 ---
 
+## Rewards P1 — "Identity Badges"  ·  build `LWRHb2ufLVzQpAXeGzq8y`  ·  2026-07-02
+
+First visible slice of the rewards economy — **visual only, no money**, shipped
+**dark** behind the `reward_badges` feature flag (OFF by default, flip in `/admin`).
+
+- New `lib/identityBadges.js` — a server helper that turns a wallet's already-cached
+  signals into small "who you are" chips: **Founder** 🧱 (claimed a Bitcoin genesis
+  block), **Flame Rank** 🔥 (Signal Weight tier) and **Burn Tier** ✦ (volume saluted).
+  Reads only cached tables (`trust_scores`, `torchbearers`) — no network, no writes.
+  `getIdentityBadges()` returns `[]` whenever the flag is OFF, so nothing renders.
+- New `IdentityBadges` component + CSS — a compact chip row in the fire/amber
+  language, wired as a canary into the torchbearer profile header.
+- UNATPEPE 🐸 / Node 🖥️ chips are stubbed for later (node identity isn't linked to a
+  SOL wallet yet); today the wallet lookup fills Founder / Flame / Burn.
+
+## Rewards P0 — "Safety Harness"  ·  build `JHRzJn26Cz_p2yP89cU4Z`  ·  2026-07-02
+
+Foundation for the rewards economy — all additive, all dark, nothing wired to a
+live path. The point: make every future reward feature a switch, not a redeploy.
+
+- `lib/features.js` — the central switchboard. Every reward flag OFF by default,
+  fail-closed. Reads the `settings` table (`feature:<name>` = `'0'`/`'1'`, explicit
+  `'0'` wins) with an env fallback. Registry covers badges, referral, claim,
+  activity, grants and tip.
+- `/api/admin/settings` extended so flags toggle instantly from the browser
+  (gated by admin token) — no SSH, no redeploy.
+- `ops/safe-check.sh` + `npm run preflight` — a read-only pre-deploy green light:
+  checks you're in `app/`, no destructive SQL in the diff, no flag forced on, no
+  forbidden/oversized files staged, and that the production build passes. Prints
+  the exact next commands or a clear STOP.
+- `.gitignore` hardened (`/preflight_snapshots/`, `/public/danknotes/`) so a
+  `git add -A` can never sweep up heavy artifacts.
+
+---
+
 ## Phase 8 — "Split Restored"  ·  build `jBf2KHv4kub_CzqUTHBOI`  ·  2026-07-02
 
 Restores the **69/31 artist split** that two July refactors silently broke
