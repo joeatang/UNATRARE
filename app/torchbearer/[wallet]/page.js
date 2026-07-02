@@ -7,8 +7,10 @@ import { fmtCash, tierFor, truncateWallet } from '../../../lib/saluteDisplay';
 import { getTorchbearer, displayFor } from '../../../lib/torchbearerIdentity';
 import { getSignalWeight, signalTier } from '../../../lib/signalWeight';
 import { getCosignsForTorchbearer } from '../../../lib/artistCosign';
+import { getIdentityBadges } from '../../../lib/identityBadges';
 import CosignButton from './CosignButton';
 import BlockShare from '../../components/BlockShare';
+import IdentityBadges from '../../components/IdentityBadges';
 
 const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
@@ -145,6 +147,7 @@ export default async function TorchbearerPage({ params }) {
   const signal = getSignalWeight(wallet);
   const sigTier = signal ? signalTier(signal.score) : null;
   const cosigns = getCosignsForTorchbearer(wallet);
+  const badges = getIdentityBadges(wallet);
 
   return (
     <>
@@ -183,6 +186,7 @@ export default async function TorchbearerPage({ params }) {
           <div className={styles.tier} style={{ color: tier.color, borderColor: `${tier.color}55` }}>
             {tier.label}
           </div>
+          <IdentityBadges badges={badges} />
           <div className={styles.claimHint}>
             <Link href="/torchbearer/claim">{disp.claimed ? 'this is you? edit your profile →' : 'this is you? claim your handle →'}</Link>
           </div>

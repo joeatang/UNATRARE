@@ -1,0 +1,45 @@
+.row {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.badge {
+  --badge-color: #ffb86b;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--badge-color) 45%, transparent);
+  background: color-mix(in srgb, var(--badge-color) 12%, transparent);
+  color: var(--badge-color);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.glyph {
+  font-size: 0.85em;
+  line-height: 1;
+}
+
+.label {
+  line-height: 1;
+}
+
+/* size variants */
+.sm .badge {
+  padding: 1px 6px;
+  font-size: 0.64rem;
+}
+
+.lg .badge {
+  padding: 3px 11px;
+  font-size: 0.82rem;
+}
