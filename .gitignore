@@ -27,3 +27,10 @@ Thumbs.db
 *.log
 npm-debug.log*
 *.db.*
+
+# Preflight snapshots — local safety backups only, NEVER in git (huge binaries
+# break the push). Any new snapshot folder is ignored automatically.
+/preflight_snapshots/
+
+# Danknote render artifacts — large generated images, NEVER in git.
+/public/danknotes/

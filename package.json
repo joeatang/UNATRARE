@@ -6,7 +6,9 @@
     "dev": "next dev -p 3007",
     "build": "next build",
     "start": "next start -p 3007",
-    "preflight:snapshot": "bash ./scripts/preflight-snapshot.sh"
+    "preflight:snapshot": "bash ./scripts/preflight-snapshot.sh",
+    "preflight": "bash ./ops/safe-check.sh",
+    "safe-check": "bash ./ops/safe-check.sh"
   },
   "dependencies": {
     "@noble/curves": "^2.2.0",
