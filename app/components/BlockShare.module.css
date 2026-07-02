@@ -1,0 +1,150 @@
+/* Flex-your-block share sheet */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 5px 8px 5px 12px;
+  border: 1px solid rgba(255, 176, 0, 0.5);
+  border-radius: 999px;
+  background: rgba(255, 176, 0, 0.06);
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: var(--amber);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.pill:hover {
+  background: rgba(255, 176, 0, 0.12);
+  border-color: var(--amber);
+}
+.pillShare {
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 176, 0, 0.14);
+  color: var(--amber);
+  text-transform: uppercase;
+}
+
+/* Inline card (claim success) */
+.cardInline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 0 auto 20px;
+  width: 100%;
+  max-width: 460px;
+}
+.preview {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: block;
+}
+.cardHint {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+/* Shared action buttons */
+.actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.flexBtn,
+.saveBtn {
+  flex: 1 1 auto;
+  min-width: 130px;
+  text-align: center;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-family: var(--font-card);
+  font-size: 14px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.1s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.flexBtn {
+  background: var(--amber);
+  color: #080808;
+  border: 1px solid var(--amber);
+  font-weight: 700;
+}
+.flexBtn:hover { background: var(--amber-hot, #ffc44d); }
+.saveBtn {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.saveBtn:hover { border-color: var(--amber); color: var(--amber); }
+.saveBtn:disabled { opacity: 0.6; cursor: default; }
+.flexBtn:active,
+.saveBtn:active { transform: translateY(1px); }
+
+/* Modal (profile pill) */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  padding-top: calc(20px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(4px);
+  overflow-y: auto;
+}
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 22px 22px;
+  border: 1px solid var(--amber);
+  border-radius: 16px;
+  background: var(--surface, #0f0f0f);
+}
+.close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+.close:hover { color: var(--text); }
+.modalTitle {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+.modalSub {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: var(--amber);
+  margin-top: -8px;
+}

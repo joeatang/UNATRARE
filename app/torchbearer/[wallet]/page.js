@@ -8,6 +8,7 @@ import { getTorchbearer, displayFor } from '../../../lib/torchbearerIdentity';
 import { getSignalWeight, signalTier } from '../../../lib/signalWeight';
 import { getCosignsForTorchbearer } from '../../../lib/artistCosign';
 import CosignButton from './CosignButton';
+import BlockShare from '../../components/BlockShare';
 
 const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
@@ -106,9 +107,26 @@ function getTorchbearerData(wallet) {
 
 export async function generateMetadata({ params }) {
   const wallet = decodeURIComponent((await params).wallet);
+  const identity = SOL_ADDR_RE.test(wallet) ? getTorchbearer(wallet) : null;
+  const disp = identity ? displayFor(identity, wallet) : null;
+  const hasBlock = disp && disp.block != null;
+  const title = `${truncateWallet(wallet)} — Torchbearer — UNATRARE`;
+  const description = hasBlock
+    ? `${disp.label} holds Bitcoin Block #${disp.block.toLocaleString()} on UNATRARE — certified Counterparty art, on Bitcoin.`
+    : `Salute history and campaign fire record for ${wallet} on UNATRARE.`;
   return {
-    title: `${truncateWallet(wallet)} — Torchbearer — UNATRARE`,
-    description: `Salute history and campaign fire record for ${wallet} on UNATRARE.`,
+    title,
+    description,
+    openGraph: hasBlock
+      ? {
+          title,
+          description,
+          images: [{ url: `/api/og/block/${wallet}`, width: 1200, height: 630 }],
+        }
+      : { title, description },
+    twitter: hasBlock
+      ? { card: 'summary_large_image', title, description, images: [`/api/og/block/${wallet}`] }
+      : undefined,
   };
 }
 
@@ -148,7 +166,12 @@ export default async function TorchbearerPage({ params }) {
             <div className={styles.wallet}>{truncateWallet(wallet)} · <span className={styles.anonTag}>anon</span></div>
           )}
           {disp.block != null && (
-            <div className={styles.blockBadge}>⛓ Genesis Block #{disp.block.toLocaleString()}</div>
+            <BlockShare
+              variant="pill"
+              wallet={wallet}
+              block={disp.block}
+              subtitle={disp.handle ? `@${disp.handle}` : disp.label}
+            />
           )}
           {disp.bio && <p className={styles.bio}>{disp.bio}</p>}
           {(disp.twitter || disp.website) && (

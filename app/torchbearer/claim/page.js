@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Nav from '../../components/Nav';
+import BlockShare from '../../components/BlockShare';
 import styles from './claim.module.css';
 
 const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
@@ -195,6 +196,14 @@ export default function ClaimTorchbearerPage() {
                   ? 'Your handle now shows wherever you appear across UNATRARE.'
                   : "You're a numbered block anon — add a handle any time to put a name to your fire."}
             </p>
+            {block != null && (
+              <BlockShare
+                variant="card"
+                wallet={wallet}
+                block={block}
+                subtitle={form.handle ? `@${form.handle}` : ''}
+              />
+            )}
             <div className={styles.successActions}>
               <Link href={`/torchbearer/${wallet}`} className={styles.primary}>View my profile →</Link>
               <button type="button" className={styles.secondary} onClick={() => setSaved(false)}>Edit again</button>
