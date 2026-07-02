@@ -106,6 +106,7 @@ export default function DirectoryPage({ searchParams }) {
       momentumCards.push({
         token,
         weighted:       Number(mom?.weighted || 0),
+        rawWindow:      Number(mom?.raw_window || 0),
         total24h:       Number(mom?.total_24h || 0),
         backers:        Number(mom?.backers || 0),
         trustedBackers: Number(mom?.trusted_backers || 0),
@@ -201,12 +202,12 @@ export default function DirectoryPage({ searchParams }) {
               <span className={styles.momentumSub}>weighted by how trusted each recent backer is</span>
             </div>
             <div className={styles.momentumGrid}>
-              {topMomentum.map(({ token, total24h, totalBurned, backers, trustedBackers }) => {
+              {topMomentum.map(({ token, rawWindow, totalBurned, backers, trustedBackers }) => {
                 const tier = tierFor(totalBurned);
                 const thumb = token.art_mime?.startsWith('video/') ? token.art_cover_url : token.art_url;
                 const whyNow = trustedBackers > 0
-                  ? `${trustedBackers} trusted torchbearer${trustedBackers === 1 ? '' : 's'} backing`
-                  : `${backers} torchbearer${backers === 1 ? '' : 's'} this week`;
+                  ? `${trustedBackers} trusted torchbearer${trustedBackers === 1 ? '' : 's'}`
+                  : `${backers} backer${backers === 1 ? '' : 's'} this week`;
                 return (
                   <Link key={token.token_name} href={`/card/${token.token_name}`} className={styles.momentumCard}>
                     <div className={styles.momentumThumb}>
@@ -214,17 +215,14 @@ export default function DirectoryPage({ searchParams }) {
                     </div>
                     <div className={styles.momentumMeta}>
                       <div className={styles.momentumName}>{token.display_title || token.token_name}</div>
-                      <div className={styles.momentumCardSub}>
-                        S{toRoman(token.series)} · #{String(token.card_number).padStart(3, '0')}
-                      </div>
                       {token.artist_handle && (
                         <div className={styles.momentumArtist}>by @{token.artist_handle}</div>
                       )}
                       <div className={styles.momentumWhy}>{whyNow}</div>
                     </div>
                     <div className={styles.momentumFire} style={{ color: tier.color }}>
-                      <div className={styles.momentumFireNow}>+{fmtCash(total24h)}</div>
-                      <div className={styles.momentumFireLabel}>last 24h</div>
+                      <div className={styles.momentumFireNow}>+{fmtCash(rawWindow)}</div>
+                      <div className={styles.momentumFireLabel}>past 7 days</div>
                     </div>
                   </Link>
                 );
