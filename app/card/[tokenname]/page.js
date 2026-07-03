@@ -8,6 +8,8 @@ import styles from './card.module.css';
 import { getDb } from '../../../lib/db';
 import { fmtCash, tierFor, truncateWallet } from '../../../lib/saluteDisplay';
 import { resolveIdentities, displayFor } from '../../../lib/torchbearerIdentity';
+import { resolveIdentityBadges } from '../../../lib/identityBadges';
+import IdentityBadges from '../../components/IdentityBadges';
 
 function toRoman(n) {
   const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
@@ -108,6 +110,11 @@ function getCampaignData(tokenName) {
       .slice(0, 5);
     for (const t of visibleTop) t.label = labelFor(t.sol_wallet);
     for (const s of recentSalutes) s.label = labelFor(s.sol_wallet);
+
+    // Colored identity badges travel with each top torchbearer on the card.
+    const topTotals = new Map(visibleTop.map(t => [t.sol_wallet, Number(t.total_burned || 0)]));
+    const topBadges = resolveIdentityBadges(visibleTop.map(t => t.sol_wallet), { totalsByWallet: topTotals });
+    for (const t of visibleTop) t.badges = topBadges.get(t.sol_wallet) || [];
 
     return {
       totals: totals || {
@@ -514,6 +521,7 @@ export default async function CardPage({ params }) {
                                   {torchbearer.salute_count} salute{torchbearer.salute_count === 1 ? '' : 's'}
                                   {isGenesis ? ' · genesis' : ''}
                                 </span>
+                                <IdentityBadges badges={torchbearer.badges} size="sm" />
                               </div>
                             </div>
                             <span className={styles.campaignAmount}>🔥 {fmtCash(torchbearer.total_burned)}</span>

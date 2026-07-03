@@ -383,6 +383,23 @@ export default function NodesPage() {
                       {node.status === 'offline' ? 'OFFLINE' : 'STALE'}
                     </span>
                   )}
+                  {node.is_unatpepe_node && (
+                    <span
+                      title="This node holds UNATPEPE on Bitcoin"
+                      style={{
+                        display: 'inline-block',
+                        marginLeft: 6,
+                        padding: '1px 6px',
+                        fontSize: 9,
+                        letterSpacing: '0.05em',
+                        border: '1px solid #3f7a2a',
+                        color: '#8bd450',
+                        background: 'rgba(63,122,42,0.15)',
+                      }}
+                    >
+                      🐸 UNATPEPE
+                    </span>
+                  )}
                   <div className={styles.pubkey} title={node.pubkey}>
                     {truncPubkey(node.pubkey)}
                   </div>

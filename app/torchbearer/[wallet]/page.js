@@ -192,6 +192,8 @@ export default async function TorchbearerPage({ params }) {
           <IdentityBadges badges={badges} />
           <div className={styles.claimHint}>
             <Link href="/torchbearer/claim">{disp.claimed ? 'this is you? edit your profile →' : 'this is you? claim your handle →'}</Link>
+            {' · '}
+            <Link href="/torchbearer/link">link your Bitcoin (UNATPEPE / node) →</Link>
           </div>
         </header>
 

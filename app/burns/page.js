@@ -3,6 +3,8 @@ import Nav from '../components/Nav';
 import { getDb } from '../../lib/db';
 import { fmtCash, tierFor, truncateWallet } from '../../lib/saluteDisplay';
 import { resolveIdentities, displayFor } from '../../lib/torchbearerIdentity';
+import { resolveIdentityBadges } from '../../lib/identityBadges';
+import IdentityBadges from '../components/IdentityBadges';
 import styles from './burns.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -117,6 +119,14 @@ export default function BurnsPage({ searchParams }) {
   if (recent.length) {
     const m = resolveIdentities(recent.map(r => r.sol_wallet));
     for (const r of recent) r.label = displayFor(m.get(r.sol_wallet), r.sol_wallet).label;
+  }
+
+  // Identity badges travel with each ranked wallet (colored chips). Uses each
+  // row's real burn total so the burn-tier chip stays truthful; batched.
+  let walletBadges = new Map();
+  if (visibleWallets.length) {
+    const totals = new Map(visibleWallets.map(w => [w.sol_wallet, Number(w.total_burned || 0)]));
+    walletBadges = resolveIdentityBadges(visibleWallets.map(w => w.sol_wallet), { totalsByWallet: totals });
   }
 
   let activeCeremony = null;
@@ -308,6 +318,7 @@ export default function BurnsPage({ searchParams }) {
                       {' · '}{row.burn_count} salute{row.burn_count === 1 ? '' : 's'}
                       {' · '}last {relTime(row.last_burn_at)}
                     </div>
+                    <IdentityBadges badges={walletBadges.get(row.sol_wallet)} size="sm" />
                   </div>
                   <div className={styles.amount} style={{ color: tier.color }}>
                     <div className={styles.amountValue}>🔥 {fmtCash(row.total_burned)}</div>

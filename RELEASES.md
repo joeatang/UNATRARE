@@ -29,6 +29,31 @@ Full economy design: `docs/cash-rewards-economy.md`.
 
 ---
 
+## Status Everywhere — "Colors That Travel"  ·  2026-07-03
+
+Makes identity status **visible wherever a person shows up**, and lights the 🐸/🖥️
+chips by proving the Bitcoin↔Solana link. Additive-only; badges stay behind the
+existing `reward_badges` flag. No money moves, no destructive migration.
+
+- **Badges travel.** The colored badge row (previously only on the Torchbearer profile)
+  now renders on Hall of Fire founder cards + greatest-flames rows, the Burns wallet
+  leaderboard, and the card page's top-torchbearers list — via one batch resolver
+  `resolveIdentityBadges(wallets[])` so leaderboards stay cheap.
+- **Nodes + UNATPEPE showcased.** `/nodes` rows get a green 🐸 UNATPEPE chip; Hall gains a
+  new **"🖥️ The Network"** section with live stat tiles (nodes online / total, UNATPEPE
+  nodes, UNATPEPE holders) linking to `/nodes` and `/register`.
+- **Signature-proven identity link.** New `wallet_links` table + `lib/walletLink.js`.
+  A holder proves they own both wallets by signing two cross-referencing challenges
+  (`UNATRARE:LINK:<addr>`) — SOL signs the BTC challenge, BTC signs the SOL challenge.
+  New page `/torchbearer/link` + API `/api/torchbearer/link`. Once linked, their 🐸
+  (UNATPEPE) and 🖥️ (node) status lights up on every public surface.
+- **Scarce honors (first cut).** Retired the generic 🧱 "Founder" chip (everyone who
+  claims already is a Torchbearer). Two sealed-forever, capped-at-69 honors computed at
+  read time from Bitcoin height / earliest action: **Founding 69** (⛓) and
+  **First Spark** (⚡). Final names TBD.
+
+---
+
 ## Onboarding — "Front Door"  ·  build `0gLXwU4ItBk06XOOxTJBt`  ·  2026-07-02
 
 New-traffic UX polish from the onboarding audit. No flags, no money, no schema.

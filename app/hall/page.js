@@ -3,6 +3,8 @@ import Nav from '../components/Nav';
 import { getDb } from '../../lib/db';
 import { fmtCash, tierFor } from '../../lib/saluteDisplay';
 import { resolveIdentities, displayFor } from '../../lib/torchbearerIdentity';
+import { resolveIdentityBadges } from '../../lib/identityBadges';
+import IdentityBadges from '../components/IdentityBadges';
 import styles from './hall.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -44,6 +46,35 @@ function getMonument(db) {
     blocks: torch.blocks || 0,
     artists: artists.artists || 0,
   };
+}
+
+// ── The Network — nodes + UNATPEPE holders (public showcase) ────────────────
+// Surfaces the two Bitcoin-side cohorts that otherwise never appear publicly:
+// the people running the archive nodes and the verified UNATPEPE holders.
+function getNetwork(db) {
+  const out = { nodes: 0, nodes_online: 0, genesis_confirmed: 0, unatpepe_nodes: 0, holders: 0 };
+  try {
+    const online = Date.now() - 2 * 60 * 60 * 1000;
+    const n = db.prepare(`
+      SELECT
+        COUNT(*)                                          AS nodes,
+        COUNT(CASE WHEN last_heartbeat >= ? THEN 1 END)   AS nodes_online,
+        COUNT(CASE WHEN is_unatpepe_node > 0 THEN 1 END)  AS unatpepe_nodes
+      FROM nodes
+    `).get(online);
+    out.nodes = n?.nodes || 0;
+    out.nodes_online = n?.nodes_online || 0;
+    out.unatpepe_nodes = n?.unatpepe_nodes || 0;
+  } catch { /* ignore */ }
+  try {
+    const g = db.prepare(`SELECT COUNT(*) AS c FROM genesis_grants WHERE genesis_confirmed_at IS NOT NULL`).get();
+    out.genesis_confirmed = g?.c || 0;
+  } catch { /* ignore */ }
+  try {
+    const h = db.prepare(`SELECT COUNT(*) AS c FROM holders WHERE tap_balance > 0`).get();
+    out.holders = h?.c || 0;
+  } catch { /* ignore */ }
+  return out;
 }
 
 // ── The Founders — earliest Bitcoin-anchored claims win (source of truth) ──
@@ -127,6 +158,7 @@ function relTime(unixSec) {
 export default function HallPage() {
   const db = getDb();
   const monument = getMonument(db);
+  const network  = getNetwork(db);
   const founders = getFounders(db);
   const flames   = getGreatestFlames(db);
   const artists  = getHonoredArtists(db);
@@ -141,6 +173,13 @@ export default function HallPage() {
     const disp = displayFor(r, r.sol_wallet);
     return { ...r, label: disp.label, avatar: disp.avatar };
   });
+
+  // Colored identity badges travel with each honored wallet (founders + flames).
+  const badgeWallets = [
+    ...founderCards.map(f => f.sol_wallet),
+    ...flames.map(f => f.sol_wallet),
+  ];
+  const hallBadges = resolveIdentityBadges(badgeWallets);
 
   return (
     <>
@@ -202,6 +241,7 @@ export default function HallPage() {
                   </div>
                   <div className={styles.founderLabel}>{f.label}</div>
                   <div className={styles.founderBlock}>⛓ Block #{f.genesis_block.toLocaleString()}</div>
+                  <IdentityBadges badges={hallBadges.get(f.sol_wallet)} size="sm" />
                 </Link>
               ))}
             </div>
@@ -240,6 +280,7 @@ export default function HallPage() {
                         {' · '}
                         <a href={`https://solscan.io/tx/${row.tx_sig}`} target="_blank" rel="noopener noreferrer" className={styles.solscan}>solscan ↗</a>
                       </div>
+                      <IdentityBadges badges={hallBadges.get(row.sol_wallet)} size="sm" />
                     </div>
                     <div className={styles.amount} style={{ color: tier.color }}>
                       <div className={styles.amountValue}>🔥 {fmtCash(row.amount_display)}</div>
@@ -291,10 +332,42 @@ export default function HallPage() {
           )}
         </section>
 
+        {/* ── The Network — nodes + UNATPEPE holders ── */}
+        {(network.nodes > 0 || network.holders > 0) && (
+          <section className={styles.section}>
+            <div className={styles.sectionHead}>
+              <h2 className={styles.sectionTitle}>🖥️ The Network</h2>
+              <p className={styles.sectionSub}>
+                The archive lives on Bitcoin because people carry it. These are the
+                nodes keeping the art alive and the verified UNATPEPE holders behind them.
+              </p>
+            </div>
+            <div className={styles.statsRow}>
+              <Link href="/nodes" className={styles.stat} style={{ textDecoration: 'none' }}>
+                <div className={styles.statValue} style={{ color: '#7ac7ff' }}>{network.nodes_online.toLocaleString()}</div>
+                <div className={styles.statLabel}>nodes online</div>
+              </Link>
+              <Link href="/nodes" className={styles.stat} style={{ textDecoration: 'none' }}>
+                <div className={styles.statValue}>{network.nodes.toLocaleString()}</div>
+                <div className={styles.statLabel}>nodes total</div>
+              </Link>
+              <Link href="/nodes" className={styles.stat} style={{ textDecoration: 'none' }}>
+                <div className={styles.statValue} style={{ color: '#8bd450' }}>{network.unatpepe_nodes.toLocaleString()}</div>
+                <div className={styles.statLabel}>🐸 UNATPEPE nodes</div>
+              </Link>
+              <Link href="/register" className={styles.stat} style={{ textDecoration: 'none' }}>
+                <div className={styles.statValue} style={{ color: '#8bd450' }}>{network.holders.toLocaleString()}</div>
+                <div className={styles.statLabel}>🐸 UNATPEPE holders</div>
+              </Link>
+            </div>
+          </section>
+        )}
+
         <div className={styles.footnote}>
           The Hall is the permanent record. Rankings here are all-time and never reset.
           {' '}Want your block in The Founders? <Link href="/torchbearer/claim">Claim yours →</Link>
           {' '}Watching the fire live? <Link href="/burns">The Burns ledger →</Link>
+          {' '}Hold UNATPEPE or run a node? <Link href="/torchbearer/link">Link it to your profile →</Link>
         </div>
 
       </main>
