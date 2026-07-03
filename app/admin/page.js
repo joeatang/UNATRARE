@@ -425,7 +425,7 @@ function TokenRow({ token, authToken, onAction }) {
           'in the collection.',
           '',
           `Series ${series} · Card #${cardNum}`,
-          '— The UNATRARE Scientist Panel',
+          '— The UNATRARE Council',
           '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
         ].join('\n');
 

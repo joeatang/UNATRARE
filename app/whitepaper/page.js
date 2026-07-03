@@ -97,7 +97,7 @@ One platform. One network.`}</pre>
 THE DIRECTORY
 An art directory — an homage to the Rare Pepe Directory.
 Artists submit Counterparty tokens.
-A council of AI scientist judges evaluate each submission.
+The Council — eight AI judges — evaluates each submission.
 Certified art is listed permanently.
 1,774 cards. No more.
 In honor of the 1,774 Rare Pepe series cards

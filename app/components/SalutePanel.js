@@ -972,6 +972,18 @@ export default function SalutePanel({ cardName }) {
         {/* ══ Native burn section ════════════════════════════════════════════ */}
         <div style={S.sectionDivider} />
 
+        {/* Always-visible newcomer essentials */}
+        <div style={{
+          fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text)',
+          lineHeight: 1.6, marginBottom: 12, padding: '8px 11px',
+          border: '1px solid var(--border)', borderRadius: 6,
+          background: 'rgba(255,180,0,0.05)',
+        }}>
+          <strong style={{ color: 'var(--amber)' }}>To salute you need a Solana wallet + $CASH.</strong>{' '}
+          Burning is <strong style={{ color: 'var(--text)' }}>permanent</strong> — it can&apos;t be undone.{' '}
+          <a href="/start" style={{ color: 'var(--amber)' }}>New here? →</a>
+        </div>
+
         {phase !== 'success' && (
         <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 14 }}>
           <strong style={{ color: 'var(--text)' }}>Salute this card</strong> by burning $CASH on Solana. Permanent. Public. Forever attributed to your wallet — your name lives on this card.

@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 export const metadata = {
   title: 'UNATRARE — The new Counterparty art directory. On Bitcoin.',
   description:
-    'A curated meme-art directory for Counterparty art on Bitcoin. Eight Pepe AI scientists decide what gets listed — permanently. Browse, submit, or choose your path.',
+    'A curated meme-art directory for Counterparty art on Bitcoin. The Council — eight Pepe AI judges — decides what gets listed, permanently. Browse, submit, or choose your path.',
 };
 
 // The 8 council members — static, derived from judges.config.json
@@ -114,8 +114,14 @@ export default function LandingPage() {
 
           <p className={styles.heroSub}>
             A curated Pepe art directory &amp; permanent P2P art storage for your Counterparty tokens on Bitcoin.<br />
-            Eight Pepe AI scientists decide what gets listed!
+            The Council &mdash; eight Pepe AI judges &mdash; decides what gets listed!
           </p>
+
+          <div style={{ textAlign: 'center', margin: '14px 0 4px' }}>
+            <Link href="/start" style={{ fontFamily: 'var(--font-card)', fontSize: 13, letterSpacing: '2px', color: 'var(--amber)', textDecoration: 'none' }}>
+              new here? start with how it works &rarr;
+            </Link>
+          </div>
 
           <div className={styles.heroDoors}>
             <Link href="/directory" className={styles.heroDoor}>

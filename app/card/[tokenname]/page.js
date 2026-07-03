@@ -621,22 +621,6 @@ export default async function CardPage({ params }) {
                 <span className={styles.metaKey}>Card #</span>
                 <span className={styles.metaVal}>#{String(token.card_number).padStart(3,'0')}</span>
               </div>
-              {token.artist_address && (
-                <div className={styles.metaRow}>
-                  <span className={styles.metaKey}>Artist</span>
-                  <Link
-                    href={`/artist/${token.artist_address}`}
-                    className={`${styles.metaVal} ${styles.metaArtistLink}`}
-                    title={token.artist_address}
-                  >
-                    {token.artist_handle ? `@${token.artist_handle} ` : ''}
-                    <span className={styles.addressTrunc}>
-                      {token.artist_address.slice(0,8)}…{token.artist_address.slice(-6)}
-                    </span>
-                    <span className={styles.metaArtistArrow}>↗</span>
-                  </Link>
-                </div>
-              )}
               {token.ord_inscription && (
                 <div className={styles.metaRow}>
                   <span className={styles.metaKey}>Inscription</span>

@@ -35,6 +35,7 @@ export default function Nav() {
 
         {/* Desktop links */}
         <ul className={styles['nav-links']}>
+          <li><Link href="/start">Start</Link></li>
           <li><Link href="/directory">Directory</Link></li>
           <li><Link href="/vault">Vault</Link></li>
           <li><Link href="/burns">🔥 Burns</Link></li>
@@ -90,6 +91,7 @@ export default function Nav() {
           <button className={styles.drawerClose} onClick={() => setOpen(false)} aria-label="Close menu">✕</button>
         </div>
         <ul className={styles.drawerLinks} onClick={() => setOpen(false)}>
+          <li><Link href="/start">Start Here</Link></li>
           <li><Link href="/directory">Directory</Link></li>
           <li><Link href="/archive">Archive</Link></li>
           <li><Link href="/council">Council</Link></li>

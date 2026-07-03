@@ -256,7 +256,7 @@ export default function PayPage({ params }) {
             <div style={{fontSize:'40px', opacity:0.2, marginBottom:16}}>?</div>
             <div style={{fontSize:'10px', letterSpacing:'3px', color:'var(--text-dim)', lineHeight:2}}>
               {tokenName}<br />
-              UNDER REVIEW BY THE SCIENTIST PANEL<br />
+              UNDER REVIEW BY THE COUNCIL<br />
               YOU WILL BE CONTACTED IF CERTIFIED DANK
             </div>
             <div style={{marginTop:24}}>
