@@ -439,6 +439,53 @@ async function handleUCommand(msg, arg) {
   log(`[tgbot] /u → ${token.token_name} (user=${userId})`);
 }
 
+// ── /start command handler (how-it-works) ───────────────────────────────────
+async function handleStartCommand(msg) {
+  const chatId = msg.chat?.id;
+  const messageId = msg.message_id;
+  if (String(chatId) !== String(CHAT_ID)) return;
+  if (rateLimited(msg.from?.id) > 0) return;
+
+  const text = clean([
+    '🐸 <b>Welcome to UNATRARE</b> — a curated home for Pepe art on Bitcoin, kept alive by a P2P node network.',
+    '',
+    '<b>Three ways in:</b>',
+    '• <b>Support the art</b> — browse the directory and <b>salute</b> a card (a permanent on-chain $CASH burn).',
+    '• <b>Submit your art</b> — the Council of 8 AI judges reviews it; certified art is stored forever.',
+    '• <b>Claim a block</b> — become a torchbearer and carry a card’s line forward.',
+    '',
+    `Full guide + glossary → <a href="${SITE_BASE}/start">${SITE_BASE}/start</a>`,
+    'Need $CASH first? Type <code>/buycash</code>',
+  ].join('\n'));
+  await sendMessage(text, chatId, messageId)
+    .catch(e => warn('[tgbot] /start send failed:', e.message));
+  log(`[tgbot] /start (user=${msg.from?.id})`);
+}
+
+// ── /buycash command handler ────────────────────────────────────────────────
+async function handleBuyCashCommand(msg) {
+  const chatId = msg.chat?.id;
+  const messageId = msg.message_id;
+  if (String(chatId) !== String(CHAT_ID)) return;
+  if (rateLimited(msg.from?.id) > 0) return;
+
+  const text = clean([
+    '💵 <b>How to buy $CASH</b> — you burn it to salute a card.',
+    '',
+    '1️⃣ Get a Solana wallet — Phantom recommended (<a href="https://phantom.app">phantom.app</a>).',
+    '2️⃣ Add a little SOL for the swap + tiny network fee.',
+    '3️⃣ Swap SOL → $CASH on <a href="https://nat.fun/?refId=c69c9108f52b">nat.fun</a>.',
+    '4️⃣ Come back, open a card, connect your wallet, and <b>SALUTE</b>.',
+    '',
+    '⚠️ $CASH is a young token, so some wallets show an “unverified” notice — that’s normal, not a scam. Always confirm the transaction is a <b>Burn</b> of $CASH before signing.',
+    '',
+    `Full walkthrough → <a href="${SITE_BASE}/start#buy-cash">${SITE_BASE}/start#buy-cash</a>`,
+  ].join('\n'));
+  await sendMessage(text, chatId, messageId)
+    .catch(e => warn('[tgbot] /buycash send failed:', e.message));
+  log(`[tgbot] /buycash (user=${msg.from?.id})`);
+}
+
 // ── Telegram long-poll loop ─────────────────────────────────────────────────
 let updatesOffset = 0;
 
@@ -468,6 +515,10 @@ async function pollUpdates() {
       const m = text.match(/^\/u(?:@\w+)?(?:\s+(.+))?$/i);
       if (m) {
         await handleUCommand(msg, m[1]);
+      } else if (/^\/start(?:@\w+)?$/i.test(text)) {
+        await handleStartCommand(msg);
+      } else if (/^\/buycash(?:@\w+)?$/i.test(text)) {
+        await handleBuyCashCommand(msg);
       }
     }
   } catch (e) {
