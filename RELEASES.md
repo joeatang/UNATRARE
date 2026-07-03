@@ -29,7 +29,7 @@ Full economy design: `docs/cash-rewards-economy.md`.
 
 ---
 
-## Status Everywhere — "Colors That Travel"  ·  2026-07-03
+## Status Everywhere — "Colors That Travel"  ·  build `W87U7r5sFRD97yz5v6VRT`  ·  2026-07-03
 
 Makes identity status **visible wherever a person shows up**, and lights the 🐸/🖥️
 chips by proving the Bitcoin↔Solana link. Additive-only; badges stay behind the
