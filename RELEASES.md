@@ -29,6 +29,23 @@ Full economy design: `docs/cash-rewards-economy.md`.
 
 ---
 
+## Onboarding — "Front Door"  ·  build `0gLXwU4ItBk06XOOxTJBt`  ·  2026-07-02
+
+New-traffic UX polish from the onboarding audit. No flags, no money, no schema.
+
+- New `/start` page — plain-English "How It Works" (three ways in) + a full **Glossary**
+  (UNATRARE, Counterparty, Card, Council, Certified, Salute, Burn, $CASH, Torchbearer,
+  Genesis Block, Flame Rank, Signal Weight, Node/UNATPEPE, Vault) + a **How to buy $CASH**
+  walkthrough. Linked from desktop nav, mobile drawer, and a homepage hero line.
+- `SalutePanel` — always-visible essentials banner: "To salute you need a Solana wallet + $CASH.
+  Burning is permanent." (was buried in a collapsed section).
+- Standardized the panel term to **Council** across user-facing copy (homepage + metadata,
+  `/pay` review banner, whitepaper, admin enrollment byline). Code identifiers unchanged.
+- Removed the duplicate artist link on the card page — the "by @handle" frame-footer link
+  is now the single artist link (meta-grid row dropped).
+
+---
+
 ## Rewards P2 — "Fire Spread"  ·  build `0X1-kOYJhtnGakuMqbDge`  ·  2026-07-02
 
 Referral attribution + rebate accrual — **accrue-only, no money moves**, shipped
