@@ -526,10 +526,33 @@ async function handleBuyCashCommand(msg) {
   log(`[tgbot] /buycash (user=${msg.from?.id})`);
 }
 
-// ── /torchbearers command handler (top 5 supporters by $CASH saluted) ────────
-const MEDALS = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+// ── /help command handler (lists every command) ─────────────────────────────
+async function handleHelpCommand(msg) {
+  const chatId = msg.chat?.id;
+  const messageId = msg.message_id;
+  if (String(chatId) !== String(CHAT_ID)) return;
+  if (rateLimited(msg.from?.id) > 0) return;
 
-function torchbearerLabel(row) {
+  const text = clean([
+    '🐸 <b>UNATRARE bot — commands</b>',
+    '',
+    '<b>/u</b> — a random card from the directory',
+    '   <code>/u TOKENNAME</code> a specific card · <code>/u latest</code> the newest',
+    '<b>/torchbearers</b> — top 5 supporters by $CASH saluted',
+    '<b>/topcards</b> — top 5 most-saluted cards',
+    '<b>/buycash</b> — how to get $CASH to salute a card',
+    '<b>/start</b> — what UNATRARE is + how it works',
+    '<b>/help</b> — this list',
+    '',
+    `Explore everything → <a href="${SITE_BASE}">${SITE_BASE}</a>`,
+  ].join('\n'));
+  await sendMessage(text, chatId, messageId)
+    .catch(e => warn('[tgbot] /help send failed:', e.message));
+  log(`[tgbot] /help (user=${msg.from?.id})`);
+}
+
+// ── /torchbearers command handler (top 5 supporters by $CASH saluted) ────────
+const MEDALS = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];function torchbearerLabel(row) {
   // Public handle only when a profile is claimed AND not hidden; otherwise a
   // masked wallet — same privacy posture as the Hall.
   if (row.handle && !row.hidden) return `@${row.handle}`;
@@ -635,6 +658,8 @@ async function pollUpdates() {
         await handleStartCommand(msg);
       } else if (/^\/buycash(?:@\w+)?$/i.test(text)) {
         await handleBuyCashCommand(msg);
+      } else if (/^\/(help|commands|unatrare)(?:@\w+)?$/i.test(text)) {
+        await handleHelpCommand(msg);
       } else if (/^\/(torchbearers|torch|leaders)(?:@\w+)?$/i.test(text)) {
         await handleTorchbearersCommand(msg);
       } else if (/^\/(topcards|hotcards|topburns)(?:@\w+)?$/i.test(text)) {
