@@ -210,6 +210,38 @@ const upsertFileId = db.prepare(`
 `);
 const delFileId = db.prepare('DELETE FROM tg_photo_cache WHERE cache_key = ?');
 
+// ── Leaderboards (read-only, mirror the site) ────────────────────────────────
+// Top torchbearers by total $CASH saluted (all-time). Anon-aware: we join the
+// torchbearer profile so we can show a handle when one is claimed and public.
+const selTopTorchbearers = db.prepare(`
+  SELECT s.sol_wallet                 AS sol_wallet,
+         SUM(s.amount_display)        AS total_burned,
+         COUNT(*)                     AS salutes,
+         COUNT(DISTINCT s.card_name)  AS cards,
+         t.handle                     AS handle,
+         t.hidden                     AS hidden,
+         t.genesis_block              AS genesis_block
+  FROM card_salutes s
+  LEFT JOIN torchbearers t ON t.sol_wallet = s.sol_wallet
+  GROUP BY s.sol_wallet
+  ORDER BY total_burned DESC, salutes DESC
+  LIMIT 5
+`);
+// Top cards by total $CASH burned across every salute (the /burns aggregate).
+const selTopCards = db.prepare(`
+  SELECT s.card_name                  AS card_name,
+         SUM(s.amount_display)        AS total_burned,
+         COUNT(*)                     AS salutes,
+         COUNT(DISTINCT s.sol_wallet) AS saluters,
+         tok.council_certified        AS certified,
+         tok.artist_handle            AS artist_handle
+  FROM card_salutes s
+  LEFT JOIN tokens tok ON tok.token_name = s.card_name
+  GROUP BY s.card_name
+  ORDER BY total_burned DESC, salutes DESC
+  LIMIT 5
+`);
+
 // ── Telegram helpers ─────────────────────────────────────────────────────────
 async function tgPost(method, body) {
   const res = await fetch(`${TG_API}/bot${BOT_TOKEN}/${method}`, {
@@ -362,6 +394,13 @@ function fmtBtc(sats) {
   if (n === 0) return '0 BTC';
   return `${(n / 1e8).toFixed(8).replace(/0+$/, '').replace(/\.$/, '')} BTC`;
 }
+function fmtCash(n) {
+  const v = Number(n) || 0;
+  if (v >= 1e9) return `${(v / 1e9).toFixed(v >= 1e10 ? 0 : 1).replace(/\.0$/, '')}B`;
+  if (v >= 1e6) return `${(v / 1e6).toFixed(v >= 1e7 ? 0 : 1).replace(/\.0$/, '')}M`;
+  if (v >= 1e3) return `${(v / 1e3).toFixed(v >= 1e4 ? 0 : 1).replace(/\.0$/, '')}K`;
+  return `${Math.round(v)}`;
+}
 function clean(s) {
   return s.replace(/\n{3,}/g, '\n\n').trim();
 }
@@ -456,6 +495,7 @@ async function handleStartCommand(msg) {
     '',
     `Full guide + glossary → <a href="${SITE_BASE}/start">${SITE_BASE}/start</a>`,
     'Need $CASH first? Type <code>/buycash</code>',
+    'See who’s leading: <code>/torchbearers</code> · <code>/topcards</code>',
   ].join('\n'));
   await sendMessage(text, chatId, messageId)
     .catch(e => warn('[tgbot] /start send failed:', e.message));
@@ -484,6 +524,82 @@ async function handleBuyCashCommand(msg) {
   await sendMessage(text, chatId, messageId)
     .catch(e => warn('[tgbot] /buycash send failed:', e.message));
   log(`[tgbot] /buycash (user=${msg.from?.id})`);
+}
+
+// ── /torchbearers command handler (top 5 supporters by $CASH saluted) ────────
+const MEDALS = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+
+function torchbearerLabel(row) {
+  // Public handle only when a profile is claimed AND not hidden; otherwise a
+  // masked wallet — same privacy posture as the Hall.
+  if (row.handle && !row.hidden) return `@${row.handle}`;
+  return `<code>${shortAddr(row.sol_wallet)}</code>`;
+}
+
+async function handleTorchbearersCommand(msg) {
+  const chatId = msg.chat?.id;
+  const messageId = msg.message_id;
+  if (String(chatId) !== String(CHAT_ID)) return;
+  if (rateLimited(msg.from?.id) > 0) return;
+
+  let rows = [];
+  try { rows = selTopTorchbearers.all(); } catch (e) { warn('[tgbot] /torchbearers query failed:', e.message); }
+  if (!rows.length) {
+    await sendMessage('No salutes yet — be the first torchbearer. 🔥', chatId, messageId)
+      .catch(() => {});
+    return;
+  }
+
+  const lines = rows.map((r, i) => {
+    const medal = MEDALS[i] || `${i + 1}.`;
+    const block = r.genesis_block ? `  ·  ⛓ #${Number(r.genesis_block).toLocaleString()}` : '';
+    return `${medal} ${torchbearerLabel(r)} — <b>${fmtCash(r.total_burned)}</b> $CASH  ·  ${r.salutes} salute${r.salutes === 1 ? '' : 's'} across ${r.cards} card${r.cards === 1 ? '' : 's'}${block}`;
+  });
+
+  const text = clean([
+    '🔥 <b>TOP TORCHBEARERS</b>  ·  most $CASH saluted',
+    '',
+    lines.join('\n'),
+    '',
+    `<a href="${SITE_BASE}/hall">The Hall of Fire →</a>`,
+  ].join('\n'));
+  await sendMessage(text, chatId, messageId)
+    .catch(e => warn('[tgbot] /torchbearers send failed:', e.message));
+  log(`[tgbot] /torchbearers (user=${msg.from?.id})`);
+}
+
+// ── /topcards command handler (top 5 cards by $CASH burned) ──────────────────
+async function handleTopCardsCommand(msg) {
+  const chatId = msg.chat?.id;
+  const messageId = msg.message_id;
+  if (String(chatId) !== String(CHAT_ID)) return;
+  if (rateLimited(msg.from?.id) > 0) return;
+
+  let rows = [];
+  try { rows = selTopCards.all(); } catch (e) { warn('[tgbot] /topcards query failed:', e.message); }
+  if (!rows.length) {
+    await sendMessage('No cards have been saluted yet. Type <code>/u</code> to see one. 🐸', chatId, messageId)
+      .catch(() => {});
+    return;
+  }
+
+  const lines = rows.map((r, i) => {
+    const medal = MEDALS[i] || `${i + 1}.`;
+    const cert = r.certified ? ' ⭐' : '';
+    const artist = r.artist_handle ? `  ·  by @${r.artist_handle}` : '';
+    return `${medal} <a href="${SITE_BASE}/card/${r.card_name}"><b>${r.card_name}</b></a>${cert} — <b>${fmtCash(r.total_burned)}</b> $CASH  ·  ${r.saluters} saluter${r.saluters === 1 ? '' : 's'}${artist}`;
+  });
+
+  const text = clean([
+    '🔥 <b>MOST-SALUTED CARDS</b>  ·  total $CASH burned',
+    '',
+    lines.join('\n'),
+    '',
+    `<a href="${SITE_BASE}/burns">All burns →</a>`,
+  ].join('\n'));
+  await sendMessage(text, chatId, messageId)
+    .catch(e => warn('[tgbot] /topcards send failed:', e.message));
+  log(`[tgbot] /topcards (user=${msg.from?.id})`);
 }
 
 // ── Telegram long-poll loop ─────────────────────────────────────────────────
@@ -519,6 +635,10 @@ async function pollUpdates() {
         await handleStartCommand(msg);
       } else if (/^\/buycash(?:@\w+)?$/i.test(text)) {
         await handleBuyCashCommand(msg);
+      } else if (/^\/(torchbearers|torch|leaders)(?:@\w+)?$/i.test(text)) {
+        await handleTorchbearersCommand(msg);
+      } else if (/^\/(topcards|hotcards|topburns)(?:@\w+)?$/i.test(text)) {
+        await handleTopCardsCommand(msg);
       }
     }
   } catch (e) {
