@@ -10,6 +10,9 @@ import { fmtCash, tierFor, truncateWallet } from '../../../lib/saluteDisplay';
 import { resolveIdentities, displayFor } from '../../../lib/torchbearerIdentity';
 import { resolveIdentityBadges } from '../../../lib/identityBadges';
 import IdentityBadges from '../../components/IdentityBadges';
+import { featureEnabled } from '../../../lib/features';
+import { getHeraldsForCard } from '../../../lib/reach';
+import HeraldShare from '../../components/HeraldShare';
 
 function toRoman(n) {
   const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
@@ -255,6 +258,20 @@ export default async function CardPage({ params }) {
   const campaign = getCampaignData(token.token_name);
   const campaignTier = tierFor(campaign.totals.total_burned);
 
+  // Heralds & Reach (Social Phase 1) — dark unless the reward_reach flag is ON.
+  const reachEnabled = featureEnabled('reward_reach');
+  let heralds = [];
+  if (reachEnabled) {
+    const raw = getHeraldsForCard(token.token_name);
+    if (raw.length) {
+      const ids = resolveIdentities(raw.map(h => h.wallet));
+      heralds = raw.map(h => {
+        const id = ids.get(h.wallet);
+        return { ...h, label: id ? displayFor(id, h.wallet).label : truncateWallet(h.wallet) };
+      });
+    }
+  }
+
   const xcpUrl   = `https://tokenscan.io/asset/${token.token_name}`;
   const ordUrl   = token.ord_inscription
     ? `https://ordinals.com/inscription/${token.ord_inscription}`
@@ -471,6 +488,8 @@ export default async function CardPage({ params }) {
                 </div>
               </div>
 
+              {reachEnabled && <HeraldShare card={token.token_name} title={token.display_title || token.token_name} />}
+
               <div className={styles.campaignStats}>
                 <div className={styles.campaignStat}>
                   <span className={styles.campaignStatLabel}>total burned</span>
@@ -555,6 +574,26 @@ export default async function CardPage({ params }) {
                   )}
                 </div>
               </div>
+
+              {reachEnabled && heralds.length > 0 && (
+                <div style={{ marginTop: 24 }}>
+                  <div className={styles.campaignColumnLabel}>📣 heralds of this card</div>
+                  <div className={styles.campaignList}>
+                    {heralds.map((h, i) => (
+                      <Link key={h.wallet} href={`/torchbearer/${h.wallet}`} className={`${styles.campaignRow} ${styles.campaignRowLink}`}>
+                        <div className={styles.campaignRowLeft}>
+                          <span className={styles.campaignRank}>#{i + 1}</span>
+                          <div className={styles.campaignSupporterMeta}>
+                            <span className={styles.campaignWallet}>{h.label}</span>
+                            <span className={styles.campaignSupporterSub}>amplified this card</span>
+                          </div>
+                        </div>
+                        <span className={styles.campaignAmount}>{h.reach_clicks} reached</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className={styles.campaignUpdates}>
                 <div className={styles.campaignColumnLabel}>artist updates</div>

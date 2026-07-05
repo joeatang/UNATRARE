@@ -10,6 +10,7 @@ import { getCosignsForTorchbearer } from '../../../lib/artistCosign';
 import { getIdentityBadges } from '../../../lib/identityBadges';
 import { featureEnabled } from '../../../lib/features';
 import { getReferralSummary } from '../../../lib/referrals';
+import { getReach, reachTier } from '../../../lib/reach';
 import CosignButton from './CosignButton';
 import BlockShare from '../../components/BlockShare';
 import IdentityBadges from '../../components/IdentityBadges';
@@ -151,6 +152,8 @@ export default async function TorchbearerPage({ params }) {
   const cosigns = getCosignsForTorchbearer(wallet);
   const badges = getIdentityBadges(wallet);
   const referral = featureEnabled('reward_referral') ? getReferralSummary(getDb(), wallet) : null;
+  const reach = featureEnabled('reward_reach') ? getReach(wallet) : null;
+  const reachT = reach ? reachTier(reach.reach) : null;
 
   return (
     <>
@@ -294,6 +297,46 @@ export default async function TorchbearerPage({ params }) {
                 <Link href="/torchbearer/claim" style={{ color: 'var(--amber)' }}>claim your block →</Link>
               </div>
             )}
+          </section>
+        )}
+
+        {/* ── Reach (Social Phase 1) — awareness a Herald generated ─── */}
+        {reach && (
+          <section
+            style={{
+              margin: '0 0 24px', padding: '18px 20px',
+              border: `1px solid ${reachT.color}55`, borderRadius: 10,
+              background: 'rgba(255, 143, 90, 0.06)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap', marginBottom: 8 }}>
+              <span style={{ fontFamily: 'var(--font-card)', fontSize: 11, letterSpacing: 3, color: 'var(--amber)' }}>📣 REACH</span>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: reachT.color }}>{Math.round(reach.reach).toLocaleString()}</span>
+              <span style={{ fontFamily: 'var(--font-card)', fontSize: 11, letterSpacing: 2, color: reachT.color, border: `1px solid ${reachT.color}55`, borderRadius: 999, padding: '2px 10px' }}>{reachT.label}</span>
+            </div>
+            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+              <div>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: 18, color: 'var(--text)' }}>{reach.clicks.toLocaleString()}</div>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 1, color: 'var(--text-dim)' }}>real clicks</div>
+              </div>
+              <div>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: 18, color: 'var(--text)' }}>{reach.conversions.toLocaleString()}</div>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 1, color: 'var(--text-dim)' }}>brought to salute</div>
+              </div>
+              <div>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: 18, color: 'var(--text)' }}>{reach.cards_shared.toLocaleString()}</div>
+                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 1, color: 'var(--text-dim)' }}>cards amplified</div>
+              </div>
+              {Number(reach.burn_mult || 1) > 1 && (
+                <div>
+                  <div style={{ fontFamily: 'var(--font-card)', fontSize: 18, color: 'var(--amber)' }}>×{reach.burn_mult}</div>
+                  <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 1, color: 'var(--text-dim)' }}>burn multiplier</div>
+                </div>
+              )}
+            </div>
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', marginTop: 12, lineHeight: 1.6 }}>
+              Earned by <strong>spreading the word</strong> — real people who followed a shared link, and those who went on to salute. No burn required; burning only <strong>multiplies</strong> it.
+            </div>
           </section>
         )}
 

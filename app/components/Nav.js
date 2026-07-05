@@ -20,8 +20,24 @@ export default function Nav() {
   useEffect(() => {
     try {
       const ref = new URLSearchParams(window.location.search).get('ref');
-      if (ref && !localStorage.getItem('unat_ref')) {
-        localStorage.setItem('unat_ref', ref.trim().slice(0, 64));
+      if (!ref) return;
+      const code = ref.trim().slice(0, 64);
+      if (!localStorage.getItem('unat_ref')) {
+        localStorage.setItem('unat_ref', code);
+      }
+      // Heralds & Reach: log this click once per (code, card). The endpoint is a
+      // silent no-op unless the `reward_reach` flag is ON, so this ships dark.
+      const m = window.location.pathname.match(/^\/card\/([^/]+)/);
+      const card = m ? decodeURIComponent(m[1]).toUpperCase() : '';
+      const seen = `unat_click_${code}_${card}`;
+      if (!localStorage.getItem(seen)) {
+        localStorage.setItem(seen, '1');
+        fetch('/api/reach/click', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, card }),
+          keepalive: true,
+        }).catch(() => {});
       }
     } catch { /* no-op */ }
   }, []);
