@@ -652,6 +652,92 @@ function FeaturesPanel({ authToken }) {
   );
 }
 
+// ── Reach Activity panel — verification readout for the Heralds & Reach loop ──
+function ReachActivityPanel({ authToken }) {
+  const [open, setOpen] = useState(false);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  async function load() {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/reach', { headers: { Authorization: `Bearer ${authToken}` } });
+      const json = await res.json();
+      if (json.ok) setData(json);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { if (open) load(); }, [open]);
+
+  const trunc = (w) => (w ? `${w.slice(0, 4)}…${w.slice(-4)}` : '—');
+  const t = data?.totals || {};
+  const stat = (label, value) => (
+    <div style={{ flex: '1 1 84px', minWidth: 84 }}>
+      <div style={{ fontFamily: 'var(--font-card)', fontSize: 20, color: 'var(--amber)' }}>{Number(value || 0).toLocaleString()}</div>
+      <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 1, color: 'var(--text-dim)' }}>{label}</div>
+    </div>
+  );
+
+  return (
+    <div style={{ borderBottom: '1px solid var(--border)' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ width: '100%', textAlign: 'left', padding: '14px 20px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '3px', color: 'var(--amber)' }}
+      >
+        {open ? '▲' : '▼'} 📣 REACH ACTIVITY · HERALDS
+      </button>
+      {open && (
+        <div style={{ padding: '0 20px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+            <span style={{
+              fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 2, padding: '3px 10px', borderRadius: 999,
+              border: `1px solid ${data?.enabled ? 'var(--amber)' : 'var(--border)'}`,
+              color: data?.enabled ? 'var(--amber)' : 'var(--text-dim)',
+            }}>
+              {data?.enabled ? 'LIVE' : 'DARK (flag off)'}
+            </span>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)' }}>
+              conversions {data?.referralEnabled ? 'tracking' : 'need reward_referral ON'}
+            </span>
+            <button
+              onClick={load}
+              style={{ marginLeft: 'auto', fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 1, padding: '5px 10px', cursor: 'pointer', background: 'transparent', color: 'var(--amber)', border: '1px solid var(--amber)' }}
+            >
+              {loading ? '…' : '↻ refresh'}
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 18 }}>
+            {stat('clicks', t.clicks)}
+            {stat('unique visitors', t.visitors)}
+            {stat('brought to salute', t.conversions)}
+            {stat('cards amplified', t.cards)}
+            {stat('active heralds', t.heralds)}
+          </div>
+
+          <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 2, color: 'var(--text-dim)', marginBottom: 8 }}>TOP HERALDS</div>
+          {data?.topHeralds?.length ? (
+            data.topHeralds.map((h, i) => (
+              <div key={h.sol_wallet} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0', borderTop: '1px solid var(--border)' }}>
+                <span style={{ fontFamily: 'var(--font-card)', fontSize: 10, color: 'var(--text-dim)', width: 22 }}>#{i + 1}</span>
+                <span style={{ fontFamily: 'var(--font-card)', fontSize: 11, color: 'var(--text)', flex: 1 }}>{trunc(h.sol_wallet)}</span>
+                <span style={{ fontFamily: 'var(--font-card)', fontSize: 11, color: 'var(--amber)' }}>{Math.round(h.reach).toLocaleString()} reach</span>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--text-dim)', width: 120, textAlign: 'right' }}>{h.clicks} clicks · {h.conversions} conv</span>
+              </div>
+            ))
+          ) : (
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)' }}>
+              No Reach yet. Flip <strong>reward_reach</strong> ON above, share a card link, and click it from another device — it lands here.
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Telegram Registrations panel ──────────────────────────────
 function TelegramRegistrationsPanel({ authToken }) {
   const [open,  setOpen]  = useState(false);
@@ -2566,6 +2652,7 @@ export default function AdminPage() {
         {tab === 'tools' ? (
           <>
             <FeaturesPanel authToken={authToken} />
+            <ReachActivityPanel authToken={authToken} />
             <SaluteCeremoniesPanel authToken={authToken} />
             <TelegramRegistrationsPanel authToken={authToken} />
             <GenesisGrantsPanel authToken={authToken} />
