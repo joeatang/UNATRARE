@@ -152,8 +152,11 @@ export default async function TorchbearerPage({ params }) {
   const cosigns = getCosignsForTorchbearer(wallet);
   const badges = getIdentityBadges(wallet);
   const referral = featureEnabled('reward_referral') ? getReferralSummary(getDb(), wallet) : null;
-  const reach = featureEnabled('reward_reach') ? getReach(wallet) : null;
-  const reachT = reach ? reachTier(reach.reach) : null;
+  const reachEnabled = featureEnabled('reward_reach');
+  const reach = reachEnabled ? getReach(wallet) : null;
+  const reachVal = reach || { reach: 0, clicks: 0, conversions: 0, cards_shared: 0, burn_mult: 1 };
+  const reachT = reachTier(reachVal.reach);
+  const hasReach = reachVal.clicks > 0 || reachVal.conversions > 0;
 
   return (
     <>
@@ -301,7 +304,7 @@ export default async function TorchbearerPage({ params }) {
         )}
 
         {/* ── Reach (Social Phase 1) — awareness a Herald generated ─── */}
-        {reach && (
+        {reachEnabled && (
           <section
             style={{
               margin: '0 0 24px', padding: '18px 20px',
@@ -311,31 +314,38 @@ export default async function TorchbearerPage({ params }) {
           >
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap', marginBottom: 8 }}>
               <span style={{ fontFamily: 'var(--font-card)', fontSize: 11, letterSpacing: 3, color: 'var(--amber)' }}>📣 REACH</span>
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: reachT.color }}>{Math.round(reach.reach).toLocaleString()}</span>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: reachT.color }}>{Math.round(reachVal.reach).toLocaleString()}</span>
               <span style={{ fontFamily: 'var(--font-card)', fontSize: 11, letterSpacing: 2, color: reachT.color, border: `1px solid ${reachT.color}55`, borderRadius: 999, padding: '2px 10px' }}>{reachT.label}</span>
             </div>
-            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-              <div>
-                <div style={{ fontFamily: 'var(--font-card)', fontSize: 18, color: 'var(--text)' }}>{reach.clicks.toLocaleString()}</div>
-                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 1, color: 'var(--text-dim)' }}>real clicks</div>
-              </div>
-              <div>
-                <div style={{ fontFamily: 'var(--font-card)', fontSize: 18, color: 'var(--text)' }}>{reach.conversions.toLocaleString()}</div>
-                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 1, color: 'var(--text-dim)' }}>brought to salute</div>
-              </div>
-              <div>
-                <div style={{ fontFamily: 'var(--font-card)', fontSize: 18, color: 'var(--text)' }}>{reach.cards_shared.toLocaleString()}</div>
-                <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 1, color: 'var(--text-dim)' }}>cards amplified</div>
-              </div>
-              {Number(reach.burn_mult || 1) > 1 && (
+            {hasReach ? (
+              <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
                 <div>
-                  <div style={{ fontFamily: 'var(--font-card)', fontSize: 18, color: 'var(--amber)' }}>×{reach.burn_mult}</div>
-                  <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 1, color: 'var(--text-dim)' }}>burn multiplier</div>
+                  <div style={{ fontFamily: 'var(--font-card)', fontSize: 18, color: 'var(--text)' }}>{reachVal.clicks.toLocaleString()}</div>
+                  <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 1, color: 'var(--text-dim)' }}>real clicks</div>
                 </div>
-              )}
-            </div>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-card)', fontSize: 18, color: 'var(--text)' }}>{reachVal.conversions.toLocaleString()}</div>
+                  <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 1, color: 'var(--text-dim)' }}>brought to salute</div>
+                </div>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-card)', fontSize: 18, color: 'var(--text)' }}>{reachVal.cards_shared.toLocaleString()}</div>
+                  <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 1, color: 'var(--text-dim)' }}>cards amplified</div>
+                </div>
+                {Number(reachVal.burn_mult || 1) > 1 && (
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-card)', fontSize: 18, color: 'var(--amber)' }}>×{reachVal.burn_mult}</div>
+                    <div style={{ fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 1, color: 'var(--text-dim)' }}>burn multiplier</div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text)', lineHeight: 1.6 }}>
+                No beacons lit yet. Share any card with your link to start your Reach —{' '}
+                <strong>every real click and every person you bring to salute counts</strong>. No burn required.
+              </div>
+            )}
             <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', marginTop: 12, lineHeight: 1.6 }}>
-              Earned by <strong>spreading the word</strong> — real people who followed a shared link, and those who went on to salute. No burn required; burning only <strong>multiplies</strong> it.
+              Earned by <strong>spreading the word</strong> — real people who followed a shared link, and those who went on to salute. Burning only <strong>multiplies</strong> it, never gates it.
             </div>
           </section>
         )}

@@ -575,23 +575,29 @@ export default async function CardPage({ params }) {
                 </div>
               </div>
 
-              {reachEnabled && heralds.length > 0 && (
+              {reachEnabled && (
                 <div style={{ marginTop: 24 }}>
                   <div className={styles.campaignColumnLabel}>📣 heralds of this card</div>
-                  <div className={styles.campaignList}>
-                    {heralds.map((h, i) => (
-                      <Link key={h.wallet} href={`/torchbearer/${h.wallet}`} className={`${styles.campaignRow} ${styles.campaignRowLink}`}>
-                        <div className={styles.campaignRowLeft}>
-                          <span className={styles.campaignRank}>#{i + 1}</span>
-                          <div className={styles.campaignSupporterMeta}>
-                            <span className={styles.campaignWallet}>{h.label}</span>
-                            <span className={styles.campaignSupporterSub}>amplified this card</span>
+                  {heralds.length > 0 ? (
+                    <div className={styles.campaignList}>
+                      {heralds.map((h, i) => (
+                        <Link key={h.wallet} href={`/torchbearer/${h.wallet}`} className={`${styles.campaignRow} ${styles.campaignRowLink}`}>
+                          <div className={styles.campaignRowLeft}>
+                            <span className={styles.campaignRank}>#{i + 1}</span>
+                            <div className={styles.campaignSupporterMeta}>
+                              <span className={styles.campaignWallet}>{h.label}</span>
+                              <span className={styles.campaignSupporterSub}>amplified this card</span>
+                            </div>
                           </div>
-                        </div>
-                        <span className={styles.campaignAmount}>{h.reach_clicks} reached</span>
-                      </Link>
-                    ))}
-                  </div>
+                          <span className={styles.campaignAmount}>{h.reach_clicks} reached</span>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className={styles.campaignEmpty}>
+                      No beacons lit for this card yet — be the first to light one above and get credited here.
+                    </div>
+                  )}
                 </div>
               )}
 
