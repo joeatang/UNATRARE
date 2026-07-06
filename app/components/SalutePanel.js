@@ -920,11 +920,19 @@ export default function SalutePanel({ cardName }) {
                   <span style={S.statUnit}>$CASH</span>
                 </span>
               </div>
-              {Number(lb.totalArtistDisplay || 0) > 0 && (
+              {Number(lb.totalArtistDisplay || 0) > 0 ? (
                 <div style={S.statBlock}>
-                  <span style={S.statLabel}>TO ARTISTS</span>
+                  <span style={S.statLabel}>TO ARTIST</span>
                   <span style={S.statValue}>
                     {fmt(lb.totalArtistDisplay)}
+                    <span style={S.statUnit}>$CASH</span>
+                  </span>
+                </div>
+              ) : (
+                <div style={S.statBlock}>
+                  <span style={S.statLabel}>TO ARTIST</span>
+                  <span style={S.statValue}>
+                    0
                     <span style={S.statUnit}>$CASH</span>
                   </span>
                 </div>

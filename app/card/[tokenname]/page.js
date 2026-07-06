@@ -500,15 +500,6 @@ export default async function CardPage({ params }) {
                   <span className={styles.campaignStatSub}>$CASH saluted into this card</span>
                 </div>
                 <div className={styles.campaignStat}>
-                  <span className={styles.campaignStatLabel}>to the artist</span>
-                  <span className={styles.campaignStatValue}>🎨 {fmtCash(campaign.totals.total_artist)}</span>
-                  <span className={styles.campaignStatSub}>
-                    {Number(campaign.totals.total_artist) > 0
-                      ? '$CASH routed to the creator'
-                      : 'set a payout address to earn 31%'}
-                  </span>
-                </div>
-                <div className={styles.campaignStat}>
                   <span className={styles.campaignStatLabel}>torchbearers</span>
                   <span className={styles.campaignStatValue}>{campaign.totals.unique_saluters}</span>
                   <span className={styles.campaignStatSub}>

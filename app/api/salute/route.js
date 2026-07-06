@@ -52,7 +52,8 @@ export async function GET(request) {
   const stats = db.prepare(`
     SELECT
       COUNT(DISTINCT sol_wallet) AS unique_saluters,
-      SUM(amount_display)        AS total_display
+      SUM(amount_display)        AS total_display,
+      SUM(artist_amount_display) AS total_artist
     FROM card_salutes
     WHERE card_name = ?
   `).get(card);
@@ -63,8 +64,10 @@ export async function GET(request) {
 
   return NextResponse.json({
     card,
-    totalDisplay:   stats?.total_display   ?? 0,
-    uniqueSaluters: stats?.unique_saluters ?? 0,
+    totalDisplay:      stats?.total_display   ?? 0,
+    totalBurnDisplay:  stats?.total_display   ?? 0,
+    totalArtistDisplay: stats?.total_artist   ?? 0,
+    uniqueSaluters:    stats?.unique_saluters ?? 0,
     firstSaluter:   firstSaluterRow?.sol_wallet ?? null,
     leaderboard,
   });
