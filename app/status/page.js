@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Nav from '../components/Nav';
 import styles from './status.module.css';
@@ -1361,6 +1361,100 @@ function SubmissionCard({ sub, artistAddress, onRefresh }) {
   );
 }
 
+// ── Account payout — one SOL address for ALL of this artist's cards ──
+function AccountPayoutPanel({ address }) {
+  const [current, setCurrent] = useState(null);
+  const [sol, setSol]     = useState('');
+  const [sig, setSig]     = useState('');
+  const [state, setState] = useState('idle'); // idle | loading | ok | error
+  const [err, setErr]     = useState('');
+  const [updated, setUpdated] = useState(0);
+  const [open, setOpen]   = useState(false);
+
+  const SOL_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+  const challenge = `UNATRARE:PAYOUT:${address}`;
+
+  useEffect(() => {
+    let live = true;
+    fetch(`/api/artist/payout?address=${encodeURIComponent(address)}`)
+      .then(r => r.json())
+      .then(j => { if (live && j.ok) { setCurrent(j); setSol(j.solPayout || ''); } })
+      .catch(() => {});
+    return () => { live = false; };
+  }, [address]);
+
+  async function apply() {
+    if (!SOL_RE.test(sol.trim())) { setErr('Enter a valid Solana payout address'); return; }
+    if (!sig.trim()) { setErr('Paste your signature of the message below'); return; }
+    setState('loading'); setErr('');
+    try {
+      const res = await fetch('/api/artist/payout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ artistAddress: address, signature: sig.trim(), solAddress: sol.trim() }),
+      });
+      const j = await res.json();
+      if (j.ok) {
+        setState('ok'); setUpdated(j.updated); setSig('');
+        setCurrent(c => ({ ...(c || {}), solPayout: j.solPayout, linkedCount: j.updated }));
+      } else { setErr(j.error || 'Failed to save'); setState('error'); }
+    } catch { setErr('Network error — try again'); setState('error'); }
+  }
+
+  const box = { fontFamily: 'var(--font-card)', fontSize: 12, color: 'var(--text)', padding: '9px 11px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface,#0f0f0f)', width: '100%', wordBreak: 'break-all' };
+  const label = { fontFamily: 'var(--font-card)', fontSize: 9, letterSpacing: 2, color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: 6 };
+
+  return (
+    <div style={{ border: '1px solid var(--amber)', borderRadius: 12, padding: 16, marginBottom: 18, background: 'rgba(255,143,90,0.05)' }}>
+      <button onClick={() => setOpen(o => !o)} style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-card)', fontSize: 11, letterSpacing: 2, color: 'var(--amber)' }}>
+        {open ? '▲' : '▼'} 🎨 PAYOUT ADDRESS · ALL YOUR CARDS
+      </button>
+      {open && (
+        <div style={{ marginTop: 12 }}>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 12 }}>
+            Set one Solana address here and it applies to <strong>every card you own</strong> — so 31% of each
+            salute reaches you. Update it anytime; it re-applies to all your cards.
+            {current && (
+              <> Currently linked on <strong>{current.linkedCount ?? 0}</strong> of <strong>{current.cardCount ?? 0}</strong> cards.</>
+            )}
+          </div>
+
+          <div style={{ marginBottom: 12 }}>
+            <div style={label}>your SOL payout address</div>
+            <input value={sol} onChange={e => { setSol(e.target.value.trim()); setState('idle'); setErr(''); }} placeholder="your Solana address" spellCheck={false} autoCapitalize="none" style={box} />
+          </div>
+
+          <div style={{ marginBottom: 12 }}>
+            <div style={label}>1) sign this exact message with your submission wallet</div>
+            <div style={{ ...box, userSelect: 'all', color: 'var(--amber)' }}>{challenge}</div>
+          </div>
+
+          <div style={{ marginBottom: 12 }}>
+            <div style={label}>2) paste the signature</div>
+            <input value={sig} onChange={e => { setSig(e.target.value.trim()); setState('idle'); setErr(''); }} placeholder="base64 signature from your wallet" spellCheck={false} autoCapitalize="none" style={box} />
+          </div>
+
+          {err && <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--red,#ff6b6b)', marginBottom: 10 }}>{err}</div>}
+          {state === 'ok' && <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--green,#b4ff6f)', marginBottom: 10 }}>✓ Payout saved and applied to {updated} card{updated === 1 ? '' : 's'}.</div>}
+
+          <button
+            onClick={apply}
+            disabled={state === 'loading'}
+            style={{ fontFamily: 'var(--font-card)', fontSize: 12, letterSpacing: 1, padding: '11px 18px', borderRadius: 10, cursor: 'pointer', background: 'var(--amber)', color: '#080808', fontWeight: 700, border: '1px solid var(--amber)' }}
+          >
+            {state === 'loading' ? 'saving…' : 'save payout for all my cards'}
+          </button>
+
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--text-dim)', marginTop: 10, lineHeight: 1.6 }}>
+            Sign with the same Bitcoin wallet you submitted with. Need help signing?{' '}
+            <Link href="/studio/sol-payout-help" style={{ color: 'var(--amber)' }}>SOL payout help →</Link>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function StatusPage() {
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
@@ -1480,6 +1574,7 @@ export default function StatusPage() {
                     <span className={styles.resultsCount}>{data.submissions.length} submission{data.submissions.length !== 1 ? 's' : ''}</span>
                     <span className={styles.resultsAddr}>{data.address.slice(0, 12)}…{data.address.slice(-6)}</span>
                   </div>
+                  <AccountPayoutPanel address={data.address} />
                   <div className={styles.cardList}>
                     {data.submissions.map(sub => (
                       <SubmissionCard key={sub.tokenName} sub={sub} artistAddress={data.address} onRefresh={handleLookup} />
