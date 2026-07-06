@@ -734,9 +734,11 @@ export default async function CardPage({ params }) {
             </div>
 
             <div className={styles.actions}>
-              <a href={tweetUrl} target="_blank" rel="noopener noreferrer" className={styles.actionBtn}>
-                {reachEnabled ? 'share plain link (no Reach) →' : 'share on X →'}
-              </a>
+              {!reachEnabled && (
+                <a href={tweetUrl} target="_blank" rel="noopener noreferrer" className={styles.actionBtn}>
+                  share on X →
+                </a>
+              )}
               <a href={xcpUrl} target="_blank" rel="noopener noreferrer" className={styles.actionBtn}>
                 view on tokenscan.io →
               </a>
@@ -749,10 +751,7 @@ export default async function CardPage({ params }) {
                 metadata json →
               </Link>
               <Link href={`/studio/update/${token.token_name}`} className={styles.actionBtnSecondary}>
-                artist: update card →
-              </Link>
-              <Link href={`/studio?token=${token.token_name}`} className={styles.actionBtnSecondary}>
-                artist: open studio →
+                artist: manage this card →
               </Link>
             </div>
 
