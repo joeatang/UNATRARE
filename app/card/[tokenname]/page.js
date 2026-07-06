@@ -52,6 +52,7 @@ function getCampaignData(tokenName) {
     const totals = db.prepare(`
       SELECT
         COALESCE(SUM(amount_display), 0) AS total_burned,
+        COALESCE(SUM(artist_amount_display), 0) AS total_artist,
         COUNT(*) AS burn_count,
         COUNT(DISTINCT sol_wallet) AS unique_saluters,
         COALESCE(SUM(CASE WHEN burned_at >= ? THEN amount_display ELSE 0 END), 0) AS total_24h,
@@ -122,6 +123,7 @@ function getCampaignData(tokenName) {
     return {
       totals: totals || {
         total_burned: 0,
+        total_artist: 0,
         burn_count: 0,
         unique_saluters: 0,
         total_24h: 0,
@@ -139,6 +141,7 @@ function getCampaignData(tokenName) {
     return {
       totals: {
         total_burned: 0,
+        total_artist: 0,
         burn_count: 0,
         unique_saluters: 0,
         total_24h: 0,
@@ -497,6 +500,15 @@ export default async function CardPage({ params }) {
                   <span className={styles.campaignStatSub}>$CASH saluted into this card</span>
                 </div>
                 <div className={styles.campaignStat}>
+                  <span className={styles.campaignStatLabel}>to the artist</span>
+                  <span className={styles.campaignStatValue}>🎨 {fmtCash(campaign.totals.total_artist)}</span>
+                  <span className={styles.campaignStatSub}>
+                    {Number(campaign.totals.total_artist) > 0
+                      ? '$CASH routed to the creator'
+                      : 'set a payout address to earn 31%'}
+                  </span>
+                </div>
+                <div className={styles.campaignStat}>
                   <span className={styles.campaignStatLabel}>torchbearers</span>
                   <span className={styles.campaignStatValue}>{campaign.totals.unique_saluters}</span>
                   <span className={styles.campaignStatSub}>
@@ -723,7 +735,7 @@ export default async function CardPage({ params }) {
 
             <div className={styles.actions}>
               <a href={tweetUrl} target="_blank" rel="noopener noreferrer" className={styles.actionBtn}>
-                share on X →
+                {reachEnabled ? 'share plain link (no Reach) →' : 'share on X →'}
               </a>
               <a href={xcpUrl} target="_blank" rel="noopener noreferrer" className={styles.actionBtn}>
                 view on tokenscan.io →
