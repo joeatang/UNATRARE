@@ -51,7 +51,7 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, error: 'invalid json' }, { status: 400 });
   }
 
-  const { artistAddress, signature, solAddress } = body || {};
+  const { artistAddress, signature, solAddress, applyToAll } = body || {};
 
   if (!artistAddress || !signature) {
     return NextResponse.json({ ok: false, error: 'artistAddress and signature are required' }, { status: 400 });
@@ -91,17 +91,28 @@ export async function POST(request) {
   db.exec('BEGIN');
   try {
     // Account record (upsert). Create a minimal artists row if none exists.
-    const exists = db.prepare('SELECT btc_address FROM artists WHERE btc_address = ?').get(artistAddress);
-    if (exists) {
+    const prev = db.prepare('SELECT sol_payout_address FROM artists WHERE btc_address = ?').get(artistAddress);
+    const oldDefault = (prev?.sol_payout_address || '').trim();
+    if (prev) {
       db.prepare('UPDATE artists SET sol_payout_address = ?, sol_payout_verified_at = ?, updated_at = ? WHERE btc_address = ?')
         .run(sol, now, now, artistAddress);
     } else {
       db.prepare('INSERT INTO artists (btc_address, sol_payout_address, sol_payout_verified_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?)')
         .run(artistAddress, sol, now, now, now);
     }
-    // Write through to every card this identity owns.
-    const res = db.prepare('UPDATE tokens SET artist_sol_address = ?, artist_sol_verified_at = ? WHERE artist_address = ?')
-      .run(sol, now, artistAddress);
+    // Write through. By default we ONLY touch cards that are "inheriting" the
+    // account default (blank, or equal to the OLD default) — so a per-card
+    // payout OVERRIDE set on an individual card is preserved. Pass applyToAll
+    // to deliberately overwrite every card (unify).
+    let res;
+    if (applyToAll === true) {
+      res = db.prepare('UPDATE tokens SET artist_sol_address = ?, artist_sol_verified_at = ? WHERE artist_address = ?')
+        .run(sol, now, artistAddress);
+    } else {
+      res = db.prepare(
+        "UPDATE tokens SET artist_sol_address = ?, artist_sol_verified_at = ? WHERE artist_address = ? AND (TRIM(COALESCE(artist_sol_address,'')) = '' OR artist_sol_address = ?)"
+      ).run(sol, now, artistAddress, oldDefault);
+    }
     updated = res.changes || 0;
     db.exec('COMMIT');
   } catch (e) {

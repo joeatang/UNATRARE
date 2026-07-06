@@ -1370,6 +1370,7 @@ function AccountPayoutPanel({ address }) {
   const [err, setErr]     = useState('');
   const [updated, setUpdated] = useState(0);
   const [open, setOpen]   = useState(false);
+  const [applyAll, setApplyAll] = useState(false);
 
   const SOL_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
   const challenge = `UNATRARE:PAYOUT:${address}`;
@@ -1391,7 +1392,7 @@ function AccountPayoutPanel({ address }) {
       const res = await fetch('/api/artist/payout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ artistAddress: address, signature: sig.trim(), solAddress: sol.trim() }),
+        body: JSON.stringify({ artistAddress: address, signature: sig.trim(), solAddress: sol.trim(), applyToAll: applyAll }),
       });
       const j = await res.json();
       if (j.ok) {
@@ -1418,6 +1419,10 @@ function AccountPayoutPanel({ address }) {
               <> Currently linked on <strong>{current.linkedCount ?? 0}</strong> of <strong>{current.cardCount ?? 0}</strong> cards.</>
             )}
           </div>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 12 }}>
+            Want one card paid to a different wallet? Set that card&apos;s own payout in its update form below — by
+            default a per-card override is preserved and won&apos;t be overwritten when you change this account default.
+          </div>
 
           <div style={{ marginBottom: 12 }}>
             <div style={label}>your SOL payout address</div>
@@ -1436,6 +1441,11 @@ function AccountPayoutPanel({ address }) {
 
           {err && <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--red,#ff6b6b)', marginBottom: 10 }}>{err}</div>}
           {state === 'ok' && <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--green,#b4ff6f)', marginBottom: 10 }}>✓ Payout saved and applied to {updated} card{updated === 1 ? '' : 's'}.</div>}
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-dim)' }}>
+            <input type="checkbox" checked={applyAll} onChange={e => setApplyAll(e.target.checked)} style={{ width: 15, height: 15, accentColor: 'var(--amber)' }} />
+            Overwrite every card (including any per-card overrides)
+          </label>
 
           <button
             onClick={apply}
