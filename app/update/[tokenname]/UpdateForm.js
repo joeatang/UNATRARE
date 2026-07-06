@@ -141,6 +141,7 @@ export default function UpdateForm({ initialData }) {
   return (
     <div className={styles.wrap}>
       <div className={styles.header}>
+        <Link href={`/card/${name}`} style={{ fontFamily: 'var(--font-card)', fontSize: 11, letterSpacing: 2, color: 'var(--amber)', textDecoration: 'none', display: 'inline-block', marginBottom: 10 }}>← back to card</Link>
         <div className={styles.eyebrow}>artist update</div>
         <h1 className={styles.title}>{name}</h1>
         <p className={styles.subtitle}>
