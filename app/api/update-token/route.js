@@ -186,8 +186,10 @@ export async function POST(request) {
   if (typeof artistSolAddress === 'string') {
     const s = artistSolAddress.trim();
     if (s === '') {
-      updates.artist_sol_address = '';
-      updates.artist_sol_verified_at = null;
+      // NO-OP. Never silently wipe a saved payout address. This previously set
+      // artist_sol_address='' whenever the update form submitted a blank field,
+      // which zeroed artists' 31% split the moment they edited any other field
+      // (e.g. description/art). Clearing a payout must be an explicit admin action.
     } else if (SOL_ADDR_RE.test(s)) {
       updates.artist_sol_address = s;
       updates.artist_sol_verified_at = Math.floor(Date.now() / 1000);
