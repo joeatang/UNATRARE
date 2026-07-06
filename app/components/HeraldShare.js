@@ -115,7 +115,7 @@ export default function HeraldShare({ card, title }) {
         disabled={connecting}
         style={{ ...btn, background: 'var(--amber)', color: '#080808', fontWeight: 700, border: '1px solid var(--amber)' }}
       >
-        {connecting ? 'connecting…' : '🔥 Share & earn Reach'}
+        {connecting ? 'connecting…' : '🔥 Share & earn UNATREACH'}
       </button>
 
       {open && (
@@ -131,7 +131,7 @@ export default function HeraldShare({ card, title }) {
               <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-dim)', marginBottom: 10 }}>
                 {noProvider
                   ? 'No wallet on this browser. Enter your handle to get your tracked link — it works anywhere.'
-                  : 'Tell us who you are so your shares earn Reach:'}
+                  : 'Tell us who you are so your shares earn UNATREACH:'}
               </div>
               <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
                 <span style={{ alignSelf: 'center', color: 'var(--text-dim)', fontFamily: 'var(--font-card)' }}>@</span>
@@ -159,7 +159,7 @@ export default function HeraldShare({ card, title }) {
           ) : tracked ? (
             <>
               <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--green, #b4ff6f)', marginBottom: 10 }}>
-                ✓ Tracked to <strong>{idLabel}</strong> — every real click and everyone you bring to salute builds your Reach.{' '}
+                ✓ Tracked to <strong>{idLabel}</strong> — every real click and everyone you bring to salute builds your UNATREACH.{' '}
                 <button type="button" onClick={() => { setIdentify(true); }} style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', textDecoration: 'underline', fontSize: 11 }}>
                   not you?
                 </button>

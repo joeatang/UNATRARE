@@ -686,7 +686,7 @@ function ReachActivityPanel({ authToken }) {
         onClick={() => setOpen(o => !o)}
         style={{ width: '100%', textAlign: 'left', padding: '14px 20px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '3px', color: 'var(--amber)' }}
       >
-        {open ? '▲' : '▼'} 📣 REACH ACTIVITY · HERALDS
+        {open ? '▲' : '▼'} 📣 UNATREACH ACTIVITY · HERALDS
       </button>
       {open && (
         <div style={{ padding: '0 20px 20px' }}>

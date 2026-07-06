@@ -313,7 +313,7 @@ export default async function TorchbearerPage({ params }) {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap', marginBottom: 8 }}>
-              <span style={{ fontFamily: 'var(--font-card)', fontSize: 11, letterSpacing: 3, color: 'var(--amber)' }}>📣 REACH</span>
+              <span style={{ fontFamily: 'var(--font-card)', fontSize: 11, letterSpacing: 3, color: 'var(--amber)' }}>📣 UNATREACH</span>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: reachT.color }}>{Math.round(reachVal.reach).toLocaleString()}</span>
               <span style={{ fontFamily: 'var(--font-card)', fontSize: 11, letterSpacing: 2, color: reachT.color, border: `1px solid ${reachT.color}55`, borderRadius: 999, padding: '2px 10px' }}>{reachT.label}</span>
             </div>
@@ -340,7 +340,7 @@ export default async function TorchbearerPage({ params }) {
               </div>
             ) : (
               <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text)', lineHeight: 1.6 }}>
-                No beacons lit yet. Share any card with your link to start your Reach —{' '}
+                No beacons lit yet. Share any card with your link to start your UNATREACH —{' '}
                 <strong>every real click and every person you bring to salute counts</strong>. No burn required.
               </div>
             )}

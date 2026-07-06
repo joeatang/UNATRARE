@@ -48,7 +48,7 @@ export async function GET() {
           <div style={{ display: 'flex', fontSize: 108, lineHeight: 1, fontWeight: 900 }}>Become a</div>
           <div style={{ display: 'flex', fontSize: 108, lineHeight: 1.05, fontWeight: 900, color: AMBER }}>Herald.</div>
           <div style={{ display: 'flex', fontSize: 32, lineHeight: 1.45, marginTop: 26, maxWidth: 880 }}>
-            Support the art even if you can’t spend. Share a card, bring real people in, and build your public Reach.
+            Support the art even if you can’t spend. Share a card, bring real people in, and build your public UNATREACH.
           </div>
           <div style={{ display: 'flex', fontSize: 25, color: GREEN, marginTop: 14 }}>
             No funds needed. Word of mouth counts. Burning only multiplies it.
