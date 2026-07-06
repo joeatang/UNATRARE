@@ -53,7 +53,7 @@ export async function GET() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
           <Update tag="STUDIO" line="One hub for your submissions, card updates & payouts." />
           <Update tag="PAYOUTS" line="Set your Solana address once — it applies to ALL your cards. You earn 31% of every salute." />
-          <Update tag="UNATREACH" line="A new reputation you build by sharing your art. No funds needed." />
+          <Update tag="UNATREACH" line="Your community earns this by sharing your cards — fans become promoters, bringing you more salutes. (You can share too.)" />
           <Update tag="TORCHBEARERS" line="Your supporters — now ranked and credited right on your cards." />
         </div>
 
@@ -61,7 +61,7 @@ export async function GET() {
           <div style={{ display: 'flex', fontSize: 24, letterSpacing: 5, color: GREEN, fontWeight: 800 }}>ACTIONS TO TAKE NOW</div>
           <Action n="1" line="Open the Studio → set your payout address (one signature)." />
           <Action n="2" line="Check your card shows 'TO ARTIST' — that's your 31%." />
-          <Action n="3" line="Share your cards to start earning UNATREACH." />
+          <Action n="3" line="Rally your supporters to share your cards & earn UNATREACH." />
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
