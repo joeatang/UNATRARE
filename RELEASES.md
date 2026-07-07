@@ -29,6 +29,18 @@ Full economy design: `docs/cash-rewards-economy.md`.
 
 ---
 
+## Fix — "690M not 69M"  ·  build `B3_DhoRuDNp2V40NQoUZM`  ·  2026-07-06
+
+Display-only bug in `fmtCash` (lib/saluteDisplay.js): the trailing-zero trimmer
+(meant for decimals like `1.500`→`1.5`) was also eating the last zero of **whole
+numbers** — so a 690M salute rendered as **69M**, 100M as 1M, 690K as 69K, etc.
+Any round value in `[100M,1B)` or `[100K,1M)` was shown 10× too small everywhere
+`fmtCash` is used (card pages, burns ledger, Hall of Fire, Telegram posts).
+Underlying salute data was always correct on-chain and in the DB — only the label
+was wrong. Fix: `trimZeros()` now strips trailing zeros **only after a decimal point**.
+
+---
+
 ## Meritocracy Salutes + Artist Payout Fixes  ·  build `uaUSPOsJ54InUx49OeCIf`  ·  2026-07-06
 
 Salutes are no longer gated behind the council stamp, and the artist SOL payout now
