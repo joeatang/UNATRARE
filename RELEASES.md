@@ -29,6 +29,18 @@ Full economy design: `docs/cash-rewards-economy.md`.
 
 ---
 
+## Fix — "One number, one format"  ·  build `hG7VyinS6KEQs7GVSUny4`  ·  2026-07-07
+
+Follow-up to the 690M fix. The same $CASH amount was rendering differently on every
+surface because ~5 duplicate formatters existed (card page "1.385B", salute panel
+"1.39B", Telegram bot "1.4B" — and fractions shown in some places, dropped in others).
+Consolidated all salute-facing formatters onto the single `fmtCash` in
+`lib/saluteDisplay.js` (added a `T` tier): the SalutePanel, SaluteCeremonySpotlight,
+CeremonyBurnPanel, and the standalone Telegram bot now import the one function, so
+numbers match everywhere. The tgbot picks this up on its next restart.
+
+---
+
 ## Fix — "690M not 69M"  ·  build `B3_DhoRuDNp2V40NQoUZM`  ·  2026-07-06
 
 Display-only bug in `fmtCash` (lib/saluteDisplay.js): the trailing-zero trimmer
