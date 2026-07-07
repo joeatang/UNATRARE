@@ -17,7 +17,7 @@ export default async function UpdatePage({ params }) {
     token = db.prepare(`
       SELECT token_name, display_title, artist_handle, description, official_signal,
              category, subcategory, art_url, art_mime,
-             audio_url, video_url, artist_address, owner_address
+             audio_url, video_url, artist_address, owner_address, artist_sol_address
       FROM tokens WHERE token_name = ?
     `).get(name);
   } catch {
@@ -43,6 +43,7 @@ export default async function UpdatePage({ params }) {
     video_url:     token.video_url     || '',
     art_url:       token.art_url       || '',
     art_mime:      token.art_mime      || '',
+    artist_sol_address: token.artist_sol_address || '',
   };
 
   return (

@@ -14,6 +14,7 @@ export default function UpdateForm({ initialData }) {
 
   const [displayTitle,  setDisplayTitle]  = useState(initialData.display_title);
   const [artistHandle,  setArtistHandle]  = useState(initialData.artist_handle);
+  const [solPayout,     setSolPayout]     = useState(initialData.artist_sol_address || '');
   const [description,   setDescription]  = useState(initialData.description || '');
   const [officialSignal, setOfficialSignal] = useState(initialData.official_signal || '');
   const [campaignUpdate, setCampaignUpdate] = useState('');
@@ -69,6 +70,12 @@ export default function UpdateForm({ initialData }) {
       return;
     }
 
+    const solTrim = solPayout.trim();
+    if (solTrim && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(solTrim)) {
+      setError('Card payout must be a valid Solana address (or leave it blank).');
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch('/api/update-token', {
@@ -80,6 +87,7 @@ export default function UpdateForm({ initialData }) {
           signature:    sig.trim(),
           displayTitle: displayTitle.trim(),
           artistHandle: artistHandle.trim(),
+          artistSolAddress: solPayout.trim(),
           description:  description.trim(),
           officialSignal: officialSignal.trim(),
           campaignUpdate: campaignUpdate.trim(),
@@ -227,6 +235,24 @@ export default function UpdateForm({ initialData }) {
                 maxLength={64}
                 placeholder="yourhandle"
               />
+            </div>
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>Card payout address <span className={styles.opt}>(optional override)</span></label>
+            <input
+              type="text"
+              className={styles.input}
+              value={solPayout}
+              onChange={e => setSolPayout(e.target.value.trim())}
+              maxLength={48}
+              spellCheck={false}
+              placeholder="Solana address for THIS card only"
+            />
+            <div className={styles.hint}>
+              Leave as-is to keep your current payout. Enter a different Solana address to route
+              THIS card&apos;s 31% artist share to another wallet — your account default still
+              applies to your other cards.
             </div>
           </div>
 

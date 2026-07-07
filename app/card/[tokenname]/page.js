@@ -466,7 +466,17 @@ export default async function CardPage({ params }) {
             )}
 
             {token.revealed_at ? (
-              <SalutePanel cardName={token.token_name} />
+              <>
+                <div style={{
+                  fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '1px',
+                  color: 'var(--text-dim)', textAlign: 'center', padding: '0 0 10px',
+                }}>
+                  {(token.artist_sol_address || '').trim()
+                    ? '🎨 31% of your salute goes to the artist · 69% is burned forever'
+                    : '🔥 100% of your salute is burned forever'}
+                </div>
+                <SalutePanel cardName={token.token_name} />
+              </>
             ) : (
               <div style={{
                 fontFamily: 'var(--font-card)', fontSize: '10px', letterSpacing: '2px',
@@ -742,7 +752,7 @@ export default async function CardPage({ params }) {
                 metadata json →
               </Link>
               <Link href={`/studio/update/${token.token_name}`} className={styles.actionBtnSecondary}>
-                artist: manage this card →
+                are you the artist? edit this card →
               </Link>
             </div>
 
