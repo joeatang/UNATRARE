@@ -1027,9 +1027,12 @@ function Step3({ data, onNext, onBack }) {
           ★ ARTIST $CASH PAYOUT · OPTIONAL
         </div>
         <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 10 }}>
-          When fans salute your card by burning $CASH, a portion routes to you. Paste the Solana address where you want that share sent. Skip if you don&apos;t have one — you can add it anytime from your card&apos;s status page.
+          When fans salute your card by burning $CASH, 31% routes to you.
           <br /><br />
-          <strong>Already set a payout in your Artist Studio?</strong> Leave this blank — your saved payout address applies to every new card automatically.
+          Enter your Solana payout <strong>once</strong> — it&apos;s saved to your Artist Studio and
+          applied to <strong>every card you make, now and in the future</strong>. Already set it in the
+          Studio? Leave this blank. Want one card paid to a different wallet? Enter that address here
+          (this card only).
         </div>
         <input
           type="text"

@@ -229,17 +229,32 @@ export async function POST(request) {
       : '';
 
     // ── Artist SOL payout ──────────────────────────────────────────────
-    // Use the address entered in the wizard; if blank, inherit the artist's
-    // account-level payout (set once in the Studio) so new cards don't need
-    // it re-entered every time. Split path (getSplitSnapshot) only needs a
-    // non-empty tokens.artist_sol_address to route the 31% artist share.
+    // Single source of truth = the artist's ACCOUNT-level payout
+    // (artists.sol_payout_address, set once in the Studio). Card payout:
+    //   1. use the address entered in this wizard (per-card), else
+    //   2. inherit the account default so it never needs re-entering.
+    // Convenience: if the artist enters an address here and has NO account
+    // default yet, make it their account default so every FUTURE card inherits
+    // it automatically ("set once, applies everywhere"). Owner is BIP-137
+    // verified above, so this is a trusted write; it never overwrites an
+    // existing account default (that stays the source of truth).
     const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
     const solTrim = typeof artistSolAddress === 'string' ? artistSolAddress.trim() : '';
-    let finalArtistSol = SOL_ADDR_RE.test(solTrim) ? solTrim : '';
-    if (!finalArtistSol) {
-      const acct = db.prepare('SELECT sol_payout_address FROM artists WHERE btc_address = ?').get(owner);
-      const acctSol = (acct?.sol_payout_address || '').trim();
-      if (SOL_ADDR_RE.test(acctSol)) finalArtistSol = acctSol;
+    const enteredSol = SOL_ADDR_RE.test(solTrim) ? solTrim : '';
+
+    const acctRow = db.prepare('SELECT btc_address, sol_payout_address FROM artists WHERE btc_address = ?').get(owner);
+    const acctSol = (acctRow?.sol_payout_address || '').trim();
+    const finalArtistSol = enteredSol || (SOL_ADDR_RE.test(acctSol) ? acctSol : '');
+
+    if (enteredSol && !SOL_ADDR_RE.test(acctSol)) {
+      const nowSec = Math.floor(Date.now() / 1000);
+      if (acctRow) {
+        db.prepare('UPDATE artists SET sol_payout_address = ?, sol_payout_verified_at = ?, updated_at = ? WHERE btc_address = ?')
+          .run(enteredSol, nowSec, nowSec, owner);
+      } else {
+        db.prepare('INSERT INTO artists (btc_address, sol_payout_address, sol_payout_verified_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?)')
+          .run(owner, enteredSol, nowSec, nowSec, nowSec);
+      }
     }
 
     db.prepare(`
