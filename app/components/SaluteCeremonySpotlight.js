@@ -1,16 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { fmtCash } from '../../lib/saluteDisplay';
 
-function fmt(n) {
-  const v = Number(n || 0);
-  if (!v) return '0';
-  if (v >= 1e12) return (v / 1e12).toFixed(2).replace(/\.?0+$/, '') + 'T';
-  if (v >= 1e9) return (v / 1e9).toFixed(2).replace(/\.?0+$/, '') + 'B';
-  if (v >= 1e6) return (v / 1e6).toFixed(2).replace(/\.?0+$/, '') + 'M';
-  if (v >= 1e3) return (v / 1e3).toFixed(1).replace(/\.?0+$/, '') + 'K';
-  return String(Math.round(v));
-}
+// $CASH amounts use the single shared formatter (consistent across every surface).
+const fmt = fmtCash;
 
 function truncWallet(addr) {
   if (!addr) return '';

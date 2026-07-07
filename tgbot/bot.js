@@ -23,6 +23,7 @@ import { readFile as readFileAsync } from 'fs/promises';
 import { dirname, join, basename } from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
+import { fmtCash } from '../lib/saluteDisplay.js';
 
 const __dirname  = dirname(fileURLToPath(import.meta.url));
 const require    = createRequire(import.meta.url);
@@ -394,13 +395,8 @@ function fmtBtc(sats) {
   if (n === 0) return '0 BTC';
   return `${(n / 1e8).toFixed(8).replace(/0+$/, '').replace(/\.$/, '')} BTC`;
 }
-function fmtCash(n) {
-  const v = Number(n) || 0;
-  if (v >= 1e9) return `${(v / 1e9).toFixed(v >= 1e10 ? 0 : 1).replace(/\.0$/, '')}B`;
-  if (v >= 1e6) return `${(v / 1e6).toFixed(v >= 1e7 ? 0 : 1).replace(/\.0$/, '')}M`;
-  if (v >= 1e3) return `${(v / 1e3).toFixed(v >= 1e4 ? 0 : 1).replace(/\.0$/, '')}K`;
-  return `${Math.round(v)}`;
-}
+// fmtCash is imported from ../lib/saluteDisplay.js — one shared formatter so the
+// bot's numbers always match the website (no more 690M-vs-69M / decimal drift).
 function clean(s) {
   return s.replace(/\n{3,}/g, '\n\n').trim();
 }

@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import styles from './CeremonyBurnPanel.module.css';
+import { fmtCash } from '../../lib/saluteDisplay';
 
 const CASH_MINT       = 'oMhwtzE6KeovcRMFAsFocEA6GcZUTAYFdvQ7tpJfnat';
 const TOKEN_PROG      = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
@@ -33,14 +34,8 @@ function truncWallet(addr) {
   return addr.slice(0, 5) + '…' + addr.slice(-4);
 }
 
-function fmt(n) {
-  if (!n) return '0';
-  if (n >= 1e12) return (n / 1e12).toFixed(2).replace(/\.?0+$/, '') + 'T';
-  if (n >= 1e9)  return (n / 1e9).toFixed(2).replace(/\.?0+$/, '') + 'B';
-  if (n >= 1e6)  return (n / 1e6).toFixed(2).replace(/\.?0+$/, '') + 'M';
-  if (n >= 1e3)  return (n / 1e3).toFixed(1).replace(/\.?0+$/, '') + 'K';
-  return n.toFixed(0);
-}
+// $CASH amounts use the single shared formatter (consistent across every surface).
+const fmt = fmtCash;
 
 function parseToRaw(str, decimals) {
   if (!str || !str.trim()) return 0n;
