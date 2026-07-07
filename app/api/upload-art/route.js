@@ -198,12 +198,32 @@ export async function POST(request) {
       }
     }
 
+    // Generate a 400px-wide card thumbnail (JPEG) — this is the wallet `image` field.
+    // A 48x48 icon renders blank/unofficial in Freewallet; the full art (300 KB–3 MB)
+    // times out the wallet's thumbnail fetch. This mid-size JPEG (~40-120 KB) is the
+    // middle ground: real, legible artwork that always loads. First frame only for GIFs.
+    let card_url = null;
+    if (THUMBABLE_MIME.has(effectiveMime)) {
+      try {
+        const cardBuf = await sharp(buf, { pages: 1 })
+          .resize(400, 560, { fit: 'inside', withoutEnlargement: true })
+          .flatten({ background: '#000000' })
+          .jpeg({ quality: 82 })
+          .toBuffer();
+        await writeFile(path.join(UPLOAD_DIR, `${hash}_card.jpg`), cardBuf);
+        card_url = `/uploads/${hash}_card.jpg`;
+      } catch (cardErr) {
+        // Non-fatal — metadata will fall back to the full art URL
+        console.warn('[upload-art] card thumb generation failed:', cardErr.message);
+      }
+    }
+
     // Fire-and-forget: also store in Hyperdrive for P2P redundancy
     storeArt(hash, buf.toString('base64'), effectiveMime).catch(() => {});
 
     // Public URL — served by Next.js static file serving
     const url = `/uploads/${filename}`;
-    return NextResponse.json({ ok: true, url, filename, hash, icon_url, mediaType });
+    return NextResponse.json({ ok: true, url, filename, hash, icon_url, card_url, mediaType });
   } catch (err) {
     console.error('Upload error:', err);
     return NextResponse.json({ ok: false, error: 'Storage error — please try again' }, { status: 500 });

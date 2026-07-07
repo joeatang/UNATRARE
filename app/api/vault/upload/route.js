@@ -183,6 +183,24 @@ export async function POST(req) {
       }
     }
 
+    // Generate a 400px-wide card thumbnail (JPEG) for the wallet `image` field.
+    // Real, legible art that renders in Freewallet without timing out (unlike the
+    // blank 48x48 icon or the full-weight original). First frame only for GIFs.
+    let card_url = null;
+    if (THUMBABLE_MIME.has(file.type)) {
+      try {
+        const cardBuf = await sharp(buf, { pages: 1 })
+          .resize(400, 560, { fit: 'inside', withoutEnlargement: true })
+          .flatten({ background: '#000000' })
+          .jpeg({ quality: 82 })
+          .toBuffer();
+        await writeFile(path.join(UPLOAD_DIR, `${hash}_card.jpg`), cardBuf);
+        card_url = `/uploads/vault/${hash}_card.jpg`;
+      } catch (cardErr) {
+        console.error('[vault/upload] card thumb gen failed:', cardErr?.message);
+      }
+    }
+
     // Store in Hyperdrive for P2P replication
     storeArt(hash, buf.toString('base64'), file.type).catch(() => {});
 
@@ -201,7 +219,7 @@ export async function POST(req) {
     );
 
     console.log(`[vault/upload] ${token_name} ${hash.slice(0, 8)}... promo=${promo.promo}`);
-    return NextResponse.json({ ok: true, hash, art_url, icon_url, json_url, is_promo: promo.promo });
+    return NextResponse.json({ ok: true, hash, art_url, icon_url, card_url, json_url, is_promo: promo.promo });
 
   } catch (err) {
     console.error('[vault/upload]', err?.message ?? err);

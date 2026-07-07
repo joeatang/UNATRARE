@@ -35,7 +35,11 @@ export async function GET(req, { params }) {
     const baseUrl  = process.env.NEXT_PUBLIC_BASE_URL || 'https://unatrare.wtf';
     const ext      = asset.art_mime.split('/')[1].replace('jpeg', 'jpg');
     const art_url  = `${baseUrl}/uploads/vault/${hash}.${ext}`;
-    const icon_url = `${baseUrl}/uploads/vault/${hash}_icon.png`;
+    // Card thumbnail (400px JPEG) — the wallet `image` slot. Real art that renders in
+    // Freewallet without timing out. Falls back to the full art for non-raster mimes.
+    const card_url = /^image\/(png|jpe?g|gif|webp)$/.test(asset.art_mime)
+      ? `${baseUrl}/uploads/vault/${hash}_card.jpg`
+      : art_url;
     const name     = asset.asset_name || asset.token_name;
 
     // Embed the large image in the description so HTML-rendering explorers
@@ -55,7 +59,7 @@ export async function GET(req, { params }) {
       asset:                 asset.token_name,
       name,
       description,
-      image:                 icon_url,
+      image:                 card_url,
       image_large:           art_url,
       image_title:           name,
       website:               baseUrl,
