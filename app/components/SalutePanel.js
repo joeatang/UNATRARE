@@ -1065,6 +1065,15 @@ export default function SalutePanel({ cardName }) {
         )}
 
         {/* ── Security / wallet-warning education ─────────────────────────── */}
+        <div style={{
+          fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text)',
+          lineHeight: 1.6, marginBottom: 10, padding: '9px 11px',
+          border: '1px solid var(--amber)', borderRadius: 6, background: 'rgba(255,180,0,0.06)',
+        }}>
+          🔒 Your wallet should ask to <strong>burn $CASH</strong> — never to transfer SOL, approve unlimited
+          spending, or reveal a seed phrase. If it asks for anything else, <strong>close the tab</strong>.
+        </div>
+
         <details style={{
           fontFamily: 'var(--font-body)',
           fontSize: '11px',

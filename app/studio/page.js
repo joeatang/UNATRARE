@@ -83,16 +83,17 @@ export default function StudioPage({ searchParams }) {
             ) : null}
             <Link href="/studio/sol-payout-help" style={{
               padding: '10px 14px',
-              border: '1px solid var(--border)',
-              background: 'transparent',
-              color: 'var(--ink)',
+              border: '1px solid var(--amber)',
+              background: 'var(--amber)',
+              color: '#080808',
               textDecoration: 'none',
               fontFamily: 'var(--font-card)',
               fontSize: 10,
               letterSpacing: '2px',
               textTransform: 'uppercase',
+              fontWeight: 700,
             }}>
-              SOL payout help
+              💰 Set your payout · all cards
             </Link>
           </div>
         </div>
