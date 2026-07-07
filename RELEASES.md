@@ -42,7 +42,9 @@ actually sticks across cards. Also retired the dead UNATPEPE "420" drop copy.
 - **Artist SOL payout persists on submission.** Root bug: the submit route silently dropped
   the SOL address on every new card (the column was omitted from the INSERT). It's now saved,
   and when left blank it **inherits the artist's account-level payout** (set once in the
-  Studio) so it never needs re-entering. Wizard copy updated to say so.
+  Studio) so it never needs re-entering. First-time convenience (build `R_CbTCOKx02cMs4_amRrY`):
+  entering an address on your *first* submission also **seeds it as your account default**, so
+  every future card inherits it automatically — set once, applies everywhere. Wizard copy updated.
 - **Retired stale "420" drop copy.** Removed the deprecated UNATPEPE-holder-drop allocation
   section from the submit wizard and the matching "Path A" content on `/terms`; relabeled the
   fee section and rewrote "The Deal" to the flat-fee reality (keep 100% of your supply).
