@@ -29,6 +29,26 @@ Full economy design: `docs/cash-rewards-economy.md`.
 
 ---
 
+## Meritocracy Salutes + Artist Payout Fixes  ·  build `uaUSPOsJ54InUx49OeCIf`  ·  2026-07-06
+
+Salutes are no longer gated behind the council stamp, and the artist SOL payout now
+actually sticks across cards. Also retired the dead UNATPEPE "420" drop copy.
+
+- **Salutes open to any approved card.** Dropped the `council_certified = 1` requirement
+  from the salute path — any **approved + revealed** card can now be promoted and saluted.
+  Certification is now purely an honor/badge, not a paywall on support. Changed the salute
+  API gate, the card-page panel gate, and the Telegram announcement image (keys off
+  `revealed_at`, so real art shows for revealed-but-unstamped cards).
+- **Artist SOL payout persists on submission.** Root bug: the submit route silently dropped
+  the SOL address on every new card (the column was omitted from the INSERT). It's now saved,
+  and when left blank it **inherits the artist's account-level payout** (set once in the
+  Studio) so it never needs re-entering. Wizard copy updated to say so.
+- **Retired stale "420" drop copy.** Removed the deprecated UNATPEPE-holder-drop allocation
+  section from the submit wizard and the matching "Path A" content on `/terms`; relabeled the
+  fee section and rewrote "The Deal" to the flat-fee reality (keep 100% of your supply).
+
+---
+
 ## Status Everywhere — "Colors That Travel"  ·  build `W87U7r5sFRD97yz5v6VRT`  ·  2026-07-03
 
 Makes identity status **visible wherever a person shows up**, and lights the 🐸/🖥️
