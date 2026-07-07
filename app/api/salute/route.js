@@ -110,12 +110,16 @@ export async function POST(request) {
     return NextResponse.json({ error: 'too many attempts for this wallet — try again shortly' }, { status: 429 });
   }
 
+  // Meritocracy: salutes are open to any APPROVED + REVEALED card. Council
+  // certification (council_certified) is a separate honor / stamp — NOT a
+  // prerequisite for supporters to promote and back a card. If a card can
+  // earn salutes before it's stamped, that's the point.
   const card = db.prepare(
-    "SELECT token_name, artist_sol_address FROM tokens WHERE token_name = ? AND status = 'approved' AND council_certified = 1 AND revealed_at IS NOT NULL"
+    "SELECT token_name, artist_sol_address FROM tokens WHERE token_name = ? AND status = 'approved' AND revealed_at IS NOT NULL"
   ).get(cardNameClean);
   if (!card) {
     logSaluteEvent(db, 'card_not_found', { clientIp, cardName: cardNameClean, solWallet: sol_wallet, txSig: tx_sig });
-    return NextResponse.json({ error: 'card not found or not certified' }, { status: 404 });
+    return NextResponse.json({ error: 'card not found or not yet approved' }, { status: 404 });
   }
 
   const gate = getCeremonyGateDecision(db, cardNameClean);
@@ -276,9 +280,8 @@ export async function POST(request) {
   } catch { /* referral accrual is best-effort; never affects the salute */ }
 
   // Telegram salute announcement (fire-and-forget, never blocks the API).
-  // Burns are already gated to certified + revealed cards above, and
-  // notifySalute additionally swaps in the mystery placeholder for any
-  // uncertified token — so this can never leak hidden art.
+  // Burns are gated to approved + revealed cards above, and notifySalute keys
+  // the image off revealed_at — so this can never leak hidden art.
   try {
     const tokenRow = db.prepare(
       'SELECT token_name, display_title, art_url, art_mime, art_cover_url, artist_handle, artist_address, council_certified, revealed_at FROM tokens WHERE token_name = ?'

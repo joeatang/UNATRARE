@@ -775,7 +775,6 @@ function Step3({ data, onNext, onBack }) {
   const [category, setCategory] = useState(data.category || '');
   const [subcategory, setSubcategory] = useState(data.subcategory || '');
   const [inscription, setInscription] = useState(data.ordInscription || '');
-  const [allocQty, setAllocQty] = useState(data.unatpepeAllocQty ? String(data.unatpepeAllocQty) : '');
   const [solAddr, setSolAddr] = useState(data.artistSolAddress || '');
   const [errMsg, setErrMsg] = useState('');
 
@@ -860,7 +859,7 @@ function Step3({ data, onNext, onBack }) {
       videoUrl:          videoResult?.url  || '',
       videoMime:         videoResult?.mime || '',
       videoHash:         videoResult?.hash || '',
-      unatpepeAllocQty:  Math.max(0, parseInt(allocQty, 10) || 0),
+      unatpepeAllocQty:  0,
       artistSolAddress:  trimmedSol,
     });
   }
@@ -1029,6 +1028,8 @@ function Step3({ data, onNext, onBack }) {
         </div>
         <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 10 }}>
           When fans salute your card by burning $CASH, a portion routes to you. Paste the Solana address where you want that share sent. Skip if you don&apos;t have one — you can add it anytime from your card&apos;s status page.
+          <br /><br />
+          <strong>Already set a payout in your Artist Studio?</strong> Leave this blank — your saved payout address applies to every new card automatically.
         </div>
         <input
           type="text"
@@ -1052,63 +1053,6 @@ function Step3({ data, onNext, onBack }) {
              style={{ color: 'var(--amber)', textDecoration: 'none' }}>
             Get Phantom (free, 2 min) ↗
           </a>
-        </div>
-      </div>
-
-      {/* ── UNATPEPE holder drop (optional) ── */}
-      <div style={{ marginTop: 8, marginBottom: 20 }}>
-        <div style={{
-          fontFamily: 'var(--font-card)', fontSize: '9px', letterSpacing: '3px',
-          color: 'var(--text-dim)', marginBottom: 10,
-        }}>
-          ★ UNATPEPE HOLDER DROP · OPTIONAL
-        </div>
-        <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 10 }}>
-          UNATPEPE holders are the founding community of this platform. You can offer them an allocation of your token — completely optional. Your approval is based on the art, not this.
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-          <input
-            type="number"
-            min="0"
-            value={allocQty}
-            onChange={e => setAllocQty(e.target.value)}
-            placeholder="0"
-            style={{
-              width: 80, padding: '6px 10px',
-              background: 'var(--bg-card)', border: '1px solid var(--border)',
-              color: 'var(--text)', fontFamily: 'var(--font-card)', fontSize: 14,
-              letterSpacing: '1px', outline: 'none',
-            }}
-          />
-          <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-dim)' }}>
-            copies · UNATPEPE total supply: 420
-          </span>
-        </div>
-        {(() => {
-          const n = parseInt(allocQty, 10);
-          if (!n || n <= 0) return (
-            <div style={{ fontSize: '11px', color: 'var(--text-dim)', fontStyle: 'italic' }}>
-              Leave blank or 0 to skip. No effect on your submission.
-            </div>
-          );
-          if (n < 10) return (
-            <div style={{ fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.5 }}>
-              Private raffle. One verified UNATPEPE holder will be selected randomly. No public announcement.
-            </div>
-          );
-          if (n < 420) return (
-            <div style={{ fontSize: '11px', color: 'var(--amber)', lineHeight: 1.5 }}>
-              Partial drop. Distributed by raffle among verified claimants, up to {n} total. Announced on the platform.
-            </div>
-          );
-          return (
-            <div style={{ fontSize: '11px', color: 'var(--green)', lineHeight: 1.5 }}>
-              Full drop. Enough for every active UNATPEPE holder. Featured announcement + UNATPEPE SUPPORTED treatment on your card.
-            </div>
-          );
-        })()}
-        <div style={{ marginTop: 8, fontSize: '10px', color: 'var(--text-dim)', lineHeight: 1.5 }}>
-          Only verified holders who claim during the drop window receive a copy. Unclaimed copies stay with you.
         </div>
       </div>
 

@@ -465,7 +465,7 @@ export default async function CardPage({ params }) {
               <SaluteCeremonySpotlight cardName={token.token_name} />
             )}
 
-            {token.council_certified === 1 && token.revealed_at ? (
+            {token.revealed_at ? (
               <SalutePanel cardName={token.token_name} />
             ) : (
               <div style={{
@@ -473,7 +473,7 @@ export default async function CardPage({ params }) {
                 color: 'var(--text-dim)', textAlign: 'center', padding: '24px 0',
                 border: '1px dashed #2a2a2a', margin: '12px 0',
               }}>
-                ○ SALUTES OPEN AFTER COUNCIL STAMPS THIS CARD
+                ○ SALUTES OPEN ONCE THIS CARD IS REVEALED
               </div>
             )}
 

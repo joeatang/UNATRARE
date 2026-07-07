@@ -26,16 +26,11 @@ export default function TermsPage() {
           <h2 className={styles.sectionTitle}>THE DEAL</h2>
           <div className={styles.prose}>
             <p>
-              UNATRARE doesn&apos;t charge an upfront fee to list. Instead, we ask for
-              a small slice of your token supply — distributed to the people who
-              make this directory worth having: UNATPEPE holders, your fellow artists,
-              and the network itself.
+              UNATRARE lists your card for a flat submission fee — no cut of your
+              token supply, no forced distribution.
             </p>
             <p>
-              You keep the rest. You set the price. You own the token forever.
-            </p>
-            <p>
-              There is also a cash-out path (Path B) if you&apos;d rather keep 100% of your supply.
+              You keep 100% of your supply. You set the price. You own the token forever.
             </p>
           </div>
         </section>
@@ -48,62 +43,16 @@ export default function TermsPage() {
               There is no platform-enforced minimum supply. You choose your supply — any number you&apos;d issue
               on Counterparty is valid here.
             </p>
-            <p>
-              If you opt to offer a UNATPEPE holder drop during submission, we recommend issuing at least enough
-              for your intended allocation. UNATPEPE total supply is fixed at 420.
-            </p>
           </div>
         </section>
 
-        {/* ── Path A ── */}
+        {/* ── Submission fee ── */}
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>PATH A — UNATPEPE HOLDER DROP (OPTIONAL)</h2>
+          <h2 className={styles.sectionTitle}>SUBMISSION FEE (KEEP YOUR SUPPLY)</h2>
           <div className={styles.prose}>
             <p>
-              You can choose to offer UNATPEPE holders a free allocation of your token during submission.
-              This is entirely optional and has no effect on your certification outcome.
-            </p>
-            <p>
-              Choose how many copies to offer (1–9 = private raffle; 10–419 = partial drop; 420+ = full drop).
-              Only verified holders who claim during the drop window receive a copy.
-              Unclaimed copies remain with you.
-            </p>
-          </div>
-
-          <div className={styles.splitTable}>
-            <div className={styles.splitRow}>
-              <div className={styles.splitWho}>Full drop (420+)</div>
-              <div className={styles.splitNote}>Enough for every active UNATPEPE holder. Featured announcement on the platform.</div>
-            </div>
-            <div className={styles.splitRow}>
-              <div className={styles.splitWho}>Partial drop (10–419)</div>
-              <div className={styles.splitNote}>Distributed by raffle among verified claimants up to your chosen quantity.</div>
-            </div>
-            <div className={styles.splitRow}>
-              <div className={styles.splitWho}>Private raffle (1–9)</div>
-              <div className={styles.splitNote}>One or a few UNATPEPE holders selected randomly. No public announcement.</div>
-            </div>
-            <div className={styles.splitRow}>
-              <div className={styles.splitWho}>Opt out (0)</div>
-              <div className={styles.splitNote}>No allocation offered. Standard listing with no drop.</div>
-            </div>
-          </div>
-
-          <div className={styles.prose}>
-            <p>
-              Drops open for a <strong>30-day claim window</strong> after certification.
-              After the window closes, unclaimed copies are returned to you.
-            </p>
-          </div>
-        </section>
-
-        {/* ── Path B ── */}
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>PATH B — FLAT FEE (KEEP YOUR SUPPLY)</h2>
-          <div className={styles.prose}>
-            <p>
-              Prefer to keep 100% of your supply? Pay a flat listing fee instead.
-              No split. No distribution. Your token, fully yours from the start.
+              Pay a flat listing fee to submit. No split. No distribution.
+              Your token stays fully yours from the start.
             </p>
           </div>
 
@@ -124,7 +73,7 @@ export default function TermsPage() {
 
           <div className={styles.prose}>
             <p>
-              Path B is available at the time of submission. Select your currency and
+              The fee is paid at the time of submission. Select your currency and
               send to the payment address provided after verification. Your submission
               enters the mempool immediately on confirmed payment.
             </p>

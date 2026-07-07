@@ -68,6 +68,7 @@ export async function POST(request) {
     videoMime         = '',
     videoHash         = '',
     unatpepeAllocQty  = 0,
+    artistSolAddress  = '',
     burnTxid          = '',
   } = body || {};
 
@@ -227,14 +228,28 @@ export async function POST(request) {
       ? ordInscription.trim()
       : '';
 
+    // ── Artist SOL payout ──────────────────────────────────────────────
+    // Use the address entered in the wizard; if blank, inherit the artist's
+    // account-level payout (set once in the Studio) so new cards don't need
+    // it re-entered every time. Split path (getSplitSnapshot) only needs a
+    // non-empty tokens.artist_sol_address to route the 31% artist share.
+    const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+    const solTrim = typeof artistSolAddress === 'string' ? artistSolAddress.trim() : '';
+    let finalArtistSol = SOL_ADDR_RE.test(solTrim) ? solTrim : '';
+    if (!finalArtistSol) {
+      const acct = db.prepare('SELECT sol_payout_address FROM artists WHERE btc_address = ?').get(owner);
+      const acctSol = (acct?.sol_payout_address || '').trim();
+      if (SOL_ADDR_RE.test(acctSol)) finalArtistSol = acctSol;
+    }
+
     db.prepare(`
       INSERT INTO tokens
         (token_name, display_title, artist_address, artist_handle,
          description, category, subcategory, status, art_url, art_mime, art_hash,
          supply, cp_version, ord_inscription, submitted_at, series0_code_used,
          audio_url, audio_hash, audio_mime, video_url, video_hash, video_mime,
-         unatpepe_alloc_qty, softpwar_burn_txid)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, unixepoch(), ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         unatpepe_alloc_qty, softpwar_burn_txid, artist_sol_address, artist_sol_verified_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, unixepoch(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       normalized,
       normalized,
@@ -259,6 +274,8 @@ export async function POST(request) {
       videoMime.slice(0, 50),
       Math.max(0, parseInt(unatpepeAllocQty, 10) || 0),
       safeBurnTxid,
+      finalArtistSol,
+      finalArtistSol ? Math.floor(Date.now() / 1000) : null,
     );
 
     // Consume invite code if used
