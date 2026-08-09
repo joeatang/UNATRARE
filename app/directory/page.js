@@ -5,6 +5,17 @@ import styles from './directory.module.css';
 import { getDb } from '../../lib/db';
 import { getSalutesByCardBatch, tierFor, fmtCash } from '../../lib/saluteDisplay';
 import { getCardMomentumBatch } from '../../lib/signalWeight';
+import {
+  HONORARY_SERIES,
+  HONORARY_CAP,
+  ART_SERIES_CAP,
+  ART_SERIES_COUNT,
+  LAST_ART_SERIES,
+  TOTAL_CAP,
+  isHonorary,
+  capForSeries,
+  seriesLabel,
+} from '../../lib/seriesConfig';
 
 function toRoman(n) {
   const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
@@ -23,7 +34,8 @@ function getApproved(series, sort) {
       ? 'supply ASC, card_number ASC'   // supply ASC = rarest first (supply 1 before 21000)
       : 'series ASC, card_number ASC';
     let rows;
-    if (series) {
+    if (series !== null && series !== undefined) {
+      // Explicit series filter — 0 (Honorary) counts as a valid filter.
       rows = db.prepare(
         `SELECT * FROM tokens WHERE status='approved' AND series=? AND (is_demo IS NULL OR is_demo=0) AND (directory_hidden IS NULL OR directory_hidden=0) ORDER BY ${orderBy}`
       ).all(Number(series));
@@ -58,7 +70,10 @@ function getDirectoryStats() {
 export const revalidate = 60;
 
 export default function DirectoryPage({ searchParams }) {
-  const seriesFilter = searchParams?.series ? Number(searchParams.series) : null;
+  const rawSeries = searchParams?.series;
+  const seriesFilter = (rawSeries === undefined || rawSeries === '')
+    ? null
+    : Number(rawSeries);
   const sortMode = ['rarity', 'momentum'].includes(searchParams?.sort) ? searchParams.sort : 'card';
   const { grouped, total } = getApproved(seriesFilter, sortMode);
   const stats = getDirectoryStats();
@@ -96,8 +111,6 @@ export default function DirectoryPage({ searchParams }) {
     }
   }
 
-  const seriesNumbers = Object.keys(grouped).map(Number).sort((a, b) => a - b);
-
   const momentumCards = [];
   for (const arr of Object.values(grouped)) {
     for (const token of arr) {
@@ -131,6 +144,24 @@ export default function DirectoryPage({ searchParams }) {
     ).all().map(r => r.series);
   } catch { /* empty */ }
 
+  // Approved fill per series (used for progress + sealed badges + global counter).
+  // Always show all six art series in the header even if empty, so users see
+  // the structure. Honorary is only shown if it has cards.
+  const fillBySeries = new Map();
+  for (const s of [HONORARY_SERIES, 1, 2, 3, 4, 5, 6]) {
+    const arr = grouped[s] || [];
+    fillBySeries.set(s, arr.length);
+  }
+  const honoraryFill = fillBySeries.get(HONORARY_SERIES) || 0;
+  const totalArtFilled = [1,2,3,4,5,6].reduce((a,s) => a + (fillBySeries.get(s) || 0), 0);
+  const totalFilled = honoraryFill + totalArtFilled;
+  const totalRemaining = Math.max(0, TOTAL_CAP - totalFilled);
+
+  // Ensure Series 0 (Honorary) is rendered FIRST when present.
+  const seriesNumbers = Object.keys(grouped)
+    .map(Number)
+    .sort((a, b) => a - b);
+
   return (
     <>
       <Nav />
@@ -149,6 +180,17 @@ export default function DirectoryPage({ searchParams }) {
               <span className={styles.dirStatSep}>·</span>
               <span className={styles.dirStatRejected}>{stats.rejected} rejected</span>
             </div>
+            {/* Global project progress — Series 0 + 6 art series × 69 = 420 total */}
+            <div className={styles.projectProgress}>
+              <span className={styles.projectProgressLabel}>project</span>
+              <span className={styles.projectProgressCount}>
+                {totalFilled}<span className={styles.projectProgressSlash}> / </span>{TOTAL_CAP}
+              </span>
+              <span className={styles.projectProgressSep}>·</span>
+              <span className={styles.projectProgressRemain}>
+                {totalRemaining} slot{totalRemaining === 1 ? '' : 's'} remain
+              </span>
+            </div>
           </div>
           <Link href="/submit" className={styles.submitCta}>
             submit your token →
@@ -160,35 +202,40 @@ export default function DirectoryPage({ searchParams }) {
           <span className={styles.filterLabel}>series</span>
           <Link
             href={`/directory${sortMode !== 'card' ? `?sort=${sortMode}` : ''}`}
-            className={`${styles.filterBtn} ${!seriesFilter ? styles.active : ''}`}
+            className={`${styles.filterBtn} ${!seriesFilter && seriesFilter !== 0 ? styles.active : ''}`}
           >
             all
           </Link>
-          {allSeries.map(s => (
-            <Link
-              key={s}
-              href={`/directory?series=${s}${sortMode !== 'card' ? `&sort=${sortMode}` : ''}`}
-              className={`${styles.filterBtn} ${seriesFilter === s ? styles.active : ''}`}
-            >
-              {toRoman(s)}
-            </Link>
-          ))}
+          {allSeries.map(s => {
+            const hon = isHonorary(s);
+            const active = seriesFilter === s;
+            const chipClass = `${styles.filterBtn} ${active ? styles.active : ''} ${hon ? styles.honoraryChip : ''}`;
+            return (
+              <Link
+                key={s}
+                href={`/directory?series=${s}${sortMode !== 'card' ? `&sort=${sortMode}` : ''}`}
+                className={chipClass}
+              >
+                {hon ? 'Honorary' : toRoman(s)}
+              </Link>
+            );
+          })}
           <span className={styles.filterSep}>·</span>
           <span className={styles.filterLabel}>sort</span>
           <Link
-            href={`/directory${seriesFilter ? `?series=${seriesFilter}` : ''}`}
+            href={`/directory${seriesFilter || seriesFilter === 0 ? `?series=${seriesFilter}` : ''}`}
             className={`${styles.filterBtn} ${sortMode === 'card' ? styles.active : ''}`}
           >
             card #
           </Link>
           <Link
-            href={`/directory?${seriesFilter ? `series=${seriesFilter}&` : ''}sort=rarity`}
+            href={`/directory?${seriesFilter || seriesFilter === 0 ? `series=${seriesFilter}&` : ''}sort=rarity`}
             className={`${styles.filterBtn} ${sortMode === 'rarity' ? styles.active : ''}`}
           >
             rarity
           </Link>
           <Link
-            href={`/directory?${seriesFilter ? `series=${seriesFilter}&` : ''}sort=momentum`}
+            href={`/directory?${seriesFilter || seriesFilter === 0 ? `series=${seriesFilter}&` : ''}sort=momentum`}
             className={`${styles.filterBtn} ${sortMode === 'momentum' ? styles.active : ''}`}
           >
             momentum
@@ -244,12 +291,43 @@ export default function DirectoryPage({ searchParams }) {
             </Link>
           </div>
         ) : (
-          seriesNumbers.map(seriesNum => (
+          seriesNumbers.map(seriesNum => {
+            const hon = isHonorary(seriesNum);
+            const filled = fillBySeries.get(seriesNum) ?? (grouped[seriesNum]?.length || 0);
+            const cap = capForSeries(seriesNum);
+            const sealed = filled >= cap;
+            const pct = Math.min(100, Math.round((filled / cap) * 100));
+            const label = hon ? 'HONORARY' : `SERIES ${toRoman(seriesNum)}`;
+            const blockClass = `${styles.seriesHeader} ${hon ? styles.seriesHeaderHonorary : ''}`;
+            return (
             <div key={seriesNum}>
-              <div className={styles.seriesHeader}>
-                <div className={styles.seriesLabel}>
-                  SERIES <span>{toRoman(seriesNum)}</span>
+              <div className={blockClass}>
+                <div className={styles.seriesLabelRow}>
+                  <div className={styles.seriesLabel}>
+                    {hon
+                      ? <>SERIES <span>0</span> · <em>HONORARY</em></>
+                      : <>SERIES <span>{toRoman(seriesNum)}</span></>}
+                  </div>
+                  <div className={styles.seriesMeta}>
+                    {hon ? (
+                      <span className={styles.seriesCount}>
+                        {filled}<span className={styles.seriesSlash}> / </span>{cap} curated
+                      </span>
+                    ) : sealed ? (
+                      <span className={styles.seriesSealed}>SEALED · {filled} / {cap}</span>
+                    ) : (
+                      <span className={styles.seriesCount}>
+                        {filled}<span className={styles.seriesSlash}> / </span>{cap}
+                        <span className={styles.seriesRemain}> · {cap - filled} slot{cap - filled === 1 ? '' : 's'} left</span>
+                      </span>
+                    )}
+                  </div>
                 </div>
+                {!hon && (
+                  <div className={styles.seriesProgress} aria-hidden="true">
+                    <div className={styles.seriesProgressFill} style={{ width: `${pct}%` }} />
+                  </div>
+                )}
               </div>
               <div className={styles.grid}>
                 {grouped[seriesNum].map(token => (
@@ -340,7 +418,8 @@ export default function DirectoryPage({ searchParams }) {
                 ))}
               </div>
             </div>
-          ))
+            );
+          })
         )}
 
       </main>

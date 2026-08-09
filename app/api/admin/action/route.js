@@ -11,6 +11,14 @@ import {
   notifyGenesis     as discordGenesis,
   notifyCertification as discordCertification,
 } from '../../../../lib/discord.js';
+import {
+  HONORARY_SERIES,
+  HONORARY_CAP,
+  ART_SERIES_CAP,
+  LAST_ART_SERIES,
+  isHonorary,
+  capForSeries,
+} from '../../../../lib/seriesConfig';
 
 // Fire the full 8-judge council as a background job — fire-and-forget, never blocks the caller
 function fireFullCouncil() {
@@ -147,6 +155,18 @@ export async function POST(request) {
         genesisSeriesNum = parsed;
       }
 
+      // Refuse if the chosen series is at its cap.
+      const gCap = capForSeries(genesisSeriesNum);
+      const gFilled = db.prepare(
+        "SELECT COUNT(*) as n FROM tokens WHERE status='approved' AND series=?"
+      ).get(genesisSeriesNum).n;
+      if (gFilled >= gCap) {
+        const label = isHonorary(genesisSeriesNum) ? 'Honorary series' : `Series ${genesisSeriesNum}`;
+        return NextResponse.json({
+          error: `${label} is sealed (${gFilled}/${gCap})`,
+        }, { status: 409 });
+      }
+
       const last = db.prepare(
         "SELECT MAX(card_number) as mx FROM tokens WHERE series=? AND status='approved'"
       ).get(genesisSeriesNum);
@@ -191,14 +211,38 @@ export async function POST(request) {
             return NextResponse.json({ error: 'invalid series number' }, { status: 400 });
           }
         } else {
-          // Find current series (fills at 300 then increments)
+          // Auto-assign: fill current ART series to its cap (69), then graduate to next.
+          // Series 0 (Honorary) is never auto-assigned — it's admin-invite only.
+          // Find the highest ART series (>0) that has approved cards.
           const seriesRow = db.prepare(
-            `SELECT series, COUNT(*) as n FROM tokens WHERE status='approved'
+            `SELECT series, COUNT(*) as n FROM tokens
+             WHERE status='approved' AND series > 0
              GROUP BY series ORDER BY series DESC LIMIT 1`
           ).get();
-          seriesNum = (!seriesRow || seriesRow.n >= 300)
-            ? (seriesRow ? seriesRow.series + 1 : 1)
-            : seriesRow.series;
+          if (!seriesRow) {
+            seriesNum = 1;
+          } else if (seriesRow.n >= ART_SERIES_CAP) {
+            seriesNum = seriesRow.series + 1;
+          } else {
+            seriesNum = seriesRow.series;
+          }
+          // Refuse to open a series beyond the last art series (total-cap guard).
+          if (seriesNum > LAST_ART_SERIES) {
+            return NextResponse.json({
+              error: `all ${LAST_ART_SERIES} art series are sealed (total cap reached)`,
+            }, { status: 409 });
+          }
+        }
+        // Enforce cap for the target series (whether admin-overridden or auto-picked).
+        const cap = capForSeries(seriesNum);
+        const filled = db.prepare(
+          "SELECT COUNT(*) as n FROM tokens WHERE status='approved' AND series=?"
+        ).get(seriesNum).n;
+        if (filled >= cap) {
+          const label = isHonorary(seriesNum) ? 'Honorary series' : `Series ${seriesNum}`;
+          return NextResponse.json({
+            error: `${label} is sealed (${filled}/${cap})`,
+          }, { status: 409 });
         }
         const last = db.prepare(
           'SELECT MAX(card_number) as mx FROM tokens WHERE status=? AND series=?'

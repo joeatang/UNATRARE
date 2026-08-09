@@ -378,11 +378,120 @@
 
 .seriesLabel span { color: var(--amber); }
 
+.seriesLabel em {
+  font-style: normal;
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: var(--amber-hot);
+  border: 1px solid var(--amber-hot);
+  padding: 3px 10px;
+  border-radius: 2px;
+}
+
 .seriesLabel::after {
   content: '';
   flex: 1;
   height: 1px;
   background: var(--border-dim);
+}
+
+/* NEW: label row (label + right-aligned meta) */
+.seriesLabelRow {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.seriesMeta {
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.seriesCount { color: var(--text); }
+.seriesSlash { color: var(--border); margin: 0 2px; }
+.seriesRemain { color: var(--text-dim); }
+
+.seriesSealed {
+  color: var(--amber-hot);
+  border: 1px solid var(--amber-hot);
+  padding: 3px 10px;
+  border-radius: 2px;
+  background: rgba(255, 122, 0, 0.05);
+}
+
+/* Progress bar under art-series header */
+.seriesProgress {
+  margin-top: 12px;
+  height: 3px;
+  background: var(--border-dim);
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.seriesProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--amber) 0%, var(--amber-hot) 100%);
+  transition: width 0.4s ease-out;
+}
+
+/* Honorary variant — distinct amber-glow border */
+.seriesHeaderHonorary .seriesLabel {
+  color: var(--amber);
+}
+.seriesHeaderHonorary .seriesLabel::after {
+  background: linear-gradient(90deg, var(--amber-hot) 0%, transparent 100%);
+  opacity: 0.4;
+}
+
+/* Filter chip for Honorary — visually distinct from Roman-numeral art chips */
+.filterBtn.honoraryChip {
+  border-color: var(--amber-hot);
+  color: var(--amber-hot);
+  background: rgba(255, 122, 0, 0.04);
+}
+.filterBtn.honoraryChip.active,
+.filterBtn.honoraryChip:hover {
+  background: rgba(255, 122, 0, 0.12);
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+/* Project-level progress under directory header stats */
+.projectProgress {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  margin-top: 10px;
+  font-family: var(--font-card);
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  flex-wrap: wrap;
+}
+.projectProgressLabel {
+  color: var(--text-dim);
+}
+.projectProgressCount {
+  color: var(--amber);
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: 3px;
+}
+.projectProgressSlash {
+  color: var(--border);
+  margin: 0 4px;
+  font-size: 15px;
+}
+.projectProgressSep {
+  color: var(--border-dim);
+}
+.projectProgressRemain {
+  color: var(--text-dim);
 }
 
 /* ─── Empty state ────────────────────────────────────────── */
@@ -445,8 +554,14 @@
   .grid { padding: 20px 16px; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
   .momentumStrip { padding: 18px 16px 4px; }
   .momentumGrid { grid-template-columns: 1fr; }
-  .seriesHeader { padding: 16px 16px 0; }
-  .seriesLabel { font-size: 20px; letter-spacing: 2px; }
+  .seriesHeader { padding: 20px 16px 0; }
+  .seriesLabel { font-size: 20px; letter-spacing: 2px; gap: 10px; }
+  .seriesLabel em { font-size: 11px; letter-spacing: 2px; padding: 2px 6px; }
+  .seriesLabelRow { gap: 8px 12px; }
+  .seriesMeta { font-size: 11px; letter-spacing: 1.5px; width: 100%; }
+  .seriesSealed { font-size: 11px; letter-spacing: 1.5px; padding: 2px 8px; }
+  .projectProgress { font-size: 11px; letter-spacing: 1.5px; gap: 6px; }
+  .projectProgressCount { font-size: 17px; letter-spacing: 2px; }
   .empty { padding: 48px 16px; }
   .emptyTitle { font-size: 24px; }
 }

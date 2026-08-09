@@ -284,7 +284,7 @@ function TokenRow({ token, authToken, onAction }) {
               placeholder="admin note (optional — shown in rejection feedback)"
               rows={2}
             />
-            <div style={{display:'flex', alignItems:'center', gap:8, marginBottom:8}}>
+            <div style={{display:'flex', alignItems:'center', gap:8, marginBottom:8, flexWrap:'wrap'}}>
               <span style={{fontFamily:'var(--font-card)', fontSize:'9px', letterSpacing:'2px', color:'var(--text-dim)', whiteSpace:'nowrap'}}>
                 SERIES OVERRIDE
               </span>
@@ -303,7 +303,7 @@ function TokenRow({ token, authToken, onAction }) {
                 }}
               />
               <span style={{fontFamily:'var(--font-body)', fontSize:'11px', color:'var(--text-dim)'}}>
-                (blank = auto-assign)
+                (blank = auto · 0 = honorary · 1–6 = art series · cap 69/series, 6 honorary)
               </span>
             </div>
             <div className={styles.actionBtns}>
