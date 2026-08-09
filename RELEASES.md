@@ -29,6 +29,33 @@ Full economy design: `docs/cash-rewards-economy.md`.
 
 ---
 
+## Series Structure Locked — "69 per art series, 6 honorary, 420 total"  ·  build `G-imGSZrtHD1RjCP5kO9k`  ·  2026-08-09
+
+Founder confirmed the catalog geometry: Series 0 is **Honorary** (admin-invited, cap **6**),
+Series 1..6 are the **art series** (cap **69** each), total project ceiling **420**. The
+directory now visibly reflects that structure so anyone can see where the project is.
+
+- **Single source of truth** — new `lib/seriesConfig.js` holds `HONORARY_CAP=6`,
+  `ART_SERIES_CAP=69`, `ART_SERIES_COUNT=6`, `LAST_ART_SERIES=6`, `TOTAL_CAP=420` plus
+  helpers (`isHonorary`, `capForSeries`, `seriesLabel`). Change one place, everything follows.
+- **Auto-graduation at 69** — the admin approve action fills the current art series to 69
+  and then opens the next automatically (was silently 300 before, which is why Series 1 was
+  drifting past its intended cap). Refuses to open a 7th art series (total-cap guard) and
+  refuses to fill a sealed series (returns 409). Genesis (Series 0 default) also cap-checked.
+- **Directory shows the structure** — project-level counter under the header
+  (`PROJECT 69 / 420 · 351 slots remain`), per-series header with `filled / cap · N slots left`
+  and a slim amber progress bar for art series, `SEALED` chip when a series fills, distinct
+  amber styling for the Honorary section, and a proper `Honorary` filter chip alongside the
+  Roman-numeral art series. Filter now correctly supports `?series=0`. Mobile-first (390px),
+  scales to desktop (1280px+).
+- **Admin panel hint** — SERIES OVERRIDE field now says
+  `blank = auto · 0 = honorary · 1–6 = art series · cap 69/series, 6 honorary`.
+
+Live state: Series 0 (Honorary) at 3/6 visible · Series I at 66/69 (3 slots left before
+Series II opens automatically) · 351 slots remain across the whole project.
+
+---
+
 ## Fix — "One number, one format"  ·  build `hG7VyinS6KEQs7GVSUny4`  ·  2026-07-07
 
 Follow-up to the 690M fix. The same $CASH amount was rendering differently on every
