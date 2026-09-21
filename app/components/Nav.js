@@ -7,6 +7,16 @@ import ClaimBanner from './ClaimBanner';
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
+  const [marketLive, setMarketLive] = useState(false);
+
+  // Marketplace nav link is dark until the `market_public` flag is flipped.
+  // Fail-closed: any error leaves the link hidden.
+  useEffect(() => {
+    fetch('/api/market/live')
+      .then(r => r.json())
+      .then(d => setMarketLive(!!d.live))
+      .catch(() => {});
+  }, []);
 
   // Lock body scroll when drawer is open
   useEffect(() => {
@@ -53,6 +63,7 @@ export default function Nav() {
         <ul className={styles['nav-links']}>
           <li><Link href="/start">Start</Link></li>
           <li><Link href="/directory">Directory</Link></li>
+          {marketLive && <li><Link href="/market">Market</Link></li>}
           <li><Link href="/vault">Vault</Link></li>
           <li><Link href="/burns">🔥 Burns</Link></li>
           <li><Link href="/hall">🏛 Hall</Link></li>
@@ -109,6 +120,7 @@ export default function Nav() {
         <ul className={styles.drawerLinks} onClick={() => setOpen(false)}>
           <li><Link href="/start">Start Here</Link></li>
           <li><Link href="/directory">Directory</Link></li>
+          {marketLive && <li><Link href="/market">Market</Link></li>}
           <li><Link href="/archive">Archive</Link></li>
           <li><Link href="/council">Council</Link></li>
           <li><Link href="/nodes">Nodes</Link></li>
