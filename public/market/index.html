@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UNATRARE — Marketplace</title>
+<style>
+  :root{ --bg:#0a0b0a; --panel:#121512; --line:#26301f; --ink:#e9f0e6; --dim:#8ba17e; --acc:#7CFC00; --warn:#ffb454; --bad:#ff6b6b; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5}
+  a{color:var(--acc);text-decoration:none}
+  header{padding:20px 20px 0;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(10,11,10,.94);backdrop-filter:blur(6px);z-index:5}
+  h1{margin:0;font-size:19px;letter-spacing:2px}
+  .tag{color:var(--dim);font-size:12px;margin:4px 0 12px}
+  .tabs{display:flex;gap:4px}
+  .tab{padding:9px 16px;font-size:13px;font-weight:600;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent}
+  .tab.active{color:var(--acc);border-color:var(--acc)}
+  main{max-width:1080px;margin:0 auto;padding:20px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;transition:.15s;display:flex;flex-direction:column}
+  .card:hover{border-color:var(--acc);transform:translateY(-2px)}
+  .card img{width:100%;aspect-ratio:1;object-fit:cover;background:#000;display:block}
+  .card .nm{padding:8px 10px 2px;font-size:12px;font-weight:700;letter-spacing:.5px;word-break:break-all}
+  .card .pr{padding:0 10px 10px;font-size:12px;color:var(--acc)}
+  .muted{color:var(--dim)} .spin{color:var(--dim);padding:24px 0}
+  label{display:block;font-size:12px;color:var(--dim);margin:12px 0 4px}
+  select,input{width:100%;background:#0c0e0c;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:10px;font-size:14px;font-family:inherit}
+  select:focus,input:focus{outline:none;border-color:var(--acc)}
+  button{background:var(--acc);color:#04210a;border:0;border-radius:8px;padding:12px 16px;font-weight:700;font-size:14px;cursor:pointer;width:100%;margin-top:16px}
+  button.sec{background:#1b2417;color:var(--acc);border:1px solid var(--line)}
+  button:disabled{background:#2a3324;color:#6f7d64;cursor:not-allowed}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.74);display:none;align-items:flex-start;justify-content:center;padding:24px;overflow:auto;z-index:10}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:560px;width:100%;padding:20px}
+  .modal img{width:100%;border-radius:10px;background:#000;margin-bottom:12px}
+  .x{float:right;color:var(--dim);cursor:pointer;font-size:20px;line-height:1}
+  .quote{background:#0c0e0c;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:12px;font-size:13px;display:none}
+  .quote b{color:var(--acc)}
+  .mono{font-family:ui-monospace,Menlo,monospace;font-size:12px;word-break:break-all}
+  .note{font-size:12px;color:var(--dim);margin-top:8px}
+  .msg{margin-top:12px;font-size:13px;padding:10px;border-radius:8px;display:none}
+  .msg.ok{display:block;background:#0e1f0e;border:1px solid var(--acc);color:var(--acc)}
+  .msg.err{display:block;background:#241010;border:1px solid var(--bad);color:var(--bad)}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;max-width:620px}
+  .row{display:flex;gap:10px;align-items:center}.row>*{flex:1}
+  .prow{display:grid;grid-template-columns:90px 1fr 1.4fr auto;gap:8px;align-items:center;margin-top:8px}
+  .order{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px;font-size:13px}
+  .order.action{border-color:var(--warn)}
+  .badge{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--dim)}
+  .badge.act{color:var(--warn);border-color:var(--warn)}
+  .del{color:var(--bad);cursor:pointer;font-size:16px;background:none;border:0;width:auto;margin:0;padding:0}
+</style>
+</head>
+<body>
+<header>
+  <h1>◆ UNATRARE</h1>
+  <div class="tag">Non-custodial marketplace for Bitcoin-native Counterparty art · you pay the artist directly</div>
+  <div class="tabs">
+    <div class="tab active" data-t="market" onclick="tab('market')">Market</div>
+    <div class="tab" data-t="sell" onclick="tab('sell')">Sell your art</div>
+    <div class="tab" data-t="pay" onclick="tab('pay')">Artist payments</div>
+  </div>
+</header>
+<main>
+  <div id="market"><div class="spin">Loading listings…</div></div>
+  <div id="sell" style="display:none"></div>
+  <div id="pay" style="display:none"></div>
+</main>
+
+<div class="overlay" id="overlay"><div class="modal"><span class="x" onclick="closeModal()">✕</span><div id="mBody"></div></div></div>
+
+<script>
+let IMAGES = {};   // token -> image url
+let RAILS = [];    // approved currencies (from /api/config)
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const priceLabel = (l) => (l.basePriceUsd? '$'+l.basePriceUsd+' · ' : '') + (l.currencies||[]).join(' · ');
+
+function tab(name){
+  ['market','sell','pay'].forEach(t=>{ $(t).style.display = t===name?'':'none';
+    document.querySelector(`.tab[data-t="${t}"]`).classList.toggle('active', t===name); });
+  if(name==='market') loadMarket();
+  if(name==='sell') renderSell();
+  if(name==='pay') renderPay();
+}
+
+async function boot(){
+  try{ const cfg=await fetch('/api/market/config').then(r=>r.json()); RAILS=cfg.rails||[]; }catch{}
+  try{ const cat=await fetch('/api/market/catalog').then(r=>r.json()); (cat.items||[]).forEach(i=>IMAGES[i.token]=i.image); }catch{}
+  loadMarket();
+}
+
+// ── MARKET ──────────────────────────────────────────────────────────────────
+async function loadMarket(){
+  const el=$('market'); el.className=''; el.innerHTML='<div class="spin">Loading listings…</div>';
+  try{
+    const d=await fetch('/api/market/listings').then(r=>r.json());
+    const items=d.listings||[];
+    if(!items.length){ el.innerHTML='<p class="muted">No active listings yet. Be the first — hit <b>Sell your art</b>.</p>'; return; }
+    el.innerHTML='<div class="grid">'+items.map(l=>`
+      <div class="card" onclick='openBuy(${JSON.stringify(l.id)})'>
+        <img loading="lazy" src="${esc(IMAGES[l.asset]||'')}" alt="${esc(l.asset)}" onerror="this.style.opacity=.2">
+        <div class="nm">${esc(l.asset)}</div>
+        <div class="pr">${esc(priceLabel(l))}</div>
+      </div>`).join('')+'</div>';
+  }catch(e){ el.innerHTML='<p class="muted">Could not load listings: '+esc(e.message)+'</p>'; }
+}
+
+async function openBuy(id){
+  const o=$('overlay'); o.style.display='flex'; $('mBody').innerHTML='<div class="spin">Loading…</div>';
+  let l; try{ l=(await fetch('/api/market/listings/'+encodeURIComponent(id)).then(r=>r.json())).listing; }catch(e){ $('mBody').innerHTML='<p class="msg err" style="display:block">'+esc(e.message)+'</p>'; return; }
+  const opts=(l.currencies||[]).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  $('mBody').innerHTML=`
+    <img src="${esc(IMAGES[l.asset]||'')}" onerror="this.style.opacity=.2">
+    <div style="font-size:18px;font-weight:700;letter-spacing:1px">${esc(l.asset)}</div>
+    <div class="note">Sold by artist <span class="mono">${esc(l.artist)}</span> · released via ${esc(l.releaseMethod)}</div>
+    <label>Pay with</label><select id="cur" onchange="buyQuote('${esc(l.id)}')">${opts}</select>
+    <div class="quote" id="q"></div>
+    <div id="auth"></div>
+    <label>Deliver the art to — your XCP wallet (FreeWallet, starts with 1)</label>
+    <input id="delivery" placeholder="1… Counterparty address">
+    <div class="note">Not an exchange or bech32 (bc1…) address — the XCP asset could be lost.</div>
+    <button id="buyBtn" onclick="doBuy('${esc(l.id)}')">Verify payment &amp; claim</button>
+    <div class="msg" id="msg"></div>`;
+  buyQuote(l.id);
+}
+
+let CURRENT_QUOTE = null;
+async function buyQuote(id){
+  const cur=$('cur').value, q=$('q'), auth=$('auth');
+  q.style.display='block'; q.innerHTML='<span class="muted">Fetching live quote…</span>'; CURRENT_QUOTE=null;
+  try{
+    const r=await fetch(`/api/market/listing-quote?listing=${encodeURIComponent(id)}&currency=${encodeURIComponent(cur)}`).then(x=>x.json());
+    if(!r.ok){ q.innerHTML='<span class="muted">'+esc(r.error)+'</span>'; return; }
+    CURRENT_QUOTE=r.quoteId;
+    const others=Object.entries(r.allPrices||{}).filter(([c])=>c!==cur).map(([c,v])=>`${v} ${c}`).join(' · ');
+    const mins=Math.max(1,Math.round((r.expiresAt-Date.now())/60000));
+    const feeLine = r.fee ? `<div style="margin-top:6px">+ <b>${esc(r.fee.amount)} ${esc(r.label)}</b> ${r.fee.kind==='burn'?'$CASH burn':'platform fee'} → <span class="mono">${esc(r.fee.to)}</span></div><div class="note">send both in one transaction · total ${esc(r.total)} ${esc(r.label)}</div>` : '';
+    q.innerHTML=`Send <b>${esc(r.amount)} ${esc(r.label)}</b> directly to the artist:
+      <div class="mono" style="margin-top:6px">${esc(r.payTo)}</div>
+      ${feeLine}
+      <div class="note">${r.priceSource==='live'?'live rate':'fixed price'}${r.baseUsd?` · base $${esc(r.baseUsd)}`:''} · locked ~${mins} min${others?` · also: ${esc(others)}`:''}</div>`;
+    auth.innerHTML = r.chain==='solana'
+      ? `<label>Your Solana wallet (that you paid from)</label><input id="pubkey" placeholder="Solana address"><label>Transaction signature</label><input id="txid" placeholder="Solana tx signature">`
+      : `<label>Transaction id</label><input id="txid" placeholder="64-hex txid" oninput="chal()"><label>Your paying Bitcoin address</label><input id="authaddr" placeholder="1…"><label>BIP-137 signature</label><input id="sig" placeholder="signature of the challenge"><div class="note" id="chalN">Enter a txid to get the message to sign.</div>`;
+  }catch(e){ q.innerHTML='<span class="muted">'+esc(e.message)+'</span>'; }
+}
+async function chal(){ const t=($('txid')||{}).value||'',n=$('chalN'); if(!n)return;
+  if(!/^[0-9a-fA-F]{64}$/.test(t)){n.textContent='Enter a valid 64-hex txid.';return;}
+  try{const r=await fetch('/api/market/challenge?txid='+t).then(x=>x.json()); n.innerHTML=r.ok?'Sign: <span class="mono">'+esc(r.challenge)+'</span>':esc(r.error);}catch{} }
+
+async function doBuy(id){
+  const btn=$('buyBtn'),msg=$('msg'),cur=$('cur').value,rail=RAILS.find(r=>r.code===cur)||{};
+  const body={listing:id,currency:cur,quoteId:CURRENT_QUOTE,txid:($('txid')||{}).value||'',deliveryAddress:($('delivery')||{}).value||''};
+  if(rail.chain==='solana') body.buyerPubkey=($('pubkey')||{}).value||''; else {body.authAddress=($('authaddr')||{}).value||'';body.signature=($('sig')||{}).value||'';}
+  msg.className='msg';msg.style.display='none';btn.disabled=true;btn.textContent='Verifying on-chain…';
+  try{
+    const r=await fetch('/api/market/listing-purchase',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(x=>x.json());
+    if(r.ok){ msg.className='msg ok'; msg.innerHTML=`✔ ${esc(r.status)}<br>Paid ${esc(r.paid)} to <span class="mono">${esc(r.paidTo)}</span><br>Receipt <a href="/api/market/receipt/${esc(r.orderId)}" target="_blank">${esc(r.orderId)}</a>`; }
+    else { msg.className='msg err'; msg.textContent='✕ '+(r.error||'failed'); }
+  }catch(e){ msg.className='msg err'; msg.textContent=e.message; }
+  btn.disabled=false;btn.textContent='Verify payment & claim';
+}
+
+// ── SELL (list your asset) ───────────────────────────────────────────────────
+function renderSell(){
+  const verifiable=RAILS.filter(r=>r.verifiable);
+  const rows=verifiable.map(r=>`
+    <div class="prow" data-cur="${esc(r.code)}">
+      <label style="margin:0;display:flex;align-items:center;gap:6px;color:var(--ink)"><input type="checkbox" class="s_on" style="width:auto" checked> ${esc(r.code)}</label>
+      ${r.oracle
+        ? `<span class="note" style="margin:0">auto from USD</span>`
+        : `<input class="s_manual" placeholder="price in ${esc(r.code)}">`}
+      <input class="s_paddr" placeholder="your ${esc(r.code)} receive address">
+      <span></span>
+    </div>`).join('');
+  $('sell').innerHTML=`<div class="panel">
+    <h2 style="margin:0 0 4px;font-size:16px">List an asset you own</h2>
+    <p class="note" style="margin-top:0">Payment goes straight to your wallet — UNATRARE never holds it. All currencies are ON by default; untick any you don't want. Oracle-priced ones auto-convert from your base USD price; $CASH / NAT need a manual amount (no market feed).</p>
+    <label>Asset name (Counterparty token)</label><input id="s_asset" placeholder="e.g. BURNAT" oninput="s_updateChal()">
+    <div class="row"><div><label>Quantity to sell</label><input id="s_qty" type="number" min="1" value="1"></div>
+      <div><label>Base price (USD) — auto-converts</label><input id="s_usd" type="number" min="0" step="0.01" placeholder="e.g. 25"></div></div>
+    <label>Release method</label><select id="s_rel"><option value="sign">Sign-on-release (you approve each sale)</option><option value="dispenser">Dispenser (auto, BTC/XCP)</option></select>
+    <label>Your Counterparty address holding the asset (starts with 1)</label><input id="s_addr" placeholder="1…">
+    <label>Currencies you accept — untick to disable, add YOUR receive address for each</label>
+    <div id="s_prices">${rows}</div>
+    <div class="note" id="s_chal" style="margin-top:14px">Enter an asset name to get the message to sign.</div>
+    <label>Signature (BIP-137) proving you control the holding address</label><input id="s_sig" placeholder="signature of the message above">
+    <button id="s_btn" onclick="s_submit()">Verify ownership &amp; list</button>
+    <div class="msg" id="s_msg"></div></div>`;
+}
+function s_updateChal(){ const a=($('s_asset')||{}).value.trim().toUpperCase(); $('s_chal').innerHTML = a? 'Sign this message with your FreeWallet: <span class="mono">UNATRARE:LIST:'+esc(a)+'</span>':'Enter an asset name to get the message to sign.'; }
+async function s_submit(){
+  const btn=$('s_btn'),msg=$('s_msg');
+  const payAddresses={},manualPrices={};
+  document.querySelectorAll('#s_prices .prow').forEach(row=>{
+    if(!row.querySelector('.s_on').checked) return;
+    const c=row.dataset.cur, a=(row.querySelector('.s_paddr').value||'').trim();
+    if(a){ payAddresses[c]=a; const m=row.querySelector('.s_manual'); if(m && m.value.trim()) manualPrices[c]=m.value.trim(); }
+  });
+  const body={asset:($('s_asset').value||'').trim().toUpperCase(),quantity:parseInt($('s_qty').value||'1',10),
+    basePriceUsd:parseFloat($('s_usd').value||'0')||0,releaseMethod:$('s_rel').value,
+    artistAddress:($('s_addr').value||'').trim(),signature:($('s_sig').value||'').trim(),payAddresses,manualPrices};
+  msg.className='msg';msg.style.display='none';btn.disabled=true;btn.textContent='Verifying ownership…';
+  try{
+    const r=await fetch('/api/market/listings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(x=>x.json());
+    if(r.ok){ msg.className='msg ok'; msg.innerHTML='✔ Listed! Your '+esc(r.listing.asset)+' is now on the market.'; loadMarket(); }
+    else { msg.className='msg err'; msg.textContent='✕ '+(r.error||'failed'); }
+  }catch(e){ msg.className='msg err'; msg.textContent=e.message; }
+  btn.disabled=false;btn.textContent='Verify ownership & list';
+}
+
+// ── ARTIST PAYMENTS ──────────────────────────────────────────────────────────
+function renderPay(){
+  $('pay').innerHTML=`<div class="panel">
+    <h2 style="margin:0 0 4px;font-size:16px">Artist payment box</h2>
+    <p class="note" style="margin-top:0">Enter your Counterparty address to see incoming orders and what needs releasing.</p>
+    <div class="row"><input id="p_addr" placeholder="1… your artist address"><button style="margin:0;flex:0 0 auto" onclick="p_load()">Load</button></div>
+    <div id="p_out" style="margin-top:14px"></div></div>`;
+}
+async function p_load(){
+  const a=($('p_addr').value||'').trim(), out=$('p_out'); if(!a){out.innerHTML='<p class="muted">Enter an address.</p>';return;}
+  out.innerHTML='<div class="spin">Loading…</div>';
+  try{
+    const d=await fetch('/api/market/artist/'+encodeURIComponent(a)+'/orders').then(r=>r.json());
+    if(!d.ok){ out.innerHTML='<p class="muted">'+esc(d.error)+'</p>'; return; }
+    if(!d.orders.length){ out.innerHTML='<p class="muted">No orders yet for this address.</p>'; return; }
+    out.innerHTML=`<div class="note">${d.count} order(s) · ${d.pendingAction} awaiting your release</div>`+d.orders.map(o=>`
+      <div class="order ${o.needsAction?'action':''}">
+        <div class="row"><b>${esc(o.piece)}</b> <span class="badge ${o.needsAction?'act':''}">${o.needsAction?'action needed':esc(o.status)}</span></div>
+        <div>Paid <b style="color:var(--acc)">${esc(o.paid)}</b> · <a href="${esc(o.paymentExplorer||'#')}" target="_blank">payment ↗</a></div>
+        <div class="note">deliver to <span class="mono">${esc(o.deliverTo)}</span></div>
+        <div class="note">release: ${esc(o.release.mechanism||'—')} · ${esc(o.release.status||'—')}${o.release.txid?' · <a href="https://xchain.io/tx/'+esc(o.release.txid)+'" target="_blank">delivered ↗</a>':''}</div>
+      </div>`).join('');
+  }catch(e){ out.innerHTML='<p class="muted">'+esc(e.message)+'</p>'; }
+}
+
+function closeModal(){ $('overlay').style.display='none'; }
+$('overlay').addEventListener('click',e=>{ if(e.target===$('overlay')) closeModal(); });
+boot();
+</script>
+</body>
+</html>

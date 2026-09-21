@@ -9,6 +9,7 @@ out/
 .env.local
 .env.*.local
 .env
+.env*.bak*
 
 # SQLite database — lives on server, not in git
 *.db
