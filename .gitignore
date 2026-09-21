@@ -35,3 +35,6 @@ npm-debug.log*
 
 # Danknote render artifacts — large generated images, NEVER in git.
 /public/danknotes/
+
+# large desktop-app binaries (hosted, never committed)
+/public/downloads/
