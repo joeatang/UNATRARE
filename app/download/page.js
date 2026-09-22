@@ -7,6 +7,7 @@ export const metadata = {
 };
 
 const MAC_ARM = '/downloads/unatrare-mac-arm64.zip';
+const WIN_X64 = '/downloads/unatrare-win-x64.zip';
 
 export default function DownloadPage() {
   return (
@@ -30,9 +31,14 @@ export default function DownloadPage() {
           UNATRARE is a home for Bitcoin&#8209;native art that no one can quietly delete, gatekeep, or
           take away. Not a website you visit &mdash; a network you become part of.
         </p>
-        <a className={styles.cta} href={MAC_ARM} download>
-          Download for macOS <span className={styles.chip}>Apple Silicon</span>
-        </a>
+        <div className={styles.ctaRow}>
+          <a className={styles.cta} href={MAC_ARM} download>
+            Download for macOS <span className={styles.chip}>Apple Silicon</span>
+          </a>
+          <a className={styles.cta2} href={WIN_X64} download>
+            Download for Windows <span className={styles.chip}>x64 &middot; beta</span>
+          </a>
+        </div>
         <div className={styles.subcta}>Free · self&#8209;custodial · no account</div>
       </section>
 
@@ -74,8 +80,9 @@ export default function DownloadPage() {
         <div className={styles.kicker}>For the best experience</div>
         <ol className={styles.steps}>
           <li>
-            <b>Open it.</b> macOS may warn it&rsquo;s from an unidentified developer (it&rsquo;s a fresh,
-            unsigned test build). Right&#8209;click the app &rarr; <b>Open</b> &rarr; <b>Open</b>.
+            <b>Open it.</b> On <b>macOS</b>: right&#8209;click the app &rarr; <b>Open</b> &rarr; <b>Open</b>.
+            On <b>Windows</b>: if SmartScreen appears, click <b>More info</b> &rarr; <b>Run anyway</b>.
+            (These are fresh, unsigned test builds &mdash; signing comes before public launch.)
           </li>
           <li>
             <b>Create your wallet</b> and <b>write down your 12&#8209;word phrase</b> on paper. It is the only
@@ -92,7 +99,7 @@ export default function DownloadPage() {
       </section>
 
       <footer className={styles.foot}>
-        Windows &amp; Linux builds coming next. Questions? Visit{' '}
+        Linux build coming next. Questions? Visit{' '}
         <a href="https://unatrare.wtf" className={styles.flink}>unatrare.wtf</a>.
       </footer>
     </main>

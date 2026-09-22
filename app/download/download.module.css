@@ -85,6 +85,31 @@
   transform: translateY(-2px);
   box-shadow: 0 16px 50px rgba(124, 252, 0, 0.4);
 }
+.ctaRow {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.cta2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 28px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #e8ffe0;
+  background: transparent;
+  border: 1px solid rgba(124, 252, 0, 0.5);
+  border-radius: 999px;
+  text-decoration: none;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.cta2:hover {
+  transform: translateY(-2px);
+  background: rgba(124, 252, 0, 0.1);
+}
 .chip {
   font-size: 11px;
   font-weight: 700;
