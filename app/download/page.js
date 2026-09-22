@@ -75,6 +75,38 @@ export default function DownloadPage() {
         </ul>
       </section>
 
+      {/* SAFE BY DESIGN */}
+      <section className={styles.safe}>
+        <div className={styles.kicker}>Safe by design</div>
+        <h2 className={styles.h2}>Why it&rsquo;s safe on your machine</h2>
+        <div className={styles.safeGrid}>
+          <div className={styles.safeCard}>
+            <b>Your keys never leave</b>
+            <span>Your wallet is created and encrypted on your device. Nobody &mdash; not even us &mdash; can reach your seed or your coins.</span>
+          </div>
+          <div className={styles.safeCard}>
+            <b>Art can&rsquo;t be faked</b>
+            <span>Every file is cryptographically verified against Bitcoin. A bad actor can&rsquo;t tamper with or inject art into the archive.</span>
+          </div>
+          <div className={styles.safeCard}>
+            <b>Every send needs your OK</b>
+            <span>Payments show a native confirmation with the real recipient and amount before a single sat can move. It cannot be spoofed.</span>
+          </div>
+          <div className={styles.safeCard}>
+            <b>No accounts, no tracking</b>
+            <span>No sign&#8209;up, no email, no telemetry. The app talks only to Bitcoin and UNATRARE &mdash; nothing phones home.</span>
+          </div>
+          <div className={styles.safeCard}>
+            <b>It locks itself</b>
+            <span>The wallet auto&#8209;locks after inactivity, wiping your keys from memory until you unlock again.</span>
+          </div>
+          <div className={styles.safeCard}>
+            <b>You own it all</b>
+            <span>Your art, your keys, your node. Self&#8209;custodial and peer&#8209;to&#8209;peer, end to end.</span>
+          </div>
+        </div>
+      </section>
+
       {/* BEST EXPERIENCE */}
       <section className={styles.guide}>
         <div className={styles.kicker}>For the best experience</div>
