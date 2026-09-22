@@ -1,5 +1,6 @@
 import styles from './download.module.css';
 import VersionBadge from './VersionBadge';
+import DownloadCTAs from './DownloadCTAs';
 
 export const metadata = {
   title: 'Download UNATRARE — the app that makes you the archive',
@@ -9,6 +10,7 @@ export const metadata = {
 
 const MAC_ARM = '/downloads/unatrare-mac-arm64.zip';
 const WIN_X64 = '/downloads/unatrare-win-x64.zip';
+
 
 export default function DownloadPage() {
   return (
@@ -32,15 +34,7 @@ export default function DownloadPage() {
           UNATRARE is a home for Bitcoin&#8209;native art that no one can quietly delete, gatekeep, or
           take away. Not a website you visit &mdash; a network you become part of.
         </p>
-        <div className={styles.ctaRow}>
-          <a className={styles.cta} href={MAC_ARM} download>
-            Download for macOS <span className={styles.chip}>Apple Silicon</span>
-          </a>
-          <a className={styles.cta2} href={WIN_X64} download>
-            Download for Windows <span className={styles.chip}>x64 &middot; beta</span>
-          </a>
-        </div>
-        <div className={styles.subcta}>Free · self&#8209;custodial · no account</div>
+        <DownloadCTAs />
         <VersionBadge />
       </section>
 
