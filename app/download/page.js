@@ -80,9 +80,11 @@ export default function DownloadPage() {
         <div className={styles.kicker}>For the best experience</div>
         <ol className={styles.steps}>
           <li>
-            <b>Open it.</b> On <b>macOS</b>: right&#8209;click the app &rarr; <b>Open</b> &rarr; <b>Open</b>.
-            On <b>Windows</b>: if SmartScreen appears, click <b>More info</b> &rarr; <b>Run anyway</b>.
-            (These are fresh, unsigned test builds &mdash; signing comes before public launch.)
+            <b>Open it.</b> Unzip, move <b>UNATRARE</b> to Applications. On <b>macOS</b>:
+            right&#8209;click &rarr; <b>Open</b> &rarr; <b>Open</b>. If it ever says &ldquo;damaged&rdquo;,
+            open <b>Terminal</b> and run <code className={styles.cmd}>xattr -cr /Applications/UNATRARE.app</code>,
+            then open it. On <b>Windows</b>: if SmartScreen appears, click <b>More info</b> &rarr; <b>Run anyway</b>.
+            (Fresh test builds &mdash; full code&#8209;signing lands before public launch.)
           </li>
           <li>
             <b>Create your wallet</b> and <b>write down your 12&#8209;word phrase</b> on paper. It is the only

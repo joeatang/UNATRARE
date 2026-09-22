@@ -215,6 +215,18 @@
   font-size: 13px;
 }
 .steps b { color: #e8ffe0; }
+.cmd {
+  display: inline-block;
+  padding: 2px 7px;
+  margin: 2px 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  color: #7cfc00;
+  background: rgba(124, 252, 0, 0.08);
+  border: 1px solid rgba(124, 252, 0, 0.28);
+  border-radius: 6px;
+  white-space: nowrap;
+}
 .trust {
   margin-top: 24px;
   font-size: 12px;
