@@ -1,4 +1,5 @@
 import styles from './download.module.css';
+import VersionBadge from './VersionBadge';
 
 export const metadata = {
   title: 'Download UNATRARE — the app that makes you the archive',
@@ -40,6 +41,7 @@ export default function DownloadPage() {
           </a>
         </div>
         <div className={styles.subcta}>Free · self&#8209;custodial · no account</div>
+        <VersionBadge />
       </section>
 
       {/* HOW */}
