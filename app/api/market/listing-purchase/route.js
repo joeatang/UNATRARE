@@ -5,8 +5,9 @@ import { fetchToken } from '../../../../lib/market/catalog.js';
 import * as bip137 from '../../../../lib/market/bip137.js';
 import { runVerifier } from '../../../../lib/market/verifiers.js';
 import { verifyCashBurn } from '../../../../lib/solanaBurnVerify.js';
-import { dbQuery, dbExecute } from '../../../../lib/market/store.js';
+import { dbQuery, dbExecute, withTx } from '../../../../lib/market/store.js';
 import { QUOTES, PRICE_TOLERANCE, HEX64, B58SIG, XCP_ADDR, isBitcoinRail, checkRate } from '../../../../lib/market/runtime.js';
+import { featureEnabled } from '../../../../lib/features.js';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -86,20 +87,32 @@ export async function POST(request) {
   }
 
   const orderId = randomUUID();
+  const oversellLock = featureEnabled('market_oversell_lock');
   try {
-    dbExecute(
-      `INSERT INTO checkout_orders (id, token_name, currency, amount, txid, buyer_delivery_address, buyer_auth_address, listing_id, artist_address, fee_kind, fee_amount, fee_to, status, confirmed_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'paid', datetime('now'))`,
-      [orderId, row.asset, currency, lockedAmount, txid, deliveryAddress, authAddress || buyerPubkey || null, row.id, row.artist_xcp_address,
-        fee ? fee.kind : null, fee ? fee.amount : null, fee ? fee.to : null]
-    );
-    dbExecute(
-      `INSERT INTO release_intents (id, order_id, mechanism, chain, payload, status)
-       VALUES (?, ?, ?, ?, ?, 'awaiting_authority')`,
-      [randomUUID(), orderId, rail.release, 'bitcoin',
-        JSON.stringify({ token: row.asset, deliveryAddress, paidWith: currency, amount: lockedAmount, txid, artist: row.artist_xcp_address })]
-    );
+    // Phase 0: reserve the unit and record the order in ONE transaction. With the
+    // lock on, claimListingUnit atomically decrements stock (and flips to 'sold' at
+    // 0); if it can't (already sold out — a concurrent buyer won the last unit),
+    // we throw SOLD_OUT and the whole tx rolls back — no order is recorded.
+    withTx(() => {
+      if (oversellLock) {
+        const claim = listings.claimListingUnit(row.id);
+        if (!claim.ok) { const e = new Error('SOLD_OUT'); e.soldOut = true; throw e; }
+      }
+      dbExecute(
+        `INSERT INTO checkout_orders (id, token_name, currency, amount, txid, buyer_delivery_address, buyer_auth_address, listing_id, artist_address, fee_kind, fee_amount, fee_to, status, confirmed_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'paid', datetime('now'))`,
+        [orderId, row.asset, currency, lockedAmount, txid, deliveryAddress, authAddress || buyerPubkey || null, row.id, row.artist_xcp_address,
+          fee ? fee.kind : null, fee ? fee.amount : null, fee ? fee.to : null]
+      );
+      dbExecute(
+        `INSERT INTO release_intents (id, order_id, mechanism, chain, payload, status)
+         VALUES (?, ?, ?, ?, ?, 'awaiting_authority')`,
+        [randomUUID(), orderId, rail.release, 'bitcoin',
+          JSON.stringify({ token: row.asset, deliveryAddress, paidWith: currency, amount: lockedAmount, txid, artist: row.artist_xcp_address })]
+      );
+    });
   } catch (e) {
+    if (e && e.soldOut) return NextResponse.json({ ok: false, soldOut: true, error: 'This piece sold out before your payment could be recorded. Your payment did go through on-chain — keep your txid and contact UNATRARE for a refund.' }, { status: 409 });
     if (/UNIQUE|constraint/i.test(e.message)) return NextResponse.json({ ok: false, error: 'that txid was already used' }, { status: 409 });
     return NextResponse.json({ ok: false, error: `payment verified but recording failed: ${e.message}` }, { status: 500 });
   }

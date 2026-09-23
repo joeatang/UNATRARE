@@ -4,6 +4,7 @@ import * as listings from '../../../../lib/market/listings.js';
 import { fetchToken } from '../../../../lib/market/catalog.js';
 import * as fees from '../../../../lib/market/fees.js';
 import { QUOTES, QUOTE_TTL } from '../../../../lib/market/runtime.js';
+import { featureEnabled } from '../../../../lib/features.js';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -14,6 +15,11 @@ export async function GET(request) {
   const currency = String(searchParams.get('currency') || '').trim().toUpperCase();
   const row = await listings.getListingRow(String(searchParams.get('listing') || ''));
   if (!row || row.status !== 'active') return NextResponse.json({ ok: false, error: 'listing not active' }, { status: 404 });
+
+  // Phase 0: refuse quotes on sold-out listings so a buyer never pays into one.
+  if (featureEnabled('market_oversell_lock') && !listings.hasStock(row)) {
+    return NextResponse.json({ ok: false, error: 'this piece is sold out', soldOut: true }, { status: 409 });
+  }
 
   const rail = listings.listingRail(row, currency);
   if (!rail.exists) return NextResponse.json({ ok: false, error: `"${currency}" is not an approved currency` }, { status: 400 });
