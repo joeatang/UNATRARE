@@ -5,6 +5,7 @@ import { dispenseTo, openDispenserFor } from '../../../../lib/market/dispensers.
 import { dbQuery, dbExecute } from '../../../../lib/market/store.js';
 import { XCP_ADDR, checkRate } from '../../../../lib/market/runtime.js';
 import { featureEnabled } from '../../../../lib/features.js';
+import { notifySale } from '../../../../lib/telegram.js';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -54,6 +55,9 @@ export async function POST(request) {
   } catch (e) {
     if (/UNIQUE|constraint/i.test(e.message)) return NextResponse.json({ ok: false, error: 'that dispense was already recorded' }, { status: 409 });
     return NextResponse.json({ ok: false, error: e.message }, { status: 500 });
+  }
+  if (featureEnabled('market_notify')) {
+    notifySale({ piece: row.asset, amount, currency: 'BTC', deliveryAddress, artist: row.artist_xcp_address, orderId, via: 'dispenser' }).catch(() => {});
   }
   return NextResponse.json({ ok: true, orderId, delivered: true, txid: d.txHash, piece: row.asset, note: 'Delivered — the dispense is on-chain. The art is in your wallet.' });
 }

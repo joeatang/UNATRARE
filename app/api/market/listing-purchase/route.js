@@ -9,6 +9,7 @@ import { dbQuery, dbExecute, withTx } from '../../../../lib/market/store.js';
 import { QUOTES, PRICE_TOLERANCE, HEX64, B58SIG, XCP_ADDR, isBitcoinRail, checkRate } from '../../../../lib/market/runtime.js';
 import { featureEnabled } from '../../../../lib/features.js';
 import { dispenseTo } from '../../../../lib/market/dispensers.js';
+import { notifySale } from '../../../../lib/telegram.js';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -134,6 +135,11 @@ export async function POST(request) {
         delivered = true;
       }
     } catch { /* leave awaiting_authority */ }
+  }
+
+  // Sale alert (best-effort, flag-gated) — so the artist/ops delivers promptly.
+  if (featureEnabled('market_notify')) {
+    notifySale({ piece: row.asset, amount: lockedAmount, currency: rail.label, deliveryAddress, artist: row.artist_xcp_address, orderId, via: delivered ? 'dispenser' : 'sign' }).catch(() => {});
   }
 
   return NextResponse.json({
