@@ -8,6 +8,7 @@ import { verifyCashBurn } from '../../../../lib/solanaBurnVerify.js';
 import { dbQuery, dbExecute, withTx } from '../../../../lib/market/store.js';
 import { QUOTES, PRICE_TOLERANCE, HEX64, B58SIG, XCP_ADDR, isBitcoinRail, checkRate } from '../../../../lib/market/runtime.js';
 import { featureEnabled } from '../../../../lib/features.js';
+import { dispenseTo } from '../../../../lib/market/dispensers.js';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -118,10 +119,28 @@ export async function POST(request) {
   }
 
   QUOTES.delete(b.quoteId);
+
+  // Phase 2 — dispenser trustless delivery. If this listing settles via a
+  // Counterparty dispenser and the flag is on, try to confirm the on-chain
+  // dispense to the buyer and auto-mark delivered — no manual authority step.
+  // Best-effort: any failure leaves the order 'awaiting_authority' (manual fallback).
+  let delivered = false;
+  if (featureEnabled('market_dispenser_release') && rail.release === 'dispenser') {
+    try {
+      const d = await dispenseTo(row.asset, deliveryAddress);
+      if (d && d.txHash) {
+        dbExecute("UPDATE release_intents SET status='delivered', delivery_txid=?, fulfilled_at=datetime('now') WHERE order_id=?", [d.txHash, orderId]);
+        dbExecute("UPDATE checkout_orders SET status='delivered' WHERE id=?", [orderId]);
+        delivered = true;
+      }
+    } catch { /* leave awaiting_authority */ }
+  }
+
   return NextResponse.json({
     ok: true, orderId, token: row.asset, name: meta.name,
     paid: `${lockedAmount} ${rail.label}`, paidTo: rail.treasury, artist: row.artist_xcp_address,
     fee: fee ? `${fee.amount} ${rail.label} ${fee.kind}` : null,
-    delivery: deliveryAddress, release: rail.release, status: 'paid — awaiting artist release',
+    delivery: deliveryAddress, release: rail.release,
+    status: delivered ? 'delivered — art dispensed on-chain' : 'paid — awaiting artist release',
   });
 }
