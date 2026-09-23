@@ -152,20 +152,39 @@ async function boot(){
 }
 
 // ── MARKET ──────────────────────────────────────────────────────────────────
+let MARKET_ITEMS=[];
 async function loadMarket(){
   const el=$('market'); el.className=''; el.innerHTML='<div class="spin">Loading listings…</div>';
   try{
     const d=await fetch('/api/market/listings').then(r=>r.json());
-    const items=d.listings||[];
-    if(!items.length){ el.innerHTML='<p class="muted">No active listings yet. Be the first — hit <b>Sell your art</b>.</p>'; return; }
-    el.innerHTML='<div class="grid">'+items.map(l=>`
-      <div class="card" onclick='openBuy(${JSON.stringify(l.id)})'>
-        <img loading="lazy" src="${esc(IMAGES[l.asset]||'')}" alt="${esc(l.asset)}" onerror="this.style.opacity=.2">
-        <div class="nm">${esc(l.asset)}</div>
-        <div class="pr">${esc(priceLabel(l))}</div>
-        ${repBadge(l)}
-      </div>`).join('')+'</div>';
+    MARKET_ITEMS=d.listings||[];
+    if(!MARKET_ITEMS.length){ el.innerHTML='<p class="muted">No active listings yet. Be the first — hit <b>Sell your art</b>.</p>'; return; }
+    el.innerHTML=`<div class="row" style="margin-bottom:14px">
+      <input id="mq" placeholder="🔍 Search art…" oninput="renderMarketGrid()" style="flex:1">
+      <select id="msort" onchange="renderMarketGrid()" style="flex:0 0 auto;width:auto">
+        <option value="new">Newest</option><option value="price_lo">Price ↑</option><option value="price_hi">Price ↓</option><option value="rep">Top sellers</option>
+      </select></div><div id="mgrid"></div>`;
+    renderMarketGrid();
   }catch(e){ el.innerHTML='<p class="muted">Could not load listings: '+esc(e.message)+'</p>'; }
+}
+function renderMarketGrid(){
+  const g=$('mgrid'); if(!g) return;
+  const q=(($('mq')||{}).value||'').trim().toLowerCase();
+  const sort=(($('msort')||{}).value)||'new';
+  const px=l=>Number(l.basePriceUsd || (l.manualPrices && Object.values(l.manualPrices)[0]) || 0);
+  const rep=l=>(l.reputation && l.reputation.deliveredSales) || 0;
+  let items=MARKET_ITEMS.filter(l=>!q || String(l.asset).toLowerCase().includes(q));
+  if(sort==='price_lo') items=[...items].sort((a,b)=>px(a)-px(b));
+  else if(sort==='price_hi') items=[...items].sort((a,b)=>px(b)-px(a));
+  else if(sort==='rep') items=[...items].sort((a,b)=>rep(b)-rep(a));
+  if(!items.length){ g.innerHTML='<p class="muted">No pieces match “'+esc(q)+'”.</p>'; return; }
+  g.innerHTML='<div class="grid">'+items.map(l=>`
+    <div class="card" onclick='openBuy(${JSON.stringify(l.id)})'>
+      <img loading="lazy" src="${esc(IMAGES[l.asset]||'')}" alt="${esc(l.asset)}" onerror="this.style.opacity=.2">
+      <div class="nm">${esc(l.asset)}</div>
+      <div class="pr">${esc(priceLabel(l))}</div>
+      ${repBadge(l)}
+    </div>`).join('')+'</div>';
 }
 
 async function openBuy(id){
