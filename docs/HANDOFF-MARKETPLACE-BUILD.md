@@ -20,6 +20,32 @@ Deep operational memory (if you share this workspace): `/memories/repo/unatrare-
 
 ---
 
+## 0.5 INTERFACE CONTRACT (Emblem ↔ Copilot) — standing protocol, do NOT re-negotiate
+This is the fixed loop. Follow it every phase without asking again.
+- **Roles:** Emblem builds ~99.9% (code + tests + one `.patch` + threat-model note per phase).
+  Copilot verifies + does the last mile (apply → preflight → push → `deploy.sh`; desktop build/codesign/ship).
+- **Base commit:** cut every patch against the **current `origin/main` HEAD** of the target repo.
+  After each deploy, Copilot reports the NEW HEAD; Emblem re-pulls and rebases the next phase on it.
+  Current bases: web `github.com/joeatang/UNATRARE` = `fbc5404` (Node 22, Next 14.2.29);
+  desktop (from zip) = `97082a1` (Electron 40.2.1).
+- **Delivery:** ONE self-contained patch per phase, served as a **downloadable raw `.patch` URL**
+  (never pasted text — avoids CRLF/whitespace mangling). `git format-patch` or `git diff` both fine.
+  Flag-gated, additive-migration-only, + a short threat-model note.
+- **Apply (Copilot):** WEB → `cd ~/UNATRARE/app` (NOT `~/UNATRARE`, that's not a repo) →
+  `curl -O <url>` → `git apply --3way <file>` → `npm run preflight` → `git push origin main` →
+  `ssh root@unatrare.wtf 'cd /var/www/unatrare && bash ops/deploy.sh'` → flip `feature:<flag>` in /admin → canary.
+  DESKTOP → apply in `~/UNATRARE/unatrare-desktop-source/unatrare-desktop`, then Copilot builds/codesigns/ships.
+- **Authority:** `ops/deploy.sh` verify-gate + auto-rollback is the final word on "is the build green on prod."
+  Emblem ships `node --check` + real `node:sqlite` logic tests + headless-renderer QA already done.
+- **Desktop seam (Emblem cannot):** real Pear/Electron GUI, real cross-machine multi-peer P2P, installer
+  build/sign, broadcasting signed txs. Everything else (headless renderer QA, node --check, in-process
+  hyperbee logic tests, live-RPC verifier tests, unsigned tx composition) Emblem executes for real.
+- **Money flags stay OFF** until Copilot canaries. Threat-model note required before any flip.
+- **Loop:** Emblem: patch URL + threat note → Copilot: apply/verify/deploy → reports result + new HEAD →
+  Emblem: next phase on new HEAD. No capability re-negotiation.
+
+---
+
 ## 1. Repositories
 - **Desktop app** (Electron/Pear): `github.com/joeatang/unatrare-desktop` — **PRIVATE**.
   Local: `/Users/joeatang/UNATRARE/unatrare-desktop-source/unatrare-desktop/`
