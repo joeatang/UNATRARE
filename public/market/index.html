@@ -187,6 +187,28 @@ function renderMarketGrid(){
     </div>`).join('')+'</div>';
 }
 
+// #2 — Artist profile: reputation + all their pieces, from the loaded market data.
+function openArtist(addr){
+  const o=$('overlay'); o.style.display='flex';
+  const mine=MARKET_ITEMS.filter(l=>l.artist===addr);
+  const rep=(mine.find(l=>l.reputation)||{}).reputation||null;
+  const repHtml = rep ? (rep.deliveredSales>0
+    ? `<div style="display:inline-flex;gap:8px;align-items:center;color:var(--acc);border:1px solid rgba(124,252,0,.4);border-radius:999px;padding:6px 13px;font-weight:800;font-size:13px">★ ${esc(rep.tier)}</div><div class="note" style="margin-top:6px">${rep.deliveredSales} sold · ${rep.deliveryRate}% delivered · ${rep.distinctBuyers} buyers</div>`
+    : `<div class="note">◇ New seller — no completed sales yet</div>`) : `<div class="note">reputation appears once enabled</div>`;
+  $('mBody').innerHTML=`
+    <div style="font-size:16px;font-weight:800;letter-spacing:1px">◆ Artist</div>
+    <div class="mono" style="margin:4px 0 10px;word-break:break-all">${esc(addr)}</div>
+    ${repHtml}
+    <div class="note" style="margin:16px 0 8px">${mine.length} piece(s) for sale</div>
+    <div class="grid">${mine.map(l=>`
+      <div class="card" onclick='openBuy(${JSON.stringify(l.id)})'>
+        <img loading="lazy" src="${esc(IMAGES[l.asset]||'')}" onerror="this.style.opacity=.2">
+        <div class="nm">${esc(l.asset)}</div>
+        <div class="pr">${esc(priceLabel(l))}</div>
+        ${repBadge(l)}
+      </div>`).join('')}</div>`;
+}
+
 async function openBuy(id){
   const o=$('overlay'); o.style.display='flex'; $('mBody').innerHTML='<div class="spin">Loading…</div>';
   let l; try{ l=(await fetch('/api/market/listings/'+encodeURIComponent(id)).then(r=>r.json())).listing; }catch(e){ $('mBody').innerHTML='<p class="msg err" style="display:block">'+esc(e.message)+'</p>'; return; }
@@ -194,7 +216,7 @@ async function openBuy(id){
   $('mBody').innerHTML=`
     <img src="${esc(IMAGES[l.asset]||'')}" onerror="this.style.opacity=.2">
     <div style="font-size:18px;font-weight:700;letter-spacing:1px">${esc(l.asset)}</div>
-    <div class="note">Sold by artist <span class="mono">${esc(l.artist)}</span> · released via ${esc(l.releaseMethod)}</div>
+    <div class="note">Sold by artist <span class="mono" style="cursor:pointer;color:var(--acc)" onclick='openArtist(${JSON.stringify(l.artist)})'>${esc(l.artist)}</span> · released via ${esc(l.releaseMethod)}</div>
     <div id="disp"></div>
     <label>Pay with</label><select id="cur" onchange="buyQuote('${esc(l.id)}')">${opts}</select>
     <div class="quote" id="q"></div>
