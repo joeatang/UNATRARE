@@ -168,6 +168,7 @@ async function openBuy(id){
     <img src="${esc(IMAGES[l.asset]||'')}" onerror="this.style.opacity=.2">
     <div style="font-size:18px;font-weight:700;letter-spacing:1px">${esc(l.asset)}</div>
     <div class="note">Sold by artist <span class="mono">${esc(l.artist)}</span> · released via ${esc(l.releaseMethod)}</div>
+    <div id="disp"></div>
     <label>Pay with</label><select id="cur" onchange="buyQuote('${esc(l.id)}')">${opts}</select>
     <div class="quote" id="q"></div>
     <div id="auth"></div>
@@ -177,6 +178,37 @@ async function openBuy(id){
     <button id="buyBtn" onclick="doBuy('${esc(l.id)}')">Verify payment &amp; claim</button>
     <div class="msg" id="msg"></div>`;
   buyQuote(l.id);
+  if(l.releaseMethod==='dispenser') loadDispenser(l.id, l.asset);
+}
+
+// ── Phase 2b: trustless dispenser delivery (buyer pays the dispenser directly) ─
+async function loadDispenser(id, asset){
+  const el=$('disp'); if(!el) return;
+  el.innerHTML='<div class="note">checking for a trustless dispenser…</div>';
+  try{
+    const r=await fetch('/api/market/dispenser?listing='+encodeURIComponent(id)).then(x=>x.json());
+    if(!r.ok || !r.dispenser){ el.innerHTML=''; return; }
+    const d=r.dispenser;
+    el.innerHTML=`<div class="quote" style="display:block;border-color:var(--acc)">
+      🔥 <b>Trustless delivery (dispenser)</b> — no middleman; the artist keeps their keys.
+      <div class="note" style="margin-top:6px">Send <b>${esc(d.btc)} BTC</b> (${esc(d.satoshirate)} sats) to the dispenser <b>from the Bitcoin wallet you want the art in</b>:</div>
+      <div class="mono" style="margin-top:4px">${esc(d.payTo)}</div>
+      <div class="note" style="margin-top:6px">Counterparty auto-sends ${esc(asset||'the art')} to you. Once it confirms, paste that same address below to record your receipt.</div>
+      <label>Your Counterparty address (the one you paid from)</label><input id="disp_addr" placeholder="1…">
+      <button onclick="claimDispense('${esc(id)}')" style="margin-top:10px">Confirm my delivery</button>
+      <div class="msg" id="disp_msg"></div>
+      <div class="note" style="margin-top:10px">— or pay another way below —</div>
+    </div>`;
+  }catch(e){ el.innerHTML=''; }
+}
+async function claimDispense(id){
+  const addr=($('disp_addr')||{}).value||'', msg=$('disp_msg');
+  msg.className='msg'; msg.style.display='none';
+  try{
+    const r=await fetch('/api/market/dispenser-claim',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({listing:id,deliveryAddress:addr})}).then(x=>x.json());
+    if(r.ok){ msg.className='msg ok'; msg.innerHTML='✔ '+esc(r.note||'Delivered')+'<br>Receipt <a href="/api/market/receipt/'+esc(r.orderId)+'" target="_blank">'+esc(r.orderId)+'</a>'; }
+    else{ msg.className='msg err'; msg.textContent='✕ '+(r.error||'not yet'); }
+  }catch(e){ msg.className='msg err'; msg.textContent=e.message; }
 }
 
 let CURRENT_QUOTE = null;
