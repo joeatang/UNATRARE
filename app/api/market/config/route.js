@@ -14,6 +14,11 @@ export async function GET() {
     custody: 'none — the checkout never holds keys',
     rails,
     enabledCount: rails.filter(r => r.enabled).length,
-    flags: { market_my_orders: featureEnabled('market_my_orders') },
+    flags: {
+      market_my_orders: featureEnabled('market_my_orders'),
+      market_offers: featureEnabled('market_offers'),
+      market_auctions: featureEnabled('market_auctions'),
+      market_messages: featureEnabled('market_messages'),
+    },
   });
 }
