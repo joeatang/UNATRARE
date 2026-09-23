@@ -56,14 +56,18 @@
   <div class="tag">Non-custodial marketplace for Bitcoin-native Counterparty art · you pay the artist directly</div>
   <div class="tabs">
     <div class="tab active" data-t="market" onclick="tab('market')">Market</div>
+    <div class="tab" data-t="buy" onclick="tab('buy')" style="display:none">My Purchases</div>
+    <div class="tab" data-t="pay" onclick="tab('pay')">My Sales</div>
     <div class="tab" data-t="sell" onclick="tab('sell')">Sell your art</div>
-    <div class="tab" data-t="pay" onclick="tab('pay')">Artist payments</div>
+    <div class="tab" data-t="gloss" onclick="tab('gloss')" style="display:none">Glossary</div>
   </div>
 </header>
 <main>
   <div id="market"><div class="spin">Loading listings…</div></div>
+  <div id="buy" style="display:none"></div>
   <div id="sell" style="display:none"></div>
   <div id="pay" style="display:none"></div>
+  <div id="gloss" style="display:none"></div>
 </main>
 
 <div class="overlay" id="overlay"><div class="modal"><span class="x" onclick="closeModal()">✕</span><div id="mBody"></div></div></div>
@@ -77,15 +81,65 @@ const esc = (s) => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'
 const priceLabel = (l) => (l.basePriceUsd? '$'+l.basePriceUsd+' · ' : '') + (l.currencies||[]).join(' · ');
 
 function tab(name){
-  ['market','sell','pay'].forEach(t=>{ $(t).style.display = t===name?'':'none';
+  ['market','buy','pay','sell','gloss'].forEach(t=>{ $(t).style.display = t===name?'':'none';
     document.querySelector(`.tab[data-t="${t}"]`).classList.toggle('active', t===name); });
   if(name==='market') loadMarket();
   if(name==='sell') renderSell();
   if(name==='pay') renderPay();
+  if(name==='buy') renderPurchases();
+  if(name==='gloss') renderGlossary();
+}
+
+// ── MY PURCHASES (buyer lens) — read-only, non-money, flag-gated ─────────────
+function renderPurchases(){
+  $('buy').innerHTML = `<div class="panel"><h2 style="margin:0 0 4px;font-size:16px">My Purchases</h2>
+    <p class="note" style="margin-top:0">Enter the address you bought with (your delivery address, or the wallet you paid from) to see your orders and delivery status.</p>
+    <div class="row"><input id="b_addr" placeholder="your delivery / paying address"><button style="margin:0;flex:0 0 auto" onclick="b_load()">Load</button></div>
+    <div id="b_out" style="margin-top:14px"></div></div>`;
+}
+async function b_load(){
+  const a=($('b_addr').value||'').trim(), out=$('b_out'); if(!a){ out.innerHTML='<p class="muted">Enter an address.</p>'; return; }
+  out.innerHTML='<div class="spin">Loading…</div>';
+  try{
+    const d=await fetch('/api/market/buyer/'+encodeURIComponent(a)+'/orders').then(r=>r.json());
+    if(!d.ok){ out.innerHTML='<p class="muted">'+esc(d.error)+'</p>'; return; }
+    if(!d.orders.length){ out.innerHTML='<p class="muted">No purchases found for this address.</p>'; return; }
+    out.innerHTML=`<div class="note">${d.count} purchase(s) · ${d.awaitingDelivery} awaiting delivery</div>`+d.orders.map(o=>`
+      <div class="order ${o.delivered?'':'action'}">
+        <div class="row"><b>${esc(o.piece)}</b> <span class="badge ${o.delivered?'':'act'}">${o.delivered?'delivered':'awaiting delivery'}</span></div>
+        <div>Paid <b style="color:var(--acc)">${esc(o.paid)}</b> · <a href="${esc(o.paymentExplorer||'#')}" target="_blank">payment ↗</a></div>
+        <div class="note">from artist <span class="mono">${esc(o.artist||'—')}</span></div>
+        <div class="note">delivery: ${esc(o.delivery.status||'—')}${o.delivery.txid?' · <a href="'+esc(o.delivery.explorer)+'" target="_blank">art tx ↗</a>':''}</div>
+        <div class="note">receipt <a href="/api/market/receipt/${esc(o.orderId)}" target="_blank">${esc(o.orderId)}</a></div>
+      </div>`).join('');
+  }catch(e){ out.innerHTML='<p class="muted">'+esc(e.message)+'</p>'; }
+}
+
+// ── GLOSSARY — plain-language terms ──────────────────────────────────────────
+function renderGlossary(){
+  const terms=[
+    ['Non-custodial','UNATRARE never holds your money or your art. Payment goes straight to the artist; the art stays in their wallet until it sells.'],
+    ['Rail','A way to pay — BTC, XCP, $CASH, SOL, USDT, etc. Each piece lists the rails its artist accepts.'],
+    ['Quote','A live price for one piece in one currency, locked for a few minutes so the price can’t move while you pay.'],
+    ['Listing','A piece an artist has put up for sale, with their receive address and price.'],
+    ['Delivery address','Your Counterparty wallet address (starts with 1) — where the art is sent. Not an exchange address.'],
+    ['Release','The artist sending the art to you after your payment is verified on-chain.'],
+    ['Sold out','A 1-of-1 (or the last unit) already sold. If you see this before paying, you were not charged.'],
+    ['Receipt','A permanent record of your purchase — currency, amount, transaction id, and delivery status.'],
+    ['Certified / The Council','8 Pepe judges score each piece /69. Only certified, revealed pieces can be listed.'],
+  ];
+  $('gloss').innerHTML = `<div class="panel"><h2 style="margin:0 0 10px;font-size:16px">Plain-English Glossary</h2>`+
+    terms.map(([t,d])=>`<div style="margin-bottom:12px"><b style="color:var(--acc)">${esc(t)}</b><div class="note" style="margin-top:2px">${esc(d)}</div></div>`).join('')+
+    `</div>`;
 }
 
 async function boot(){
-  try{ const cfg=await fetch('/api/market/config').then(r=>r.json()); RAILS=cfg.rails||[]; }catch{}
+  let cfg={};
+  try{ cfg=await fetch('/api/market/config').then(r=>r.json()); RAILS=cfg.rails||[]; }catch{}
+  // Flag-gated reveal: My Purchases + Glossary tabs stay hidden until market_my_orders is ON.
+  if(cfg.flags && cfg.flags.market_my_orders){
+    document.querySelectorAll('.tab[data-t="buy"],.tab[data-t="gloss"]').forEach(e=>e.style.display='');
+  }
   try{ const cat=await fetch('/api/market/catalog').then(r=>r.json()); (cat.items||[]).forEach(i=>IMAGES[i.token]=i.image); }catch{}
   loadMarket();
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { listRails } from '../../../../lib/market/currencies.js';
+import { featureEnabled } from '../../../../lib/features.js';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -13,5 +14,6 @@ export async function GET() {
     custody: 'none — the checkout never holds keys',
     rails,
     enabledCount: rails.filter(r => r.enabled).length,
+    flags: { market_my_orders: featureEnabled('market_my_orders') },
   });
 }
