@@ -12,11 +12,23 @@ Deep operational memory (if you share this workspace): `/memories/repo/unatrare-
 
 ---
 
-## 0. Current state (as of 2026-09-22)
-- Desktop app is at **v0.1.9**, shipped to Mac + Windows. Feels good; founder is happy with UX.
-- The **web marketplace is LIVE but DARK** (`market_public` flag OFF; `/api/market/live` → `{live:false}`).
-  Listings + quote + purchase endpoints all work; a real buyer has transacted (paid, awaiting release).
-- **START HERE: Phase 0** (oversell/sold-out payment vulnerability). See §7.
+## 0. Current state (as of 2026-09-23)
+- **Web repo `github.com/joeatang/UNATRARE` HEAD = `958d028`** (Next 14.2.29, Node 22). Cut your next
+  patch against THIS. Prod build verified `rN_rB31A5h1hh64FKFzoI`.
+- **Desktop repo `github.com/joeatang/unatrare-desktop` HEAD = `a6e1bd6`, shipped v0.1.14** (Mac + Windows,
+  ad-hoc signed). `latest.json` = 0.1.14.
+- **Phases 0 → K are DEPLOYED (dark)**: oversell-lock, my_orders, dispenser trustless-delivery,
+  reputation, Telegram sale-notify, offers, auctions, messages (v2 private/anti-spam), BIP-322 segwit
+  listing. Everything additive + flag-gated. Full per-slice log in §11.
+- **LIVE FLAG STATE on prod (`/api/market/config`)**: `market_my_orders=ON`, `market_offers=ON`,
+  `market_auctions=ON`, `market_messages=OFF`. (offers/auctions were flipped ON server-side by the
+  founder; messages stays dark until the desktop UI matches.) `market_public` (the master nav/live
+  gate) is still OFF — the marketplace is LIVE-but-DARK to the public.
+- **NEW: our own Pear OTA release channel is stood up** (single-key). See §10 — that's your next task:
+  wire the upgrade key + `pear.stage.ignore` into desktop `package.json`, add the updater worker, then
+  we test an OTA update end-to-end.
+- Governing loop is unchanged: §0.5 interface contract. Patches only, cut against current HEAD, no direct
+  pushes to `origin/main` (Copilot owns the branch).
 
 ---
 
@@ -107,8 +119,11 @@ JSON'
 GOTCHAS:
 - A Windows build **deletes the mac zip from `out/`** — build/upload mac FIRST, or rebuild after.
 - `package.json#upgrade` MUST be a valid pear key (`pear touch` sets it). Empty string fails the build.
-  Current key is OURS: `pear://nbj6j6o7w7qt1g3a7t9m4k39zm91y4jsk6uzbzdk8b19o6dry7fy`.
-- There is NO auto-update yet (Phase 6). Shipping = re-download; the app shows an update-nudge banner.
+  The key that CURRENTLY ships in 0.1.14 is the template-derived `pear://nbj6j6o7w7qt1g3a7t9m4k39zm91y4jsk6uzbzdk8b19o6dry7fy`.
+  **We have now minted OUR OWN OTA line `pear://y9dd5w9sgbcxike8n8tesy6k4rqw7cp8bcekqde4sfc34j8j66uo`
+  (see §10) — switch `package.json#upgrade` to it when wiring auto-update.**
+- Auto-update infra is now bootstrapped (§10: our key + a live public seeder). The updater WORKER is
+  still TODO (your job). Until it ships, shipping = re-download; the app shows an update-nudge banner.
 
 ## 4. Prod processes (pm2) — do NOT touch the fragile ones
 - `unatrare` = web app.  `unatrare-artdrive` = isolated art seeder (drive key
@@ -201,3 +216,77 @@ Then Phase 1 (My Purchases / My Sales / glossary), then Phase 2 (dispensers). Se
   signature scoping (`^UNATRARE:`), native send confirmation, wallet auto-lock (15 min).
 - Admin routes all import AND call `verifyAdminToken`. Solana RPC proxy is method-allowlisted.
 - Write a short threat-model note before flipping any money flag.
+
+---
+
+## 10. Desktop OTA release channel — HANDOFF (this is your next task)
+Stood up 2026-09-23 (single-key; no multisig, no Apple notarization yet — deliberately deferred).
+The channel + a live public seeder exist. What remains is the app-side updater. Split of work below.
+
+### 10.1 What Copilot already did (done, verified)
+- **Minted OUR OWN release key** on the Mac via `pear touch` (Foundational Step 0):
+  - Upgrade link (base): `pear://y9dd5w9sgbcxike8n8tesy6k4rqw7cp8bcekqde4sfc34j8j66uo`
+  - The **Mac holds the secret key** → the Mac is the ONLY machine that can `pear stage` to this line.
+    (Copilot runs staging; that's the desktop seam per §0.5.)
+- **Staged a bootstrap v1** from the desktop repo source (versioned `pear://0.39.y9dd5w9…`,
+  app `unatrare-desktop@0.1.14`, ~946 kB, drive key `07c63dd3…`, content key `54335778…`).
+  This is just to prove the pipe; it will be superseded by your real release stage (versions only go UP —
+  **no downgrade path**, a rollback must be re-staged at a HIGHER version).
+- **Stood up the PUBLIC seeder** on `unatrare.wtf` as pm2 process **`unat-seeder`** (id 5 — DISTINCT from
+  the crash-looping `unatrare-seeder` id1; do NOT touch id1). It reports **`firewalled: false`, NAT
+  consistent**, fully replicated the drive, and serves it independently (survives Mac going offline;
+  `pm2 save`'d so it survives reboot). Server runtime is genuine Holepunch Pear v2.0.1 at
+  `/root/.config/pear/bin/pear` (NOT the Ubuntu `/usr/bin/pear` PHP-PEAR shim, though that one also
+  chains to it).
+
+### 10.2 STAGING GOTCHA you must know (bit us once)
+`pear stage` does **NOT** honor `.gitignore`, and the desktop repo has no `pear.stage.ignore`. A bare
+`pear stage` drags in `out/` (~30k files incl. bundled `node_modules`) and even `.git/`. Two fixes:
+1. **Add a persistent ignore to desktop `package.json`** (your edit — cleanest): a `pear` block with
+   `"stage": { "ignore": [".git","node_modules","out","todo",".DS_Store",".github", <loose dev artifacts>] }`.
+2. Until then, Copilot stages with an explicit `--ignore` flag (verified to yield a clean 52-file source
+   drive). `pear.json` currently holds only PLACEHOLDER multisig pubkeys (`<PUBKEY_HERE>`) — unused for
+   single-key; leave it for the future multisig step.
+
+### 10.3 What YOU (Emblem) do next
+1. Set desktop **`package.json#upgrade` = `pear://y9dd5w9sgbcxike8n8tesy6k4rqw7cp8bcekqde4sfc34j8j66uo`**
+   and add the `pear.stage.ignore` block from 10.2. Deliver as a desktop `.patch` per §0.5.
+2. Add/enable the **updater worker** (`workers/*` + main-process wiring) using `pear-runtime-updater`
+   (see `agent_docs/updates.md` for the flow + the one-shot-latch footgun: `applied=true` is set BEFORE
+   the swap and the worker handler has no try/catch → every failure is a silent hang; add a try/catch +
+   failure reply). Keep it behind a flag / `--updates` gate so dev runs don't try to self-apply.
+3. Hand Copilot the patch. Copilot applies → builds/ships → **stages the new version to the OTA line on
+   the Mac** (`pear stage <link> --ignore …`) → the `unat-seeder` serves it → we launch the packaged app
+   and confirm it pulls + applies the update end-to-end.
+
+### 10.4 Division of labor (per §0.5 desktop seam)
+- **Copilot only** (needs the Mac + the secret key + SSH): `pear touch`, `pear stage`, running/monitoring
+  the seeder, building/codesigning/shipping, the live end-to-end OTA test.
+- **Emblem**: the `package.json` upgrade-key + ignore edit, the updater worker code + its logic tests,
+  and (later) the multisig config when we graduate off single-key.
+- **Deferred (needs founder):** Apple Developer account → Developer-ID signing + notarization (Path B);
+  the multisig key ceremony (needs ≥3 machines each seeding, per `agent_docs/releases.md`).
+
+---
+
+## 11. Session log — what shipped 2026-09-23 (newest first)
+- **web `958d028`** — messaging v2 (private, anti-spam): public board → per-piece private threads gated by
+  buyer STANDING (existing offer/order, else 403); link-sanitized bodies (phishing/drainer strip);
+  reportable; artist replies operator-token-gated. Additive idempotent `ALTER TABLE messages ADD COLUMN`
+  over a hardcoded col list; all SQL parameterized. Flag `market_messages` (stays DARK). Deploy build
+  `rN_rB31A5h1hh64FKFzoI`.
+- **web `8c885c2`** — offers + auctions + messages(v1) + BIP-322. Non-custodial offers/auctions (signed
+  intents, NO escrow → convert to a normal verified purchase on accept/close); each route hard-gates on its
+  flag; offers/accept also `OPERATOR_TOKEN`-gated. `USDT_ETH` currency registered `verifier:null` (disabled).
+  BIP-322 additive (legacy 1/3 → bip137 unchanged; new bc1q → bip322). Build `3Jo778AaPjcA5fpFrnIqN`.
+- **web `6462f0a`** — (pushed by Emblem earlier, before the direct-push freeze) my_orders, dispenser
+  trustless-delivery, reputation, Telegram sale-notify, search/filter/sort, artist profiles. Build
+  `2Kl_ziwdqvcbqBctdoogk`.
+- **web `ab56486`** — Phase 0 oversell/sold-out lock (`market_oversell_lock`).
+- **desktop `a6e1bd6` v0.1.14** — auto-refresh (new pieces/listings appear without relaunch).
+- **desktop `40ee17d` v0.1.13** — v0.1.11 parity + market phase UIs (My Purchases, search, offers/auctions/
+  messages, watchlist, glossary, artist profiles, dispenser status).
+- **RELAY RULE (learned the hard way):** patches must be cut against the CURRENT `origin/main` HEAD.
+  Emblem previously ALSO direct-pushed to `origin/main`, which stale-based a patch mid-flight and caused a
+  divergence. Resolution (founder decision): **Emblem sends patches ONLY; Copilot owns `origin/main`; no
+  more direct pushes.** Before applying any patch, Copilot `git fetch` + confirms HEAD == the patch's base.
