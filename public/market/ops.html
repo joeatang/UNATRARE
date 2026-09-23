@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UNATRARE — Delivery Ops</title>
+<style>
+  :root{--bg:#0a0b0a;--panel:#121512;--line:#26301f;--ink:#e9f0e6;--dim:#8ba17e;--acc:#7CFC00;--warn:#ffb454;--bad:#ff6b6b}
+  *{box-sizing:border-box;margin:0} body{background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,sans-serif;line-height:1.5;padding:24px;max-width:820px;margin:0 auto}
+  h1{font-size:20px;letter-spacing:2px} .sub{color:var(--dim);font-size:13px;margin:4px 0 18px}
+  input{background:#0c0e0c;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:10px;font-size:14px;width:100%}
+  button{background:var(--acc);color:#04210a;border:0;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer}
+  .row{display:flex;gap:10px;align-items:center} .mono{font-family:ui-monospace,monospace;font-size:12px;word-break:break-all}
+  .note{color:var(--dim);font-size:12px} .order{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}
+  .order.done{opacity:.55} .badge{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--warn);color:var(--warn)}
+  .badge.ok{border-color:var(--acc);color:var(--acc)} label{display:block;font-size:12px;color:var(--dim);margin:10px 0 4px}
+  .msg{font-size:13px;margin-top:8px} .err{color:var(--bad)} .good{color:var(--acc)}
+</style></head><body>
+<h1>◆ UNATRARE — Delivery Ops</h1>
+<div class="sub">Fulfill sign-based orders: send the art from your wallet, then record the delivery txid here. Gated by your OPERATOR_TOKEN.</div>
+<div class="row"><input id="tok" type="password" placeholder="OPERATOR_TOKEN"><button style="flex:0 0 auto" onclick="load()">Load pending</button></div>
+<div id="out" style="margin-top:16px"></div>
+<script>
+const $=(id)=>document.getElementById(id);
+const esc=(s)=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function tok(){ return ($('tok').value||'').trim(); }
+async function load(){
+  const out=$('out'); if(!tok()){ out.innerHTML='<p class="err msg">Enter your OPERATOR_TOKEN.</p>'; return; }
+  out.innerHTML='<p class="note">loading…</p>';
+  try{
+    const d=await fetch('/api/market/intents?status=awaiting_authority',{headers:{Authorization:'Bearer '+tok()}}).then(r=>r.json());
+    if(!d.ok){ out.innerHTML='<p class="err msg">'+esc(d.error||'unauthorized')+'</p>'; return; }
+    if(!d.intents.length){ out.innerHTML='<p class="note">No pending deliveries. 🎉</p>'; return; }
+    out.innerHTML='<div class="note">'+d.count+' order(s) awaiting delivery</div>'+d.intents.map(o=>{
+      let payload={}; try{payload=JSON.parse(o.payload||'{}')}catch{}
+      const to=o.buyer_delivery_address||payload.deliveryAddress||'';
+      return `<div class="order" id="o_${esc(o.id)}">
+        <div class="row"><b>${esc(o.token_name||payload.token||'?')}</b> <span class="badge">awaiting delivery</span></div>
+        <div class="note">paid ${esc(o.amount||'')} ${esc(o.currency||'')} · via ${esc(o.mechanism||'sign')}</div>
+        <div class="note">send the art to: <span class="mono">${esc(to)}</span></div>
+        <label>Delivery txid (the Counterparty send you just made)</label>
+        <div class="row"><input id="tx_${esc(o.id)}" placeholder="the XCP send txid"><button style="flex:0 0 auto" onclick="fulfill('${esc(o.id)}')">Mark delivered</button></div>
+        <div class="msg" id="m_${esc(o.id)}"></div></div>`;
+    }).join('');
+  }catch(e){ out.innerHTML='<p class="err msg">'+esc(e.message)+'</p>'; }
+}
+async function fulfill(id){
+  const tx=($('tx_'+id).value||'').trim(), m=$('m_'+id);
+  if(!tx){ m.className='msg err'; m.textContent='Enter the delivery txid.'; return; }
+  m.className='msg note'; m.textContent='recording…';
+  try{
+    const r=await fetch('/api/market/intents/'+encodeURIComponent(id)+'/fulfill',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tok()},body:JSON.stringify({deliveryTxid:tx})}).then(x=>x.json());
+    if(r.ok){ const o=$('o_'+id); o.classList.add('done'); o.querySelector('.badge').className='badge ok'; o.querySelector('.badge').textContent='delivered'; m.className='msg good'; m.textContent='✔ delivered'; }
+    else{ m.className='msg err'; m.textContent='✕ '+(r.error||'failed'); }
+  }catch(e){ m.className='msg err'; m.textContent=e.message; }
+}
+</script></body></html>
