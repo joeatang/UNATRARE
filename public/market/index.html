@@ -21,7 +21,9 @@
   .card:hover{border-color:var(--acc);transform:translateY(-2px)}
   .card img{width:100%;aspect-ratio:1;object-fit:cover;background:#000;display:block}
   .card .nm{padding:8px 10px 2px;font-size:12px;font-weight:700;letter-spacing:.5px;word-break:break-all}
-  .card .pr{padding:0 10px 10px;font-size:12px;color:var(--acc)}
+  .card .pr{padding:0 10px 2px;font-size:12px;color:var(--acc)}
+  .repb{padding:0 10px 10px;font-size:11px;font-weight:700;color:var(--acc)}
+  .repb.new{color:var(--dim);font-weight:600}
   .muted{color:var(--dim)} .spin{color:var(--dim);padding:24px 0}
   label{display:block;font-size:12px;color:var(--dim);margin:12px 0 4px}
   select,input{width:100%;background:#0c0e0c;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:10px;font-size:14px;font-family:inherit}
@@ -79,6 +81,11 @@ let RAILS = [];    // approved currencies (from /api/config)
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const priceLabel = (l) => (l.basePriceUsd? '$'+l.basePriceUsd+' · ' : '') + (l.currencies||[]).join(' · ');
+function repBadge(l){
+  const r=l.reputation; if(!r) return '';
+  if(!(r.deliveredSales>0)) return '<div class="repb new">◇ New seller</div>';
+  return '<div class="repb">★ '+esc(r.tier)+' · '+r.deliveredSales+' sold · '+r.deliveryRate+'% delivered</div>';
+}
 
 function tab(name){
   ['market','buy','pay','sell','gloss'].forEach(t=>{ $(t).style.display = t===name?'':'none';
@@ -156,6 +163,7 @@ async function loadMarket(){
         <img loading="lazy" src="${esc(IMAGES[l.asset]||'')}" alt="${esc(l.asset)}" onerror="this.style.opacity=.2">
         <div class="nm">${esc(l.asset)}</div>
         <div class="pr">${esc(priceLabel(l))}</div>
+        ${repBadge(l)}
       </div>`).join('')+'</div>';
   }catch(e){ el.innerHTML='<p class="muted">Could not load listings: '+esc(e.message)+'</p>'; }
 }
