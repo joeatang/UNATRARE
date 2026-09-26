@@ -17,6 +17,9 @@ export default function NotFound() {
   return (
     <main style={wrap}>
       <div style={{ maxWidth: 520 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/unatpepe-mark.png" alt="UNATPEPE" width="128" height="109"
+          style={{ width: 128, height: 'auto', margin: '0 auto 14px', display: 'block' }} />
         <p style={{ color: '#7cfc00', letterSpacing: '.32em', fontSize: 11, textTransform: 'uppercase', margin: '0 0 10px' }}>UNATRARE</p>
         <h1 style={{ fontSize: 'clamp(56px,16vw,120px)', lineHeight: 1, margin: '0 0 6px', fontFamily: 'ui-sans-serif,system-ui,sans-serif', fontWeight: 800 }}>404</h1>
         <p style={{ color: '#eafbe0', fontSize: 18, margin: '0 0 6px' }}>This page drifted off the archive.</p>
