@@ -64,8 +64,16 @@ export async function POST(request) {
   // Verify the payment reached the ARTIST's address for >= the locked amount.
   const chk = await runVerifier(rail, { txid, treasury: rail.treasury, priceHuman: requiredHuman, buyerPubkey });
   if (!chk.ok) return NextResponse.json({ ok: false, error: chk.error }, { status: 422 });
-  if (isBitcoinRail(currency) && chk.source && authAddress && chk.source !== authAddress) {
-    return NextResponse.json({ ok: false, error: 'the signing wallet is not the wallet that paid' }, { status: 422 });
+  if (isBitcoinRail(currency)) {
+    // FAIL CLOSED: never bind a Bitcoin-rail payment we can't attribute to a
+    // sender — otherwise someone could sign over a stranger's incoming txid and
+    // front-run the real payer. A missing source ⇒ reject (retry once indexed).
+    if (!chk.source) {
+      return NextResponse.json({ ok: false, error: 'could not confirm the on-chain sender yet — cannot safely bind this payment; wait for it to index and retry' }, { status: 422 });
+    }
+    if (authAddress && chk.source !== authAddress) {
+      return NextResponse.json({ ok: false, error: 'the signing wallet is not the wallet that paid' }, { status: 422 });
+    }
   }
 
   // Fee/burn: the same tx must also pay the platform fee (or burn $CASH).
