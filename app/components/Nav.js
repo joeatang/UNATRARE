@@ -71,6 +71,7 @@ export default function Nav() {
           <li><Link href="/archive">Archive</Link></li>
           <li><Link href="/council">Council</Link></li>
           <li><Link href="/nodes">Nodes</Link></li>
+          <li><Link href="/currencies">Currencies</Link></li>
           <li><Link href="/whitepaper" className={styles['nav-paper']}>UNATPEPER</Link></li>
           <li><Link href="/register" className={styles['nav-register']}>✦ UNATPEPE</Link></li>
         </ul>
@@ -124,6 +125,7 @@ export default function Nav() {
           <li><Link href="/archive">Archive</Link></li>
           <li><Link href="/council">Council</Link></li>
           <li><Link href="/nodes">Nodes</Link></li>
+          <li><Link href="/currencies">Currencies</Link></li>
           <li><Link href="/register" className={styles['nav-register']}>✦ UNATPEPE</Link></li>
           <li><Link href="/whitepaper" className={styles.drawerPaperLink}>UNATPEPER ↗</Link></li>
           <li className={styles.drawerSectionDivider}><span>more</span></li>
