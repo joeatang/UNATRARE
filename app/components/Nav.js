@@ -77,6 +77,9 @@ export default function Nav() {
         </ul>
 
         <div className={styles.navRight}>
+          <Link href="/download" className={styles['nav-status']}>
+            ↓ Get the App
+          </Link>
           <Link href="/torchbearer/claim" className={styles['nav-status']}>
             🔥 Claim Block
           </Link>
@@ -120,6 +123,7 @@ export default function Nav() {
         </div>
         <ul className={styles.drawerLinks} onClick={() => setOpen(false)}>
           <li><Link href="/start">Start Here</Link></li>
+          <li><Link href="/download">↓ Get the App</Link></li>
           <li><Link href="/directory">Directory</Link></li>
           {marketLive && <li><Link href="/market">Market</Link></li>}
           <li><Link href="/archive">Archive</Link></li>

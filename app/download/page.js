@@ -1,6 +1,7 @@
 import styles from './download.module.css';
 import VersionBadge from './VersionBadge';
 import DownloadCTAs from './DownloadCTAs';
+import Nav from '../components/Nav';
 
 export const metadata = {
   title: 'Download UNATRARE — the app that makes you the archive',
@@ -14,7 +15,9 @@ const WIN_X64 = '/downloads/unatrare-win-x64.zip';
 
 export default function DownloadPage() {
   return (
-    <main className={styles.wrap}>
+    <>
+      <Nav />
+      <main className={styles.wrap}>
       <div className={styles.glow} aria-hidden="true" />
 
       <header className={styles.top}>
@@ -132,6 +135,7 @@ export default function DownloadPage() {
         Linux build coming next. Questions? Visit{' '}
         <a href="https://unatrare.wtf" className={styles.flink}>unatrare.wtf</a>.
       </footer>
-    </main>
+      </main>
+    </>
   );
 }

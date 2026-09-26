@@ -128,7 +128,7 @@ export default function LandingPage() {
               <span className={styles.heroDoorLabel}>Support the art</span>
               <span className={styles.heroDoorDesc}>
                 Browse the directory and salute the cards that move you.
-                Your $CASH goes straight to the artists.
+                Saluting burns 69% of your $CASH to honor the art; the rest goes to the artist.
               </span>
               <span className={styles.heroDoorArrow}>enter the directory →</span>
             </Link>
@@ -194,7 +194,7 @@ export default function LandingPage() {
             <p>
               TAP, DMT, and the Trac Network opened new ways to read Bitcoin itself as creative material.
               UNATRARE&apos;s mission is to connect those worlds through curation, community, and a node-powered
-              archive that no one can pull the plug on.
+              archive built to outlive any single server — an experiment in the making, growing stronger with every node that joins.
             </p>
           </div>
 
