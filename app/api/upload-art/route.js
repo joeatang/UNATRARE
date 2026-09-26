@@ -43,15 +43,15 @@ const VIDEO_MIME = new Set([
   'video/x-m4v',     // M4V files (common on Apple devices)
 ]);
 const ALLOWED_MIME = new Set([
+  // SECURITY: image/svg+xml and text/html are DELIBERATELY excluded — they can
+  // carry <script> and, served same-origin, execute as stored XSS. Raster images
+  // + a/v only. (If SVG display is ever needed, rasterize to PNG via sharp first.)
   'image/png', 'image/jpeg', 'image/gif', 'image/webp',
-  'image/svg+xml', 'text/html',
   ...AUDIO_MIME, ...VIDEO_MIME,
 ]);
 
 // Extension map for MIME types that need explicit mapping
 const MIME_EXT = {
-  'image/svg+xml':   'svg',
-  'text/html':       'html',
   'audio/mpeg':      'mp3',
   'audio/wav':       'wav',
   'audio/ogg':       'ogg',
@@ -68,7 +68,6 @@ const EXT_MIME_FALLBACK = {
   mp4: 'video/mp4', m4v: 'video/x-m4v', mov: 'video/quicktime', webm: 'video/webm',
   mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg', flac: 'audio/flac', m4a: 'audio/mp4',
   png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp',
-  svg: 'image/svg+xml', html: 'text/html',
 };
 
 function resolveFileMime(reportedType, filename) {

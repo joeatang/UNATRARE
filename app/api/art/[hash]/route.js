@@ -48,6 +48,10 @@ export async function GET(_request, { params }) {
         headers: {
           'Content-Type': token.art_mime || 'application/octet-stream',
           'Cache-Control': CACHE,
+          // Neutralize any legacy HTML/SVG upload: no MIME sniffing + sandboxed
+          // (unique origin, scripts blocked) so user content can never run as XSS.
+          'X-Content-Type-Options': 'nosniff',
+          'Content-Security-Policy': "default-src 'none'; sandbox; img-src 'self' data:; media-src 'self' data:",
         },
       });
     } catch {
@@ -65,6 +69,8 @@ export async function GET(_request, { params }) {
           'Content-Type': result.mime,
           'Cache-Control': CACHE,
           'X-Source': 'hyperdrive',
+          'X-Content-Type-Options': 'nosniff',
+          'Content-Security-Policy': "default-src 'none'; sandbox; img-src 'self' data:; media-src 'self' data:",
         },
       });
     }

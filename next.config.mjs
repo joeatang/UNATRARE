@@ -19,6 +19,26 @@ const nextConfig = {
       },
     ];
   },
+
+  // SECURITY headers. User-uploaded files are served raw from /uploads — sandbox
+  // them (unique origin, no scripts) + nosniff so a legacy HTML/SVG can never run
+  // as stored XSS. nosniff site-wide as defense-in-depth.
+  async headers() {
+    return [
+      {
+        source: '/uploads/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Content-Security-Policy', value: "default-src 'none'; sandbox; img-src 'self' data:; media-src 'self' data:" },
+          { key: 'Content-Disposition', value: 'inline' },
+        ],
+      },
+      {
+        source: '/:path*',
+        headers: [{ key: 'X-Content-Type-Options', value: 'nosniff' }],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
