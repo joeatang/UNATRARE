@@ -12,11 +12,13 @@ export const runtime = 'nodejs';
 const SC_BRIDGE_URL = process.env.SC_BRIDGE_URL || 'ws://127.0.0.1:49222';
 
 function bridgeToken() {
-  if (process.env.SC_BRIDGE_TOKEN) return process.env.SC_BRIDGE_TOKEN;
-  // Canonical location (outside /var/www so deploys can't sweep it), then fallbacks.
+  // The token FILE (written by the daemon) is authoritative — it always matches
+  // the RUNNING peer, even after a rotation. Read it FIRST; a stale env
+  // SC_BRIDGE_TOKEN (e.g. the old committed one) must NOT win over it.
   for (const p of ['/opt/unatrare-intercom/.sc-bridge-token', '/var/www/unatrare/.sc-bridge-token']) {
     try { const t = fs.readFileSync(p, 'utf8').trim(); if (t) return t; } catch { /* next */ }
   }
+  if (process.env.SC_BRIDGE_TOKEN) return process.env.SC_BRIDGE_TOKEN;
   return '';
 }
 
@@ -39,7 +41,7 @@ function getSubnetListings(timeoutMs = 6000) {
       let m; try { m = JSON.parse(ev.data); } catch { return; }
       if (m.type === 'auth_ok' && !authed) { authed = true; ws.send(JSON.stringify({ type: 'get_listings' })); return; }
       if (m.type === 'listings') { clearTimeout(timer); finish({ ok: true, listings: Array.isArray(m.listings) ? m.listings : [] }); return; }
-      if (m.type === 'error')    { clearTimeout(timer); finish({ ok: false, reason: m.message || 'bridge-error', listings: [] }); }
+      if (m.type === 'error')    { clearTimeout(timer); finish({ ok: false, reason: m.error || m.message || 'bridge-error', listings: [] }); }
     };
     ws.onerror = () => { clearTimeout(timer); finish({ ok: false, reason: 'unreachable', listings: [] }); };
   });
