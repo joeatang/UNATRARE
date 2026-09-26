@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import * as listings from '../../../../lib/market/listings.js';
 import { fetchToken } from '../../../../lib/market/catalog.js';
 import * as fees from '../../../../lib/market/fees.js';
-import { QUOTES, QUOTE_TTL } from '../../../../lib/market/runtime.js';
+import { QUOTES, QUOTE_TTL, checkRate } from '../../../../lib/market/runtime.js';
 import { featureEnabled } from '../../../../lib/features.js';
 
 export const dynamic = 'force-dynamic';
@@ -11,6 +11,8 @@ export const runtime = 'nodejs';
 
 // GET /api/market/listing-quote?listing=&currency= — live price + fee, pay the ARTIST.
 export async function GET(request) {
+  // Throttle: each quote hits the price oracle + catalog — cap abuse (30/min/IP).
+  if (!checkRate(request, 30)) return NextResponse.json({ ok: false, error: 'too many requests — wait a minute' }, { status: 429 });
   const { searchParams } = new URL(request.url);
   const currency = String(searchParams.get('currency') || '').trim().toUpperCase();
   const row = await listings.getListingRow(String(searchParams.get('listing') || ''));

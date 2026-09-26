@@ -72,6 +72,7 @@ export default function Nav() {
           <li><Link href="/council">Council</Link></li>
           <li><Link href="/nodes">Nodes</Link></li>
           <li><Link href="/currencies">Currencies</Link></li>
+          <li><a href="https://t.me/unatpepe" target="_blank" rel="noopener noreferrer">Help</a></li>
           <li><Link href="/whitepaper" className={styles['nav-paper']}>UNATPEPER</Link></li>
           <li><Link href="/register" className={styles['nav-register']}>✦ UNATPEPE</Link></li>
         </ul>
@@ -133,6 +134,7 @@ export default function Nav() {
           <li><Link href="/register" className={styles['nav-register']}>✦ UNATPEPE</Link></li>
           <li><Link href="/whitepaper" className={styles.drawerPaperLink}>UNATPEPER ↗</Link></li>
           <li className={styles.drawerSectionDivider}><span>more</span></li>
+          <li><a href="https://t.me/unatpepe" target="_blank" rel="noopener noreferrer" className={styles.drawerSecondaryLink}>💬 Get help / Support</a></li>
           <li><Link href="/feed" className={styles.drawerSecondaryLink}>Feed</Link></li>
           <li><Link href="/vault" className={styles.drawerSecondaryLink}>Vault</Link></li>
           <li><Link href="/burns" className={styles.drawerSecondaryLink}>🔥 Burns</Link></li>

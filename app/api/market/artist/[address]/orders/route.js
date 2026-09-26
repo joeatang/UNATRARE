@@ -1,12 +1,17 @@
 import { NextResponse } from 'next/server';
 import { dbQuery } from '../../../../../../lib/market/store.js';
-import { explorerFor } from '../../../../../../lib/market/runtime.js';
+import { explorerFor, checkRate } from '../../../../../../lib/market/runtime.js';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 // GET /api/market/artist/:address/orders — incoming orders for an artist address.
+// NOTE: artist addresses are public, so this exposes an artist's order list to
+// anyone who knows the address. Rate-limited to stop mass scraping/enumeration;
+// a signature-gated version (artist proves control before seeing buyer details)
+// is a planned follow-up that needs the dashboard to sign a challenge.
 export async function GET(request, { params }) {
+  if (!checkRate(request, 30)) return NextResponse.json({ ok: false, error: 'too many requests — wait a minute' }, { status: 429 });
   const address = String(params.address || '').trim();
   try {
     const rows = dbQuery(
